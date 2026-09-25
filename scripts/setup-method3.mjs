@@ -5,26 +5,34 @@
  * Requires env:
  *   VERCEL_TOKEN
  *   SUPABASE_SERVICE_ROLE_KEY
+ *   TELEGRAM_BOT_TOKEN
+ *   TELEGRAM_WEBHOOK_SECRET
  * Optional:
  *   NEXT_PUBLIC_SUPABASE_ANON_KEY
+ *   MODERATION_DESK_SECRET
  *   VERCEL_PROJECT_ID / VERCEL_TEAM_ID (auto-detected if omitted)
  *
- * Telegram bot values default to the Method 3 desk bot.
- *
  * Usage:
- *   node scripts/setup-method3.mjs
+ *   node --env-file=.env.local scripts/setup-method3.mjs
  */
 
-const BOT_TOKEN =
-  process.env.TELEGRAM_BOT_TOKEN ||
-  "8706494565:AAHK9yg3n1tBooF6dtDf-UUJQ7MQKdo6L1g";
-const WEBHOOK_SECRET =
-  process.env.TELEGRAM_WEBHOOK_SECRET ||
-  "4b6aa95ea67e317e35bbbb2324fefe84";
-const SITE = "https://www.nayisamakhya.org";
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN?.trim() || "";
+const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET?.trim() || "";
+const SITE =
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+  "https://www.nayisamakhya.org";
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
   "https://pvhnwoukpccgeoqdsevm.supabase.co";
+
+if (!BOT_TOKEN) {
+  console.error("TELEGRAM_BOT_TOKEN is required");
+  process.exit(1);
+}
+if (!WEBHOOK_SECRET) {
+  console.error("TELEGRAM_WEBHOOK_SECRET is required");
+  process.exit(1);
+}
 
 async function vercel(path, opts = {}) {
   const token = process.env.VERCEL_TOKEN?.trim();
@@ -165,6 +173,14 @@ async function main() {
       teamId,
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.trim(),
+    );
+  }
+  if (process.env.MODERATION_DESK_SECRET) {
+    await upsertEnv(
+      id,
+      teamId,
+      "MODERATION_DESK_SECRET",
+      process.env.MODERATION_DESK_SECRET.trim(),
     );
   }
 

@@ -3,6 +3,12 @@ import {
   ModerationDeskClient,
   type DeskSubmission,
 } from "@/components/admin/ModerationDeskClient";
+import { ModerationUnlockForm } from "@/components/admin/ModerationUnlockForm";
+import {
+  deskAuthRequired,
+  expectedDeskSecret,
+  isDeskUnlocked,
+} from "@/lib/moderation/deskAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +32,21 @@ export default async function ModerationDeskPage({
         </p>
       </main>
     );
+  }
+
+  if (deskAuthRequired() && !(await isDeskUnlocked())) {
+    if (!expectedDeskSecret() && process.env.NODE_ENV === "production") {
+      return (
+        <main className="mx-auto max-w-3xl px-4 py-16 text-center">
+          <h1 className="text-xl font-bold text-[#18181B]">Moderation Desk</h1>
+          <p className="mt-2 text-sm text-[#71717A]">
+            Set <code>MODERATION_DESK_SECRET</code> in Vercel Production, then
+            redeploy, then unlock this page.
+          </p>
+        </main>
+      );
+    }
+    return <ModerationUnlockForm />;
   }
 
   const [{ data: submissions }, { data: districts }, { data: mandals }, { data: gps }] =

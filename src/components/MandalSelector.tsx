@@ -73,7 +73,7 @@ export function MandalSelector({
           const prefM = inDistrict.find((x) => x.slug === prefMandal);
           setMandalSlug(prefM?.slug || "");
         }
-      } catch (err) {
+      } catch {
         if (ac.signal.aborted) return;
         // leave empty — UI stays disabled
       } finally {

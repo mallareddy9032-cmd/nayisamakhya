@@ -192,9 +192,10 @@ export function SurveyWizard({
       const data = (await res.json()) as {
         success?: boolean;
         referenceId?: string;
+        persisted?: boolean;
         error?: string;
       };
-      if (!res.ok || !data.success || !data.referenceId) {
+      if (!res.ok || !data.success || !data.referenceId || data.persisted === false) {
         throw new Error(data.error || "Submit failed");
       }
       setReferenceId(data.referenceId);

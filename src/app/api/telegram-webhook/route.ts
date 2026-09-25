@@ -78,7 +78,13 @@ function senderName(from?: TelegramUpdate["message"] extends infer M
 export async function POST(req: Request) {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
   const header = req.headers.get("x-telegram-bot-api-secret-token");
-  if (secret && header !== secret) {
+  if (!secret) {
+    return NextResponse.json(
+      { ok: false, error: "webhook_secret_not_configured" },
+      { status: 503 },
+    );
+  }
+  if (header !== secret) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

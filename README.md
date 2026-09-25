@@ -63,14 +63,15 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
 ## Method 3 — Telegram Moderation Desk
 
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket).
-2. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL` in Vercel / `.env.local`.
-3. Point the bot webhook:
+2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`.
+3. Point the bot webhook (use **www** — apex redirects break Telegram):
    ```bash
    curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
-     -d "url=https://YOUR_DOMAIN/api/telegram-webhook" \
+     -d "url=https://www.nayisamakhya.org/api/telegram-webhook" \
      -d "secret_token=$TELEGRAM_WEBHOOK_SECRET"
    ```
-4. Open `/admin/moderation` to review Pending / Approved / Rejected queues.
+   Or: `npm run setup:method3` (needs `VERCEL_TOKEN` + the keys above).
+4. Open `/admin/moderation`, unlock with `MODERATION_DESK_SECRET`, then review queues.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
 
 ## Deploy

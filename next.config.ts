@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
         hostname: "upload.wikimedia.org",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "pvhnwoukpccgeoqdsevm.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };

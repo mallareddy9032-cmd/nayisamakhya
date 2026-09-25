@@ -357,6 +357,7 @@ export function MandalPortalView({ mandal: m }: Props) {
                     fill
                     sizes="(max-width:640px) 100vw, 33vw"
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    unoptimized={/supabase\.co\//i.test(notice.image)}
                   />
                   <div
                     className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent"

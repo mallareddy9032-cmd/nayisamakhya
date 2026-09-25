@@ -1,7 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  DESK_COOKIE,
+  deskAuthRequired,
+  deskAuthToken,
+  expectedDeskSecret,
+  isDeskUnlocked,
+} from "@/lib/moderation/deskAuth";
 
 export type ModerateResult = { ok: true; action: string } | { ok: false; error: string };
 
@@ -15,7 +23,35 @@ type Input = {
   moderator?: string;
 };
 
+export async function unlockModerationDesk(
+  secret: string,
+): Promise<ModerateResult> {
+  const expected = expectedDeskSecret();
+  if (!expected) {
+    if (process.env.NODE_ENV === "production") {
+      return { ok: false, error: "desk_secret_not_configured" };
+    }
+    return { ok: true, action: "unlock" };
+  }
+  if (secret.trim() !== expected) {
+    return { ok: false, error: "invalid_secret" };
+  }
+  const jar = await cookies();
+  jar.set(DESK_COOKIE, deskAuthToken(expected), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 12,
+  });
+  return { ok: true, action: "unlock" };
+}
+
 export async function moderateSubmission(input: Input): Promise<ModerateResult> {
+  if (deskAuthRequired() && !(await isDeskUnlocked())) {
+    return { ok: false, error: "unauthorized" };
+  }
+
   const admin = getSupabaseAdmin();
   if (!admin) {
     return { ok: false, error: "supabase_admin_not_configured" };

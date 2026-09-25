@@ -114,10 +114,23 @@ export async function POST(req: Request) {
       persisted = false;
     }
 
+    if (!persisted) {
+      return NextResponse.json(
+        {
+          success: false,
+          referenceId,
+          persisted: false,
+          error:
+            "survey_not_persisted — ensure surveys table exists and Supabase keys are set",
+        },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json({
       success: true,
       referenceId,
-      persisted,
+      persisted: true,
     });
   } catch (e) {
     return NextResponse.json(

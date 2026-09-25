@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import {
   CheckCircle2,
@@ -41,6 +41,13 @@ export type DeskSubmission = {
   gram_panchayats?: { id: string; name_en: string; name_te: string } | null;
 };
 
+type Draft = {
+  district_id: string;
+  mandal_id: string;
+  gp_id: string;
+  notes: string;
+};
+
 type Props = {
   initial: DeskSubmission[];
   counts: Record<Status, number>;
@@ -57,6 +64,19 @@ const tabs: Array<{ id: Status | "all"; label: string }> = [
   { id: "rejected", label: "Rejected" },
 ];
 
+function buildDrafts(rows: DeskSubmission[]): Record<string, Draft> {
+  const map: Record<string, Draft> = {};
+  for (const row of rows) {
+    map[row.id] = {
+      district_id: row.district_id || "",
+      mandal_id: row.mandal_id || "",
+      gp_id: row.gp_id || "",
+      notes: row.moderator_notes || "",
+    };
+  }
+  return map;
+}
+
 export function ModerationDeskClient({
   initial,
   counts: initialCounts,
@@ -71,27 +91,7 @@ export function ModerationDeskClient({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [drafts, setDrafts] = useState<
-    Record<
-      string,
-      { district_id: string; mandal_id: string; gp_id: string; notes: string }
-    >
-  >({});
-
-  useEffect(() => {
-    const map: typeof drafts = {};
-    for (const row of initial) {
-      map[row.id] = {
-        district_id: row.district_id || "",
-        mandal_id: row.mandal_id || "",
-        gp_id: row.gp_id || "",
-        notes: row.moderator_notes || "",
-      };
-    }
-    setDrafts(map);
-    setRows(initial);
-    setCounts(initialCounts);
-  }, [initial, initialCounts]);
+  const [drafts, setDrafts] = useState(() => buildDrafts(initial));
 
   const filtered = useMemo(() => {
     if (tab === "all") return rows;
