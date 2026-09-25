@@ -76,4 +76,4 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
 
 ## Deploy
 
-GitHub `BSCConsulting/nayisamakhya` → Vercel (Next.js). Domain: `nayisamakhya.org`.
+GitHub `mallareddy9032-cmd/nayisamakhya` → Vercel (Next.js). Domain: `nayisamakhya.org`.
