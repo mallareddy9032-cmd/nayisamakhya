@@ -3,6 +3,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getSupabase } from "@/lib/supabase/client";
 import { getMandal } from "@/lib/data/mandals";
+import { getDirectoryMandal } from "@/lib/data/mandalRepository";
+import {
+  canonicalDistrictSlug,
+  canonicalMandalSlug,
+} from "@/lib/data/locationAliases";
 import { SurveyWizard } from "@/components/SurveyWizard";
 
 export const dynamic = "force-dynamic";
@@ -24,16 +29,33 @@ type SurveyContext = {
 };
 
 function fromStatic(district: string, mandal: string): SurveyContext | null {
-  const staticMandal = getMandal(district, mandal);
-  if (!staticMandal) return null;
+  const rich = getMandal(district, mandal);
+  if (rich) {
+    return {
+      districtSlug: rich.districtSlug,
+      mandalSlug: rich.mandalSlug,
+      districtNameTe: rich.district.te,
+      districtNameEn: rich.district.en,
+      mandalNameTe: rich.mandal.te,
+      mandalNameEn: rich.mandal.en,
+      gramPanchayats: rich.gramPanchayats.map((gp) => ({
+        id: gp.id,
+        nameTe: gp.name.te,
+        nameEn: gp.name.en,
+      })),
+    };
+  }
+
+  const stub = getDirectoryMandal(district, mandal);
+  if (!stub) return null;
   return {
-    districtSlug: staticMandal.districtSlug,
-    mandalSlug: staticMandal.mandalSlug,
-    districtNameTe: staticMandal.district.te,
-    districtNameEn: staticMandal.district.en,
-    mandalNameTe: staticMandal.mandal.te,
-    mandalNameEn: staticMandal.mandal.en,
-    gramPanchayats: staticMandal.gramPanchayats.map((gp) => ({
+    districtSlug: stub.districtSlug,
+    mandalSlug: stub.mandalSlug,
+    districtNameTe: stub.district.te,
+    districtNameEn: stub.district.en,
+    mandalNameTe: stub.mandal.te,
+    mandalNameEn: stub.mandal.en,
+    gramPanchayats: stub.gramPanchayats.map((gp) => ({
       id: gp.id,
       nameTe: gp.name.te,
       nameEn: gp.name.en,
@@ -45,12 +67,27 @@ async function resolveSurveyContext(
   district: string,
   mandal: string,
 ): Promise<SurveyContext | null> {
-  const fallback = fromStatic(district, mandal);
+  const dSlug = canonicalDistrictSlug(district.trim());
+  const mSlug = canonicalMandalSlug(mandal.trim());
+  const fallback = fromStatic(dSlug, mSlug) || fromStatic(district, mandal);
   const supabase = getSupabase();
   if (!supabase) return fallback;
 
   try {
-    const { data: row, error } = await supabase
+    type MandalSurveyRow = {
+      id: string;
+      slug: string;
+      name_en: string;
+      name_te: string;
+      districts:
+        | { slug: string; name_en: string; name_te: string }
+        | { slug: string; name_en: string; name_te: string }[]
+        | null;
+    };
+
+    let row: MandalSurveyRow | null = null;
+
+    const primary = await supabase
       .from("mandals")
       .select(
         `
@@ -61,16 +98,35 @@ async function resolveSurveyContext(
         districts!inner(slug, name_en, name_te)
       `,
       )
-      .eq("slug", mandal)
-      .eq("districts.slug", district)
+      .eq("slug", mSlug)
+      .eq("districts.slug", dSlug)
       .maybeSingle();
 
-    if (error || !row) return fallback;
+    if (!primary.error && primary.data) {
+      row = primary.data as unknown as MandalSurveyRow;
+    } else if (dSlug !== district || mSlug !== mandal) {
+      const retry = await supabase
+        .from("mandals")
+        .select(
+          `
+          id,
+          slug,
+          name_en,
+          name_te,
+          districts!inner(slug, name_en, name_te)
+        `,
+        )
+        .eq("slug", mandal.trim())
+        .eq("districts.slug", district.trim())
+        .maybeSingle();
+      if (!retry.error && retry.data) {
+        row = retry.data as unknown as MandalSurveyRow;
+      }
+    }
 
-    const d = row.districts as
-      | { slug: string; name_en: string; name_te: string }
-      | { slug: string; name_en: string; name_te: string }[]
-      | null;
+    if (!row) return fallback;
+
+    const d = row.districts;
     const districtRow = Array.isArray(d) ? d[0] : d;
 
     let gps: GpOption[] = fallback?.gramPanchayats ?? [];
@@ -90,12 +146,12 @@ async function resolveSurveyContext(
     }
 
     return {
-      districtSlug: districtRow?.slug || district,
-      mandalSlug: String(row.slug || mandal),
-      districtNameTe: districtRow?.name_te || district,
-      districtNameEn: districtRow?.name_en || district,
-      mandalNameTe: String(row.name_te || mandal),
-      mandalNameEn: String(row.name_en || mandal),
+      districtSlug: districtRow?.slug || dSlug,
+      mandalSlug: String(row.slug || mSlug),
+      districtNameTe: districtRow?.name_te || dSlug,
+      districtNameEn: districtRow?.name_en || dSlug,
+      mandalNameTe: String(row.name_te || mSlug),
+      mandalNameEn: String(row.name_en || mSlug),
       gramPanchayats: gps,
     };
   } catch {

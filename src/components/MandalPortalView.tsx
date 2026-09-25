@@ -277,7 +277,13 @@ export function MandalPortalView({ mandal: m }: Props) {
               <li
                 className={`col-span-full rounded-2xl border border-[#EBE8E0] bg-white p-8 text-center text-sm text-[#71717A] ${te ? "font-telugu" : ""}`}
               >
-                {te ? "సరిపోలిన పంచాయతీలు లేవు." : "No matching panchayats."}
+                {m.gramPanchayats.length === 0
+                  ? te
+                    ? "ఈ మండలానికి గ్రామ పంచాయతీ జాబితా ఇంకా సీడ్ కాలేదు. సర్వేలో పంచాయతీ పేరు టైప్ చేయవచ్చు."
+                    : "Gram panchayat list is not seeded for this mandal yet. You can type the panchayat name in the survey form."
+                  : te
+                    ? "సరిపోలిన పంచాయతీలు లేవు."
+                    : "No matching panchayats."}
               </li>
             ) : (
               filtered.map((gp) => (

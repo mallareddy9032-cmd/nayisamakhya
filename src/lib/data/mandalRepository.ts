@@ -7,6 +7,15 @@ import type {
   Officer,
 } from "@/lib/types";
 import { getMandal, listMandals } from "@/lib/data/mandals";
+import { listDistricts } from "@/lib/data/districts";
+import {
+  listMandalsDirectory,
+  type MandalDirectoryEntry,
+} from "@/lib/data/mandalsDirectory";
+import {
+  canonicalDistrictSlug,
+  canonicalMandalSlug,
+} from "@/lib/data/locationAliases";
 import { getSupabase } from "@/lib/supabase/client";
 
 const HELPLINE = "919032654111";
@@ -329,17 +338,104 @@ function mapRowToMandal(
 }
 
 /**
+ * Lightweight portal for any of the 589 directory mandals when Supabase /
+ * rich static hubs do not yet have a full payload.
+ */
+export function getDirectoryMandal(
+  districtSlug: string,
+  mandalSlug: string,
+): Mandal | undefined {
+  const dSlug = canonicalDistrictSlug(districtSlug.trim());
+  const mSlug = canonicalMandalSlug(mandalSlug.trim());
+  const entry = listMandalsDirectory().find(
+    (m) =>
+      canonicalDistrictSlug(m.district_slug) === dSlug &&
+      canonicalMandalSlug(m.slug) === mSlug,
+  );
+  if (!entry) return undefined;
+  return buildDirectoryStub(entry);
+}
+
+function buildDirectoryStub(entry: MandalDirectoryEntry): Mandal {
+  const districtSlug = canonicalDistrictSlug(entry.district_slug);
+  const mandalSlug = canonicalMandalSlug(entry.slug);
+  const districtMeta = listDistricts().find((d) => d.slug === districtSlug);
+  const districtTe = districtMeta?.name_te || districtSlug;
+  const districtEn = districtMeta?.name_en || districtSlug;
+  const shortTe = entry.name_te.replace(/ మండలం$/, "");
+  const path = `/${districtSlug}/${mandalSlug}`;
+  const cartel = "https://chat.whatsapp.com/invite/salon-cartel-demo";
+
+  return {
+    districtSlug,
+    mandalSlug,
+    path,
+    surveyPath: `${path}/survey`,
+    state: { te: "తెలంగాణ", en: "Telangana" },
+    district: { te: districtTe, en: districtEn },
+    mandal: { te: entry.name_te, en: entry.name_en },
+    hubTitle: {
+      te: `${shortTe} మండల సమాఖ్య కేంద్రం`,
+      en: `${entry.name_en} Mandal Samakhya Hub`,
+    },
+    portalHeadline: {
+      te: `${shortTe} మండల నాయీ - భజంత్రి సమాఖ్య అధికారిక వేదిక`,
+      en: `Official ${entry.name_en} Mandal Nayi–Bajantri Samakhya Portal`,
+    },
+    portalSub: {
+      te: "మండల స్థాయి సంక్షేమం, సెలూన్ వ్యాపార బలోపేతం, సాంప్రదాయ కళాకారుల రక్షణ మరియు సమగ్ర కుటుంబ సేవలు. గ్రామ పంచాయతీ జాబితా సీడ్ అయిన తర్వాత ఇక్కడ కనిపిస్తుంది.",
+      en: "Mandal welfare, salon enterprise support, traditional artiste protection, and family services. Gram panchayat list appears here once seeded in Supabase.",
+    },
+    summary: {
+      households: 0,
+      salons: 0,
+      bajantri: 0,
+      freePowerPct: 0,
+      surveyPct: 0,
+      gpCount: 0,
+    },
+    officer: mapOfficer(null, entry.name_te, entry.name_en),
+    officers: [],
+    whatsappGroup: "https://chat.whatsapp.com/invite/nayi-demo",
+    telegramChannel: "https://t.me/nayi_samakhya_demo",
+    cartelWhatsapp: cartel,
+    gramPanchayats: [],
+    actions: buildActions(
+      shortTe,
+      entry.name_en,
+      districtTe,
+      districtEn,
+      cartel,
+    ),
+    notices: [],
+  };
+}
+
+function resolveLocalMandal(
+  districtSlug: string,
+  mandalSlug: string,
+): Mandal | undefined {
+  return (
+    getMandal(districtSlug, mandalSlug) ||
+    getDirectoryMandal(districtSlug, mandalSlug)
+  );
+}
+
+/**
  * Resolve a mandal portal payload.
- * Prefers Supabase when env is configured; falls back to static `mandals.ts`.
+ * Prefers Supabase when env is configured; falls back to rich static hubs,
+ * then the Phase-2 directory of 589 mandals.
  */
 export async function fetchMandalPortal(
   districtSlug: string,
   mandalSlug: string,
 ): Promise<Mandal | undefined> {
+  const dSlug = canonicalDistrictSlug(districtSlug.trim());
+  const mSlug = canonicalMandalSlug(mandalSlug.trim());
   const supabase = getSupabase();
 
   if (!supabase) {
-    return getMandal(districtSlug, mandalSlug);
+    return resolveLocalMandal(dSlug, mSlug);
   }
 
   try {
@@ -351,15 +447,32 @@ export async function fetchMandalPortal(
         districts!inner(slug, name_en, name_te)
       `,
       )
-      .eq("slug", mandalSlug)
-      .eq("districts.slug", districtSlug)
+      .eq("slug", mSlug)
+      .eq("districts.slug", dSlug)
       .maybeSingle();
 
-    if (error || !mandalData) {
-      return getMandal(districtSlug, mandalSlug);
+    // Retry without alias in case DB still stores legacy slug forms.
+    let rowData = !error && mandalData ? mandalData : null;
+    if (!rowData && (dSlug !== districtSlug || mSlug !== mandalSlug)) {
+      const retry = await supabase
+        .from("mandals")
+        .select(
+          `
+          *,
+          districts!inner(slug, name_en, name_te)
+        `,
+        )
+        .eq("slug", mandalSlug.trim())
+        .eq("districts.slug", districtSlug.trim())
+        .maybeSingle();
+      if (!retry.error && retry.data) rowData = retry.data;
     }
 
-    const row = mandalData as MandalRow;
+    if (!rowData) {
+      return resolveLocalMandal(dSlug, mSlug);
+    }
+
+    const row = rowData as MandalRow;
 
     const [officerRes, rosterRes, gpsRes, updatesRes] = await Promise.all([
       supabase
@@ -385,8 +498,8 @@ export async function fetchMandalPortal(
       supabase
         .from("local_updates")
         .select("*")
-        .eq("mandal_slug", mandalSlug)
-        .eq("district_slug", districtSlug)
+        .eq("mandal_slug", mSlug)
+        .eq("district_slug", dSlug)
         .eq("is_published", true)
         .order("published_at", { ascending: false })
         .limit(6),
@@ -406,7 +519,7 @@ export async function fetchMandalPortal(
       (updatesRes.data as UpdateRow[] | null) ?? [],
     );
   } catch {
-    return getMandal(districtSlug, mandalSlug);
+    return resolveLocalMandal(dSlug, mSlug);
   }
 }
 
