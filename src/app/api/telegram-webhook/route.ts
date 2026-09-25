@@ -281,11 +281,28 @@ export async function POST(req: Request) {
   }
 }
 
-/** Telegram may probe with GET — acknowledge health. */
+/** Telegram may probe with GET — acknowledge health without touching clients. */
 export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    service: "telegram-webhook",
-    configured: Boolean(botToken() && getSupabaseAdmin()),
-  });
+  try {
+    const hasBot = Boolean(botToken());
+    const hasUrl = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+        !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("YOUR_PROJECT"),
+    );
+    const hasKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
+    return NextResponse.json({
+      ok: true,
+      service: "telegram-webhook",
+      configured: hasBot && hasUrl && hasKey,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      {
+        ok: false,
+        service: "telegram-webhook",
+        error: err instanceof Error ? err.message : "health_check_failed",
+      },
+      { status: 500 },
+    );
+  }
 }

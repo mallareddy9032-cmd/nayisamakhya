@@ -37,7 +37,7 @@ export async function unlockModerationDesk(
     return { ok: false, error: "invalid_secret" };
   }
   const jar = await cookies();
-  jar.set(DESK_COOKIE, deskAuthToken(expected), {
+  jar.set(DESK_COOKIE, await deskAuthToken(expected), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
