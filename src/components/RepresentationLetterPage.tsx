@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,6 +10,10 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
+import {
+  AUTHORITIES,
+  SUBJECT_OPTIONS,
+} from "@/lib/data/representationLetterOptions";
 
 interface TemplateOption {
   id: string;
@@ -19,6 +23,7 @@ interface TemplateOption {
   body: string;
 }
 
+/** Civic presets + SUBJECT_OPTIONS (incl. free_power for TWA deep links). */
 const TEMPLATES: TemplateOption[] = [
   {
     id: "modern_salon_space",
@@ -27,34 +32,41 @@ const TEMPLATES: TemplateOption[] = [
     subject: "\u0c17\u0c4d\u0c30\u0c3e\u0c2e/\u0c2a\u0c1f\u0c4d\u0c1f\u0c23 \u0c2a\u0c30\u0c3f\u0c27\u0c3f\u0c32\u0c4b \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23 \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c32\u0c15\u0c41 \u0c06\u0c27\u0c41\u0c28\u0c3f\u0c15 \u0c38\u0c46\u0c32\u0c42\u0c28\u0c4d \u0c15\u0c3e\u0c02\u0c2a\u0c4d\u0c32\u0c46\u0c15\u0c4d\u0c38\u0c4d \u0c15\u0c4a\u0c30\u0c15\u0c41 \u0c2a\u0c4d\u0c30\u0c2d\u0c41\u0c24\u0c4d\u0c35 \u0c38\u0c4d\u0c25\u0c32\u0c02 \u0c15\u0c47\u0c1f\u0c3e\u0c2f\u0c3f\u0c02\u0c1a\u0c41\u0c1f \u0c17\u0c41\u0c30\u0c3f\u0c02\u0c1a\u0c3f \u0c35\u0c3f\u0c28\u0c24\u0c3f.",
     body: "\u0c2e\u0c3e \u0c2a\u0c4d\u0c30\u0c3e\u0c02\u0c24\u0c02\u0c32\u0c4b \u0c05\u0c28\u0c47\u0c15 \u0c38\u0c02\u0c35\u0c24\u0c4d\u0c38\u0c30\u0c3e\u0c32\u0c41\u0c17\u0c3e \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c32\u0c41 \u0c05\u0c26\u0c4d\u0c26\u0c46 \u0c37\u0c3e\u0c2a\u0c41\u0c32\u0c32\u0c4b \u0c05\u0c27\u0c3f\u0c15 \u0c05\u0c26\u0c4d\u0c26\u0c46\u0c32\u0c41 \u0c1a\u0c46\u0c32\u0c4d\u0c32\u0c3f\u0c02\u0c1a\u0c32\u0c47\u0c15 \u0c24\u0c40\u0c35\u0c4d\u0c30 \u0c06\u0c30\u0c4d\u0c25\u0c3f\u0c15 \u0c07\u0c2c\u0c4d\u0c2c\u0c02\u0c26\u0c41\u0c32\u0c41 \u0c0e\u0c26\u0c41\u0c30\u0c4d\u0c15\u0c4a\u0c02\u0c1f\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c30\u0c41. \u0c15\u0c3e\u0c35\u0c41\u0c28 \u0c38\u0c4d\u0c25\u0c3e\u0c28\u0c3f\u0c15 \u0c17\u0c4d\u0c30\u0c3e\u0c2e \u0c2a\u0c02\u0c1a\u0c3e\u0c2f\u0c24\u0c40/\u0c2e\u0c41\u0c28\u0c4d\u0c38\u0c3f\u0c2a\u0c3e\u0c32\u0c3f\u0c1f\u0c40 \u0c2a\u0c30\u0c3f\u0c27\u0c3f\u0c32\u0c4b\u0c28\u0c3f \u0c05\u0c28\u0c41\u0c35\u0c48\u0c28 \u0c2a\u0c4d\u0c30\u0c2d\u0c41\u0c24\u0c4d\u0c35 \u0c38\u0c4d\u0c25\u0c32\u0c02\u0c32\u0c4b \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c06\u0c27\u0c41\u0c28\u0c3f\u0c15 \u0c38\u0c46\u0c32\u0c42\u0c28\u0c4d\u0c32 \u0c28\u0c3f\u0c30\u0c4d\u0c2e\u0c3e\u0c23\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c38\u0c4d\u0c25\u0c32\u0c02 \u0c15\u0c47\u0c1f\u0c3e\u0c2f\u0c3f\u0c02\u0c1a\u0c3f, \u0c38\u0c39\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c35\u0c32\u0c38\u0c3f\u0c02\u0c26\u0c3f\u0c17\u0c3e \u0c15\u0c4b\u0c30\u0c41\u0c1a\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c2e\u0c41.",
   },
-  {
-    id: "community_hall",
-    title: "\u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23 \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c2d\u0c35\u0c28\u0c02 / \u0c2b\u0c02\u0c15\u0c4d\u0c37\u0c28\u0c4d \u0c39\u0c3e\u0c32\u0c4d \u0c28\u0c3f\u0c30\u0c4d\u0c2e\u0c3e\u0c23\u0c02",
-    category: "\u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02 (Welfare)",
-    subject: "\u0c2e\u0c02\u0c21\u0c32 \u0c15\u0c47\u0c02\u0c26\u0c4d\u0c30\u0c02\u0c32\u0c4b \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c2d\u0c35\u0c28 \u0c28\u0c3f\u0c30\u0c4d\u0c2e\u0c3e\u0c23\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c28\u0c3f\u0c27\u0c41\u0c32\u0c41 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c38\u0c4d\u0c25\u0c32 \u0c15\u0c47\u0c1f\u0c3e\u0c2f\u0c3f\u0c02\u0c2a\u0c41 \u0c15\u0c4a\u0c30\u0c15\u0c41 \u0c35\u0c3f\u0c28\u0c24\u0c3f.",
-    body: "\u0c2e\u0c3e \u0c2e\u0c02\u0c21\u0c32 \u0c2a\u0c30\u0c3f\u0c27\u0c3f\u0c32\u0c4b\u0c28\u0c3f \u0c2a\u0c47\u0c26 \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c32 \u0c38\u0c3e\u0c02\u0c38\u0c4d\u0c15\u0c43\u0c24\u0c3f\u0c15, \u0c38\u0c3e\u0c2e\u0c3e\u0c1c\u0c3f\u0c15 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c35\u0c3f\u0c35\u0c3e\u0c39\u0c3e\u0c26\u0c3f \u0c36\u0c41\u0c2d\u0c15\u0c3e\u0c30\u0c4d\u0c2f\u0c3e\u0c32 \u0c28\u0c3f\u0c30\u0c4d\u0c35\u0c39\u0c23 \u0c15\u0c4a\u0c30\u0c15\u0c41 \u0c2a\u0c4d\u0c30\u0c24\u0c4d\u0c2f\u0c47\u0c15 \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c2d\u0c35\u0c28\u0c02 \u0c05\u0c02\u0c26\u0c41\u0c2c\u0c3e\u0c1f\u0c41\u0c32\u0c4b \u0c32\u0c47\u0c26\u0c41. \u0c15\u0c3e\u0c35\u0c41\u0c28 \u0c2a\u0c4d\u0c30\u0c2d\u0c41\u0c24\u0c4d\u0c35 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e \u0c2a\u0c25\u0c15\u0c3e\u0c32 \u0c26\u0c4d\u0c35\u0c3e\u0c30\u0c3e \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c39\u0c3e\u0c32\u0c4d \u0c28\u0c3f\u0c30\u0c4d\u0c2e\u0c3e\u0c23\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c38\u0c4d\u0c25\u0c32\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c24\u0c17\u0c3f\u0c28 \u0c17\u0c4d\u0c30\u0c3e\u0c02\u0c1f\u0c41 \u0c2e\u0c02\u0c1c\u0c42\u0c30\u0c41 \u0c1a\u0c47\u0c2f\u0c35\u0c32\u0c38\u0c3f\u0c02\u0c26\u0c3f\u0c17\u0c3e \u0c2e\u0c28\u0c35\u0c3f.",
-  },
+  ...SUBJECT_OPTIONS.map((opt) => ({
+    id: opt.id,
+    title: opt.subj_te.length > 48 ? `${opt.subj_te.slice(0, 48)}\u2026` : opt.subj_te,
+    category: opt.ref_te.length > 40 ? `${opt.ref_te.slice(0, 40)}\u2026` : opt.ref_te,
+    subject: opt.subj_te,
+    body: opt.default_body_te,
+  })),
   {
     id: "id_cards_welfare",
     title: "\u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c32\u0c15\u0c41 \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e \u0c17\u0c41\u0c30\u0c4d\u0c24\u0c3f\u0c02\u0c2a\u0c41 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41\u0c32\u0c41",
     category: "\u0c17\u0c41\u0c30\u0c4d\u0c24\u0c3f\u0c02\u0c2a\u0c41 & \u0c30\u0c15\u0c4d\u0c37\u0c23 (Civic Rights)",
     subject: "\u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e \u0c2c\u0c4b\u0c30\u0c4d\u0c21\u0c41 \u0c26\u0c4d\u0c35\u0c3e\u0c30\u0c3e \u0c05\u0c30\u0c4d\u0c39\u0c41\u0c32\u0c48\u0c28 \u0c38\u0c3e\u0c02\u0c2a\u0c4d\u0c30\u0c26\u0c3e\u0c2f \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c32\u0c02\u0c26\u0c30\u0c3f\u0c15\u0c40 \u0c17\u0c41\u0c30\u0c4d\u0c24\u0c3f\u0c02\u0c2a\u0c41 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41\u0c32\u0c41 \u0c1c\u0c3e\u0c30\u0c40 \u0c1a\u0c47\u0c2f\u0c41\u0c1f \u0c17\u0c41\u0c30\u0c3f\u0c02\u0c1a\u0c3f.",
     body: "\u0c2e\u0c3e \u0c2a\u0c30\u0c3f\u0c27\u0c3f\u0c32\u0c4b \u0c38\u0c46\u0c32\u0c42\u0c28\u0c4d \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c2a\u0c48 \u0c06\u0c27\u0c3e\u0c30\u0c2a\u0c21\u0c3f \u0c1c\u0c40\u0c35\u0c3f\u0c38\u0c4d\u0c24\u0c41\u0c28\u0c4d\u0c28 \u0c15\u0c3e\u0c30\u0c4d\u0c2e\u0c3f\u0c15\u0c41\u0c32\u0c15\u0c41 \u0c0e\u0c1f\u0c41\u0c35\u0c02\u0c1f\u0c3f \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e \u0c17\u0c41\u0c30\u0c4d\u0c24\u0c3f\u0c02\u0c2a\u0c41 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41\u0c32\u0c41 \u0c32\u0c47\u0c15\u0c2a\u0c4b\u0c35\u0c21\u0c02 \u0c35\u0c32\u0c4d\u0c32 \u0c2a\u0c4d\u0c30\u0c2d\u0c41\u0c24\u0c4d\u0c35 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e \u0c2a\u0c25\u0c15\u0c3e\u0c32\u0c41, \u0c2a\u0c4d\u0c30\u0c2e\u0c3e\u0c26 \u0c2c\u0c40\u0c2e\u0c3e \u0c05\u0c02\u0c26\u0c21\u0c02 \u0c32\u0c47\u0c26\u0c41. \u0c15\u0c3e\u0c35\u0c41\u0c28 \u0c38\u0c30\u0c4d\u0c35\u0c47 \u0c28\u0c3f\u0c30\u0c4d\u0c35\u0c39\u0c3f\u0c02\u0c1a\u0c3f \u0c05\u0c30\u0c4d\u0c39\u0c41\u0c32\u0c48\u0c28 \u0c2a\u0c4d\u0c30\u0c24\u0c3f \u0c12\u0c15\u0c4d\u0c15\u0c30\u0c3f\u0c15\u0c40 \u0c24\u0c15\u0c4d\u0c37\u0c23\u0c2e\u0c47 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e \u0c17\u0c41\u0c30\u0c4d\u0c24\u0c3f\u0c02\u0c2a\u0c41 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41\u0c32\u0c41 \u0c05\u0c02\u0c26\u0c1c\u0c47\u0c2f\u0c35\u0c32\u0c38\u0c3f\u0c02\u0c26\u0c3f\u0c17\u0c3e \u0c15\u0c4b\u0c30\u0c41\u0c1a\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c2e\u0c41.",
-  }
+  },
 ];
 
-const OFFICERS = [
-  { value: "\u0c17\u0c4c\u0c30\u0c35\u0c28\u0c40\u0c2f\u0c41\u0c32\u0c48\u0c28 \u0c24\u0c39\u0c36\u0c40\u0c32\u0c4d\u0c26\u0c3e\u0c30\u0c4d \u0c17\u0c3e\u0c30\u0c41 (MRO)", label: "\u0c24\u0c39\u0c36\u0c40\u0c32\u0c4d\u0c26\u0c3e\u0c30\u0c4d \u0c17\u0c3e\u0c30\u0c41 (Tahsildar / MRO)" },
-  { value: "\u0c17\u0c4c\u0c30\u0c35\u0c28\u0c40\u0c2f\u0c41\u0c32\u0c48\u0c28 \u0c2e\u0c41\u0c28\u0c4d\u0c38\u0c3f\u0c2a\u0c32\u0c4d \u0c15\u0c2e\u0c3f\u0c37\u0c28\u0c30\u0c4d \u0c17\u0c3e\u0c30\u0c41", label: "\u0c2e\u0c41\u0c28\u0c4d\u0c38\u0c3f\u0c2a\u0c32\u0c4d \u0c15\u0c2e\u0c3f\u0c37\u0c28\u0c30\u0c4d \u0c17\u0c3e\u0c30\u0c41 (Municipal Commissioner)" },
-  { value: "\u0c17\u0c4c\u0c30\u0c35\u0c28\u0c40\u0c2f\u0c41\u0c32\u0c48\u0c28 \u0c06\u0c30\u0c4d.\u0c21\u0c3f.\u0c13 \u0c17\u0c3e\u0c30\u0c41 (RDO)", label: "\u0c06\u0c30\u0c4d.\u0c21\u0c3f.\u0c13 \u0c17\u0c3e\u0c30\u0c41 (Revenue Divisional Officer)" },
-  { value: "\u0c17\u0c4c\u0c30\u0c35\u0c28\u0c40\u0c2f\u0c41\u0c32\u0c48\u0c28 \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e \u0c15\u0c32\u0c46\u0c15\u0c4d\u0c1f\u0c30\u0c4d \u0c17\u0c3e\u0c30\u0c41", label: "\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e \u0c15\u0c32\u0c46\u0c15\u0c4d\u0c1f\u0c30\u0c4d \u0c17\u0c3e\u0c30\u0c41 (District Collector)" },
-] as const;
+function resolveAuthorityTitle(authorityId: string | null): string {
+  if (!authorityId) return AUTHORITIES[0].title_te;
+  const match = AUTHORITIES.find((a) => a.id === authorityId);
+  return match?.title_te || AUTHORITIES[0].title_te;
+}
+
+function resolveTemplateId(subjectId: string | null): string {
+  if (!subjectId) return TEMPLATES[0].id;
+  const match = TEMPLATES.find((t) => t.id === subjectId);
+  return match?.id || TEMPLATES[0].id;
+}
 
 export function RepresentationLetterPage() {
   const searchParams = useSearchParams();
   const initialMandal = searchParams.get("mandal") || "";
   const initialDistrict = searchParams.get("district") || "";
   const initialLocality = searchParams.get("locality") || "";
+  const initialAuthority = searchParams.get("authority");
+  const initialSubject = searchParams.get("subject");
 
   const [applicantName, setApplicantName] = useState("\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 / \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c28\u0c3f \u0c2a\u0c47\u0c30\u0c41");
   const [applicantPhone, setApplicantPhone] = useState("");
@@ -62,23 +74,40 @@ export function RepresentationLetterPage() {
   const [mandal, setMandal] = useState(initialMandal || "\u0c15\u0c4b\u0c26\u0c3e\u0c21");
   const [locality, setLocality] = useState(initialLocality || "\u0c17\u0c3e\u0c02\u0c27\u0c40 \u0c28\u0c17\u0c30\u0c4d");
   const [recipientOfficer, setRecipientOfficer] = useState<string>(
-    OFFICERS[0].value,
+    resolveAuthorityTitle(initialAuthority),
   );
-  const [selectedTemplateId, setSelectedTemplateId] = useState(TEMPLATES[0].id);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(
+    resolveTemplateId(initialSubject),
+  );
   const [recordId, setRecordId] = useState("------");
+  const [letterDate, setLetterDate] = useState("");
 
   useEffect(() => {
     const nextDistrict = searchParams.get("district") || "";
     const nextMandal = searchParams.get("mandal") || "";
     const nextLocality = searchParams.get("locality") || "";
+    const nextAuthority = searchParams.get("authority");
+    const nextSubject = searchParams.get("subject");
     if (nextDistrict) setDistrict(nextDistrict);
     if (nextMandal) setMandal(nextMandal);
     if (nextLocality) setLocality(nextLocality);
+    if (nextAuthority) setRecipientOfficer(resolveAuthorityTitle(nextAuthority));
+    if (nextSubject) setSelectedTemplateId(resolveTemplateId(nextSubject));
   }, [searchParams]);
 
   useEffect(() => {
     setRecordId(Date.now().toString().slice(-6));
+    setLetterDate(new Date().toLocaleDateString("te-IN"));
   }, []);
+
+  const officerOptions = useMemo(
+    () =>
+      AUTHORITIES.map((a) => ({
+        value: a.title_te,
+        label: `${a.title_te} (${a.title_en})`,
+      })),
+    [],
+  );
 
   const activeTemplate =
     TEMPLATES.find((tmpl) => tmpl.id === selectedTemplateId) || TEMPLATES[0];
@@ -148,7 +177,7 @@ export function RepresentationLetterPage() {
                   onChange={(e) => setRecipientOfficer(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 bg-civic-paper p-2.5 font-telugu text-civic-ink focus:border-civic-bronze focus:outline-none"
                 >
-                  {OFFICERS.map((opt) => (
+                  {officerOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
                     </option>
@@ -212,7 +241,7 @@ export function RepresentationLetterPage() {
             <p className="mb-3 block font-telugu text-xs font-bold text-civic-ink">
               {"\u0c35\u0c3f\u0c28\u0c24\u0c3f \u0c05\u0c02\u0c36\u0c3e\u0c28\u0c4d\u0c28\u0c3f \u0c0e\u0c02\u0c1a\u0c41\u0c15\u0c4b\u0c02\u0c21\u0c3f (Select Matter):"}
             </p>
-            <div className="space-y-2" role="listbox" aria-label="Petition templates">
+            <div className="max-h-[28rem] space-y-2 overflow-y-auto" role="listbox" aria-label="Petition templates">
               {TEMPLATES.map((tmpl) => {
                 const isSelected = tmpl.id === selectedTemplateId;
                 return (
@@ -273,8 +302,8 @@ export function RepresentationLetterPage() {
 
                 <div className="text-right">
                   <p className="text-slate-700">
-                    <strong>{"\u0c24\u0c47\u0c26\u0c40:"}</strong> 
-                    {new Date().toLocaleDateString("te-IN")}
+                    <strong>{"\u0c24\u0c47\u0c26\u0c40:"}</strong>{" "}
+                    {letterDate || "\u2014"}
                   </p>
                   <p className="text-slate-700">
                     <strong>{"\u0c2a\u0c4d\u0c30\u0c26\u0c47\u0c36\u0c02:"}</strong> {locality}
@@ -291,8 +320,8 @@ export function RepresentationLetterPage() {
                   <strong>{"\u0c05\u0c2f\u0c4d\u0c2f\u0c3e / \u0c06\u0c30\u0c4d\u0c2f\u0c3e,"}</strong>
                 </p>
                 <p>
-                  {"\u0c2e\u0c47\u0c2e\u0c41"} {district} {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e,"} 
-                  {mandal} {"\u0c2e\u0c02\u0c21\u0c32\u0c02,"} {locality} 
+                  {"\u0c2e\u0c47\u0c2e\u0c41"} {district} {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e,"}{" "}
+                  {mandal} {"\u0c2e\u0c02\u0c21\u0c32\u0c02,"} {locality}{" "}
                   {"\u0c2a\u0c4d\u0c30\u0c3e\u0c02\u0c24\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c1a\u0c46\u0c02\u0c26\u0c3f\u0c28 \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c38\u0c3e\u0c02\u0c2a\u0c4d\u0c30\u0c26\u0c3e\u0c2f \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c26\u0c3e\u0c30\u0c41\u0c32\u0c2e\u0c41. \u0c2e\u0c3e \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c1c\u0c40\u0c35\u0c28\u0c4b\u0c2a\u0c3e\u0c27\u0c3f \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c38\u0c02\u0c2c\u0c02\u0c27\u0c3f\u0c02\u0c1a\u0c3f \u0c15\u0c4d\u0c30\u0c3f\u0c02\u0c26\u0c3f \u0c2e\u0c41\u0c16\u0c4d\u0c2f\u0c2e\u0c48\u0c28 \u0c05\u0c02\u0c36\u0c3e\u0c28\u0c4d\u0c28\u0c3f \u0c24\u0c2e\u0c30\u0c3f \u0c26\u0c43\u0c37\u0c4d\u0c1f\u0c3f\u0c15\u0c3f \u0c24\u0c40\u0c38\u0c41\u0c15\u0c41\u0c35\u0c38\u0c4d\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c2e\u0c41."}
                 </p>
                 <p className="rounded-md border border-civic-border bg-civic-paper p-3 font-medium text-slate-800">

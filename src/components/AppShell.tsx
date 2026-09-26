@@ -24,13 +24,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   if (isChromeFree) {
     // Light civic tools (/feed, /poster, …) sit on paper; dark desks keep slate.
+    // Use <div> — tool pages own their own <main> landmark.
     const shellBg = pathname.startsWith("/admin") || pathname.startsWith("/announce")
       ? "bg-slate-950"
       : "bg-civic-paper";
     return (
-      <main id="main-content" className={`flex-1 ${shellBg}`}>
+      <div id="main-content" className={`flex-1 ${shellBg}`}>
         {children}
-      </main>
+      </div>
     );
   }
 

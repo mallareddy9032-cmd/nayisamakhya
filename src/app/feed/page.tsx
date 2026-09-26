@@ -22,7 +22,6 @@ interface FeedItem {
   photo_urls: string[];
   raw_caption: string;
   panchayat_name?: string;
-  admin_notes?: string;
   districts?: { id: string; name_en: string; name_te: string } | null;
   mandals?: { id: string; name_en: string; name_te: string } | null;
 }
@@ -291,15 +290,6 @@ export default function CivicFeedPage() {
                       <p className="line-clamp-3 font-telugu text-xs leading-relaxed text-civic-navy">
                         {item.raw_caption || "\u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c38\u0c30\u0c4d\u0c35\u0c47 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15 \u0c28\u0c2e\u0c4b\u0c26\u0c41 \u0c1a\u0c47\u0c2f\u0c2c\u0c21\u0c3f\u0c02\u0c26\u0c3f."}
                       </p>
-
-                      {item.admin_notes ? (
-                        <div className="rounded-lg border border-civic-border bg-civic-subtle p-2.5 font-telugu text-[11px] text-slate-700">
-                          <span className="font-bold text-civic-ink">
-                            {"\u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c38\u0c2e\u0c40\u0c15\u0c4d\u0c37:"}
-                          </span> 
-                          {item.admin_notes}
-                        </div>
-                      ) : null}
                     </div>
 
                     <div className="flex items-center justify-between border-t border-civic-border pt-3 text-[11px]">

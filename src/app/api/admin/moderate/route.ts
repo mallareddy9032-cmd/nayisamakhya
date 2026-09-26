@@ -16,15 +16,13 @@ type Body = {
 
 function assertSecret(req: Request) {
   const expected = process.env.MODERATION_DESK_SECRET?.trim();
-  if (!expected) {
-    // Allow when secret unset only in development.
-    if (process.env.NODE_ENV === "production") {
-      return false;
-    }
-    return true;
-  }
+  // Fail closed when secret is unset in every environment.
+  if (!expected) return false;
   const header = req.headers.get("x-moderation-secret");
-  return header === expected;
+  const bearer = req.headers.get("authorization");
+  const bearerToken =
+    bearer?.startsWith("Bearer ") ? bearer.slice("Bearer ".length).trim() : "";
+  return header === expected || bearerToken === expected;
 }
 
 export async function POST(req: Request) {

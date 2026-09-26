@@ -4,13 +4,13 @@ import { createClient } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function getSupabase() {
+/** Public feed must use anon + RLS only — never service role. */
+function getFeedSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || "";
-  const anonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    "";
-  if (!supabaseUrl || !anonKey) return null;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || "";
+  if (!supabaseUrl || !anonKey || supabaseUrl.includes("YOUR_PROJECT")) {
+    return null;
+  }
   return createClient(supabaseUrl, anonKey, {
     auth: { persistSession: false },
   });
@@ -18,7 +18,7 @@ function getSupabase() {
 
 export async function GET() {
   try {
-    const supabase = getSupabase();
+    const supabase = getFeedSupabase();
     if (!supabase) {
       return NextResponse.json(
         { error: "supabase_not_configured", feed: [] },
@@ -36,7 +36,6 @@ export async function GET() {
         photo_urls,
         raw_caption,
         panchayat_name,
-        admin_notes,
         districts(id, name_en, name_te),
         mandals(id, name_en, name_te)
       `,
@@ -51,8 +50,7 @@ export async function GET() {
 
     return NextResponse.json({ feed: data || [] });
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Internal Error";
+    const message = err instanceof Error ? err.message : "Internal Error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

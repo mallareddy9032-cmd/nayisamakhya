@@ -310,10 +310,12 @@ async function handleOfficerLookup(
     return NextResponse.json({ ok: true });
   }
 
+  // Escape LIKE wildcards so user "%" / "_" cannot broaden the match.
+  const safeMandal = queryMandal.replace(/[%_\\]/g, "\\$&");
   const { data: mandalData } = await admin
     .from("mandals")
     .select("id, name_en, name_te, districts(name_en)")
-    .ilike("name_en", `%${queryMandal}%`)
+    .ilike("name_en", `%${safeMandal}%`)
     .limit(1)
     .maybeSingle();
 
@@ -417,7 +419,24 @@ async function ingestPhoto(
     );
     return NextResponse.json({ ok: false, error: "download_failed" }, { status: 502 });
   }
+  // Cap at bucket limit (10MB) before buffering to avoid memory pressure.
+  const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+  const contentLength = Number(fileRes.headers.get("content-length") || 0);
+  if (contentLength > MAX_PHOTO_BYTES) {
+    await replyText(
+      chatId,
+      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C30\u0C3F\u0C2E\u0C3E\u0C23\u0C02 \u0C1A\u0C3E\u0C32\u0C41 \u0C2A\u0C46\u0C26\u0C4D\u0C26\u0C3F. 10MB \u0C32\u0C4B\u0C2A\u0C41 \u0C1A\u0C3F\u0C28\u0C4D\u0C28 \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.",
+    );
+    return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 413 });
+  }
   const buffer = Buffer.from(await fileRes.arrayBuffer());
+  if (buffer.byteLength > MAX_PHOTO_BYTES) {
+    await replyText(
+      chatId,
+      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C30\u0C3F\u0C2E\u0C3E\u0C23\u0C02 \u0C1A\u0C3E\u0C32\u0C41 \u0C2A\u0C46\u0C26\u0C4D\u0C26\u0C3F. 10MB \u0C32\u0C4B\u0C2A\u0C41 \u0C1A\u0C3F\u0C28\u0C4D\u0C28 \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.",
+    );
+    return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 413 });
+  }
   const objectPath = `submissions/${fileUniqueId}.jpg`;
 
   const { error: uploadError } = await admin.storage
@@ -689,32 +708,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, ignored: "no_photo" });
   } catch (err) {
     console.error("telegram webhook", err);
-    return NextResponse.json({ ok: true });
-  }
-}
-
-/** Telegram may probe with GET — acknowledge health without touching clients. */
-export async function GET() {
-  try {
-    const hasBot = Boolean(botToken());
-    const hasUrl = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-        !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("YOUR_PROJECT"),
-    );
-    const hasKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
-    return NextResponse.json({
-      ok: true,
-      service: "telegram-webhook",
-      configured: hasBot && hasUrl && hasKey,
-    });
-  } catch (err) {
+    // Return 500 so Telegram retries instead of silently dropping the update.
     return NextResponse.json(
-      {
-        ok: false,
-        service: "telegram-webhook",
-        error: err instanceof Error ? err.message : "health_check_failed",
-      },
+      { ok: false, error: "internal_error" },
       { status: 500 },
     );
   }
+}
+
+/** Telegram may probe with GET — acknowledge without leaking config. */
+export async function GET() {
+  return NextResponse.json({ ok: true });
 }

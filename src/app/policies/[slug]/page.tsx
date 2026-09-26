@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { use } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -36,8 +37,10 @@ export default function PolicyPage({
   const { slug } = use(params);
   const { language } = useLanguage();
   const te = language === "te";
-  const pageKey = (slug in copy ? slug : "privacy") as keyof typeof copy;
-  const page = copy[pageKey];
+  if (!(slug in copy)) {
+    notFound();
+  }
+  const page = copy[slug as keyof typeof copy];
 
   return (
     <section className="mx-auto max-w-3xl px-4 py-10">

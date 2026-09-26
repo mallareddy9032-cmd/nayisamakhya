@@ -16,8 +16,13 @@ export function CivicFooter() {
   const pathname = usePathname() || "";
   const year = new Date().getFullYear();
 
-  // Dark admin/announce desks keep a full-bleed tool chrome without the light sitemap.
-  if (pathname.startsWith("/admin") || pathname.startsWith("/announce")) {
+  // Full-bleed tool surfaces — no light sitemap under dark/print/TWA chrome.
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/announce") ||
+    pathname.startsWith("/twa") ||
+    pathname.startsWith("/poster")
+  ) {
     return null;
   }
 
