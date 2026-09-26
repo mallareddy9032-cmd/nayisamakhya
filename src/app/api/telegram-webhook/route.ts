@@ -63,7 +63,15 @@ async function telegramApi(method: string, body: Record<string, unknown>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  return res.json().catch(() => null);
+  const json = (await res.json().catch(() => null)) as {
+    ok?: boolean;
+    description?: string;
+    result?: Record<string, unknown>;
+  } | null;
+  if (json && json.ok === false) {
+    console.error(`telegram ${method} failed:`, json.description || json);
+  }
+  return json;
 }
 
 async function replyText(
@@ -72,18 +80,56 @@ async function replyText(
   replyMarkup?: Record<string, unknown>,
   parseMode: "HTML" | undefined = "HTML",
 ) {
-  await telegramApi("sendMessage", {
+  const payload: Record<string, unknown> = {
     chat_id: chatId,
     text,
-    parse_mode: parseMode,
     reply_markup: replyMarkup,
-  });
+  };
+  if (parseMode) payload.parse_mode = parseMode;
+  const result = await telegramApi("sendMessage", payload);
+  // Retry without HTML if Telegram rejects parse_mode (bad entities).
+  if (result && result.ok === false && parseMode) {
+    await telegramApi("sendMessage", {
+      chat_id: chatId,
+      text: text.replace(/<[^>]+>/g, ""),
+      reply_markup: replyMarkup,
+    });
+  }
 }
 
 function senderName(from?: TelegramUser) {
   if (!from) return "Field enumerator";
   const full = [from.first_name, from.last_name].filter(Boolean).join(" ").trim();
   return full || from.username || "Field enumerator";
+}
+
+/** Normalize /start@BotName and case so greeting detection is reliable. */
+function normalizeInboundText(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  // Strip @bot suffix from slash commands: /start@NayiSamakhyaDeskBot → /start
+  const cmd = trimmed.match(/^\/([a-zA-Z0-9_]+)(?:@\w+)?(?:\s|$)/);
+  if (cmd) {
+    const rest = trimmed.slice(cmd[0].trimEnd().length).trim();
+    return rest ? `/${cmd[1].toLowerCase()} ${rest}` : `/${cmd[1].toLowerCase()}`;
+  }
+  return trimmed;
+}
+
+function isGreeting(text: string): boolean {
+  const normalized = normalizeInboundText(text);
+  const key = normalized.toLowerCase();
+  const greetings = new Set([
+    "/start",
+    "hi",
+    "hello",
+    "namaste",
+    "start",
+    "help",
+    "\u0C28\u0C2E\u0C38\u0C4D\u0C24\u0C47", // నమస్తే
+    "\u0C39\u0C3E\u0C2F\u0C4D", // హాయ్
+  ]);
+  return greetings.has(key) || greetings.has(normalized);
 }
 
 async function sendWelcomeMenu(chatId: number | string, name: string) {
@@ -478,22 +524,12 @@ export async function POST(req: Request) {
     }
 
     const chatId = message.chat.id;
-    const text = (message.text || "").trim();
+    const text = normalizeInboundText(message.text || "");
     const name = senderName(message.from);
 
-    const greetings = [
-      "/start",
-      "hi",
-      "hello",
-      "namaste",
-      "\u0C28\u0C2E\u0C38\u0C4D\u0C24\u0C47",
-      "start",
-      "\u0C39\u0C3E\u0C2F\u0C4D",
-      "help",
-    ];
-    if (text && greetings.includes(text.toLowerCase())) {
+    if (text && isGreeting(text)) {
       await sendWelcomeMenu(chatId, name);
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true, menu: "welcome" });
     }
 
     if (text.toLowerCase().startsWith("/officer")) {

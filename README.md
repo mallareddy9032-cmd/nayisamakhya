@@ -80,16 +80,12 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
 4. Open `/admin/moderation`, unlock with `MODERATION_DESK_SECRET`, then review queues.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
 
-### Deploy to Vercel (GitHub `main`)
+## Deploy
 
-Vercel production tracks GitHub `mallareddy9032-cmd/nayisamakhya` **`main`**. Push the full Next tip:
+GitHub `mallareddy9032-cmd/nayisamakhya` **`main`** → Vercel (Next.js). Domain: `nayisamakhya.org`.
 
 ```bash
 ./scripts/push-github-main.sh
 ```
 
-Requires `GITHUB_TOKEN` in `.env.local` (Contents: Read and write). Prefer a **new commit** over re-pushing an already-built SHA so Vercel redeploys.
-
-## Deploy
-
-GitHub `mallareddy9032-cmd/nayisamakhya` → Vercel (Next.js). Domain: `nayisamakhya.org`.
+Requires `GITHUB_TOKEN` in `.env.local` (Contents: Read and write). Prefer a **new commit** over re-pushing an already-built SHA so Vercel redeploys. Set the GitHub default branch to `main` (not a `cursor/*` branch).
