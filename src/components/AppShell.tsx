@@ -23,8 +23,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/twa");
 
   if (isChromeFree) {
+    // Light civic tools (/feed, /poster, …) sit on paper; dark desks keep slate.
+    const shellBg = pathname.startsWith("/admin") || pathname.startsWith("/announce")
+      ? "bg-slate-950"
+      : "bg-civic-paper";
     return (
-      <main id="main-content" className="min-h-dvh flex-1 bg-slate-950">
+      <main id="main-content" className={`min-h-dvh flex-1 ${shellBg}`}>
         {children}
       </main>
     );
