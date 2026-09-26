@@ -31,13 +31,15 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/` | Civic homepage (hero, actions, FAQ, gallery, press) |
 | `/verticals/[slug]` | Welfare, Education, Livelihood, Bajantri, … |
 | `/mandals` | Mandal directory |
+| `/{district}` | Unified rural & urban directory (tabs + search) |
+| `/{district}/urban/{ulb}` | Urban local body portal (coordinators, establishments, Telegram desk) |
 | `/{district}/{mandal}` | Mandal civic portal (Supabase when configured, else static) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
 | `/policies/*` · `/sitemap` | Legal pages |
 
 ## Supabase (optional)
 
-Mandal hubs read from Postgres when env is set; otherwise they use `src/lib/data/mandals.ts`.
+Mandal hubs and urban ULB pages read from Postgres when env is set; otherwise they fall back to static JSON (`mandals.ts`, `urban-directory.json`). Apply `supabase/migrations/004_urban_local_bodies.sql` for the urban tables.
 
 1. Create a Supabase project and copy URL + anon key into `.env.local` (see `.env.example`).
 2. Run migrations in order:

@@ -1,0 +1,150 @@
+[
+  {
+    "district_slug": "hyderabad",
+    "slug": "hyderabad-municipal-corporation",
+    "name_en": "Greater Hyderabad Municipal Corporation",
+    "name_te": "గ్రేటర్ హైదరాబాద్ మున్సిపల్ కార్పొరేషన్",
+    "ulb_type": "municipal_corporation",
+    "town_coordinators_count": 4,
+    "registered_establishments_count": 128,
+    "welfare_support_active": true,
+    "representatives": [
+      {
+        "name_en": "Lakshmi Devi",
+        "name_te": "లక్ష్మీ దేవి",
+        "designation_en": "Coordinator",
+        "designation_te": "సమన్వయకర్త",
+        "phone": "9032654111"
+      },
+      {
+        "name_en": "Ravi Kumar",
+        "name_te": "రవి కుమార్",
+        "designation_en": "Seva Representative",
+        "designation_te": "సేవా ప్రతినిధి",
+        "phone": "9032654111"
+      }
+    ],
+    "establishments": [
+      {
+        "name_en": "Charminar Salon Collective",
+        "name_te": "చార్మినార్ సెలూన్ కలెక్టివ్",
+        "category_en": "Salon",
+        "category_te": "సెలూన్"
+      },
+      {
+        "name_en": "Secunderabad Artiste Desk",
+        "name_te": "సికింద్రాబాద్ కళాకారుల డెస్క్",
+        "category_en": "Bajantri",
+        "category_te": "భజంత్రి"
+      }
+    ]
+  },
+  {
+    "district_slug": "adilabad",
+    "slug": "adilabad-municipality",
+    "name_en": "Adilabad Municipality",
+    "name_te": "ఆదిలాబాద్ మున్సిపాలిటీ",
+    "ulb_type": "municipality",
+    "town_coordinators_count": 2,
+    "registered_establishments_count": 36,
+    "welfare_support_active": true,
+    "representatives": [
+      {
+        "name_en": "Srinivas Rao",
+        "name_te": "శ్రీనివాస్ రావు",
+        "designation_en": "Coordinator",
+        "designation_te": "సమన్వయకర్త",
+        "phone": "9032654111"
+      }
+    ],
+    "establishments": [
+      {
+        "name_en": "Town Market Salon Hub",
+        "name_te": "టౌన్ మార్కెట్ సెలూన్ హబ్",
+        "category_en": "Salon",
+        "category_te": "సెలూన్"
+      }
+    ]
+  },
+  {
+    "district_slug": "suryapet",
+    "slug": "suryapet-municipality",
+    "name_en": "Suryapet Municipality",
+    "name_te": "సూర్యాపేట మున్సిపాలిటీ",
+    "ulb_type": "municipality",
+    "town_coordinators_count": 2,
+    "registered_establishments_count": 42,
+    "welfare_support_active": true,
+    "representatives": [
+      {
+        "name_en": "Anitha Reddy",
+        "name_te": "అనితా రెడ్డి",
+        "designation_en": "Seva Representative",
+        "designation_te": "సేవా ప్రతినిధి",
+        "phone": "9032654111"
+      }
+    ],
+    "establishments": [
+      {
+        "name_en": "Kodad Road Salon Cluster",
+        "name_te": "కోడాడ్ రోడ్ సెలూన్ క్లస్టర్",
+        "category_en": "Salon",
+        "category_te": "సెలూన్"
+      }
+    ]
+  },
+  {
+    "district_slug": "khammam",
+    "slug": "khammam-municipal-corporation",
+    "name_en": "Khammam Municipal Corporation",
+    "name_te": "ఖమ్మం మున్సిపల్ కార్పొరేషన్",
+    "ulb_type": "municipal_corporation",
+    "town_coordinators_count": 3,
+    "registered_establishments_count": 58,
+    "welfare_support_active": true,
+    "representatives": [
+      {
+        "name_en": "Praveen",
+        "name_te": "ప్రవీణ్",
+        "designation_en": "Coordinator",
+        "designation_te": "సమన్వయకర్త",
+        "phone": "9032654111"
+      }
+    ],
+    "establishments": [
+      {
+        "name_en": "Wyra Gate Salon Network",
+        "name_te": "వైరా గేట్ సెలూన్ నెట్‌వర్క్",
+        "category_en": "Salon",
+        "category_te": "సెలూన్"
+      }
+    ]
+  },
+  {
+    "district_slug": "rangareddy",
+    "slug": "lb-nagar-municipality",
+    "name_en": "LB Nagar Municipality Cluster",
+    "name_te": "ఎల్.బి. నగర్ మున్సిపాలిటీ క్లస్టర్",
+    "ulb_type": "municipality",
+    "town_coordinators_count": 2,
+    "registered_establishments_count": 47,
+    "welfare_support_active": true,
+    "representatives": [
+      {
+        "name_en": "Meena",
+        "name_te": "మీనా",
+        "designation_en": "Coordinator",
+        "designation_te": "సమన్వయకర్త",
+        "phone": "9032654111"
+      }
+    ],
+    "establishments": [
+      {
+        "name_en": "Shamshabad Road Salon Desk",
+        "name_te": "షంషాబాద్ రోడ్ సెలూన్ డెస్క్",
+        "category_en": "Salon",
+        "category_te": "సెలూన్"
+      }
+    ]
+  }
+]
