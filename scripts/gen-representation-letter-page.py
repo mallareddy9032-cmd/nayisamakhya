@@ -103,6 +103,10 @@ def main() -> None:
     def q(key: str) -> str:
         return esc(ui[key])
 
+    def qs(key: str) -> str:
+        """JS string literal including surrounding quotes."""
+        return '"' + esc(ui[key]) + '"'
+
     tsx = f'''"use client";
 
 import {{ useMemo, useState }} from "react";
@@ -216,7 +220,7 @@ export function RepresentationLetterPage() {{
                     : "text-slate-600 hover:text-slate-900",
                 )}}
               >
-                {q("te_btn")}
+                {{{qs("te_btn")}}}
               </button>
               <button
                 type="button"
@@ -469,7 +473,7 @@ export function RepresentationLetterPage() {{
               {{te ? "{q("tag_te")}" : "{q("tag_en")}"}}
             </div>
             <div className="mt-1 font-sans font-telugu text-[11px] text-slate-500">
-              {q("webline")}
+              {{{qs("webline")}}}
             </div>
           </div>
 
@@ -502,7 +506,7 @@ export function RepresentationLetterPage() {{
               {{te ? currentAuthority.dept_te : currentAuthority.dept_en}}
             </div>
             <div className="font-medium text-slate-800">
-              {{areaName}}, {{distName}} {q("district_suffix")}
+              {{areaName}}, {{distName}} {{{qs("district_suffix")}}}
             </div>
           </div>
 
@@ -541,20 +545,9 @@ export function RepresentationLetterPage() {{
             )}}
           >
             <p>
-              {{te ? (
-                <>
-                  {q("intro_te_prefix")}
-                  {{areaName}}
-                  {q("intro_te_suffix")}
-                </>
-              ) : (
-                <>
-                  On behalf of traditional salon operators and community
-                  coordinators of {{areaName}} ({{distName}} District), we
-                  respectfully submit this formal representation regarding the
-                  subject cited above.
-                </>
-              )}}
+              {{te
+                ? `{q("intro_te_prefix")}${{areaName}}{q("intro_te_suffix")}`
+                : `On behalf of traditional salon operators and community coordinators of ${{areaName}} (${{distName}} District), we respectfully submit this formal representation regarding the subject cited above.`}}
             </p>
             <p>
               {{te
