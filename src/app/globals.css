@@ -39,8 +39,15 @@ html.contrast-high {
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-sos: var(--sos);
-  /* next/font sets --font-sans / --font-telugu on <html>; do not
-     reassign them here or the theme tokens become circular. */
+  --color-civic-paper: #fbfbfa;
+  --color-civic-subtle: #f4f4f2;
+  --color-civic-border: #e2e8f0;
+  --color-civic-ink: #0f172a;
+  --color-civic-navy: #1e293b;
+  --color-civic-bronze: #b45309;
+  --color-civic-bronze-hover: #92400e;
+  /* next/font sets --font-sans / --font-telugu on <html>; fontFamily
+     in tailwind.config.ts maps font-sans / font-telugu utilities. */
   --animate-marquee: marquee 38s linear infinite;
   --animate-chat-pulse: chat-pulse 2s ease-out infinite;
 }
@@ -76,7 +83,7 @@ body {
 }
 
 .font-telugu {
-  font-family: var(--font-telugu), var(--font-sans), system-ui, sans-serif;
+  /* family from theme fontFamily.telugu → var(--font-telugu) */
   line-height: 1.7;
 }
 

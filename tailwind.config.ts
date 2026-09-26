@@ -1,13 +1,17 @@
 import type { Config } from "tailwindcss";
 
 const config = {
-  content: ["./src/**/*.{ts,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "sans-serif"],
+        telugu: ["var(--font-telugu)", "sans-serif"],
+      },
       colors: {
-        canvas: "#FBFBF9",
+        canvas: "#FBFBFA",
         surface: "#ffffff",
-        ink: "#18181B",
+        ink: "#0F172A",
         muted: "#71717A",
         line: "#EBE8E0",
         warm: "#F4F2EB",
@@ -16,6 +20,15 @@ const config = {
           hover: "#9A3412",
         },
         sos: "#dc2626",
+        civic: {
+          paper: "#FBFBFA",
+          subtle: "#F4F4F2",
+          border: "#E2E8F0",
+          ink: "#0F172A",
+          navy: "#1E293B",
+          bronze: "#B45309",
+          "bronze-hover": "#92400E",
+        },
       },
       animation: {
         marquee: "marquee 38s linear infinite",

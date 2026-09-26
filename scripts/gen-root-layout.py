@@ -132,7 +132,7 @@ export default function RootLayout({{
       suppressHydrationWarning
       className={{`${{sans.variable}} ${{telugu.variable}} h-full`}}
     >
-      <body className="flex min-h-dvh flex-col bg-[#FBFBFA] font-sans text-[#0F172A] antialiased selection:bg-[#B45309] selection:text-white">
+      <body className="flex min-h-dvh flex-col bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-white"
