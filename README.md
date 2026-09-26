@@ -28,7 +28,8 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 | Path | View |
 |------|------|
-| `/` | Civic homepage (hero, actions, FAQ, gallery, press) |
+| `/` | Digital Service Desk landing (Telegram CTA + field feed) |
+| `/api/admin/analytics` | Desk Bearer auth — survey intake counts by district |
 | `/verticals/[slug]` | Welfare, Education, Livelihood, Bajantri, … |
 | `/mandals` | Mandal directory |
 | `/{district}` | Unified rural & urban directory (tabs + search) |
