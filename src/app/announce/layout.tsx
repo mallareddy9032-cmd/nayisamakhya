@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Community notice | Nayi Samakhya Digital Desk",
+  title: "Broadcast & SOP | Nayi Samakhya",
   description:
-    "WhatsApp-ready Telugu announcement for the Nayi Samakhya Digital Service Desk — copy and share with mandal groups.",
+    "WhatsApp-ready Telugu blasts and mandal coordinator SOP — Digital Desk, representation letters, field photos, and coordinator guide.",
 };
 
 export default function AnnounceLayout({ children }: { children: ReactNode }) {
