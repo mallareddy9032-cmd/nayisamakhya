@@ -15,7 +15,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isChromeFree =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/feed") ||
-    pathname.startsWith("/coordinator-card");
+    pathname.startsWith("/coordinator-card") ||
+    pathname.startsWith("/coordinators") ||
+    pathname.startsWith("/twa");
 
   if (isChromeFree) {
     return (

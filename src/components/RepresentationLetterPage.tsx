@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { listDistricts } from "@/lib/data/districts";
@@ -15,6 +16,11 @@ import { transliterateLatinToTelugu } from "@/lib/teluguTransliterate";
 import { cn } from "@/lib/utils";
 
 type AreaType = "rural" | "urban";
+
+function initialSubjectId(raw: string | null): string {
+  if (raw && SUBJECT_OPTIONS.some((s) => s.id === raw)) return raw;
+  return SUBJECT_OPTIONS[0].id;
+}
 
 const MONTHS_TE = [
   "\u0c1c\u0c28\u0c35\u0c30\u0c3f",
@@ -62,6 +68,7 @@ function fieldClass(te: boolean) {
 
 export function RepresentationLetterPage() {
   const { language, setLanguage } = useLanguage();
+  const searchParams = useSearchParams();
   const reduceMotion = useReducedMotion();
   const te = language === "te";
 
@@ -72,7 +79,9 @@ export function RepresentationLetterPage() {
   const [areaType, setAreaType] = useState<AreaType>("rural");
   const [areaSlug, setAreaSlug] = useState("");
   const [authorityId, setAuthorityId] = useState(AUTHORITIES[0].id);
-  const [subjectId, setSubjectId] = useState(SUBJECT_OPTIONS[0].id);
+  const [subjectId, setSubjectId] = useState(() =>
+    initialSubjectId(searchParams.get("subject")),
+  );
   const [customNotes, setCustomNotes] = useState("");
   const [notesBusy, setNotesBusy] = useState(false);
   const [signatoryName, setSignatoryName] = useState("");

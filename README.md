@@ -37,6 +37,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/representation` | Official petition / representation letter generator (print-ready) |
 | `/feed` | Public civic field feed (approved Telegram photos) |
 | `/coordinator-card` | Printable coordinator digital ID / visiting card |
+| `/twa` | Telegram Mini App hub (petition, feed, GO 23, ID card) |
 | `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → `/api/admin/submissions`) |
 | `/admin/moderation` | Field photo moderation desk (cookie PIN via `MODERATION_DESK_SECRET`) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
