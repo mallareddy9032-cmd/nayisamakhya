@@ -66,6 +66,8 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
 
 ## Method 3 — Telegram Moderation Desk
 
+Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/officer`, album batching, photo ingest). **Never replace GitHub `main` with a telegram-only tree** — that wipes the Next site and 404s Vercel (including `/representation`). Edit the route under `src/` and push the full app.
+
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket).
 2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`.
 3. Point the bot webhook (use **www** — apex redirects break Telegram):
@@ -77,6 +79,16 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
    Or: `npm run setup:method3` (needs `VERCEL_TOKEN` + the keys above).
 4. Open `/admin/moderation`, unlock with `MODERATION_DESK_SECRET`, then review queues.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
+
+### Deploy to Vercel (GitHub `main`)
+
+Vercel production tracks GitHub `mallareddy9032-cmd/nayisamakhya` **`main`**. Push the full Next tip:
+
+```bash
+./scripts/push-github-main.sh
+```
+
+Requires `GITHUB_TOKEN` in `.env.local` (Contents: Read and write). Prefer a **new commit** over re-pushing an already-built SHA so Vercel redeploys.
 
 ## Deploy
 
