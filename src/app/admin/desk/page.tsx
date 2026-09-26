@@ -203,6 +203,8 @@ export default function AdminDeskPage() {
           status: newStatus,
           admin_notes: selectedSubmission?.admin_notes,
           panchayat_name: selectedSubmission?.panchayat_name,
+          district_id: selectedSubmission?.district_id,
+          mandal_id: selectedSubmission?.mandal_id,
         }),
       });
       const json = (await res.json()) as { error?: string };
@@ -212,8 +214,14 @@ export default function AdminDeskPage() {
         return;
       }
 
+      // Drop from current queue immediately; Telegram notify runs server-side.
+      setSubmissions((prev) => prev.filter((item) => item.id !== id));
       setSelectedSubmission(null);
-      await loadDesk(token, activeTab);
+      setCounts((prev) => ({
+        ...prev,
+        [activeTab]: Math.max(0, prev[activeTab] - 1),
+        [newStatus]: (prev[newStatus] || 0) + 1,
+      }));
     } catch (err) {
       console.error("Failed to update status:", err);
       setError(err instanceof Error ? err.message : "Update failed");
