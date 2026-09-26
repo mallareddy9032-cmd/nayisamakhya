@@ -1,4 +1,189 @@
-"use client";
+#!/usr/bin/env python3
+"""Generate src/app/admin/desk/page.tsx with ASCII-safe Telugu escapes."""
+from __future__ import annotations
+
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "src/app/admin/desk/page.tsx"
+
+
+def te(*cps: int) -> str:
+    return "".join(chr(c) for c in cps)
+
+
+def esc(s: str) -> str:
+    out: list[str] = []
+    for c in s:
+        o = ord(c)
+        if c == "\\":
+            out.append("\\\\")
+        elif c == '"':
+            out.append('\\"')
+        elif o < 32 or o > 126:
+            out.append(f"\\u{o:04x}")
+        else:
+            out.append(c)
+    return "".join(out)
+
+
+def q(s: str) -> str:
+    """JS/TS string literal."""
+    return '"' + esc(s) + '"'
+
+
+def lit(s: str) -> str:
+    """JSX text expression: {"..." }"""
+    return "{" + q(s) + "}"
+
+
+def main() -> None:
+    nayi = te(0x0C28, 0x0C3E, 0x0C2F, 0x0C3F) + " " + te(
+        0x0C38, 0x0C2E, 0x0C3E, 0x0C16, 0x0C4D, 0x0C2F
+    )
+    header = (
+        te(0x0C38, 0x0C30, 0x0C4D, 0x0C35, 0x0C47)
+        + " & "
+        + te(0x0C2B, 0x0C4B, 0x0C1F, 0x0C4B)
+        + " "
+        + te(0x0C2A, 0x0C30, 0x0C3F, 0x0C36, 0x0C40, 0x0C32, 0x0C28)
+        + " "
+        + te(0x0C35, 0x0C3F, 0x0C2D, 0x0C3E, 0x0C17, 0x0C02)
+        + " (Moderation Desk)"
+    )
+    analytics_h2 = (
+        te(0x0C1C, 0x0C3F, 0x0C32, 0x0C4D, 0x0C32, 0x0C3E)
+        + " "
+        + te(0x0C35, 0x0C3E, 0x0C30, 0x0C40, 0x0C17, 0x0C3E)
+        + " "
+        + te(0x0C28, 0x0C3F, 0x0C35, 0x0C47, 0x0C26, 0x0C3F, 0x0C15, 0x0C32, 0x0C41)
+        + " (District Performance)"
+    )
+    col_dist = te(0x0C1C, 0x0C3F, 0x0C32, 0x0C4D, 0x0C32, 0x0C3E) + " (District)"
+    col_total = te(0x0C2E, 0x0C4A, 0x0C24, 0x0C4D, 0x0C24, 0x0C02) + " (Total)"
+    col_approved = (
+        te(0x0C06, 0x0C2E, 0x0C4B, 0x0C26, 0x0C3F, 0x0C02, 0x0C1A, 0x0C3F, 0x0C28, 0x0C35, 0x0C3F)
+        + " (Approved)"
+    )
+    col_pending = (
+        te(0x0C2A, 0x0C46, 0x0C02, 0x0C21, 0x0C3F, 0x0C02, 0x0C17, 0x0C4D) + " (Pending)"
+    )
+    col_rejected = (
+        te(
+            0x0C24,
+            0x0C3F,
+            0x0C30,
+            0x0C38,
+            0x0C4D,
+            0x0C15,
+            0x0C30,
+            0x0C3F,
+            0x0C02,
+            0x0C1A,
+            0x0C3F,
+            0x0C28,
+            0x0C35,
+            0x0C3F,
+        )
+        + " (Rejected)"
+    )
+    no_data = (
+        te(0x0C21, 0x0C47, 0x0C1F, 0x0C3E)
+        + " "
+        + te(0x0C32, 0x0C47, 0x0C26, 0x0C41)
+        + " (No data available)"
+    )
+    no_subs = (
+        te(
+            0x0C28,
+            0x0C4B,
+            0x0C1F,
+            0x0C3F,
+            0x0C2B,
+            0x0C3F,
+            0x0C15,
+            0x0C47,
+            0x0C37,
+            0x0C28,
+            0x0C4D,
+            0x0C32,
+            0x0C41,
+        )
+        + " "
+        + te(0x0C0F, 0x0C35, 0x0C40)
+        + " "
+        + te(0x0C32, 0x0C47, 0x0C35, 0x0C41)
+    )
+    no_caption = (
+        te(0x0C35, 0x0C3F, 0x0C35, 0x0C30, 0x0C3E, 0x0C32, 0x0C41)
+        + " "
+        + te(0x0C28, 0x0C2E, 0x0C4B, 0x0C26, 0x0C41)
+        + " "
+        + te(0x0C15, 0x0C3E, 0x0C32, 0x0C47, 0x0C26, 0x0C41)
+        + " (No text provided)"
+    )
+    details = (
+        te(0x0C38, 0x0C2E, 0x0C40, 0x0C15, 0x0C4D, 0x0C37)
+        + " "
+        + te(0x0C35, 0x0C3F, 0x0C35, 0x0C30, 0x0C3E, 0x0C32, 0x0C41)
+        + " (Submission Details)"
+    )
+    panchayat_ph = (
+        te(0x0C17, 0x0C4D, 0x0C30, 0x0C3E, 0x0C2E, 0x0C02)
+        + " / "
+        + te(0x0C15, 0x0C3E, 0x0C32, 0x0C28, 0x0C40)
+        + " (e.g., "
+        + te(0x0C32, 0x0C21, 0x0C15, 0x0C4D)
+        + " "
+        + te(0x0C2C, 0x0C1C, 0x0C3E, 0x0C30, 0x0C4D)
+        + ")"
+    )
+    notes_ph = (
+        te(0x0C05, 0x0C02, 0x0C24, 0x0C30, 0x0C4D, 0x0C17, 0x0C24)
+        + " "
+        + te(0x0C17, 0x0C2E, 0x0C28, 0x0C3F, 0x0C15, 0x0C32, 0x0C41)
+        + " (Admin Notes)"
+    )
+    approve = te(0x0C06, 0x0C2E, 0x0C4B, 0x0C26, 0x0C3F, 0x0C02, 0x0C1A, 0x0C41) + " (Approve)"
+    reject = (
+        te(0x0C24, 0x0C3F, 0x0C30, 0x0C38, 0x0C4D, 0x0C15, 0x0C30, 0x0C3F, 0x0C02, 0x0C1A, 0x0C41)
+        + " (Reject)"
+    )
+    select = (
+        te(0x0C12, 0x0C15)
+        + " "
+        + te(0x0C05, 0x0C02, 0x0C36, 0x0C3E, 0x0C28, 0x0C4D, 0x0C28, 0x0C3F)
+        + " "
+        + te(0x0C0E, 0x0C02, 0x0C1A, 0x0C41, 0x0C15, 0x0C4B, 0x0C02, 0x0C21, 0x0C3F)
+        + " (Select a submission to review details)."
+    )
+
+    for label, value in (
+        ("header", header),
+        ("analytics_h2", analytics_h2),
+        ("approve", approve),
+    ):
+        assert "\ufffd" not in value, label
+
+    L_LOGIN = lit(nayi + " Desk Login")
+    L_HEADER = lit(header)
+    L_ANALYTICS = lit(analytics_h2)
+    L_DIST = lit(col_dist)
+    L_TOTAL = lit(col_total)
+    L_APPROVED = lit(col_approved)
+    L_PENDING = lit(col_pending)
+    L_REJECTED = lit(col_rejected)
+    L_NO_DATA = lit(no_data)
+    L_NO_SUBS = lit(no_subs)
+    L_NO_CAPTION = lit(no_caption)
+    L_DETAILS = lit(details)
+    L_PANCH = lit(panchayat_ph)
+    L_NOTES = lit(notes_ph)
+    L_APPROVE = lit(approve)
+    L_REJECT = lit(reject)
+    L_SELECT = lit(select)
+
+    page = r'''"use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -300,7 +485,7 @@ export default function AdminDeskPage() {
         >
           <div className="mb-6 flex items-center gap-3 text-xl font-semibold text-white">
             <KeyRound className="h-6 w-6 text-amber-500" />
-            <span className="font-telugu">{"\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f Desk Login"}</span>
+            <span className="font-telugu">__LOGIN__</span>
           </div>
           <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-slate-400">
             Moderation Desk Secret
@@ -335,7 +520,7 @@ export default function AdminDeskPage() {
             Nayi Samakhya · Admin
           </p>
           <h1 className="mt-1 font-telugu text-xl font-bold text-white">
-            {"\u0c38\u0c30\u0c4d\u0c35\u0c47 & \u0c2b\u0c4b\u0c1f\u0c4b \u0c2a\u0c30\u0c3f\u0c36\u0c40\u0c32\u0c28 \u0c35\u0c3f\u0c2d\u0c3e\u0c17\u0c02 (Moderation Desk)"}
+            __HEADER__
           </h1>
           <p className="mt-1 text-xs text-slate-400">
             Review field photos from @NayiSamakhyaDeskBot — approve to publish,
@@ -407,7 +592,7 @@ export default function AdminDeskPage() {
           <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
             <div className="flex flex-col gap-1 border-b border-slate-800 p-5 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="font-telugu text-sm font-semibold text-white">
-                {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e \u0c35\u0c3e\u0c30\u0c40\u0c17\u0c3e \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 (District Performance)"}
+                __ANALYTICS__
               </h2>
               <span className="text-xs text-slate-400">
                 Total volume tracking for coordinator engagement
@@ -417,18 +602,18 @@ export default function AdminDeskPage() {
               <table className="w-full text-left text-sm text-slate-300">
                 <thead className="border-b border-slate-800 bg-slate-950 text-xs uppercase text-slate-500">
                   <tr>
-                    <th className="px-6 py-4 font-telugu">{"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e (District)"}</th>
+                    <th className="px-6 py-4 font-telugu">__COL_DIST__</th>
                     <th className="px-6 py-4 text-center font-telugu">
-                      {"\u0c2e\u0c4a\u0c24\u0c4d\u0c24\u0c02 (Total)"}
+                      __COL_TOTAL__
                     </th>
                     <th className="px-6 py-4 text-center font-telugu text-emerald-400">
-                      {"\u0c06\u0c2e\u0c4b\u0c26\u0c3f\u0c02\u0c1a\u0c3f\u0c28\u0c35\u0c3f (Approved)"}
+                      __COL_APPROVED__
                     </th>
                     <th className="px-6 py-4 text-center font-telugu text-amber-400">
-                      {"\u0c2a\u0c46\u0c02\u0c21\u0c3f\u0c02\u0c17\u0c4d (Pending)"}
+                      __COL_PENDING__
                     </th>
                     <th className="px-6 py-4 text-center font-telugu text-rose-400">
-                      {"\u0c24\u0c3f\u0c30\u0c38\u0c4d\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c3f\u0c28\u0c35\u0c3f (Rejected)"}
+                      __COL_REJECTED__
                     </th>
                   </tr>
                 </thead>
@@ -455,7 +640,7 @@ export default function AdminDeskPage() {
                         colSpan={5}
                         className="px-6 py-8 text-center font-telugu text-slate-500"
                       >
-                        {"\u0c21\u0c47\u0c1f\u0c3e \u0c32\u0c47\u0c26\u0c41 (No data available)"}
+                        __NO_DATA__
                       </td>
                     </tr>
                   ) : null}
@@ -470,7 +655,7 @@ export default function AdminDeskPage() {
                 <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/80 p-8 text-center">
                   <Camera className="mx-auto mb-3 h-8 w-8 text-slate-600" />
                   <p className="font-telugu text-sm font-medium text-slate-300">
-                    {"\u0c28\u0c4b\u0c1f\u0c3f\u0c2b\u0c3f\u0c15\u0c47\u0c37\u0c28\u0c4d\u0c32\u0c41 \u0c0f\u0c35\u0c40 \u0c32\u0c47\u0c35\u0c41"} (No {activeTab} submissions found).
+                    __NO_SUBS__ (No {activeTab} submissions found).
                   </p>
                   <p className="mt-2 text-xs leading-relaxed text-slate-500">
                     {activeTab === "pending"
@@ -552,7 +737,7 @@ export default function AdminDeskPage() {
                           </div>
 
                           <p className="mb-2 line-clamp-2 rounded border border-slate-800/80 bg-slate-950/60 p-2 font-telugu text-xs leading-relaxed text-slate-300">
-                            {sub.raw_caption || "\u0c35\u0c3f\u0c35\u0c30\u0c3e\u0c32\u0c41 \u0c28\u0c2e\u0c4b\u0c26\u0c41 \u0c15\u0c3e\u0c32\u0c47\u0c26\u0c41 (No text provided)"}
+                            {sub.raw_caption || __NO_CAPTION_Q__}
                           </p>
 
                           <div className="flex items-center justify-between text-[11px] text-slate-400">
@@ -580,7 +765,7 @@ export default function AdminDeskPage() {
               {selectedSubmission ? (
                 <div className="sticky top-6 rounded-xl border border-slate-800 bg-slate-900 p-5">
                   <h2 className="mb-4 flex items-center justify-between text-sm font-semibold text-white">
-                    <span className="font-telugu">{"\u0c38\u0c2e\u0c40\u0c15\u0c4d\u0c37 \u0c35\u0c3f\u0c35\u0c30\u0c3e\u0c32\u0c41 (Submission Details)"}</span>
+                    <span className="font-telugu">__DETAILS__</span>
                     <span className="rounded border border-amber-500/20 bg-slate-800 px-2 py-0.5 text-xs capitalize text-amber-400">
                       {selectedSubmission.status}
                     </span>
@@ -632,7 +817,7 @@ export default function AdminDeskPage() {
                             panchayat_name: e.target.value,
                           })
                         }
-                        placeholder={"\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c02 / \u0c15\u0c3e\u0c32\u0c28\u0c40 (e.g., \u0c32\u0c21\u0c15\u0c4d \u0c2c\u0c1c\u0c3e\u0c30\u0c4d)"}
+                        placeholder=__PANCH__
                         className="w-full rounded border border-slate-800 bg-slate-950 p-2 font-telugu text-slate-200 focus:border-amber-500 focus:outline-none"
                       />
                     </div>
@@ -650,7 +835,7 @@ export default function AdminDeskPage() {
                             admin_notes: e.target.value,
                           })
                         }
-                        placeholder={"\u0c05\u0c02\u0c24\u0c30\u0c4d\u0c17\u0c24 \u0c17\u0c2e\u0c28\u0c3f\u0c15\u0c32\u0c41 (Admin Notes)"}
+                        placeholder=__NOTES__
                         className="w-full resize-none rounded border border-slate-800 bg-slate-950 p-2 font-telugu text-slate-200 focus:border-amber-500 focus:outline-none"
                       />
                     </div>
@@ -669,7 +854,7 @@ export default function AdminDeskPage() {
                         className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-500"
                       >
                         <CheckCircle className="h-4 w-4" />
-                        <span className="font-telugu">{"\u0c06\u0c2e\u0c4b\u0c26\u0c3f\u0c02\u0c1a\u0c41 (Approve)"}</span>
+                        <span className="font-telugu">__APPROVE__</span>
                       </button>
                       <button
                         type="button"
@@ -682,14 +867,14 @@ export default function AdminDeskPage() {
                         className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-rose-600/80 py-2 text-xs font-medium text-white transition-colors hover:bg-rose-600"
                       >
                         <XCircle className="h-4 w-4" />
-                        <span className="font-telugu">{"\u0c24\u0c3f\u0c30\u0c38\u0c4d\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c41 (Reject)"}</span>
+                        <span className="font-telugu">__REJECT__</span>
                       </button>
                     </div>
                   ) : null}
                 </div>
               ) : (
                 <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-8 text-center font-telugu text-xs text-slate-500">
-                  {"\u0c12\u0c15 \u0c05\u0c02\u0c36\u0c3e\u0c28\u0c4d\u0c28\u0c3f \u0c0e\u0c02\u0c1a\u0c41\u0c15\u0c4b\u0c02\u0c21\u0c3f (Select a submission to review details)."}
+                  __SELECT__
                 </div>
               )}
             </section>
@@ -699,3 +884,45 @@ export default function AdminDeskPage() {
     </div>
   );
 }
+'''
+
+    # placeholder=__PANCH__ needs to be placeholder={"..."}
+    # For JSX text nodes use the lit() form directly.
+    replacements = {
+        "__LOGIN__": L_LOGIN,
+        "__HEADER__": L_HEADER,
+        "__ANALYTICS__": L_ANALYTICS,
+        "__COL_DIST__": L_DIST,
+        "__COL_TOTAL__": L_TOTAL,
+        "__COL_APPROVED__": L_APPROVED,
+        "__COL_PENDING__": L_PENDING,
+        "__COL_REJECTED__": L_REJECTED,
+        "__NO_DATA__": L_NO_DATA,
+        "__NO_SUBS__": L_NO_SUBS,
+        "__NO_CAPTION_Q__": q(no_caption),
+        "__DETAILS__": L_DETAILS,
+        "placeholder=__PANCH__": f"placeholder={L_PANCH}",
+        "placeholder=__NOTES__": f"placeholder={L_NOTES}",
+        "__APPROVE__": L_APPROVE,
+        "__REJECT__": L_REJECT,
+        "__SELECT__": L_SELECT,
+    }
+
+    for key, value in replacements.items():
+        if key not in page:
+            raise SystemExit(f"missing placeholder {key}")
+        page = page.replace(key, value)
+
+    if "\ufffd" in page:
+        raise SystemExit("FFFD leaked into output")
+    if "__" in page:
+        raise SystemExit(f"unreplaced placeholder remains: {page[page.index('__'):page.index('__')+20]}")
+
+    OUT.write_text(page, encoding="utf-8")
+    print(f"Wrote {OUT} ({OUT.stat().st_size} bytes)")
+    print("header:", header)
+    print("analytics:", analytics_h2)
+
+
+if __name__ == "__main__":
+    main()
