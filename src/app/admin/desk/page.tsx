@@ -35,11 +35,19 @@ type Counts = Record<Tab, number>;
 const EMPTY_COUNTS: Counts = { pending: 0, approved: 0, rejected: 0 };
 const TABS: Tab[] = ["pending", "approved", "rejected"];
 
+function usablePhotoUrl(url: unknown): url is string {
+  if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return false;
+  // Incomplete storage prefixes (missing object path) are not previewable.
+  if (/\/storage\/v1\/object\/public\/survey-photos\/?$/i.test(url)) return false;
+  return url.length > 48;
+}
+
 function photosOf(sub: Submission): string[] {
-  if (Array.isArray(sub.photo_urls) && sub.photo_urls.length) {
-    return sub.photo_urls.filter(Boolean);
-  }
-  return sub.photo_url ? [sub.photo_url] : [];
+  const fromArr = Array.isArray(sub.photo_urls)
+    ? sub.photo_urls.filter(usablePhotoUrl)
+    : [];
+  if (fromArr.length) return fromArr;
+  return usablePhotoUrl(sub.photo_url) ? [sub.photo_url] : [];
 }
 
 function pickDefaultTab(counts: Counts): Tab {
@@ -56,6 +64,7 @@ export default function AdminDeskPage() {
   const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS);
   const [activeTab, setActiveTab] = useState<Tab>("pending");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(
     null,
   );
@@ -72,6 +81,7 @@ export default function AdminDeskPage() {
   const loadDesk = useCallback(
     async (authToken: string, tab: Tab) => {
       setLoading(true);
+      setError("");
       try {
         const nextCounts = { ...EMPTY_COUNTS };
         const results = await Promise.all(
@@ -81,7 +91,18 @@ export default function AdminDeskPage() {
               cache: "no-store",
             });
             if (res.status === 401) return { status, unauthorized: true as const };
-            const json = (await res.json()) as { submissions?: Submission[] };
+            const json = (await res.json()) as {
+              submissions?: Submission[];
+              error?: string;
+            };
+            if (!res.ok) {
+              return {
+                status,
+                unauthorized: false as const,
+                list: [] as Submission[],
+                error: json.error || `HTTP ${res.status}`,
+              };
+            }
             return {
               status,
               unauthorized: false as const,
@@ -93,7 +114,15 @@ export default function AdminDeskPage() {
         if (results.some((r) => "unauthorized" in r && r.unauthorized)) {
           setIsAuthorized(false);
           localStorage.removeItem("ns_admin_token");
+          setError("Session expired — sign in again.");
           return;
+        }
+
+        const firstErr = results.find(
+          (r) => !r.unauthorized && "error" in r && r.error,
+        );
+        if (firstErr && !firstErr.unauthorized && "error" in firstErr) {
+          setError(String(firstErr.error));
         }
 
         for (const r of results) {
@@ -123,6 +152,7 @@ export default function AdminDeskPage() {
         );
       } catch (err) {
         console.error("Failed to load submissions:", err);
+        setError(err instanceof Error ? err.message : "Failed to load desk");
       } finally {
         setLoading(false);
       }
@@ -160,6 +190,7 @@ export default function AdminDeskPage() {
     id: string,
     newStatus: "approved" | "rejected",
   ) => {
+    setError("");
     try {
       const res = await fetch("/api/admin/submissions", {
         method: "PATCH",
@@ -174,13 +205,18 @@ export default function AdminDeskPage() {
           panchayat_name: selectedSubmission?.panchayat_name,
         }),
       });
+      const json = (await res.json()) as { error?: string };
 
-      if (res.ok) {
-        setSelectedSubmission(null);
-        await loadDesk(token, activeTab);
+      if (!res.ok) {
+        setError(json.error || `Update failed (${res.status})`);
+        return;
       }
+
+      setSelectedSubmission(null);
+      await loadDesk(token, activeTab);
     } catch (err) {
       console.error("Failed to update status:", err);
+      setError(err instanceof Error ? err.message : "Update failed");
     }
   };
 
@@ -281,6 +317,11 @@ export default function AdminDeskPage() {
       </header>
 
       <main className="mx-auto mt-6 grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12">
+        {error ? (
+          <div className="lg:col-span-12 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            {error}
+          </div>
+        ) : null}
         <section className="space-y-4 lg:col-span-7">
           {submissions.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/80 p-8 text-center">
@@ -290,7 +331,7 @@ export default function AdminDeskPage() {
               </p>
               <p className="mt-2 text-xs leading-relaxed text-slate-500">
                 {activeTab === "pending"
-                  ? "New Telegram photos land here. Send a photo to @NayiSamakhyaDeskBot to queue intake."
+                  ? "Pending includes new and flagged intake. Send a photo to @NayiSamakhyaDeskBot to queue work."
                   : `Nothing in ${activeTab} right now.`}
               </p>
               {otherNonEmpty.length > 0 ? (
@@ -369,7 +410,14 @@ export default function AdminDeskPage() {
                       </p>
 
                       <div className="flex items-center justify-between text-[11px] text-slate-400">
-                        <span>Photos: {photos.length}</span>
+                        <span className="flex items-center gap-2">
+                          Photos: {photos.length || "none"}
+                          {sub.status === "flagged" ? (
+                            <span className="rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-orange-300">
+                              flagged
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="font-medium text-amber-500">
                           Click to inspect →
                         </span>
