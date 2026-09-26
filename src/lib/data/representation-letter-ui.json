@@ -63,5 +63,11 @@
   "phone_te": "ఫోన్",
   "phone_en": "Ph",
   "default_name": "మునుగోటి రాము",
-  "default_role": "మండల సమన్వయకర్త"
+  "default_role": "మండల సమన్వయకర్త",
+  "sign_name_ph_te": "ఉదా: మునుగోటి రాము",
+  "sign_name_ph_en": "e.g., Munugoti Ramu",
+  "sign_role_ph_te": "ఉదా: మండల సమన్వయకర్త / పట్టణ సమన్వయకర్త",
+  "sign_role_ph_en": "e.g., Mandal Coordinator / Town Coordinator",
+  "sign_phone_ph_te": "ఉదా: 9032654111",
+  "sign_phone_ph_en": "e.g., 9032654111"
 }

@@ -54,14 +54,24 @@ export default function RootLayout({
           Skip to content
         </a>
         <LanguageProvider>
-          <AccessibilityBar />
-          <FloatingNavbar />
-          <NewsMarquee />
+          <div className="no-print">
+            <AccessibilityBar />
+          </div>
+          <div className="no-print">
+            <FloatingNavbar />
+          </div>
+          <div className="no-print">
+            <NewsMarquee />
+          </div>
           <main id="main-content" className="flex-1">
             {children}
           </main>
-          <CivicFooter />
-          <CivicChatbot />
+          <div className="no-print">
+            <CivicFooter />
+          </div>
+          <div className="no-print">
+            <CivicChatbot />
+          </div>
         </LanguageProvider>
       </body>
     </html>

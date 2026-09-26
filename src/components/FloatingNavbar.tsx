@@ -23,7 +23,7 @@ export function FloatingNavbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#EBE8E0] bg-[#FBFBF9]/90 backdrop-blur-md">
+    <header className="no-print sticky top-0 z-50 border-b border-[#EBE8E0] bg-[#FBFBF9]/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-4">
         <Link href="/" className="tap flex min-w-0 items-center gap-2.5">
           <span className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-warm text-brand">

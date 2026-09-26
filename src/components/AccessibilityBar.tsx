@@ -13,7 +13,10 @@ export function AccessibilityBar() {
   const toggleContrast = useAccessibilityStore((s) => s.toggleContrast);
 
   return (
-    <div className="border-b border-zinc-700 bg-[#27272a] text-[11px] text-zinc-200">
+    <div
+      data-accessibility-bar
+      className="no-print border-b border-zinc-700 bg-[#27272a] text-[11px] text-zinc-200"
+    >
       <div className="mx-auto flex max-w-7xl flex-col items-stretch gap-2 px-3 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4">
         <div className="flex items-center gap-1" role="group" aria-label="Text size and contrast">
           <button

@@ -51,7 +51,7 @@ export function CivicFooter() {
 
   return (
     <footer
-      className="mt-16 bg-[#0B1320]/90 bg-cover bg-center bg-blend-multiply text-slate-200"
+      className="no-print mt-16 bg-[#0B1320]/90 bg-cover bg-center bg-blend-multiply text-slate-200"
       style={{
         backgroundImage:
           "linear-gradient(rgba(11,19,32,0.92), rgba(11,19,32,0.94)), url(https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&q=80&w=1600)",

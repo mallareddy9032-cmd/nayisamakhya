@@ -8,7 +8,7 @@ export function NewsMarquee() {
 
   return (
     <div
-      className="overflow-hidden border-b border-[#EBE8E0] bg-[#C2410C]/10 text-[#C2410C]"
+      className="no-print overflow-hidden border-b border-[#EBE8E0] bg-[#C2410C]/10 text-[#C2410C]"
       role="region"
       aria-label="Breaking updates"
     >

@@ -330,7 +330,7 @@ export function CivicChatbot() {
       };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[70] flex flex-col items-end gap-3 md:bottom-6 md:right-6">
+    <div className="no-print fixed bottom-4 right-4 z-[70] flex flex-col items-end gap-3 md:bottom-6 md:right-6">
       <AnimatePresence>
         {open && !minimized ? (
           <motion.div

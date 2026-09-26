@@ -33,9 +33,9 @@ export function RepresentationLetterPage() {
   const [authorityId, setAuthorityId] = useState(AUTHORITIES[0].id);
   const [subjectId, setSubjectId] = useState(SUBJECT_OPTIONS[0].id);
   const [customNotes, setCustomNotes] = useState("");
-  const [signatoryName, setSignatoryName] = useState("\u0c2e\u0c41\u0c28\u0c41\u0c17\u0c4b\u0c1f\u0c3f \u0c30\u0c3e\u0c2e\u0c41");
-  const [signatoryRole, setSignatoryRole] = useState("\u0c2e\u0c02\u0c21\u0c32 \u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24");
-  const [signatoryPhone, setSignatoryPhone] = useState("9032654111");
+  const [signatoryName, setSignatoryName] = useState("");
+  const [signatoryRole, setSignatoryRole] = useState("");
+  const [signatoryPhone, setSignatoryPhone] = useState("");
 
   const areas = useMemo(() => {
     if (areaType === "urban") {
@@ -78,9 +78,9 @@ export function RepresentationLetterPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div className="no-print space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="min-h-screen bg-slate-100 px-3 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[minmax(300px,400px)_minmax(0,1fr)] lg:items-start">
+        <div className="no-print space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
           <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-4 sm:flex-row sm:items-center">
             <div>
               <h1
@@ -128,7 +128,7 @@ export function RepresentationLetterPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label
                 className={cn(
@@ -211,7 +211,7 @@ export function RepresentationLetterPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label
                 className={cn(
@@ -276,7 +276,7 @@ export function RepresentationLetterPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 pt-1">
             <div>
               <label
                 className={cn(
@@ -290,6 +290,11 @@ export function RepresentationLetterPage() {
                 type="text"
                 value={signatoryName}
                 onChange={(e) => setSignatoryName(e.target.value)}
+                placeholder={
+                  te
+                    ? "\u0c09\u0c26\u0c3e: \u0c2e\u0c41\u0c28\u0c41\u0c17\u0c4b\u0c1f\u0c3f \u0c30\u0c3e\u0c2e\u0c41"
+                    : "e.g., Munugoti Ramu"
+                }
                 className={fieldClass(te)}
               />
             </div>
@@ -306,6 +311,11 @@ export function RepresentationLetterPage() {
                 type="text"
                 value={signatoryRole}
                 onChange={(e) => setSignatoryRole(e.target.value)}
+                placeholder={
+                  te
+                    ? "\u0c09\u0c26\u0c3e: \u0c2e\u0c02\u0c21\u0c32 \u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 / \u0c2a\u0c1f\u0c4d\u0c1f\u0c23 \u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24"
+                    : "e.g., Mandal Coordinator / Town Coordinator"
+                }
                 className={fieldClass(te)}
               />
             </div>
@@ -322,16 +332,17 @@ export function RepresentationLetterPage() {
                 type="text"
                 value={signatoryPhone}
                 onChange={(e) => setSignatoryPhone(e.target.value)}
+                placeholder={te ? "\u0c09\u0c26\u0c3e: 9032654111" : "e.g., 9032654111"}
                 className={fieldClass(false)}
               />
             </div>
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-stretch pt-1 sm:justify-end">
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-slate-800"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-slate-800 sm:w-auto"
             >
               <svg
                 className="h-4 w-4 fill-current"
@@ -345,11 +356,11 @@ export function RepresentationLetterPage() {
           </div>
         </div>
 
-        <div className="printable-card print-document rounded-2xl border border-slate-200 bg-white p-8 font-serif leading-relaxed text-slate-900 shadow-md sm:p-10">
-          <div className="mb-6 border-b-2 border-slate-900 pb-4 text-center">
+        <div className="printable-card print-document print-only-document rounded-2xl border border-slate-200 bg-white p-6 font-serif leading-relaxed text-slate-900 shadow-md sm:p-8 lg:p-10">
+          <div className="mb-5 border-b-2 border-slate-900 pb-3 text-center print:mb-3 print:pb-2">
             <div
               className={cn(
-                "text-xl font-bold tracking-tight text-slate-900 sm:text-2xl",
+                "text-xl font-bold tracking-tight text-slate-900 sm:text-2xl print:text-[18pt]",
                 te && "font-telugu",
               )}
             >
@@ -357,40 +368,40 @@ export function RepresentationLetterPage() {
             </div>
             <div
               className={cn(
-                "mt-1 font-sans text-xs uppercase tracking-widest text-slate-600",
+                "mt-1 font-sans text-xs uppercase tracking-widest text-slate-600 print:text-[9pt] print:normal-case print:tracking-normal",
                 te && "font-telugu normal-case tracking-normal",
               )}
             >
               {te ? "\u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02 \u2022 \u0c38\u0c3e\u0c2e\u0c3e\u0c1c\u0c3f\u0c15 \u0c38\u0c3e\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c24 \u2022 \u0c35\u0c43\u0c24\u0c4d\u0c24\u0c3f\u0c2a\u0c30\u0c2e\u0c48\u0c28 \u0c39\u0c15\u0c4d\u0c15\u0c41\u0c32 \u0c2a\u0c30\u0c3f\u0c30\u0c15\u0c4d\u0c37\u0c23 \u0c35\u0c47\u0c26\u0c3f\u0c15" : "State Platform for Welfare, Civic Rights & Occupational Empowerment"}
             </div>
-            <div className="mt-1 font-sans font-telugu text-[11px] text-slate-500">
+            <div className="mt-1 font-sans font-telugu text-[11px] text-slate-500 print:text-[8pt]">
               {"\u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c35\u0c46\u0c2c\u0c4d\u200c\u0c38\u0c48\u0c1f\u0c4d: www.nayisamakhya.org | \u0c38\u0c47\u0c35 \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c39\u0c46\u0c32\u0c4d\u0c2a\u0c4d\u200c\u0c32\u0c48\u0c28\u0c4d: 1800-NAYI-SEVA"}
             </div>
           </div>
 
-          <div className="mb-6 flex items-center justify-between font-sans text-sm text-slate-700">
+          <div className="mb-4 flex items-center justify-between font-sans text-sm text-slate-700 print:mb-2 print:text-[10pt]">
             <div className={te ? "font-telugu" : undefined}>
-              {te ? "\u0c38\u0c4d\u0c25\u0c32\u0c02" : "Place"}: 
+              {te ? "\u0c38\u0c4d\u0c25\u0c32\u0c02" : "Place"}:{" "}
               <b>
                 {areaName}, {distName}
               </b>
             </div>
             <div className={te ? "font-telugu" : undefined}>
-              {te ? "\u0c24\u0c47\u0c26\u0c40" : "Date"}: 
+              {te ? "\u0c24\u0c47\u0c26\u0c40" : "Date"}:{" "}
               <b>{todayDate}</b>
             </div>
           </div>
 
           <div
             className={cn(
-              "mb-6 space-y-1 font-sans text-sm",
+              "mb-4 space-y-0.5 font-sans text-sm print:mb-2 print:text-[10pt]",
               te && "font-telugu",
             )}
           >
             <div className="font-semibold">
               {te ? "\u0c38\u0c4d\u0c35\u0c40\u0c15\u0c30\u0c4d\u0c24 (To):" : "To:"}
             </div>
-            <div className="text-base font-bold text-slate-950">
+            <div className="text-base font-bold text-slate-950 print:text-[11pt]">
               {te ? currentAuthority.title_te : currentAuthority.title_en}
             </div>
             <div className="text-slate-800">
@@ -401,28 +412,28 @@ export function RepresentationLetterPage() {
             </div>
           </div>
 
-          <div className="mb-6 space-y-2 border-l-4 border-slate-900 bg-slate-50 p-3.5 font-sans text-sm">
+          <div className="mb-4 space-y-1.5 border-l-4 border-slate-900 bg-slate-50 p-3 font-sans text-sm print:mb-2 print:p-2 print:text-[10pt]">
             <div className={te ? "font-telugu" : undefined}>
               <span className="font-bold text-slate-900">
                 {te ? "\u0c35\u0c3f\u0c37\u0c2f\u0c2e\u0c41:" : "Subject:"}
-              </span> 
+              </span>{" "}
               <span className="font-semibold text-slate-900">
                 {te ? currentSubject.subj_te : currentSubject.subj_en}
               </span>
             </div>
             <div
-              className={cn("text-xs text-slate-700", te && "font-telugu")}
+              className={cn("text-xs text-slate-700 print:text-[9pt]", te && "font-telugu")}
             >
               <span className="font-bold">
                 {te ? "\u0c09\u0c32\u0c4d\u0c32\u0c47\u0c16\u0c28 (Ref):" : "Reference:"}
-              </span> 
+              </span>{" "}
               {te ? currentSubject.ref_te : currentSubject.ref_en}
             </div>
           </div>
 
           <div
             className={cn(
-              "mb-4 font-sans text-sm font-bold",
+              "mb-3 font-sans text-sm font-bold print:mb-2 print:text-[10pt]",
               te && "font-telugu",
             )}
           >
@@ -431,7 +442,7 @@ export function RepresentationLetterPage() {
 
           <div
             className={cn(
-              "mb-8 space-y-4 text-justify font-sans text-sm leading-relaxed sm:text-base",
+              "mb-5 space-y-3 text-justify font-sans text-sm leading-relaxed print:mb-3 print:space-y-2 print:text-[10pt] print:leading-snug sm:text-[15px]",
               te && "font-telugu",
             )}
           >
@@ -458,16 +469,16 @@ export function RepresentationLetterPage() {
             <p>{te ? "\u0c15\u0c3e\u0c35\u0c41\u0c28 \u0c17\u0c4c\u0c30\u0c35\u0c28\u0c40\u0c2f \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c41\u0c32\u0c41 \u0c2e\u0c3e \u0c35\u0c3f\u0c28\u0c4d\u0c28\u0c2a\u0c3e\u0c28\u0c4d\u0c28\u0c3f \u0c2a\u0c30\u0c3f\u0c36\u0c40\u0c32\u0c3f\u0c02\u0c1a\u0c3f, \u0c24\u0c4d\u0c35\u0c30\u0c3f\u0c24\u0c17\u0c24\u0c3f\u0c28 \u0c38\u0c2e\u0c38\u0c4d\u0c2f \u0c2a\u0c30\u0c3f\u0c37\u0c4d\u0c15\u0c3e\u0c30\u0c3e\u0c28\u0c3f\u0c15\u0c3f \u0c24\u0c17\u0c3f\u0c28 \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c1a\u0c30\u0c4d\u0c2f\u0c32\u0c41 \u0c1a\u0c47\u0c2a\u0c1f\u0c4d\u0c1f\u0c35\u0c32\u0c38\u0c3f\u0c02\u0c26\u0c3f\u0c17\u0c3e \u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c30\u0c2a\u0c41\u0c28 \u0c38\u0c35\u0c3f\u0c28\u0c2f\u0c02\u0c17\u0c3e \u0c05\u0c2d\u0c4d\u0c2f\u0c30\u0c4d\u0c25\u0c3f\u0c38\u0c4d\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c2e\u0c41." : "Therefore, we humbly urge your good office to favorably examine our genuine representation and initiate prompt administrative action to redress this issue."}</p>
           </div>
 
-          <div className="flex items-end justify-between pt-8 font-sans">
+          <div className="flex items-end justify-between pt-4 font-sans print:pt-2">
             <div
               className={cn(
-                "text-xs text-slate-500",
+                "max-w-[45%] text-xs text-slate-500 print:text-[8pt]",
                 te && "font-telugu",
               )}
             >
               {te ? "\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c30\u0c3f\u0c1c\u0c3f\u0c38\u0c4d\u0c1f\u0c4d\u0c30\u0c40 \u0c26\u0c4d\u0c35\u0c3e\u0c30\u0c3e \u0c1c\u0c3e\u0c30\u0c40 \u0c1a\u0c47\u0c2f\u0c2c\u0c21\u0c3f\u0c02\u0c26\u0c3f" : "Issued via Nayi Samakhya Digital Desk"}
             </div>
-            <div className="space-y-1 text-right">
+            <div className="space-y-0.5 text-right print:text-[10pt]">
               <div
                 className={cn(
                   "text-xs font-semibold text-slate-700",
@@ -478,11 +489,11 @@ export function RepresentationLetterPage() {
               </div>
               <div
                 className={cn(
-                  "pt-8 text-base font-bold text-slate-950",
+                  "pt-6 text-base font-bold text-slate-950 print:pt-4 print:text-[11pt]",
                   te && "font-telugu",
                 )}
               >
-                {signatoryName}
+                {signatoryName || (te ? "\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c2a\u0c47\u0c30\u0c41" : "Signatory Name")}
               </div>
               <div
                 className={cn(
@@ -490,7 +501,10 @@ export function RepresentationLetterPage() {
                   te && "font-telugu",
                 )}
               >
-                {signatoryRole}
+                {signatoryRole ||
+                  (te
+                    ? "\u0c2e\u0c02\u0c21\u0c32 \u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24"
+                    : "Mandal Coordinator")}
               </div>
               <div
                 className={cn("text-xs text-slate-600", te && "font-telugu")}
@@ -498,8 +512,8 @@ export function RepresentationLetterPage() {
                 {areaName}, {distName}
               </div>
               <div className="text-xs text-slate-700">
-                {te ? "\u0c2b\u0c4b\u0c28\u0c4d" : "Ph"}: 
-                {signatoryPhone}
+                {te ? "\u0c2b\u0c4b\u0c28\u0c4d" : "Ph"}:{" "}
+                {signatoryPhone || "___________"}
               </div>
             </div>
           </div>
