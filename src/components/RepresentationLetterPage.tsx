@@ -61,7 +61,9 @@ export function RepresentationLetterPage() {
   const [district, setDistrict] = useState(initialDistrict || "\u0c38\u0c42\u0c30\u0c4d\u0c2f\u0c3e\u0c2a\u0c47\u0c1f");
   const [mandal, setMandal] = useState(initialMandal || "\u0c15\u0c4b\u0c26\u0c3e\u0c21");
   const [locality, setLocality] = useState(initialLocality || "\u0c17\u0c3e\u0c02\u0c27\u0c40 \u0c28\u0c17\u0c30\u0c4d");
-  const [recipientOfficer, setRecipientOfficer] = useState(OFFICERS[0].value);
+  const [recipientOfficer, setRecipientOfficer] = useState<string>(
+    OFFICERS[0].value,
+  );
   const [selectedTemplateId, setSelectedTemplateId] = useState(TEMPLATES[0].id);
   const [recordId, setRecordId] = useState("------");
 
