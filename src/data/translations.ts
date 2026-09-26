@@ -25,8 +25,8 @@ export const translations = {
   go: { te: "వెళ్ళు", en: "Go" },
   menu: { te: "మెనూ", en: "Menu" },
   marquee: {
-    te: "🔴 బ్రేకింగ్ అప్‌డేట్స్: 250 యూనిట్ల ఉచిత విద్యుత్ అర్హత మార్గదర్శకాలు విడుదల • బీసీ స్టడీ సర్కిల్ ఉచిత కోచింగ్ దరఖాస్తులు ప్రారంభం • భజంత్రి పెన్షన్ వెరిఫికేషన్ శిబిరాలు — కోదాడ, మధిర, వైరా • మాతృమూర్తి మ్యాట్రిమోనియల్ డ్రైవ్ ఈ నెల 28న • ",
-    en: "🔴 Breaking: 250-unit free power eligibility guidelines released • BC Study Circle free coaching applications open • Bajantri pension verification camps — Kodad, Madhira, Wyra • Matrumurthi matrimonial drive on the 28th • ",
+    te: "🔴 బ్రేకింగ్: నాయి సమాఖ్య డిజిటల్ సేవా డెస్క్ ప్రారంభం — Telegram @NayiSamakhyaDeskBot కి Hi అని మెసేజ్ చేయండి • వినతిపత్రాలు, ఫీల్డ్ ఫోటో నమోదు, మండల సమన్వయకర్త వివరాలు మొబైల్ నుంచే • 250 యూనిట్ల ఉచిత విద్యుత్ • షేర్: /announce • ",
+    en: "🔴 Breaking: Nayi Samakhya Digital Service Desk is live — message Hi to @NayiSamakhyaDeskBot • Representation letters, field photos, mandal coordinator lookup on mobile • 250-unit free power • Share blast: /announce • ",
   },
   actionPower: { te: "250 యూనిట్ల స్థితి", en: "Check 250 Units Status" },
   actionSurvey: { te: "కుటుంబ సర్వే", en: "Start Family Survey" },
