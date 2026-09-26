@@ -19,6 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/coordinator-card") ||
     pathname.startsWith("/coordinators") ||
     pathname.startsWith("/announce") ||
+    pathname.startsWith("/poster") ||
     pathname.startsWith("/twa");
 
   if (isChromeFree) {

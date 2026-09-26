@@ -40,6 +40,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/coordinator-card` | Printable coordinator digital ID / visiting card |
 | `/twa` | Telegram Mini App hub (petition, feed, GO 23, ID card) |
 | `/announce` | Community WhatsApp blasts + coordinator SOP (`?blast=desk|representation|feed|sop`) |
+| `/poster` | Printable A4 Digital Desk QR poster (`@NayiSamakhyaDeskBot`) |
 | `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → submissions + **analytics** tab via `/api/admin/analytics`; approve/reject notifies submitter on Telegram) |
 | `/admin/moderation` | Field photo moderation desk (cookie PIN via `MODERATION_DESK_SECRET`) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
