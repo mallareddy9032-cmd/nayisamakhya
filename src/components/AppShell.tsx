@@ -11,9 +11,11 @@ import { NewsMarquee } from "@/components/NewsMarquee";
 /** Public marketing chrome — omitted on /admin/* so desks stay full-bleed tools. */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
-  const isAdmin = pathname.startsWith("/admin");
+  // Full-bleed tool / feed surfaces — skip public marketing chrome.
+  const isChromeFree =
+    pathname.startsWith("/admin") || pathname.startsWith("/feed");
 
-  if (isAdmin) {
+  if (isChromeFree) {
     return (
       <main id="main-content" className="min-h-dvh flex-1 bg-slate-950">
         {children}
