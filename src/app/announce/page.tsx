@@ -12,6 +12,7 @@ import {
   TELEGRAM_BOT_URL,
   type CommunityBlastId,
 } from "@/lib/data/communityAnnounce";
+import { extractBlastUrls, LinkifiedText } from "@/components/LinkifiedText";
 
 function AnnounceInner() {
   const searchParams = useSearchParams();
@@ -27,6 +28,7 @@ function AnnounceInner() {
 
   const blast = getCommunityBlast(activeId);
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(blast.text)}`;
+  const blastUrls = extractBlastUrls(blast.text);
 
   const copyText = async () => {
     try {
@@ -132,13 +134,30 @@ function AnnounceInner() {
           </a>
         </div>
 
+        {blastUrls.length > 0 ? (
+          <div className="mb-3 flex flex-wrap justify-center gap-2 no-print">
+            {blastUrls.map((url) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tap inline-flex max-w-full items-center gap-1 truncate rounded-full border border-[#F0A070]/35 bg-[#F0A070]/10 px-3 py-1.5 text-[11px] font-medium text-[#F0A070] hover:bg-[#F0A070]/20"
+              >
+                <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+                <span className="truncate">
+                  {url.replace(/^https:\/\//, "")}
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : null}
+
         <article
           className="flex-1 rounded-2xl border border-white/10 bg-[#0F2740]/80 p-5 shadow-2xl backdrop-blur-sm sm:p-7"
           lang="te"
         >
-          <pre className="font-telugu whitespace-pre-wrap break-words text-[14px] leading-relaxed text-[#F7F4EE] sm:text-[15px]">
-            {blast.text}
-          </pre>
+          <LinkifiedText text={blast.text} />
         </article>
 
         <footer className="mt-6 flex flex-col items-center gap-2 text-center text-xs text-slate-400 no-print">
