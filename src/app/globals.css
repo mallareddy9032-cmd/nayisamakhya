@@ -2,9 +2,9 @@
 @config "../../tailwind.config.ts";
 
 :root {
-  --canvas: #fbfbf9;
+  --canvas: #fbfbfa;
   --surface: #ffffff;
-  --ink: #18181b;
+  --ink: #0f172a;
   --muted: #71717a;
   --line: #ebe8e0;
   --warm: #f4f2eb;
@@ -39,8 +39,8 @@ html.contrast-high {
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-sos: var(--sos);
-  --font-sans: var(--font-plus-jakarta);
-  --font-telugu: var(--font-noto-telugu);
+  /* next/font sets --font-sans / --font-telugu on <html>; do not
+     reassign them here or the theme tokens become circular. */
   --animate-marquee: marquee 38s linear infinite;
   --animate-chat-pulse: chat-pulse 2s ease-out infinite;
 }
@@ -76,7 +76,7 @@ body {
 }
 
 .font-telugu {
-  font-family: var(--font-noto-telugu), var(--font-plus-jakarta), system-ui, sans-serif;
+  font-family: var(--font-telugu), var(--font-sans), system-ui, sans-serif;
   line-height: 1.7;
 }
 
