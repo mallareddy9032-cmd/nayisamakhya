@@ -22,6 +22,11 @@ function initialSubjectId(raw: string | null): string {
   return SUBJECT_OPTIONS[0].id;
 }
 
+function initialAuthorityId(raw: string | null): string {
+  if (raw && AUTHORITIES.some((a) => a.id === raw)) return raw;
+  return AUTHORITIES[0].id;
+}
+
 const MONTHS_TE = [
   "\u0c1c\u0c28\u0c35\u0c30\u0c3f",
   "\u0c2b\u0c3f\u0c2c\u0c4d\u0c30\u0c35\u0c30\u0c3f",
@@ -78,7 +83,9 @@ export function RepresentationLetterPage() {
   );
   const [areaType, setAreaType] = useState<AreaType>("rural");
   const [areaSlug, setAreaSlug] = useState("");
-  const [authorityId, setAuthorityId] = useState(AUTHORITIES[0].id);
+  const [authorityId, setAuthorityId] = useState(() =>
+    initialAuthorityId(searchParams.get("authority")),
+  );
   const [subjectId, setSubjectId] = useState(() =>
     initialSubjectId(searchParams.get("subject")),
   );

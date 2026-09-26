@@ -18,9 +18,24 @@
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN?.trim() || "";
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET?.trim() || "";
-const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  "https://www.nayisamakhya.org";
+
+/** Apex 308s break Telegram webhooks/buttons — always normalize to www. */
+function siteOrigin() {
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    "https://www.nayisamakhya.org";
+  try {
+    const u = new URL(raw.includes("://") ? raw : `https://${raw}`);
+    if (u.hostname === "nayisamakhya.org") {
+      u.hostname = "www.nayisamakhya.org";
+    }
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return "https://www.nayisamakhya.org";
+  }
+}
+
+const SITE = siteOrigin();
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
   "https://pvhnwoukpccgeoqdsevm.supabase.co";
@@ -127,7 +142,10 @@ async function setWebhook() {
   form.set("url", `${SITE}/api/telegram-webhook`);
   form.set("secret_token", WEBHOOK_SECRET);
   form.set("drop_pending_updates", "true");
-  form.set("allowed_updates", JSON.stringify(["message"]));
+  form.set(
+    "allowed_updates",
+    JSON.stringify(["message", "callback_query"]),
+  );
   const res = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
     { method: "POST", body: form },

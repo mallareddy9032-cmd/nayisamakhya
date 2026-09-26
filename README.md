@@ -74,15 +74,27 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
 
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket), then `005_moderation_desk_v2.sql` and `006_admin_desk_submissions_api.sql` (`panchayat_name`, `admin_notes`, `reviewed_at`).
 2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`.
-3. Point the bot webhook (use **www** — apex redirects break Telegram):
+3. Point the bot webhook (use **www** — apex redirects break Telegram). Include `callback_query` so welcome inline buttons work:
    ```bash
    curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
      -d "url=https://www.nayisamakhya.org/api/telegram-webhook" \
-     -d "secret_token=$TELEGRAM_WEBHOOK_SECRET"
+     -d "secret_token=$TELEGRAM_WEBHOOK_SECRET" \
+     -d 'allowed_updates=["message","callback_query"]'
    ```
    Or: `npm run setup:method3` (needs `VERCEL_TOKEN` + the keys above).
 4. Open `/admin/moderation`, unlock with `MODERATION_DESK_SECRET`, then review queues.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
+
+### Telegram Mini App (`/twa`)
+
+- Hub: `https://www.nayisamakhya.org/twa` (chrome-free; petition, feed, GO 23 → DISCOM prefill, coordinator card).
+- Menu button (persistent):
+  ```bash
+  curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setChatMenuButton" \
+    -H "Content-Type: application/json" \
+    -d '{"menu_button":{"type":"web_app","text":"📱 సేవా డెస్క్","web_app":{"url":"https://www.nayisamakhya.org/twa"}}}'
+  ```
+- BotFather → Bot Settings → Domain: `www.nayisamakhya.org`. Always set `NEXT_PUBLIC_SITE_URL=https://www.nayisamakhya.org`.
 
 ## Deploy
 

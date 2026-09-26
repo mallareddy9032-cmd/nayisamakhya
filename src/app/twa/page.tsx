@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Script from "next/script";
 import Link from "next/link";
 import {
@@ -19,6 +19,7 @@ declare global {
         ready: () => void;
         expand: () => void;
         close: () => void;
+        /** Untrusted client payload — display-only; never authorize on this alone. */
         initDataUnsafe?: {
           user?: {
             id: number;
@@ -37,23 +38,22 @@ declare global {
   }
 }
 
+const DEFAULT_NAME = "\u0C2E\u0C3F\u0C24\u0C4D\u0C30\u0C2E\u0C3E";
+
+function initTelegramWebApp(
+  setUserName: (name: string) => void,
+) {
+  const tg = window.Telegram?.WebApp;
+  if (!tg) return;
+  tg.ready();
+  tg.expand();
+  // initDataUnsafe is spoofable outside Telegram; greeting only.
+  const first = tg.initDataUnsafe?.user?.first_name?.trim();
+  if (first) setUserName(first);
+}
+
 export default function TelegramMiniAppPage() {
-  const [userName, setUserName] = useState(
-    "\u0C2E\u0C3F\u0C24\u0C4D\u0C30\u0C2E\u0C3E",
-  );
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-
-      const user = tg.initDataUnsafe?.user;
-      if (user?.first_name) {
-        setUserName(user.first_name);
-      }
-    }
-  }, []);
+  const [userName, setUserName] = useState(DEFAULT_NAME);
 
   const triggerHaptic = () => {
     try {
@@ -67,7 +67,9 @@ export default function TelegramMiniAppPage() {
     <>
       <Script
         src="https://telegram.org/js/telegram-web-app.js"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
+        onReady={() => initTelegramWebApp(setUserName)}
+        onLoad={() => initTelegramWebApp(setUserName)}
       />
 
       <div className="flex min-h-screen flex-col justify-between bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-white">
@@ -139,7 +141,7 @@ export default function TelegramMiniAppPage() {
           </Link>
 
           <Link
-            href="/representation?subject=free_power"
+            href="/representation?subject=free_power&authority=discom_ae"
             onClick={triggerHaptic}
             className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-4 transition-all hover:border-slate-700 active:scale-[0.99]"
           >
@@ -170,7 +172,7 @@ export default function TelegramMiniAppPage() {
             className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-4 transition-all hover:border-slate-700 active:scale-[0.99]"
           >
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-500/10 text-violet-400">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-400">
                 <Users className="h-5 w-5" />
               </div>
               <div>

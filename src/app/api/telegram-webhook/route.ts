@@ -46,13 +46,34 @@ function botToken() {
   return process.env.TELEGRAM_BOT_TOKEN?.trim() || "";
 }
 
+/** Escape dynamic strings before Telegram parse_mode HTML. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Canonical public origin for Telegram buttons / web_app.
+ * Apex nayisamakhya.org 308s break Telegram URL buttons — always prefer www.
+ */
 function siteOrigin() {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) return explicit.replace(/\/$/, "");
-  const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "")}`;
-  // Apex redirects → www with 308; prefer www for Telegram review links.
-  return "https://www.nayisamakhya.org";
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (process.env.VERCEL_URL?.trim()
+      ? `https://${process.env.VERCEL_URL.trim().replace(/^https?:\/\//, "")}`
+      : "https://www.nayisamakhya.org");
+  try {
+    const u = new URL(raw.includes("://") ? raw : `https://${raw}`);
+    if (u.hostname === "nayisamakhya.org") {
+      u.hostname = "www.nayisamakhya.org";
+    }
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return "https://www.nayisamakhya.org";
+  }
 }
 
 async function telegramApi(method: string, body: Record<string, unknown>) {
@@ -134,10 +155,10 @@ function isGreeting(text: string): boolean {
 
 async function sendWelcomeMenu(chatId: number | string, senderName: string) {
   const origin = siteOrigin();
-  // Mini App URL must match BotFather Web App domain (prefer www production).
-  const miniAppUrl = "https://www.nayisamakhya.org/twa";
+  const miniAppUrl = `${origin}/twa`;
+  const safeName = escapeHtml(senderName);
   const welcomeText =
-    `\u{1F64F} <b>\u0C28\u0C2E\u0C38\u0C4D\u0C15\u0C3E\u0C30\u0C02 ${senderName} \u0C17\u0C3E\u0C30\u0C41!</b>\n\n` +
+    `\u{1F64F} <b>\u0C28\u0C2E\u0C38\u0C4D\u0C15\u0C3E\u0C30\u0C02 ${safeName} \u0C17\u0C3E\u0C30\u0C41!</b>\n\n` +
     `<b>\u0C28\u0C3E\u0C2F\u0C3F \u0C38\u0C2E\u0C3E\u0C16\u0C4D\u0C2F \u0C21\u0C3F\u0C1C\u0C3F\u0C1F\u0C32\u0C4D \u0C38\u0C47\u0C35\u0C3E \u0C21\u0C46\u0C38\u0C4D\u0C15\u0C4D</b> \u0C15\u0C41 \u0C38\u0C4D\u0C35\u0C3E\u0C17\u0C24\u0C02. ` +
     `\u0C30\u0C3E\u0C37\u0C4D\u0C1F\u0C4D\u0C30\u0C35\u0C4D\u0C2F\u0C3E\u0C2A\u0C4D\u0C24\u0C02\u0C17\u0C3E \u0C2E\u0C28 \u0C15\u0C2E\u0C4D\u0C2F\u0C42\u0C28\u0C3F\u0C1F\u0C40 \u0C38\u0C2E\u0C38\u0C4D\u0C2F\u0C32 \u0C2A\u0C30\u0C3F\u0C37\u0C4D\u0C15\u0C3E\u0C30\u0C02, \u0C38\u0C02\u0C15\u0C4D\u0C37\u0C47\u0C2E\u0C02 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C38\u0C2E\u0C3E\u0C1A\u0C3E\u0C30\u0C02 \u0C15\u0C4A\u0C30\u0C15\u0C41 \u0C08 \u0C05\u0C27\u0C3F\u0C15\u0C3E\u0C30\u0C3F\u0C15 \u0C15\u0C47\u0C02\u0C26\u0C4D\u0C30\u0C02 \u0C2A\u0C28\u0C3F\u0C1A\u0C47\u0C38\u0C4D\u0C24\u0C41\u0C02\u0C26\u0C3F.\n\n` +
     `\u0C2E\u0C40\u0C30\u0C41 \u0C15\u0C4D\u0C30\u0C3F\u0C02\u0C26\u0C3F \u0C38\u0C47\u0C35\u0C32\u0C28\u0C41 \u0C28\u0C47\u0C30\u0C41\u0C17\u0C3E \u0C09\u0C2A\u0C2F\u0C4B\u0C17\u0C3F\u0C02\u0C1A\u0C41\u0C15\u0C4B\u0C35\u0C1A\u0C4D\u0C1A\u0C41:`;
@@ -231,7 +252,7 @@ async function handleOfficerLookup(
   if (!mandalData) {
     await replyText(
       chatId,
-      `\u{1F50D} <b>"${queryMandal}"</b> \u0C2E\u0C02\u0C21\u0C32\u0C02 \u0C15\u0C28\u0C41\u0C17\u0C4A\u0C28\u0C2C\u0C21\u0C32\u0C47\u0C26\u0C41. \u0C26\u0C2F\u0C1A\u0C47\u0C38\u0C3F \u0C38\u0C30\u0C48\u0C28 \u0C38\u0C4D\u0C2A\u0C46\u0C32\u0C4D\u0C32\u0C3F\u0C02\u0C17\u0C4D\u200C\u0C24\u0C4B \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C1F\u0C48\u0C2A\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F.`,
+      `\u{1F50D} <b>"${escapeHtml(queryMandal)}"</b> \u0C2E\u0C02\u0C21\u0C32\u0C02 \u0C15\u0C28\u0C41\u0C17\u0C4A\u0C28\u0C2C\u0C21\u0C32\u0C47\u0C26\u0C41. \u0C26\u0C2F\u0C1A\u0C47\u0C38\u0C3F \u0C38\u0C30\u0C48\u0C28 \u0C38\u0C4D\u0C2A\u0C46\u0C32\u0C4D\u0C32\u0C3F\u0C02\u0C17\u0C4D\u200C\u0C24\u0C4B \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C1F\u0C48\u0C2A\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F.`,
     );
     return NextResponse.json({ ok: true });
   }
@@ -249,10 +270,15 @@ async function handleOfficerLookup(
     ? districtRel[0]?.name_en || ""
     : districtRel?.name_en || "";
 
+  const mandalLabel = escapeHtml(
+    String(mandalData.name_te || mandalData.name_en || ""),
+  );
+  const districtLabel = escapeHtml(districtName);
+
   if (!officers || officers.length === 0) {
     await replyText(
       chatId,
-      `\u{1F4CD} <b>${mandalData.name_te || mandalData.name_en} (${districtName})</b>\n\n` +
+      `\u{1F4CD} <b>${mandalLabel} (${districtLabel})</b>\n\n` +
         `\u0C08 \u0C2E\u0C02\u0C21\u0C32\u0C3E\u0C28\u0C3F\u0C15\u0C3F \u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24 \u0C28\u0C3F\u0C2F\u0C3E\u0C2E\u0C15\u0C02 \u0C2A\u0C30\u0C3F\u0C36\u0C40\u0C32\u0C28\u0C32\u0C4B \u0C09\u0C02\u0C26\u0C3F.\n` +
         `\u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C15\u0C41 \u0C35\u0C46\u0C2C\u0C4D\u200C\u0C38\u0C3E\u0C1F\u0C4D \u0C1A\u0C42\u0C21\u0C02\u0C21\u0C3F: nayisamakhya.org`,
     );
@@ -260,13 +286,16 @@ async function handleOfficerLookup(
   }
 
   let reply =
-    `\u{1F4CD} <b>${mandalData.name_te || mandalData.name_en} \u0C2E\u0C02\u0C21\u0C32 \u0C2A\u0C4D\u0C30\u0C24\u0C3F\u0C28\u0C3F\u0C27\u0C41\u0C32\u0C41:</b>\n\n`;
+    `\u{1F4CD} <b>${mandalLabel} \u0C2E\u0C02\u0C21\u0C32 \u0C2A\u0C4D\u0C30\u0C24\u0C3F\u0C28\u0C3F\u0C27\u0C41\u0C32\u0C41:</b>\n\n`;
   officers.forEach((off, idx) => {
     const phoneDigits = String(off.phone || "").replace(/[^0-9]/g, "");
+    const phoneDisplay = escapeHtml(String(off.phone || ""));
+    const name = escapeHtml(String(off.name_te || off.name_en || ""));
+    const role = escapeHtml(String(off.role_te || off.role || ""));
     reply +=
-      `${idx + 1}. <b>${off.name_te || off.name_en}</b>\n` +
-      `   \u0C39\u0C4B\u0C26\u0C3E: ${off.role_te || off.role}\n` +
-      `   \u0C2B\u0C4B\u0C28\u0C4D: <a href="tel:${off.phone}">${off.phone}</a>\n` +
+      `${idx + 1}. <b>${name}</b>\n` +
+      `   \u0C39\u0C4B\u0C26\u0C3E: ${role}\n` +
+      `   \u0C2B\u0C4B\u0C28\u0C4D: <a href="tel:${phoneDigits}">${phoneDisplay}</a>\n` +
       `   \u0C35\u0C3E\u0C1F\u0C4D\u0C38\u0C3E\u0C2A\u0C4D: <a href="https://wa.me/91${phoneDigits}">\u0C1A\u0C3E\u0C1F\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F</a>\n\n`;
   });
   await replyText(chatId, reply);
@@ -575,7 +604,7 @@ export async function POST(req: Request) {
 
         await replyText(
           chatId,
-          `\u2705 <b>\u0C27\u0C28\u0C4D\u0C2F\u0C35\u0C3E\u0C26\u0C3E\u0C32\u0C41 ${name} \u0C17\u0C3E\u0C30\u0C41!</b>\n` +
+          `\u2705 <b>\u0C27\u0C28\u0C4D\u0C2F\u0C35\u0C3E\u0C26\u0C3E\u0C32\u0C41 ${escapeHtml(name)} \u0C17\u0C3E\u0C30\u0C41!</b>\n` +
             `\u0C2E\u0C40\u0C30\u0C41 \u0C2A\u0C02\u0C2A\u0C3F\u0C28 \u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C41 \u0C2E\u0C41\u0C28\u0C41\u0C2A\u0C1F\u0C3F \u0C2B\u0C4B\u0C1F\u0C4B\u0C32\u0C15\u0C41 \u0C1C\u0C24\u0C1A\u0C47\u0C2F\u0C2C\u0C21\u0C4D\u0C21\u0C3E\u0C2F\u0C3F. \u0C2E\u0C3E \u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24\u0C32 \u0C2A\u0C30\u0C3F\u0C36\u0C40\u0C32\u0C28\u0C32\u0C4B\u0C15\u0C3F \u0C24\u0C40\u0C38\u0C41\u0C15\u0C4B\u0C2C\u0C21\u0C3F\u0C02\u0C26\u0C3F.`,
         );
         return NextResponse.json({ ok: true, follow_up: true });
