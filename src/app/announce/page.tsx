@@ -16,15 +16,20 @@ import { extractBlastUrls, LinkifiedText } from "@/components/LinkifiedText";
 
 function AnnounceInner() {
   const searchParams = useSearchParams();
-  const [activeId, setActiveId] = useState<CommunityBlastId>("desk");
+  const queryBlast = searchParams.get("blast");
+  const [activeId, setActiveId] = useState<CommunityBlastId>(() => {
+    if (queryBlast && COMMUNITY_BLASTS.some((b) => b.id === queryBlast)) {
+      return queryBlast as CommunityBlastId;
+    }
+    return "desk";
+  });
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const fromQuery = searchParams.get("blast");
-    if (fromQuery && COMMUNITY_BLASTS.some((b) => b.id === fromQuery)) {
-      setActiveId(fromQuery as CommunityBlastId);
+    if (queryBlast && COMMUNITY_BLASTS.some((b) => b.id === queryBlast)) {
+      setActiveId(queryBlast as CommunityBlastId);
     }
-  }, [searchParams]);
+  }, [queryBlast]);
 
   const blast = getCommunityBlast(activeId);
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(blast.text)}`;
