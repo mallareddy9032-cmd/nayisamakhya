@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Telugu, Plus_Jakarta_Sans } from "next/font/google";
-import { AccessibilityBar } from "@/components/AccessibilityBar";
-import { CivicChatbot } from "@/components/CivicChatbot";
-import { CivicFooter } from "@/components/CivicFooter";
-import { FloatingNavbar } from "@/components/FloatingNavbar";
-import { NewsMarquee } from "@/components/NewsMarquee";
+import { AppShell } from "@/components/AppShell";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import "./globals.css";
 
@@ -54,24 +50,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <LanguageProvider>
-          <div className="no-print">
-            <AccessibilityBar />
-          </div>
-          <div className="no-print">
-            <FloatingNavbar />
-          </div>
-          <div className="no-print">
-            <NewsMarquee />
-          </div>
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <div className="no-print">
-            <CivicFooter />
-          </div>
-          <div className="no-print">
-            <CivicChatbot />
-          </div>
+          <AppShell>{children}</AppShell>
         </LanguageProvider>
       </body>
     </html>
