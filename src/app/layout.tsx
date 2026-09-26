@@ -18,9 +18,9 @@ const notoTelugu = Noto_Sans_Telugu({
 });
 
 export const metadata: Metadata = {
-  title: "నాయి సమాఖ్య డిజిటల్ సేవా డెస్క్ | Nayi Samakhya",
+  title: "నాయీ సమాఖ్య | Nayi Samakhya",
   description:
-    "Official Digital Service Desk for Nayi Brahmin, Mangali & Bajantri communities across Telangana — Telegram desk, field feed, and representation letters.",
+    "Authoritative civic portal for Telangana & Andhra Pradesh — welfare, education, livelihood, and mandal services.",
   applicationName: "Nayi Samakhya",
   manifest: "/manifest.webmanifest",
 };
