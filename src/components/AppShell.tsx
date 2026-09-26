@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { AccessibilityBar } from "@/components/AccessibilityBar";
 import { CivicChatbot } from "@/components/CivicChatbot";
-import { CivicFooter } from "@/components/CivicFooter";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { NewsMarquee } from "@/components/NewsMarquee";
 
@@ -29,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? "bg-slate-950"
       : "bg-civic-paper";
     return (
-      <main id="main-content" className={`min-h-dvh flex-1 ${shellBg}`}>
+      <main id="main-content" className={`flex-1 ${shellBg}`}>
         {children}
       </main>
     );
@@ -49,9 +48,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main id="main-content" className="flex-1">
         {children}
       </main>
-      <div className="no-print">
-        <CivicFooter />
-      </div>
       <div className="no-print">
         <CivicChatbot />
       </div>

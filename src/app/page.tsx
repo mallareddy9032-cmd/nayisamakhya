@@ -12,10 +12,8 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
-  const year = new Date().getFullYear();
-
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
+    <div className="bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
       <div className="border-b border-slate-700/50 bg-civic-navy px-4 py-1.5 text-center text-[11px] text-slate-200">
         <span className="font-telugu">{"\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c28\u0c46\u0c1f\u0c4d\u200c\u0c35\u0c30\u0c4d\u0c15\u0c4d \u2014 33 \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e\u0c32\u0c41 & 589 \u0c2e\u0c02\u0c21\u0c32\u0c3e\u0c32 \u0c38\u0c47\u0c35\u0c3e \u0c35\u0c47\u0c26\u0c3f\u0c15"}</span>
       </div>
@@ -185,33 +183,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      <footer className="border-t border-civic-border bg-white px-4 py-8 text-center">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-xs text-slate-500 md:flex-row">
-          <div className="font-telugu font-semibold text-civic-ink">
-            © {year} {"\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23. \u0c38\u0c30\u0c4d\u0c35 \u0c39\u0c15\u0c4d\u0c15\u0c41\u0c32\u0c41 \u0c2a\u0c4d\u0c30\u0c24\u0c4d\u0c2f\u0c47\u0c15\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c4d\u0c21\u0c3e\u0c2f\u0c3f."}
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/representation" className="font-telugu hover:text-civic-bronze">
-              {"\u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02"}
-            </Link>
-            <Link href="/feed" className="font-telugu hover:text-civic-bronze">
-              {"\u0c2b\u0c40\u0c21\u0c4d"}
-            </Link>
-            <Link href="/poster" className="font-telugu hover:text-civic-bronze">
-              {"QR \u0c2a\u0c4b\u0c38\u0c4d\u0c1f\u0c30\u0c4d"}
-            </Link>
-            <a
-              href="https://t.me/NayiSamakhyaDeskBot"
-              target="_blank"
-              rel="noreferrer"
-              className="font-bold text-civic-bronze"
-            >
-              Telegram Desk
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

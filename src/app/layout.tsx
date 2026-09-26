@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Noto_Sans_Telugu, Plus_Jakarta_Sans } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
+import CivicFooter from "@/components/CivicFooter";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import "./globals.css";
 
@@ -19,8 +20,10 @@ const telugu = Noto_Sans_Telugu({
 });
 
 export const metadata: Metadata = {
-  title: "\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 | \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d",
-  description: "\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c38\u0c3e\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c24, \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c38\u0c2e\u0c30\u0c4d\u0c2a\u0c23 \u0c15\u0c47\u0c02\u0c26\u0c4d\u0c30\u0c02.",
+  title:
+    "\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 | \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d",
+  description:
+    "\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c38\u0c3e\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c24, \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c38\u0c2e\u0c30\u0c4d\u0c2a\u0c23 \u0c15\u0c47\u0c02\u0c26\u0c4d\u0c30\u0c02.",
   applicationName: "Nayi Samakhya",
   manifest: "/manifest.webmanifest",
 };
@@ -42,7 +45,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${sans.variable} ${telugu.variable} h-full`}
     >
-      <body className="flex min-h-dvh flex-col bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
+      <body className="flex min-h-screen min-h-dvh flex-col justify-between bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-white"
@@ -50,7 +53,10 @@ export default function RootLayout({
           Skip to content
         </a>
         <LanguageProvider>
-          <AppShell>{children}</AppShell>
+          <div className="flex flex-1 flex-col">
+            <AppShell>{children}</AppShell>
+          </div>
+          <CivicFooter />
         </LanguageProvider>
       </body>
     </html>

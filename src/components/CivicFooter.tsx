@@ -1,201 +1,173 @@
 "use client";
 
 import Link from "next/link";
-import { MessageCircle, Send, Share2, X } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
-
-const VISITOR_DIGITS = "73557662".split("");
-
-const MAP_EMBED =
-  "https://maps.google.com/maps?q=Telangana+Secretariat+Hyderabad&t=&z=14&ie=UTF8&iwloc=&output=embed";
-
-function SocialIcon({
-  href,
-  label,
-  children,
-}: {
-  href: string;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={label}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 bg-slate-950/50 text-white hover:border-emerald-400 hover:text-emerald-300"
-    >
-      {children}
-    </a>
-  );
-}
+import { usePathname } from "next/navigation";
+import {
+  ShieldCheck,
+  FileText,
+  Users,
+  ExternalLink,
+  Lock,
+  Send,
+  MapPin,
+} from "lucide-react";
 
 export function CivicFooter() {
-  const { language, t } = useLanguage();
+  const pathname = usePathname() || "";
   const year = new Date().getFullYear();
 
-  const directories = [
-    { href: "/mandals", label: t("footerStatewide") },
-    { href: "/verticals/welfare", label: t("footerWelfarePortals") },
-    { href: "/verticals/education", label: t("footerBcCirculars") },
-    { href: "/verticals/go-library", label: t("footerGoLibrary") },
-  ];
-
-  const policies = [
-    { href: "/policies/hyperlinking", label: t("footerHyperlink") },
-    { href: "/policies/privacy", label: t("footerPrivacy") },
-    { href: "/policies/terms", label: t("footerTerms") },
-    { href: "/sitemap", label: t("footerSitemap") },
-  ];
+  // Dark admin/announce desks keep a full-bleed tool chrome without the light sitemap.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/announce")) {
+    return null;
+  }
 
   return (
-    <footer
-      className="no-print mt-16 bg-[#0B1320]/90 bg-cover bg-center bg-blend-multiply text-slate-200"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(11,19,32,0.92), rgba(11,19,32,0.94)), url(https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&q=80&w=1600)",
-      }}
-    >
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="no-print mt-auto border-t border-civic-border bg-white font-sans text-xs text-slate-600 print:hidden">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="rounded-lg border border-civic-bronze/20 bg-civic-bronze/10 p-1.5 text-civic-bronze">
+              <ShieldCheck className="h-4 w-4" />
+            </span>
+            <span className="font-telugu text-sm font-bold text-civic-ink">
+              {"\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23"}
+            </span>
+          </div>
+          <p className="font-telugu text-[11px] leading-relaxed text-slate-500">
+            {"\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c30\u0c3e\u0c37\u0c4d\u0c1f\u0c4d\u0c30\u0c35\u0c4d\u0c2f\u0c3e\u0c2a\u0c4d\u0c24\u0c02\u0c17\u0c3e \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02, \u0c2a\u0c4d\u0c30\u0c1c\u0c3e \u0c2a\u0c4d\u0c30\u0c3e\u0c24\u0c3f\u0c28\u0c3f\u0c27\u0c4d\u0c2f\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30\u0c38\u0c4d\u0c25\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c38\u0c4d\u0c2f\u0c32 \u0c2a\u0c30\u0c3f\u0c37\u0c4d\u0c15\u0c3e\u0c30\u0c02 \u0c15\u0c4a\u0c30\u0c15\u0c41 \u0c30\u0c42\u0c2a\u0c4a\u0c02\u0c26\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c3f\u0c28 \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c35\u0c47\u0c26\u0c3f\u0c15."}
+          </p>
+          <div className="flex items-center gap-1.5 pt-1 font-telugu text-[11px] text-slate-500">
+            <MapPin className="h-3.5 w-3.5 text-civic-bronze" />
+            <span>{"33 \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e\u0c32\u0c41 \u2022 589 \u0c2e\u0c02\u0c21\u0c32\u0c3e\u0c32\u0c41"}</span>
+          </div>
+        </div>
+
         <div>
-          <h3
-            className={`border-b-2 border-emerald-500 pb-2 text-sm font-semibold text-white ${language === "te" ? "font-telugu" : ""}`}
-          >
-            {t("footerOffice")}
+          <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
+            <FileText className="h-3.5 w-3.5 text-civic-bronze" />
+            {"\u0c2a\u0c4d\u0c30\u0c1c\u0c3e \u0c38\u0c47\u0c35\u0c32\u0c41 & \u0c35\u0c3f\u0c28\u0c24\u0c41\u0c32\u0c41"}
           </h3>
-          <p
-            className={`mt-4 text-sm leading-relaxed text-slate-300 ${language === "te" ? "font-telugu" : ""}`}
-          >
-            {t("footerAddress")}
-          </p>
-          <p className="mt-3 text-sm">
-            <a className="hover:text-white" href="mailto:contact@nayisamakhya.org">
-              contact@nayisamakhya.org
-            </a>
-          </p>
-          <p className="mt-1 text-sm">
-            <a className="hover:text-white" href="tel:1800NAYISEVA">
-              1800-NAYI-SEVA
-            </a>
-          </p>
-          <p className={`mt-3 text-xs text-slate-400 ${language === "te" ? "font-telugu" : ""}`}>
-            {t("footerLastUpdated")}: 24-09-2026
-          </p>
-          <div className="mt-4">
-            <p className={`mb-2 text-[11px] uppercase tracking-wide text-slate-400 ${language === "te" ? "font-telugu normal-case" : ""}`}>
-              {t("footerVisitors")}
-            </p>
-            <div className="flex flex-wrap gap-1" aria-label={`${t("footerVisitors")}: 73557662`}>
-              {VISITOR_DIGITS.map((d, i) => (
-                <span
-                  key={`${d}-${i}`}
-                  className="metric-tnum inline-flex h-8 w-7 items-center justify-center rounded border border-slate-600 bg-slate-950/70 text-sm font-bold text-white"
-                >
-                  {d}
+          <ul className="space-y-2.5 font-telugu text-[12px]">
+            <li>
+              <Link
+                href="/"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c2a\u0c4d\u0c30\u0c27\u0c3e\u0c28 \u0c2a\u0c4b\u0c30\u0c4d\u0c1f\u0c32\u0c4d (Home)"}</span>
+                <span className="font-sans text-[10px] text-slate-400">/</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/representation"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c24\u0c2f\u0c3e\u0c30\u0c40"}</span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /representation
                 </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h3
-            className={`border-b-2 border-emerald-500 pb-2 text-sm font-semibold text-white ${language === "te" ? "font-telugu" : ""}`}
-          >
-            {t("footerMap")}
-          </h3>
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950/40 shadow-lg">
-            <iframe
-              title="Telangana Secretariat, Hyderabad"
-              src={MAP_EMBED}
-              className="h-40 w-full border-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-            <a
-              href="https://maps.google.com/?q=Telangana+Secretariat+Hyderabad"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex m-3 rounded-full bg-emerald-600/90 px-3 py-1 text-[11px] font-semibold text-white hover:bg-emerald-500"
-            >
-              {t("footerMapsLink")}
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <h3
-            className={`border-b-2 border-emerald-500 pb-2 text-sm font-semibold text-white ${language === "te" ? "font-telugu" : ""}`}
-          >
-            {t("footerDirectories")}
-          </h3>
-          <ul className="mt-4 space-y-2.5 text-sm">
-            {directories.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`inline-flex items-center gap-2 hover:text-white ${language === "te" ? "font-telugu" : ""}`}
-                >
-                  <span className="text-emerald-400" aria-hidden>
-                    ›
-                  </span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/feed"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c38\u0c2e\u0c40\u0c15\u0c4d\u0c37 & \u0c38\u0c2e\u0c38\u0c4d\u0c2f\u0c32 \u0c2b\u0c40\u0c21\u0c4d"}</span>
+                <span className="font-sans text-[10px] text-slate-400">/feed</span>
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h3
-            className={`border-b-2 border-emerald-500 pb-2 text-sm font-semibold text-white ${language === "te" ? "font-telugu" : ""}`}
-          >
-            {t("footerPolicies")}
+          <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
+            <Users className="h-3.5 w-3.5 text-civic-bronze" />
+            {"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24\u0c32 \u0c35\u0c47\u0c26\u0c3f\u0c15"}
           </h3>
-          <ul className="mt-4 space-y-2.5 text-sm">
-            {policies.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  className={`hover:text-white ${language === "te" ? "font-telugu" : ""}`}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+          <ul className="space-y-2.5 font-telugu text-[12px]">
+            <li>
+              <Link
+                href="/coordinators/card"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"}</span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /coordinators/card
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/poster"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c38\u0c46\u0c32\u0c42\u0c28\u0c4d \u0c37\u0c3e\u0c2a\u0c41 QR \u0c2a\u0c4b\u0c38\u0c4d\u0c1f\u0c30\u0c4d (A4)"}</span>
+                <span className="font-sans text-[10px] text-slate-400">/poster</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/twa"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d Mini App \u0c39\u0c2c\u0c4d"}</span>
+                <span className="font-sans text-[10px] text-slate-400">/twa</span>
+              </Link>
+            </li>
           </ul>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <SocialIcon href="https://wa.me/919876543210" label="WhatsApp">
-              <MessageCircle className="h-4 w-4" />
-            </SocialIcon>
-            <SocialIcon href="https://t.me/nayi_samakhya_demo" label="Telegram">
-              <Send className="h-4 w-4" />
-            </SocialIcon>
-            <SocialIcon href="https://youtube.com" label="YouTube">
-              <Share2 className="h-4 w-4" />
-            </SocialIcon>
-            <SocialIcon href="https://x.com" label="X">
-              <X className="h-4 w-4" />
-            </SocialIcon>
-            <SocialIcon href="https://facebook.com" label="Facebook">
-              <span className="text-xs font-bold">f</span>
-            </SocialIcon>
-          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
+            <Send className="h-3.5 w-3.5 text-civic-bronze" />
+            {"\u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d & \u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d"}
+          </h3>
+          <ul className="space-y-2.5 font-telugu text-[12px]">
+            <li>
+              <a
+                href="https://t.me/NayiSamakhyaDeskBot"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between font-semibold text-civic-ink hover:text-civic-bronze"
+              >
+                <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d \u0c2c\u0c3e\u0c1f\u0c4d (@NayiSamakhyaDeskBot)"}</span>
+                <ExternalLink className="h-3 w-3 text-slate-400" />
+              </a>
+            </li>
+            <li>
+              <Link
+                href="/admin/desk"
+                className="flex items-center justify-between text-slate-600 hover:text-civic-bronze"
+              >
+                <span className="flex items-center gap-1">
+                  <Lock className="h-3 w-3 text-slate-400" />
+                  {"\u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d & \u0c05\u0c28\u0c32\u0c3f\u0c1f\u0c3f\u0c15\u0c4d\u0c38\u0c4d"}
+                </span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /admin/desk
+                </span>
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <div className="border-t border-slate-800/80">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-[11px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p className={language === "te" ? "font-telugu" : ""}>
-            {t("footerCopyright", { year })}
+      <div className="border-t border-civic-border bg-slate-50 px-4 py-4">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 text-[11px] text-slate-500 sm:flex-row">
+          <p className="font-telugu">
+            © {year} {"\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23. \u0c38\u0c30\u0c4d\u0c35 \u0c39\u0c15\u0c4d\u0c15\u0c41\u0c32\u0c41 \u0c2a\u0c4d\u0c30\u0c24\u0c4d\u0c2f\u0c47\u0c15\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c4d\u0c21\u0c3e\u0c2f\u0c3f."}
           </p>
-          <p className={`max-w-xl ${language === "te" ? "font-telugu" : ""}`}>
-            {t("footerDisclaimer")}
-          </p>
-          <p>#NayiSamakhya #PrajaSamakhya #BCWelfare</p>
+          <div className="flex items-center gap-3">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="font-sans font-medium text-slate-600">
+              nayisamakhya.org
+            </span>
+          </div>
         </div>
       </div>
     </footer>
   );
 }
+
+export default CivicFooter;
