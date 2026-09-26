@@ -13,6 +13,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
   // Full-bleed tool / feed surfaces — skip public marketing chrome.
   const isChromeFree =
+    pathname === "/" ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/feed") ||
     pathname.startsWith("/representation") ||
