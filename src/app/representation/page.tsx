@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { RepresentationGenerator } from "@/components/RepresentationGenerator";
+import { RepresentationLetterPage } from "@/components/RepresentationLetterPage";
 
 export const metadata: Metadata = {
   title: "Representation letter | Nayi Samakhya",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function RepresentationPage() {
-  return <RepresentationGenerator />;
+  return <RepresentationLetterPage />;
 }

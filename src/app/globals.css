@@ -118,29 +118,36 @@ body {
 
 @media print {
   @page {
-    margin: 16mm;
+    size: A4;
+    margin: 20mm 15mm;
   }
 
   html,
   body {
     background: #fff !important;
     color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   header,
   footer,
+  nav,
   .no-print,
   [data-accessibility-bar],
   .chat-pulse {
     display: none !important;
   }
 
-  .print-document {
+  .print-document,
+  .printable-card {
     break-inside: avoid;
     border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     padding: 0 !important;
+    margin: 0 !important;
     max-width: none !important;
+    width: 100% !important;
   }
 }

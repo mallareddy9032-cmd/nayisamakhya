@@ -1,0 +1,145 @@
+{
+  "authorities": [
+    {
+      "id": "mro",
+      "title_te": "తహసీల్దార్ (మండల రెవెన్యూ అధికారి - MRO) గారికి",
+      "title_en": "The Tahsildar / Mandal Revenue Officer (MRO)",
+      "dept_te": "రెవెన్యూ శాఖ, తెలంగాణ ప్రభుత్వం",
+      "dept_en": "Revenue Department, Government of Telangana"
+    },
+    {
+      "id": "commissioner",
+      "title_te": "మున్సిపల్ కమిషనర్ గారికి",
+      "title_en": "The Municipal Commissioner",
+      "dept_te": "పురపాలక మరియు పట్టణాభివృద్ధి శాఖ",
+      "dept_en": "Municipal Administration & Urban Development Department"
+    },
+    {
+      "id": "discom_ae",
+      "title_te": "సహాయక ఇంజనీర్ (AE) / డివిజనల్ ఇంజనీర్ (DE) గారికి",
+      "title_en": "The Assistant Engineer (AE) / Divisional Engineer (DE)",
+      "dept_te": "తెలంగాణ విద్యుత్ పంపిణీ సంస్థ (DISCOM - TGSPDCL/TGNPDCL)",
+      "dept_en": "Telangana Power Distribution Corporation Ltd (TGSPDCL/TGNPDCL)"
+    },
+    {
+      "id": "sho",
+      "title_te": "స్టేషన్ హౌస్ ఆఫీసర్ (SHO) / సర్కిల్ ఇన్‌స్పెక్టర్ గారికి",
+      "title_en": "The Station House Officer (SHO) / Circle Inspector of Police",
+      "dept_te": "పోలీస్ శాఖ, తెలంగాణ ప్రభుత్వం",
+      "dept_en": "Police Department, Government of Telangana"
+    },
+    {
+      "id": "dbcdo",
+      "title_te": "జిల్లా వెనుకబడిన తరగతుల అభివృద్ధి అధికారి (DBCDO) గారికి",
+      "title_en": "The District Backward Classes Development Officer (DBCDO)",
+      "dept_te": "బీసీ సంక్షేమ శాఖ, తెలంగాణ ప్రభుత్వం",
+      "dept_en": "BC Welfare Department, Government of Telangana"
+    },
+    {
+      "id": "collector",
+      "title_te": "జిల్లా కలెక్టర్ & జిల్లా మేజిస్ట్రేట్ గారికి",
+      "title_en": "The District Collector & District Magistrate",
+      "dept_te": "జిల్లా పరిపాలన విభాగం",
+      "dept_en": "District Administration"
+    },
+    {
+      "id": "labor_officer",
+      "title_te": "అసిస్టెంట్ లేబర్ కమిషనర్ (ALC) గారికి",
+      "title_en": "The Assistant Commissioner of Labour",
+      "dept_te": "కార్మిక శాఖ, తెలంగాణ ప్రభుత్వం",
+      "dept_en": "Labour Department, Government of Telangana"
+    }
+  ],
+  "subjects": [
+    {
+      "id": "free_power",
+      "subj_te": "క్షౌరశాలలకు 250 యూనిట్ల ఉచిత విద్యుత్ రాయితీని క్షేత్రస్థాయిలో సక్రమంగా వర్తింపజేయవలసిందిగా వినతి.",
+      "subj_en": "Representation regarding proper field-level implementation of 250 units free commercial electricity for community salons.",
+      "ref_te": "ప్రభుత్వ ఉత్తర్వులు జీవో ఎంఎస్ నం.5, బీసీ సంక్షేమ శాఖ మరియు తెలంగాణ విద్యుత్ పంపిణీ సంస్థ సర్క్యులర్లు.",
+      "ref_en": "G.O.Ms.No.5, BC Welfare Department & TGSPDCL/TGNPDCL operational circulars.",
+      "default_body_te": "మా ప్రాంతంలో నాయి బ్రాహ్మణుల నిర్వహణలో ఉన్న సెలూన్ దుకాణాలకు సంబంధించి ఉచిత విద్యుత్ జీవో ఉన్నప్పటికీ, మీటర్ల సాంకేతిక సమస్యలు మరియు కేటగిరీ మార్పులలో ఆలస్యం వల్ల విద్యుత్ బిల్లులు అధికంగా వస్తున్నాయి. అర్హులైన దుకాణదారులందరికీ ఉచిత విద్యుత్ ప్రయోజనం సకాలంలో అందేలా తగిన ఆదేశాలు జారీ చేయగలరని కోరుచున్నాము.",
+      "default_body_en": "Despite government orders providing free power up to 250 units for traditional salon establishments, local operators face metering issues and category conversion delays resulting in commercial billings. We humbly request you to issue appropriate instructions to ensure this relief reaches all eligible establishments."
+    },
+    {
+      "id": "trade_license",
+      "subj_te": "సాంప్రదాయ వృత్తి దుకాణాలకు మున్సిపల్ ట్రేడ్ లైసెన్స్ ఫీజు మినహాయింపు మరియు పరిశీలన ప్రక్రియ సులభతరం చేయుట గురించి.",
+      "subj_en": "Request for simplification and fee waiver of municipal trade license process for traditional community salon establishments.",
+      "ref_te": "సాంప్రదాయ కులవృత్తుల సంరక్షణ ప్రభుత్వ మార్గదర్శకాలు మరియు పురపాలక నిబంధనలు.",
+      "ref_en": "Government policy guidelines on protection of traditional crafts and Municipal Administration guidelines.",
+      "default_body_te": "స్థానిక పురపాలక సంఘం పరిధిలో కులవృత్తి ఆధారంగా ఉపాధి పొందుతున్న నాయి బ్రాహ్మణ కుటుంబాల చిన్న సెలూన్లపై అధిక ట్రేడ్ లైసెన్స్ ఫీజులు మరియు జరిమానాల భారం పడకుండా పరిశీలించి, సులభతర ధ్రువీకరణ పద్ధతిని అమలు చేయవలసిందిగా అభ్యర్థిస్తున్నాము.",
+      "default_body_en": "Traditional barbers operate micro-units for their livelihood. High trade license fees and commercial penalties impose severe distress. We request the municipality to simplify verification and implement reasonable concessions."
+    },
+    {
+      "id": "police_protection",
+      "subj_te": "క్షౌరశాలల సురక్షిత నిర్వహణ, అసాంఘిక శక్తుల వేధింపుల నివారణ మరియు రక్షణ కల్పించుట గురించి.",
+      "subj_en": "Representation seeking protection for local salon establishments against unlawful disruptions and harassment.",
+      "ref_te": "తెలంగాణ ప్రజా రక్షణ మరియు షాపుల చట్ట నిబంధనలు.",
+      "ref_en": "Telangana Public Safety and Shops and Establishments regulatory framework.",
+      "default_body_te": "మా ప్రాంతంలో పనిచేస్తున్న సెలూన్ దుకాణాల వద్ద కొందరు వ్యక్తులు బలవంతపు ఉచిత సేవలను డిమాండ్ చేస్తూ, సిబ్బందిపై దురుసుగా ప్రవర్తిస్తూ భయాందోళనలు సృష్టిస్తున్నారు. శాంతిభద్రతల దృష్ట్యా దుకాణదారులకు తగిన రక్షణ కల్పించి, నిర్భయంగా వ్యాపారం చేసుకునే వెసులుబాటు కల్పించగలరని మనవి.",
+      "default_body_en": "Salon operators in our jurisdiction have reported incidents of forced free services and intimidation by antisocial elements. We request police patrolling and proactive protection to ensure safe working conditions."
+    },
+    {
+      "id": "pm_vishwakarma",
+      "subj_te": "పీఎం విశ్వకర్మ యోజన కింద అర్హులైన సాంప్రదాయ వృత్తిదారుల దరఖాస్తులను త్వరితగతిన ధ్రువీకరించి సిఫార్సు చేయుట గురించి.",
+      "subj_en": "Expedited verification and official recommendation of PM Vishwakarma scheme applications for traditional barbers.",
+      "ref_te": "కేంద్ర ప్రభుత్వ పీఎం విశ్వకర్మ యోజన మార్గదర్శకాలు.",
+      "ref_en": "Guidelines of PM Vishwakarma Scheme, Ministry of MSME, Govt of India.",
+      "default_body_te": "మా మండల పరిధిలో అనేక మంది అర్హులైన నాయి బ్రాహ్మణ వృత్తిదారులు పీఎం విశ్వకర్మ పథకం కింద నైపుణ్య శిక్షణ, టూల్‌కిట్ గ్రాంట్ కొరకు దరఖాస్తు చేసుకున్నారు. పంచాయతీ/పురపాలక స్థాయిలో ఈ దరఖాస్తుల ధ్రువీకరణను వేగవంతం చేసి అర్హులకు లబ్ధి చేకూర్చగలరని కోరుచున్నాము.",
+      "default_body_en": "Eligible traditional barbers from our area have applied for skill upgradation and toolkit grants under PM Vishwakarma. We request administrative authorities to expedite local-level verification for timely disbursement."
+    },
+    {
+      "id": "hostel_orders",
+      "subj_te": "ప్రభుత్వ సంక్షేమ వసతి గృహాలు మరియు గురుకుల పాఠశాలల్లో విద్యార్థులకు హెయిర్ కట్ సేవల వర్క్ ఆర్డర్లను స్థానిక నాయి బ్రాహ్మణులకే కేటాయించుట గురించి.",
+      "subj_en": "Allocation of institutional haircut and grooming service orders in government hostels/residential schools to local community barbers.",
+      "ref_te": "బీసీ, సాంఘిక సంక్షేమ శాఖ నివాస పాఠశాలల నిర్వహణ మార్గదర్శకాలు.",
+      "ref_en": "BC Welfare and Social Welfare Residential Educational Institutions operational guidelines.",
+      "default_body_te": "ప్రభుత్వ సంక్షేమ వసతి గృహాల్లోని విద్యార్థుల హెయిర్ కటింగ్ పనులను బయటి ఏజెన్సీలకు కాకుండా, స్థానిక ప్రాంత నాయి బ్రాహ్మణ సొసైటీ లేదా సంఘ ప్రతినిధులకు ప్రాధాన్యత ఇచ్చి ఉపాధి కల్పించాల్సిందిగా అభ్యర్థిస్తున్నాము.",
+      "default_body_en": "We request that haircut and personal grooming contracts for students in government residential schools and hostels be allocated to verified local traditional barbers rather than commercial intermediaries."
+    },
+    {
+      "id": "road_widening_rehab",
+      "subj_te": "రహదారి విస్తరణ మరియు అభివృద్ధి పనులలో దుకాణాలు కోల్పోతున్న సాంప్రదాయ సెలూన్ యజమానులకు ప్రత్యామ్నాయ స్థలాలు / పునరావాసం కల్పించుట గురించి.",
+      "subj_en": "Rehabilitation and allocation of alternative vending space for traditional salons affected by road widening.",
+      "ref_te": "పట్టణాభివృద్ధి మరియు రోడ్డు విస్తరణ పరిహార నియమావళి.",
+      "ref_en": "Municipal Urban Infrastructure Development and Rehabilitation Provisions.",
+      "default_body_te": "పట్టణంలో జరుగుతున్న రహదారి విస్తరణ పనుల వలన ప్రధాన కూడళ్లలోని పాత సెలూన్ దుకాణాలు తొలగించబడుతున్నాయి. వారి కుటుంబాలు ఉపాధి కోల్పోకుండా పురపాలక సంఘం నిర్మించే వాణిజ్య సముదాయాలలో లేదా సమీప ప్రత్యామ్నాయ స్థలాలలో మొదటి ప్రాధాన్యతపై దుకాణాలు కేటాయించాలని కోరుతున్నాము.",
+      "default_body_en": "Ongoing road widening has resulted in the displacement of several community-run salons. We request municipal authorities to allot alternative commercial kiosks on priority to protect their livelihood."
+    },
+    {
+      "id": "equipment_subsidy",
+      "subj_te": "ఆధునిక సెలూన్ పరికరాల కొనుగోలు కొరకు ప్రభుత్వ రాయితీ రుణాలు మరియు ఆర్థిక సహాయం మంజూరు చేయుట గురించి.",
+      "subj_en": "Sanction of subsidized bank loans and equipment grants for modernizing community salons.",
+      "ref_te": "తెలంగాణ రాష్ట్ర బీసీ సహకార ఆర్థిక సంస్థ మరియు ఎన్‌బీసీఎఫ్‌డీసీ నిబంధనలు.",
+      "ref_en": "Telangana State BC Cooperative Finance Corporation & NBCFDC guidelines.",
+      "default_body_te": "మారుతున్న కాలానికి అనుగుణంగా ఆధునిక సెలూన్ కుర్చీలు, స్టెరిలైజర్ పరికరాలు, ఇన్వర్టర్లు సమకూర్చుకోవడానికి కార్పొరేషన్ ద్వారా సబ్సిడీతో కూడిన రుణాలు మంజూరు చేసి యువ వృత్తిదారులను ప్రోత్సహించవలసిందిగా కోరుచున్నాము.",
+      "default_body_en": "To keep pace with modern hygiene and styling standards, community youth require financial assistance for chairs, sanitizers, and power backup. We request special sanction of subsidized loans via BC Corporation."
+    },
+    {
+      "id": "community_hall",
+      "subj_te": "నాయి బ్రాహ్మణ సంఘ సేవా కార్యక్రమాలు మరియు నైపుణ్య శిక్షణ కేంద్రం నిర్వహణ కొరకు ప్రభుత్వ స్థల కేటాయింపు గురించి.",
+      "subj_en": "Allotment of government land for community service center and vocational skill training hall.",
+      "ref_te": "ప్రభుత్వ భూముల లీజు మరియు కేటాయింపు విధివిధానాలు.",
+      "ref_en": "Government Revenue Land Allotment and Lease Policies.",
+      "default_body_te": "మా ప్రాంతంలోని నాయి సమాఖ్య సేవా కార్యకలాపాలు, సాంప్రదాయ కళాకారుల సమావేశాలు, మరియు యువతకు వృత్తిపరమైన శిక్షణ అందించడానికి అనువైన ప్రభుత్వ నిరుపయోగ స్థలాన్ని కమ్యూనిటీ భవనం కొరకు మంజూరు చేయవలసిందిగా వినతి.",
+      "default_body_en": "We request allocation of suitable government land in our area for constructing a community service center to host vocational training and welfare coordination programs."
+    },
+    {
+      "id": "insurance_camp",
+      "subj_te": "క్షౌరశాలల్లో పనిచేసే అసంఘటిత కార్మికులందరికీ ఉచిత ఆరోగ్య మరియు ప్రమాద బీమా నమోదు ప్రత్యేక శిబిరం ఏర్పాటు చేయుట గురించి.",
+      "subj_en": "Organization of special registration camp for health and accidental insurance for unorganized salon workers.",
+      "ref_te": "అసంఘటిత కార్మికుల సాంఘిక భద్రత మరియు ఈ-శ్రమ్ మార్గదర్శకాలు.",
+      "ref_en": "Social Security for Unorganized Workers and e-Shram framework.",
+      "default_body_te": "మా పరిధిలోని దుకాణాలలో పనిచేసే కార్మికులు, అసిస్టెంట్లు ప్రమాదాలు మరియు అనారోగ్యం బారిన పడినప్పుడు ఆర్థిక ఇబ్బందులు పడుతున్నారు. వారి సంక్షేమం దృష్ట్యా ప్రత్యేక క్యాంప్ నిర్వహించి అధికారిక గుర్తింపు కార్డులు, బీమా సౌకర్యం కల్పించగలరు.",
+      "default_body_en": "Unorganized assistants and barbers in micro-salons face extreme financial distress during health emergencies. We urge the administration to conduct a dedicated registration drive for official insurance coverage."
+    },
+    {
+      "id": "skill_center",
+      "subj_te": "ఆధునిక హెయిర్ స్టైలింగ్, బ్యూటీ థెరపీ మరియు హైజీన్ పద్ధతులపై ఉచిత అధునాతన శిక్షణా కేంద్రాన్ని మంజూరు చేయుట గురించి.",
+      "subj_en": "Sanction and establishment of advanced styling, hygiene and beauty therapy training center for community youth.",
+      "ref_te": "తెలంగాణ నైపుణ్యాభివృద్ధి సంస్థ (TSSDM) మరియు స్కిల్ ఇండియా మార్గదర్శకాలు.",
+      "ref_en": "Telangana State Skill Development Mission (TSSDM) guidelines.",
+      "default_body_te": "కార్పొరేట్ సెలూన్ల పోటీని తట్టుకునేందుకు సాంప్రదాయ యువతకు అంతర్జాతీయ ప్రమాణాలతో కూడిన శిక్షణ అవసరం. మా కేంద్రంలో ప్రభుత్వ ఆధ్వర్యంలో ఉచిత సర్టిఫికేషన్ శిక్షణ కోర్సులు ప్రారంభించాలని కోరుతున్నాము.",
+      "default_body_en": "To withstand market competition from commercial chains, community youth require certification in advanced styling and hygiene. We request setup of a subsidized vocational skill center."
+    }
+  ]
+}
