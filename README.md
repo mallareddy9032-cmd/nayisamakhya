@@ -35,7 +35,8 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/{district}/urban/{ulb}` | Urban local body portal (coordinators, establishments, Telegram desk) |
 | `/{district}/{mandal}` | Mandal civic portal (Supabase when configured, else static) |
 | `/representation` | Official petition / representation letter generator (print-ready) |
-| `/admin/moderation` | Field photo moderation desk (PIN via `MODERATION_DESK_SECRET`) |
+| `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → `/api/admin/submissions`) |
+| `/admin/moderation` | Field photo moderation desk (cookie PIN via `MODERATION_DESK_SECRET`) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
 | `/policies/*` · `/sitemap` | Legal pages |
 
@@ -68,7 +69,7 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
 
 Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/officer`, album batching, photo ingest). **Never replace GitHub `main` with a telegram-only tree** — that wipes the Next site and 404s Vercel (including `/representation`). Edit the route under `src/` and push the full app.
 
-1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket).
+1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket), then `005_moderation_desk_v2.sql` and `006_admin_desk_submissions_api.sql` (`panchayat_name`, `admin_notes`, `reviewed_at`).
 2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`.
 3. Point the bot webhook (use **www** — apex redirects break Telegram):
    ```bash
