@@ -38,6 +38,13 @@ export type UrbanEstablishment = {
   name_te: string;
   category_en: string;
   category_te: string;
+  owner_en?: string | null;
+  owner_te?: string | null;
+  area_en?: string | null;
+  area_te?: string | null;
+  phone?: string | null;
+  photo_url?: string | null;
+  verified?: boolean;
 };
 
 export type UrbanPortal = {
@@ -222,12 +229,22 @@ export async function fetchUrbanPortal(
         photo_url: r.photo_url as string | null,
       }));
 
-    const establishments = (estRes.data || []).map((e) => ({
-      name_en: String(e.name_en),
-      name_te: String(e.name_te),
-      category_en: String(e.category_en || "Salon"),
-      category_te: String(e.category_te || "సెలూన్"),
-    }));
+    const establishments = (estRes.data || []).map((e) => {
+      const row = e as Record<string, unknown>;
+      return {
+        name_en: String(e.name_en),
+        name_te: String(e.name_te),
+        category_en: String(e.category_en || "Salon"),
+        category_te: String(e.category_te || "సెలూన్"),
+        owner_en: row.owner_en ? String(row.owner_en) : null,
+        owner_te: row.owner_te ? String(row.owner_te) : null,
+        area_en: row.area_en ? String(row.area_en) : null,
+        area_te: row.area_te ? String(row.area_te) : null,
+        phone: row.phone ? String(row.phone) : null,
+        photo_url: row.photo_url ? String(row.photo_url) : null,
+        verified: row.verified !== false,
+      };
+    });
 
     return {
       district: {

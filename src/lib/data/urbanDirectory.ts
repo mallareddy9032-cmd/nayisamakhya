@@ -22,6 +22,13 @@ export type StaticUlb = {
     name_te: string;
     category_en: string;
     category_te: string;
+    owner_en?: string | null;
+    owner_te?: string | null;
+    area_en?: string | null;
+    area_te?: string | null;
+    phone?: string | null;
+    photo_url?: string | null;
+    verified?: boolean;
   }>;
 };
 

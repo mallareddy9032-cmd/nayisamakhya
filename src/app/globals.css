@@ -115,3 +115,32 @@ body {
 .chat-pulse {
   animation: chat-pulse 2s ease-out infinite;
 }
+
+@media print {
+  @page {
+    margin: 16mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  header,
+  footer,
+  .no-print,
+  [data-accessibility-bar],
+  .chat-pulse {
+    display: none !important;
+  }
+
+  .print-document {
+    break-inside: avoid;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}

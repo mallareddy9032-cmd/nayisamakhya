@@ -47,6 +47,11 @@ export default function SitemapPage() {
                 {te ? "మండల కేంద్రాలు" : "Mandal hubs"}
               </Link>
             </li>
+            <li>
+              <Link href="/representation" className="hover:text-[#C2410C]">
+                {te ? "వినతి పత్రం" : "Representation letter"}
+              </Link>
+            </li>
           </ul>
         </div>
 

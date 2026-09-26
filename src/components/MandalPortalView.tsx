@@ -13,8 +13,10 @@ import {
   Camera,
 } from "lucide-react";
 import type { Mandal } from "@/lib/types";
+import { listEstablishmentsForMandal } from "@/lib/data/establishments";
 import { loc } from "@/lib/i18n/dictionary";
 import { useLanguageStore } from "@/lib/store/preferences";
+import { EstablishmentDirectory } from "@/components/EstablishmentDirectory";
 import { NodalOfficersRoster } from "@/components/officers/NodalOfficersRoster";
 
 const actionIcons = {
@@ -69,6 +71,10 @@ export function MandalPortalView({ mandal: m }: Props) {
   });
 
   const shortMandal = loc(m.mandal, lang).replace(/ మండలం| Mandal/gi, "");
+  const establishments = listEstablishmentsForMandal(
+    m.districtSlug,
+    m.mandalSlug,
+  );
 
   return (
     <div className="bg-[#FBFBF9]">
@@ -229,6 +235,21 @@ export function MandalPortalView({ mandal: m }: Props) {
                 </Link>
               );
             })}
+          </div>
+        </section>
+
+        <section aria-labelledby="est-heading">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C2410C]">
+            {te ? "స్థానిక సంస్థలు" : "Local establishments"}
+          </p>
+          <h2
+            id="est-heading"
+            className={`mt-1 text-xl font-bold text-[#18181B] ${te ? "font-telugu" : ""}`}
+          >
+            {te ? "నమోదైన సెలూన్లు & షాపులు" : "Verified salons & shops"}
+          </h2>
+          <div className="mt-4">
+            <EstablishmentDirectory establishments={establishments} />
           </div>
         </section>
 

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Activity, Building2, Users } from "lucide-react";
 import type { UrbanPortal } from "@/lib/data/urbanRepository";
+import { toEstablishmentListings } from "@/lib/data/establishments";
+import { EstablishmentDirectory } from "@/components/EstablishmentDirectory";
 import { RepresentativeCard } from "@/components/RepresentativeCard";
 import { TelegramQRCard } from "@/components/TelegramQRCard";
 import { useLanguageStore } from "@/lib/store/preferences";
@@ -16,6 +18,10 @@ export function UrbanPortalClient({ portal }: Props) {
   const te = lang === "te";
   const { district, ulb, representatives, establishments } = portal;
   const areaName = te ? ulb.name_te : ulb.name_en;
+  const establishmentListings = toEstablishmentListings(establishments, {
+    en: ulb.name_en,
+    te: ulb.name_te,
+  });
 
   const metrics = [
     {
@@ -141,33 +147,11 @@ export function UrbanPortalClient({ portal }: Props) {
             >
               {te ? "నమోదైన సంస్థలు" : "Registered establishments"}
             </h2>
-            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {establishments.length === 0 ? (
-                <li
-                  className={`col-span-full rounded-2xl border border-dashed border-[#EBE8E0] bg-white p-6 text-sm text-[#71717A] ${te ? "font-telugu" : ""}`}
-                >
-                  {te
-                    ? "సంస్థల జాబితా సీడ్ కావాలి."
-                    : "Establishment list pending seed."}
-                </li>
-              ) : (
-                establishments.map((est, idx) => (
-                  <li
-                    key={`${est.name_en}-${idx}`}
-                    className="rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm"
-                  >
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#C2410C]">
-                      {te ? est.category_te : est.category_en}
-                    </p>
-                    <h3
-                      className={`mt-1 text-base font-semibold text-[#18181B] ${te ? "font-telugu" : ""}`}
-                    >
-                      {te ? est.name_te : est.name_en}
-                    </h3>
-                  </li>
-                ))
-              )}
-            </ul>
+            <div className="mt-4">
+              <EstablishmentDirectory
+                establishments={establishmentListings}
+              />
+            </div>
           </section>
         </div>
 

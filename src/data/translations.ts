@@ -17,6 +17,10 @@ export const translations = {
   navMatrimonial: { te: "వివాహ సేవ", en: "Matrimonial" },
   navGallery: { te: "గ్యాలరీ", en: "Gallery" },
   navGoLibrary: { te: "G.O. లైబ్రరీ", en: "G.O. Library" },
+  navRepresentation: {
+    te: "\u0c35\u0c3f\u0c28\u0c24\u0c3f \u0c2a\u0c24\u0c4d\u0c30\u0c02",
+    en: "Representation",
+  },
   goMandal: { te: "మండలానికి వెళ్ళండి", en: "Go to mandal" },
   go: { te: "వెళ్ళు", en: "Go" },
   menu: { te: "మెనూ", en: "Menu" },

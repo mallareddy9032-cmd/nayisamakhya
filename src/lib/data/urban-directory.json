@@ -29,13 +29,27 @@
         "name_en": "Charminar Salon Collective",
         "name_te": "చార్మినార్ సెలూన్ కలెక్టివ్",
         "category_en": "Salon",
-        "category_te": "సెలూన్"
+        "category_te": "సెలూన్",
+        "owner_en": "Ramesh",
+        "owner_te": "రమేశ్",
+        "area_en": "Charminar",
+        "area_te": "చార్మినార్",
+        "phone": "9032654111",
+        "photo_url": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80",
+        "verified": true
       },
       {
         "name_en": "Secunderabad Artiste Desk",
         "name_te": "సికింద్రాబాద్ కళాకారుల డెస్క్",
         "category_en": "Bajantri",
-        "category_te": "భజంత్రి"
+        "category_te": "భజంత్రి",
+        "owner_en": "Suresh",
+        "owner_te": "సురేశ్",
+        "area_en": "Secunderabad",
+        "area_te": "సికింద్రాబాద్",
+        "phone": "9032654111",
+        "photo_url": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=1200&q=80",
+        "verified": true
       }
     ]
   },
@@ -62,7 +76,14 @@
         "name_en": "Town Market Salon Hub",
         "name_te": "టౌన్ మార్కెట్ సెలూన్ హబ్",
         "category_en": "Salon",
-        "category_te": "సెలూన్"
+        "category_te": "సెలూన్",
+        "owner_en": "Ramesh",
+        "owner_te": "రమేశ్",
+        "area_en": "Town Market",
+        "area_te": "టౌన్ మార్కెట్",
+        "phone": "9032654111",
+        "photo_url": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80",
+        "verified": true
       }
     ]
   },
@@ -89,7 +110,14 @@
         "name_en": "Kodad Road Salon Cluster",
         "name_te": "కోడాడ్ రోడ్ సెలూన్ క్లస్టర్",
         "category_en": "Salon",
-        "category_te": "సెలూన్"
+        "category_te": "సెలూన్",
+        "owner_en": "Ramesh",
+        "owner_te": "రమేశ్",
+        "area_en": "Kodad Road",
+        "area_te": "కోడాడ్ రోడ్",
+        "phone": "9032654111",
+        "photo_url": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80",
+        "verified": true
       }
     ]
   },
@@ -116,7 +144,14 @@
         "name_en": "Wyra Gate Salon Network",
         "name_te": "వైరా గేట్ సెలూన్ నెట్‌వర్క్",
         "category_en": "Salon",
-        "category_te": "సెలూన్"
+        "category_te": "సెలూన్",
+        "owner_en": "Ramesh",
+        "owner_te": "రమేశ్",
+        "area_en": "Station Road",
+        "area_te": "స్టేషన్ రోడ్",
+        "phone": "9032654111",
+        "photo_url": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80",
+        "verified": true
       }
     ]
   },
@@ -143,7 +178,14 @@
         "name_en": "Shamshabad Road Salon Desk",
         "name_te": "షంషాబాద్ రోడ్ సెలూన్ డెస్క్",
         "category_en": "Salon",
-        "category_te": "సెలూన్"
+        "category_te": "సెలూన్",
+        "owner_en": "Ramesh",
+        "owner_te": "రమేశ్",
+        "area_en": "Town Center",
+        "area_te": "టౌన్ కేంద్రం",
+        "phone": "9032654111",
+        "photo_url": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1200&q=80",
+        "verified": true
       }
     ]
   }
