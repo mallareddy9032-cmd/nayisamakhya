@@ -195,6 +195,74 @@ async function sendWelcomeMenu(chatId: number | string, senderName: string) {
   });
 }
 
+/** Slash deep-links for Digital Desk tools (HTML + www origin for Telegram URL buttons). */
+async function handleDeskToolCommand(
+  chatId: number | string,
+  command: string,
+): Promise<boolean> {
+  const origin = siteOrigin();
+  const key = command.split(/\s+/)[0]?.toLowerCase() || "";
+
+  if (key === "/vinathi") {
+    await replyText(
+      chatId,
+      `\u{1F4C4} <b>\u0C05\u0C27\u0C3F\u0C15\u0C3E\u0C30\u0C3F\u0C15 \u0C35\u0C3F\u0C28\u0C24\u0C3F\u0C2A\u0C24\u0C4D\u0C30\u0C3E\u0C32 \u0C24\u0C2F\u0C3E\u0C30\u0C40 \u0C15\u0C47\u0C02\u0C26\u0C4D\u0C30\u0C02</b>\n\n` +
+        `\u0C15\u0C32\u0C46\u0C15\u0C4D\u0C1F\u0C30\u0C4D, MRO, \u0C2E\u0C41\u0C28\u0C4D\u0C38\u0C3F\u0C2A\u0C32\u0C4D \u0C05\u0C27\u0C3F\u0C15\u0C3E\u0C30\u0C41\u0C32\u0C15\u0C41 \u0C38\u0C2E\u0C30\u0C4D\u0C2A\u0C3F\u0C02\u0C1A\u0C47 \u0C1A\u0C1F\u0C4D\u0C1F\u0C2C\u0C26\u0C4D\u0C27\u0C2E\u0C48\u0C28 \u0C32\u0C47\u0C16\u0C32\u0C28\u0C41 \u0C24\u0C2F\u0C3E\u0C30\u0C41\u0C1A\u0C47\u0C2F\u0C21\u0C3E\u0C28\u0C3F\u0C15\u0C3F \u0C15\u0C4D\u0C30\u0C3F\u0C02\u0C26\u0C3F \u0C32\u0C3F\u0C02\u0C15\u0C4D \u0C28\u0C4A\u0C15\u0C4D\u0C15\u0C02\u0C21\u0C3F:`,
+      {
+        inline_keyboard: [
+          [
+            {
+              text: "\u{1F4C4} \u0C35\u0C3F\u0C28\u0C24\u0C3F\u0C2A\u0C24\u0C4D\u0C30\u0C02 \u0C30\u0C3E\u0C2F\u0C02\u0C21\u0C3F",
+              url: `${origin}/representation`,
+            },
+          ],
+        ],
+      },
+    );
+    return true;
+  }
+
+  if (key === "/card") {
+    await replyText(
+      chatId,
+      `\u{1FAAA} <b>\u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24 \u0C21\u0C3F\u0C1C\u0C3F\u0C1F\u0C32\u0C4D \u0C17\u0C41\u0C30\u0C4D\u0C24\u0C3F\u0C02\u0C2A\u0C41 \u0C15\u0C3E\u0C30\u0C4D\u0C21\u0C41</b>\n\n` +
+        `\u0C2E\u0C40 \u0C2E\u0C02\u0C21\u0C32 \u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24 \u0C05\u0C27\u0C3F\u0C15\u0C3E\u0C30\u0C3F\u0C15 \u0C15\u0C3E\u0C30\u0C4D\u0C21\u0C41\u0C28\u0C41 \u0C24\u0C2F\u0C3E\u0C30\u0C41\u0C1A\u0C47\u0C38\u0C3F \u0C2A\u0C4D\u0C30\u0C3F\u0C02\u0C1F\u0C4D/PDF \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C1A\u0C47\u0C38\u0C41\u0C15\u0C4B\u0C35\u0C21\u0C3E\u0C28\u0C3F\u0C15\u0C3F \u0C15\u0C4D\u0C30\u0C3F\u0C02\u0C26\u0C3F \u0C32\u0C3F\u0C02\u0C15\u0C4D \u0C28\u0C4A\u0C15\u0C4D\u0C15\u0C02\u0C21\u0C3F:`,
+      {
+        inline_keyboard: [
+          [
+            {
+              text: "\u{1FAAA} \u0C28\u0C3E \u0C15\u0C3E\u0C30\u0C4D\u0C21\u0C41 \u0C24\u0C2F\u0C3E\u0C30\u0C41\u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F",
+              url: `${origin}/coordinators/card`,
+            },
+          ],
+        ],
+      },
+    );
+    return true;
+  }
+
+  if (key === "/poster") {
+    await replyText(
+      chatId,
+      `\u{1F5A8} <b>\u0C38\u0C46\u0C32\u0C42\u0C28\u0C4D \u0C37\u0C3E\u0C2A\u0C41 QR \u0C2A\u0C4B\u0C38\u0C4D\u0C1F\u0C30\u0C4D (A4 Print)</b>\n\n` +
+        `\u0C2E\u0C40 \u0C37\u0C3E\u0C2A\u0C41 \u0C05\u0C26\u0C4D\u0C26\u0C3E\u0C32\u0C2A\u0C48 \u0C32\u0C47\u0C26\u0C3E \u0C38\u0C02\u0C18\u0C02 \u0C06\u0C2B\u0C40\u0C38\u0C41\u0C32\u0C4B \u0C05\u0C24\u0C3F\u0C15\u0C3F\u0C02\u0C1A\u0C21\u0C3E\u0C28\u0C3F\u0C15\u0C3F A4 QR \u0C2A\u0C4B\u0C38\u0C4D\u0C1F\u0C30\u0C4D \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C1A\u0C47\u0C38\u0C41\u0C15\u0C4B\u0C02\u0C21\u0C3F:`,
+      {
+        inline_keyboard: [
+          [
+            {
+              text: "\u{1F5A8} A4 \u0C2A\u0C4B\u0C38\u0C4D\u0C1F\u0C30\u0C4D \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D",
+              url: `${origin}/poster`,
+            },
+          ],
+        ],
+      },
+    );
+    return true;
+  }
+
+  return false;
+}
+
 async function handleCallbackQuery(
   cq: TelegramCallbackQuery,
 ): Promise<NextResponse> {
@@ -571,6 +639,10 @@ export async function POST(req: Request) {
 
     if (text.toLowerCase().startsWith("/officer")) {
       return await handleOfficerLookup(admin, chatId, text);
+    }
+
+    if (text.startsWith("/") && (await handleDeskToolCommand(chatId, text))) {
+      return NextResponse.json({ ok: true, command: text.split(/\s+/)[0] });
     }
 
     if (message.photo && message.photo.length > 0) {
