@@ -81,13 +81,7 @@ export async function POST(req: Request) {
   }
 
   if (body.action === "reject") {
-    const notes = body.notes?.trim();
-    if (!notes) {
-      return NextResponse.json(
-        { ok: false, error: "rejection_reason_required" },
-        { status: 400 },
-      );
-    }
+    const notes = body.notes?.trim() || "dismissed";
     const { error } = await admin
       .from("survey_submissions")
       .update({

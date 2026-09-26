@@ -37,17 +37,21 @@ export function ModerationUnlockForm() {
           <Lock className="h-5 w-5 text-[#C2410C]" aria-hidden />
         </div>
         <h1 className="text-xl font-bold text-[#18181B]">Moderation Desk</h1>
+        <p className="mt-1 font-telugu text-sm text-[#71717A]">
+          అడ్మిన్ PIN / secret నమోదు చేయండి
+        </p>
         <p className="mt-1 text-sm text-[#71717A]">
-          Enter <code className="text-xs">MODERATION_DESK_SECRET</code> to
-          unlock approve / reject.
+          Enter the desk PIN (<code className="text-xs">MODERATION_DESK_SECRET</code>)
+          to unlock approve / dismiss. Session lasts 12 hours.
         </p>
         <form onSubmit={onSubmit} className="mt-5 space-y-3">
           <input
             type="password"
             autoComplete="current-password"
+            inputMode="numeric"
             value={secret}
             onChange={(e) => setSecret(e.target.value)}
-            placeholder="Desk secret"
+            placeholder="PIN / desk secret"
             className="min-h-[44px] w-full rounded-full border border-[#EBE8E0] bg-[#FBFBF9] px-4 text-sm"
             required
           />

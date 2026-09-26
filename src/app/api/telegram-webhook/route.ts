@@ -213,31 +213,45 @@ export async function POST(req: Request) {
     const status = refined.confidence === "none" ? "flagged" : "pending";
     const name = senderName(message.from);
 
-    const { data: inserted, error: insertError } = await admin
+    const payload = {
+      telegram_chat_id: String(chatId),
+      telegram_message_id: String(message.message_id),
+      sender_name: name,
+      phone: null as string | null,
+      district_id: refined.district_id || null,
+      mandal_id: refined.mandal_id || null,
+      gp_id: refined.gp_id || null,
+      raw_caption: caption || null,
+      extracted_data: {
+        matched: refined.matched,
+        confidence: refined.confidence,
+        district_slug: refined.district_slug || null,
+        mandal_slug: refined.mandal_slug || null,
+        telegram_username:
+          (message.from as { username?: string } | undefined)?.username || null,
+      },
+      photo_url: photoUrl,
+      photo_urls: [photoUrl],
+      photo_file_unique_id: fileUniqueId,
+      status,
+    };
+
+    let { data: inserted, error: insertError } = await admin
       .from("survey_submissions")
-      .insert({
-        telegram_chat_id: String(chatId),
-        telegram_message_id: String(message.message_id),
-        sender_name: name,
-        phone: null,
-        district_id: refined.district_id || null,
-        mandal_id: refined.mandal_id || null,
-        gp_id: refined.gp_id || null,
-        raw_caption: caption || null,
-        extracted_data: {
-          matched: refined.matched,
-          confidence: refined.confidence,
-          district_slug: refined.district_slug || null,
-          mandal_slug: refined.mandal_slug || null,
-          telegram_username:
-            (message.from as { username?: string } | undefined)?.username || null,
-        },
-        photo_url: photoUrl,
-        photo_file_unique_id: fileUniqueId,
-        status,
-      })
+      .insert(payload)
       .select("id")
       .maybeSingle();
+
+    // Older schemas without photo_urls column
+    if (insertError && /photo_urls/i.test(insertError.message || "")) {
+      const legacy = { ...payload };
+      delete (legacy as { photo_urls?: string[] }).photo_urls;
+      ({ data: inserted, error: insertError } = await admin
+        .from("survey_submissions")
+        .insert(legacy)
+        .select("id")
+        .maybeSingle());
+    }
 
     if (insertError) {
       if (insertError.code === "23505") {

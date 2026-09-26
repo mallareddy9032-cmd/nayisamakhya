@@ -35,6 +35,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/{district}/urban/{ulb}` | Urban local body portal (coordinators, establishments, Telegram desk) |
 | `/{district}/{mandal}` | Mandal civic portal (Supabase when configured, else static) |
 | `/representation` | Official petition / representation letter generator (print-ready) |
+| `/admin/moderation` | Field photo moderation desk (PIN via `MODERATION_DESK_SECRET`) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
 | `/policies/*` · `/sitemap` | Legal pages |
 
