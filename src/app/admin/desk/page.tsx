@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   CheckCircle,
   XCircle,
@@ -73,6 +80,36 @@ type Counts = Record<QueueTab, number>;
 const EMPTY_COUNTS: Counts = { pending: 0, approved: 0, rejected: 0 };
 const QUEUE_TABS: QueueTab[] = ["pending", "approved", "rejected"];
 const ALL_TABS: Tab[] = ["pending", "approved", "rejected", "analytics"];
+const ADMIN_TOKEN_KEY = "ns_admin_token";
+const ADMIN_TOKEN_EVENT = "ns-admin-token";
+
+function subscribeAdminToken(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => onStoreChange();
+  window.addEventListener("storage", handler);
+  window.addEventListener(ADMIN_TOKEN_EVENT, handler);
+  return () => {
+    window.removeEventListener("storage", handler);
+    window.removeEventListener(ADMIN_TOKEN_EVENT, handler);
+  };
+}
+
+function getAdminTokenSnapshot() {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(ADMIN_TOKEN_KEY)?.trim() || "";
+}
+
+function getAdminTokenServerSnapshot() {
+  return "";
+}
+
+function writeAdminToken(value: string) {
+  if (typeof window === "undefined") return;
+  const trimmed = value.trim();
+  if (trimmed) localStorage.setItem(ADMIN_TOKEN_KEY, trimmed);
+  else localStorage.removeItem(ADMIN_TOKEN_KEY);
+  window.dispatchEvent(new Event(ADMIN_TOKEN_EVENT));
+}
 
 function placeOf(rel: PlaceRel | PlaceRel[] | undefined): PlaceRel {
   if (!rel) return null;
@@ -112,8 +149,13 @@ function pickDefaultTab(counts: Counts): QueueTab {
 }
 
 export default function AdminDeskPage() {
-  const [token, setToken] = useState("");
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const token = useSyncExternalStore(
+    subscribeAdminToken,
+    getAdminTokenSnapshot,
+    getAdminTokenServerSnapshot,
+  );
+  const isAuthorized = Boolean(token);
+  const [draftToken, setDraftToken] = useState("");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [saturation, setSaturation] = useState<SaturationPayload | null>(null);
@@ -128,17 +170,8 @@ export default function AdminDeskPage() {
   );
   const didPickDefaultTab = useRef(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("ns_admin_token");
-    if (saved) {
-      setToken(saved);
-      setIsAuthorized(true);
-    }
-  }, []);
-
   const handleUnauthorized = useCallback(() => {
-    setIsAuthorized(false);
-    localStorage.removeItem("ns_admin_token");
+    writeAdminToken("");
     setError("Session expired — sign in again.");
   }, []);
 
@@ -273,26 +306,33 @@ export default function AdminDeskPage() {
     [activeTab, token, loadAnalytics, loadDesk],
   );
 
+  // Defer past the effect body so setState inside fetch runs asynchronously
+  // (satisfies react-hooks/set-state-in-effect).
   useEffect(() => {
     if (!isAuthorized || !token) return;
-    void fetchData();
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      if (cancelled) return;
+      void fetchData();
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [isAuthorized, token, activeTab, fetchData]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token.trim()) return;
-    const trimmed = token.trim();
-    localStorage.setItem("ns_admin_token", trimmed);
+    if (!draftToken.trim()) return;
+    const trimmed = draftToken.trim();
     didPickDefaultTab.current = false;
-    setToken(trimmed);
-    setIsAuthorized(true);
+    writeAdminToken(trimmed);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("ns_admin_token");
     didPickDefaultTab.current = false;
-    setIsAuthorized(false);
-    setToken("");
+    writeAdminToken("");
+    setDraftToken("");
     setSubmissions([]);
     setAnalytics([]);
     setSaturation(null);
@@ -301,6 +341,7 @@ export default function AdminDeskPage() {
     setCounts(EMPTY_COUNTS);
     setSelectedSubmission(null);
     setActiveTab("pending");
+    setError("");
   };
 
   const handleUpdateStatus = async (
@@ -387,8 +428,8 @@ export default function AdminDeskPage() {
           </label>
           <input
             type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
+            value={draftToken}
+            onChange={(e) => setDraftToken(e.target.value)}
             placeholder="Enter MODERATION_DESK_SECRET"
             className="mb-4 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-amber-500 focus:outline-none"
           />
