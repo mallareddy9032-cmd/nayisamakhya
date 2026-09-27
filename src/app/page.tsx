@@ -36,8 +36,14 @@ export default function HomePage() {
 
           <div className="flex items-center gap-2.5">
             <Link
-              href="/representation"
+              href="/newsletter"
               className="hidden items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-telugu text-xs font-semibold text-civic-ink shadow-xs transition-colors hover:bg-civic-subtle sm:inline-flex"
+            >
+              సమాచార పత్రిక
+            </Link>
+            <Link
+              href="/representation"
+              className="hidden items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-telugu text-xs font-semibold text-civic-ink shadow-xs transition-colors hover:bg-civic-subtle md:inline-flex"
             >
               <FileText className="h-3.5 w-3.5 text-civic-bronze" />
               {"\u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02"}

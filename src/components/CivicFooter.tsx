@@ -87,7 +87,7 @@ export function CivicFooter() {
                 href="/newsletter"
                 className="flex items-center justify-between hover:text-civic-bronze"
               >
-                <span>పాక్షిక పౌర సమాచార పత్రిక</span>
+                <span>సమాచార పత్రిక (Newsletter)</span>
                 <span className="font-sans text-[10px] text-slate-400">
                   /newsletter
                 </span>
