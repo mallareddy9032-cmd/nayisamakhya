@@ -21,13 +21,25 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const title = district ? `${heading} \u2014 ${district} | Nayi Samakhya` : `${heading} | Nayi Samakhya`;
   const og = new URLSearchParams({ title: heading, subtitle: description, badge: "Official Representation" });
   if (district) og.set("district", district);
-  const images = [{ url: `/api/og?${og}`, width: 1200, height: 630, alt: title }];
+  // WhatsApp/crawlers need a strictly absolute og:image URL (never relative /api/og).
+  const ogImageUrl = `https://www.nayisamakhya.org/api/og?${og}`;
+  const ogImageAlt =
+    "\u0c28\u0c3e\u0c2f\u0c40 \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02";
+  const images = [
+    {
+      url: ogImageUrl,
+      type: "image/png" as const,
+      width: 1200,
+      height: 630,
+      alt: ogImageAlt,
+    },
+  ];
 
   return {
     title,
     description,
     openGraph: { type: "website", siteName: "Nayi Samakhya", locale: "te_IN", url: "/representation", title, description, images },
-    twitter: { card: "summary_large_image", title, description, images },
+    twitter: { card: "summary_large_image", title, description, images: [ogImageUrl] },
   };
 }
 
