@@ -61,33 +61,37 @@ function teluguInitial(name: string): string {
 }
 
 function StalwartPortrait({ name, imageSrc }: { name: string; imageSrc: string }) {
-  const [failed, setFailed] = useState(false);
+  // Show Navy monogram until a real portrait loads; never flash a broken-image icon.
+  const [status, setStatus] = useState<"pending" | "loaded" | "failed">("pending");
   const initial = teluguInitial(name);
-
-  if (failed) {
-    return (
-      <div
-        className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-civic-bronze bg-civic-navy"
-        aria-hidden
-      >
-        <span className="font-telugu text-2xl font-bold leading-none text-[#FBFBFA]">
-          {initial}
-        </span>
-      </div>
-    );
-  }
+  const showMonogram = status !== "loaded";
 
   return (
-    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-civic-bronze bg-civic-navy">
-      {/* eslint-disable-next-line @next/next/no-img-element -- onError monogram fallback requires native img */}
-      <img
-        src={imageSrc}
-        alt=""
-        width={80}
-        height={80}
-        className="h-full w-full object-cover"
-        onError={() => setFailed(true)}
-      />
+    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-civic-bronze bg-civic-navy">
+      {showMonogram ? (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          aria-hidden
+        >
+          <span className="font-telugu text-2xl font-bold leading-none text-[#FBFBFA]">
+            {initial}
+          </span>
+        </div>
+      ) : null}
+      {status !== "failed" ? (
+        // eslint-disable-next-line @next/next/no-img-element -- onError monogram fallback requires native img
+        <img
+          src={imageSrc}
+          alt=""
+          width={80}
+          height={80}
+          className={`h-full w-full object-cover transition-opacity ${
+            status === "loaded" ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setStatus("loaded")}
+          onError={() => setStatus("failed")}
+        />
+      ) : null}
     </div>
   );
 }
