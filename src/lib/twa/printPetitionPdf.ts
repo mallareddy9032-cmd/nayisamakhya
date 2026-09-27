@@ -17,7 +17,7 @@ type TelegramWindow = Window & {
 
 export const PDF_LOADING_TE = "పీడీఎఫ్ సిద్ధం అవుతోంది...";
 export const OPEN_EXTERNAL_BROWSER_LABEL =
-  "External Browser లో తెరవండి (Open in Browser)";
+  "పూర్తి ఫీచర్ల కొరకు క్రోమ్ లేదా సఫారీలో తెరవండి (Open in Browser)";
 
 function telegramWindow(): TelegramWindow | null {
   if (typeof window === "undefined") return null;

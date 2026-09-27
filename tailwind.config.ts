@@ -5,8 +5,17 @@ const config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", "sans-serif"],
-        telugu: ["var(--font-telugu)", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        telugu: [
+          "var(--font-telugu)",
+          "Noto Sans Telugu",
+          "var(--font-sans)",
+          "system-ui",
+          "sans-serif",
+        ],
+      },
+      lineHeight: {
+        telugu: "1.75",
       },
       colors: {
         canvas: "#FBFBFA",

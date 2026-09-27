@@ -64,6 +64,105 @@ function HeatMapSkeleton() {
   );
 }
 
+/** Mobile-first ranked corridor cards (replaces SVG choropleth below md). */
+function CivicCorridorCards({
+  districts,
+  selectedSlug,
+  onSelect,
+}: {
+  districts: DistrictSaturation[];
+  selectedSlug?: string | null;
+  onSelect?: (slug: string | null) => void;
+}) {
+  const ranked = useMemo(
+    () => [...districts].sort((a, b) => b.index - a.index),
+    [districts],
+  );
+
+  return (
+    <div className="block space-y-2.5 p-4 md:hidden" aria-label="Civic corridor cards">
+      <p
+        className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em]"
+        style={{ color: HEATMAP_TOKENS.ceremonialGold }}
+      >
+        Civic Corridor Rank · Tap to filter
+      </p>
+      {ranked.map((row, i) => {
+        const active = selectedSlug === row.slug;
+        return (
+          <button
+            key={row.slug}
+            type="button"
+            onClick={() =>
+              onSelect?.(selectedSlug === row.slug ? null : row.slug)
+            }
+            className="w-full rounded-xl border px-3.5 py-3 text-left transition-shadow"
+            style={{
+              borderColor: active
+                ? HEATMAP_TOKENS.ceremonialGold
+                : HEATMAP_TOKENS.border,
+              background: active ? "rgb(180 83 9 / 0.06)" : "#FFFFFF",
+              boxShadow: active
+                ? "0 0 0 1px rgb(180 83 9 / 0.3)"
+                : undefined,
+            }}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold tabular-nums text-slate-400">
+                  #{i + 1}
+                </p>
+                <p
+                  className="font-telugu text-sm font-bold leading-relaxed"
+                  style={{ color: HEATMAP_TOKENS.deepSlate }}
+                >
+                  {row.name_te}
+                </p>
+                <p className="text-[11px] text-slate-500">{row.name_en}</p>
+              </div>
+              <span
+                className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums"
+                style={{
+                  background: `${tierFill(row.tier)}22`,
+                  color: tierFill(row.tier),
+                }}
+              >
+                SI {row.index}
+              </span>
+            </div>
+            <div className="mt-2.5">
+              <div
+                className="h-2 overflow-hidden rounded-full"
+                style={{ background: "#E2E8F0" }}
+              >
+                <div
+                  className="h-full rounded-full transition-[width] duration-300"
+                  style={{
+                    width: `${Math.min(100, row.index)}%`,
+                    background: tierFill(row.tier),
+                  }}
+                />
+              </div>
+              <div className="mt-1.5 flex justify-between text-[10px] text-slate-500">
+                <span>{tierLabel(row.tier)}</span>
+                <span className="tabular-nums">
+                  {row.verified_uploads} uploads · {row.active_coordinators}{" "}
+                  coords
+                </span>
+              </div>
+            </div>
+          </button>
+        );
+      })}
+      {ranked.length === 0 ? (
+        <p className="py-6 text-center text-xs text-slate-500">
+          No saturation data
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function PilotCorridorPanel({
   pilots,
   onSelect,
@@ -368,6 +467,15 @@ export function TelanganaHeatMap({
 
       <div className="grid grid-cols-1 gap-0 lg:grid-cols-12">
         <div className="relative lg:col-span-7">
+          {/* Mobile: ranked Civic Corridor Cards */}
+          <CivicCorridorCards
+            districts={districts}
+            selectedSlug={selectedSlug}
+            onSelect={setSelectedSlug}
+          />
+
+          {/* Desktop/tablet: TopoJSON choropleth */}
+          <div className="hidden md:block">
           {geoError ? (
             <div className="p-8 text-center text-sm text-rose-700">
               {geoError}
@@ -457,7 +565,7 @@ export function TelanganaHeatMap({
                     color: HEATMAP_TOKENS.deepSlate,
                   }}
                 >
-                  <p className="font-telugu text-sm font-bold">
+                  <p className="font-telugu text-sm font-bold leading-relaxed">
                     {tooltip.sat.name_te}
                   </p>
                   <p className="text-slate-500">{tooltip.sat.name_en}</p>
@@ -508,10 +616,11 @@ export function TelanganaHeatMap({
               ) : null}
             </div>
           )}
+          </div>
         </div>
 
         <aside
-          className="border-t p-5 lg:col-span-5 lg:border-l lg:border-t-0"
+          className="hidden border-t p-5 md:block lg:col-span-5 lg:border-l lg:border-t-0"
           style={{ borderColor: HEATMAP_TOKENS.border, background: "#FFFFFF" }}
         >
           {focus ? (
@@ -657,7 +766,7 @@ export function TelanganaHeatMap({
       </div>
 
       <div
-        className="overflow-x-auto border-t"
+        className="hidden overflow-x-auto border-t md:block"
         style={{ borderColor: HEATMAP_TOKENS.border }}
       >
         <table className="w-full text-left text-xs" style={{ color: "#334155" }}>

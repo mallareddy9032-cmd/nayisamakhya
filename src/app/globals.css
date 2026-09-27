@@ -83,8 +83,19 @@ body {
 }
 
 .font-telugu {
-  /* family from theme fontFamily.telugu → var(--font-telugu) */
-  line-height: 1.7;
+  /* Noto Sans Telugu — relaxed leading protects ottulu / maatras from clipping */
+  font-family: var(--font-telugu), var(--font-sans), system-ui, sans-serif;
+  line-height: 1.75;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Unified baseline for mixed Telugu + Latin numerals / dates */
+.font-telugu .metric-tnum,
+.font-telugu time,
+.font-telugu .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "kern" 1;
+  vertical-align: baseline;
 }
 
 .tap {
@@ -126,8 +137,7 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    /* Tight margins shrink browser header/footer URL + page-number chrome. */
-    margin: 12mm 15mm 12mm 15mm;
+    margin: 10mm 12mm 10mm 12mm;
   }
 
   html,
@@ -146,6 +156,7 @@ body {
   header,
   footer,
   nav,
+  button,
   .no-print,
   .no-print *,
   [data-accessibility-bar],
@@ -183,8 +194,10 @@ body {
     background: #fff !important;
   }
 
-  /* Keep signature + verification stamp on the same A4 sheet as the body. */
-  .print-signature-block {
+  /* Keep signature + verification stamp + seal on the same A4 sheet. */
+  .print-signature-block,
+  .print-seal-block,
+  .print-coordinator-ref {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     break-before: avoid !important;

@@ -10,6 +10,13 @@ Authoritative civic portal for Telangana & Andhra Pradesh — Next.js App Router
 - Lucide icons + Radix Accordion
 - Zustand (language, mandal, accessibility)
 
+## UX / Mobile (v2.0 overhaul)
+
+- Safe-area shell (`100dvh`) + in-app browser breakout banner (Telegram / Instagram / WhatsApp)
+- 3-step representation wizard at `/representation` (`?dist=` deep-link)
+- A4 print + TWA PDF fallback (`html2canvas` + `jspdf`)
+- Dual-mode admin heat map: SVG choropleth on `md+`, ranked Civic Corridor cards on mobile
+
 ## Run locally
 
 ```bash
