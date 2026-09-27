@@ -142,6 +142,12 @@ export function ModerationDeskClient({
   }
 
   async function moderate(id: string, action: "approve" | "reject" | "retag") {
+    if (action === "reject") {
+      const ok = window.confirm(
+        "Reject this photo? The image will be deleted from Supabase Storage (cannot undo).",
+      );
+      if (!ok) return;
+    }
     const draft = drafts[id];
     setBusyId(id);
     startTransition(async () => {

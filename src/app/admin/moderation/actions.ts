@@ -10,6 +10,11 @@ import {
   expectedDeskSecret,
   isDeskUnlocked,
 } from "@/lib/moderation/deskAuth";
+import {
+  clearedPhotoFields,
+  collectPhotoUrls,
+  deleteSurveyPhotosFromStorage,
+} from "@/lib/moderation/deleteSurveyPhotos";
 
 export type ModerateResult =
   | { ok: true; action: string }
@@ -31,12 +36,7 @@ function asPhotoUrls(row: {
   photo_url?: string | null;
   photo_urls?: unknown;
 }): string[] {
-  if (Array.isArray(row.photo_urls)) {
-    return row.photo_urls.filter(
-      (u): u is string => typeof u === "string" && Boolean(u),
-    );
-  }
-  return row.photo_url ? [row.photo_url] : [];
+  return collectPhotoUrls(row);
 }
 
 function establishmentNames(caption: string | null | undefined, sender: string | null) {
@@ -126,6 +126,16 @@ export async function moderateSubmission(input: Input): Promise<ModerateResult> 
   }
 
   if (input.action === "reject") {
+    const storageCleanup = await deleteSurveyPhotosFromStorage(
+      admin,
+      asPhotoUrls(current),
+    );
+    if (storageCleanup.errors.length) {
+      console.error(
+        "survey-photos delete on reject:",
+        storageCleanup.errors.join("; "),
+      );
+    }
     const { error } = await admin
       .from("survey_submissions")
       .update({
@@ -138,6 +148,7 @@ export async function moderateSubmission(input: Input): Promise<ModerateResult> 
         ulb_id: ulbId,
         gp_id: gpId,
         raw_caption: caption,
+        ...clearedPhotoFields(),
       })
       .eq("id", input.id);
     if (error) return { ok: false, error: error.message };

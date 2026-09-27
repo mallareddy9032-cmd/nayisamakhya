@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  clearedPhotoFields,
+  collectPhotoUrls,
+  deleteSurveyPhotosFromStorage,
+} from "@/lib/moderation/deleteSurveyPhotos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,6 +85,16 @@ export async function POST(req: Request) {
 
   if (body.action === "reject") {
     const notes = body.notes?.trim() || "dismissed";
+    const storageCleanup = await deleteSurveyPhotosFromStorage(
+      admin,
+      collectPhotoUrls(current),
+    );
+    if (storageCleanup.errors.length) {
+      console.error(
+        "survey-photos delete on reject:",
+        storageCleanup.errors.join("; "),
+      );
+    }
     const { error } = await admin
       .from("survey_submissions")
       .update({
@@ -90,12 +105,17 @@ export async function POST(req: Request) {
         district_id: body.district_id ?? current.district_id,
         mandal_id: body.mandal_id ?? current.mandal_id,
         gp_id: body.gp_id ?? current.gp_id,
+        ...clearedPhotoFields(),
       })
       .eq("id", body.id);
     if (error) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ ok: true, action: "reject" });
+    return NextResponse.json({
+      ok: true,
+      action: "reject",
+      storage_cleanup: storageCleanup,
+    });
   }
 
   if (body.action === "flag") {
