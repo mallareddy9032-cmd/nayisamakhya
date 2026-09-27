@@ -32,12 +32,14 @@ export type NewsletterFilterId = (typeof NEWSLETTER_FILTERS)[number]["id"];
 
 export const NEWSLETTER_TITLE = "పాక్షిక పౌర సమాచార పత్రిక";
 
-export function categoryBadgeClass(category: BulletinCategory): string {
+export function categoryBadgeClass(category: BulletinCategory | string): string {
   switch (category) {
-    case "BC-A Welfare":
+    case "G.O. 23 Power":
       return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    case "BC-A Welfare":
+      return "bg-amber-100 text-amber-900 border-amber-200";
     case "Collector Circular":
-      return "bg-slate-100 text-slate-800 border-slate-200";
+      return "bg-slate-900/10 text-slate-900 border-slate-300";
     case "Education/Scholarships":
       return "bg-amber-100 text-amber-900 border-amber-200";
     case "Legal Rights":

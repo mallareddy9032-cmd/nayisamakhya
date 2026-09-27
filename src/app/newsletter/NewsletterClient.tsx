@@ -1,46 +1,30 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
   FileDown,
   Share2,
   Newspaper,
-  Loader2,
-  AlertCircle,
   ExternalLink,
   MapPin,
   CheckCircle2,
+  Archive,
 } from "lucide-react";
 import {
+  CATEGORY_FILTER_TABS,
+  NEWSLETTER_CANONICAL,
   NEWSLETTER_TITLE,
-  NEWSLETTER_FILTERS,
-  categoryBadgeClass,
-} from "@/lib/bulletins/categories";
-import type { BulletinCategory, CivicBulletin } from "@/lib/bulletins/types";
-
-type FieldReport = {
-  id: string;
-  title: string;
-  summary_te: string;
-  published_at: string;
-  district_te?: string | null;
-  mandal_te?: string | null;
-  photo_url?: string | null;
-};
-
-type NewsletterPayload = {
-  title: string;
-  edition: { start: string; end: string; label_te: string };
-  filters: { id: string; label: string }[];
-  active_filter: string;
-  source: string;
-  error?: string | null;
-  bulletins: CivicBulletin[];
-  field_reports: FieldReport[];
-  counts: { bulletins: number; field_reports: number };
-};
+  NEWSLETTER_TITLE_SHORT,
+  buildWhatsAppShareText,
+  categoryBadgeStyle,
+  matchesFilter,
+  type CategoryFilterId,
+  type DigestBulletin,
+  type FortnightEdition,
+} from "@/lib/newsletter/digest";
+import type { NewsletterDigestPayload } from "@/lib/newsletter/loadEditions";
 
 function formatDate(iso: string) {
   try {
@@ -54,98 +38,135 @@ function formatDate(iso: string) {
   }
 }
 
-export default function NewsletterClient() {
-  const [filter, setFilter] = useState<string>("all");
-  const [reloadToken, setReloadToken] = useState(0);
-  const [data, setData] = useState<NewsletterPayload | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+function BulletinCard({ b }: { b: DigestBulletin }) {
+  const badge = categoryBadgeStyle(b.category);
+  return (
+    <article className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xs print:break-inside-avoid print:rounded-none print:border print:border-slate-300 print:shadow-none">
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`inline-flex rounded-full ${badge.className}`}
+          style={badge.style}
+        >
+          {b.category}
+        </span>
+        {b.is_fallback ? (
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900">
+            institutional notice
+          </span>
+        ) : null}
+        <span className="text-[11px] text-slate-400">
+          {formatDate(b.published_at)}
+        </span>
+      </div>
+      <h3 className="mt-2 font-telugu text-base font-bold leading-snug text-[#0F172A] md:text-lg">
+        {b.title}
+      </h3>
+      <p className="mt-2 font-telugu text-sm leading-relaxed text-[#1E293B]">
+        {b.summary_te}
+      </p>
+      {b.target_districts?.length > 0 ? (
+        <p className="mt-3 flex items-start gap-1.5 text-[11px] text-slate-500">
+          <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-[#B45309]" />
+          <span>{b.target_districts.join(" · ")}</span>
+        </p>
+      ) : null}
+      {(b.source_url || b.pdf_url) && (
+        <a
+          href={b.pdf_url || b.source_url || "#"}
+          target="_blank"
+          rel="noreferrer"
+          className="no-print mt-3 inline-flex items-center gap-1 font-telugu text-xs font-semibold text-[#B45309] hover:underline print:hidden"
+        >
+          మూల పత్రం <ExternalLink className="h-3 w-3" />
+        </a>
+      )}
+    </article>
+  );
+}
 
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const qs =
-          filter && filter !== "all" ? `?filter=${encodeURIComponent(filter)}` : "";
-        const res = await fetch(`/api/newsletter${qs}`, { cache: "no-store" });
-        const json = (await res.json()) as NewsletterPayload & {
-          error?: string;
-        };
-        if (cancelled) return;
-        if (!res.ok) {
-          setError(json.error || `HTTP ${res.status}`);
-          setData(null);
-          return;
-        }
-        setError("");
-        setData(json);
-      } catch (err) {
-        if (cancelled) return;
-        setError(
-          err instanceof Error ? err.message : "Failed to load newsletter",
-        );
-        setData(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [filter, reloadToken]);
+function EditionBlock({
+  edition,
+  filter,
+  archived,
+}: {
+  edition: FortnightEdition;
+  filter: CategoryFilterId | string;
+  archived?: boolean;
+}) {
+  const items = edition.bulletins.filter((b) => matchesFilter(b, filter));
+  if (items.length === 0) return null;
 
-  const selectFilter = (next: string) => {
-    setLoading(true);
-    setError("");
-    if (next === filter) setReloadToken((n) => n + 1);
-    else setFilter(next);
-  };
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        {archived ? (
+          <Archive className="h-4 w-4 text-slate-400" aria-hidden />
+        ) : (
+          <CheckCircle2 className="h-4 w-4 text-emerald-700" aria-hidden />
+        )}
+        <h2 className="font-telugu text-sm font-bold text-[#0F172A]">
+          {edition.label_te}
+        </h2>
+        <span className="text-[11px] text-slate-500">
+          {formatDate(edition.start)} — {formatDate(edition.end)}
+        </span>
+        <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          {items.length} notices
+        </span>
+      </div>
+      <div className="space-y-3">
+        {items.map((b) => (
+          <BulletinCard key={b.id} b={b} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export default function NewsletterClient({
+  payload,
+}: {
+  payload: NewsletterDigestPayload;
+}) {
+  const [filter, setFilter] = useState<CategoryFilterId | string>("all");
+  const { currentEdition, archives, source, error } = payload;
 
   const shareText = useMemo(() => {
-    if (!data) return NEWSLETTER_TITLE;
-    const lines = [
-      `📰 ${NEWSLETTER_TITLE}`,
-      data.edition.label_te,
-      "",
-      ...data.bulletins.slice(0, 5).map(
-        (b, i) => `${i + 1}. ${b.title}\n${b.summary_te.slice(0, 120)}…`,
-      ),
-      "",
-      `👉 https://www.nayisamakhya.org/newsletter`,
-    ];
-    return lines.join("\n");
-  }, [data]);
+    const top = currentEdition.bulletins
+      .filter((b) => matchesFilter(b, filter))
+      .slice(0, 3);
+    const sourceRows =
+      top.length > 0 ? top : currentEdition.bulletins.slice(0, 3);
+    return buildWhatsAppShareText(currentEdition, sourceRows);
+  }, [currentEdition, filter]);
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
-  const onExportPdf = () => {
-    window.print();
-  };
-
-  const total =
-    (data?.counts.bulletins || 0) + (data?.counts.field_reports || 0);
+  const filteredCurrentCount = currentEdition.bulletins.filter((b) =>
+    matchesFilter(b, filter),
+  ).length;
 
   return (
-    <div className="min-h-screen bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
-      <header className="no-print sticky top-0 z-30 border-b border-civic-border bg-white/95 backdrop-blur-md print:hidden">
+    <div className="min-h-screen bg-[#FBFBFA] text-[#0F172A] antialiased selection:bg-[#B45309] selection:text-white">
+      <header className="no-print sticky top-0 z-30 border-b border-[#E2E8F0] bg-white/95 backdrop-blur-md print:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3.5">
           <div className="flex min-w-0 items-center gap-3">
             <Link
               href="/"
-              className="rounded-lg border border-civic-border p-1.5 text-slate-500 transition-colors hover:bg-civic-subtle hover:text-civic-ink"
+              className="rounded-lg border border-[#E2E8F0] p-1.5 text-slate-500 transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+              aria-label="Home"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <Newspaper className="h-4 w-4 shrink-0 text-civic-bronze" />
-                <h1 className="truncate font-telugu text-base font-bold text-civic-ink md:text-lg">
-                  {NEWSLETTER_TITLE}
+                <Newspaper className="h-4 w-4 shrink-0 text-[#B45309]" />
+                <h1 className="truncate font-telugu text-base font-bold text-[#0F172A] md:text-lg">
+                  {NEWSLETTER_TITLE_SHORT}
                 </h1>
               </div>
               <p className="text-[11px] text-slate-500">
-                Bi-weekly civic digest · auto from approved bulletins
+                Civic Fortnightly Digest · zero-maintenance
               </p>
             </div>
           </div>
@@ -153,11 +174,11 @@ export default function NewsletterClient() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
-              onClick={onExportPdf}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-civic-border bg-white px-3 py-2 font-telugu text-xs font-bold text-civic-navy shadow-xs transition hover:bg-civic-subtle"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-telugu text-xs font-bold text-[#1E293B] shadow-xs transition hover:bg-[#F8FAFC]"
             >
-              <FileDown className="h-3.5 w-3.5 text-civic-bronze" />
-              A4 PDF
+              <FileDown className="h-3.5 w-3.5 text-[#B45309]" />
+              Print / Noticeboard
             </button>
             <a
               href={whatsappHref}
@@ -176,183 +197,106 @@ export default function NewsletterClient() {
         id="newsletter-print-root"
         className="mx-auto max-w-3xl px-4 py-8 print:max-w-none print:px-0 print:py-0"
       >
-        {/* Print masthead */}
         <div className="mb-6 hidden print:block">
-          <p className="font-telugu text-2xl font-bold text-civic-ink">
+          <p className="font-telugu text-2xl font-bold text-[#0F172A]">
             {NEWSLETTER_TITLE}
           </p>
           <p className="mt-1 text-xs text-slate-600">
-            Nayi Samakhya Telangana · nayisamakhya.org/newsletter
+            Nayi Samakhya Telangana · {NEWSLETTER_CANONICAL.replace("https://", "")}
           </p>
         </div>
 
-        {data?.edition && (
-          <div className="mb-5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-telugu font-semibold text-emerald-800">
-              <CheckCircle2 className="h-3 w-3" />
-              {data.edition.label_te}
-            </span>
-            <span>
-              {formatDate(data.edition.start)} — {formatDate(data.edition.end)}
-            </span>
-            {data.source === "seed_fallback" && (
-              <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-900">
-                seed preview
-              </span>
-            )}
-          </div>
-        )}
+        {/* Executive Card */}
+        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xs sm:p-7 print:border-0 print:p-0 print:shadow-none">
+          <header className="mb-5 border-b border-[#E2E8F0] pb-4 print:border-slate-300">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#B45309]">
+              Civic Fortnightly Digest
+            </p>
+            <h2 className="mt-1 font-telugu text-xl font-black tracking-tight text-[#0F172A] sm:text-2xl">
+              {NEWSLETTER_TITLE}
+            </h2>
+            <p className="mt-2 text-xs leading-relaxed text-slate-500">
+              Auto-curated from <code className="rounded bg-slate-100 px-1">civic_bulletins</code>{" "}
+              · current fortnight + archives · salon noticeboard ready
+            </p>
+            {source === "fallback" ? (
+              <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
+                Live bulletin window empty or unavailable — showing institutional
+                notices (G.O. 23, BC-A scholarships, corridor progress).
+                {error ? ` (${error})` : ""}
+              </p>
+            ) : null}
+          </header>
 
-        <div className="no-print mb-6 flex flex-wrap gap-2 print:hidden">
-          <button
-            type="button"
-            onClick={() => selectFilter("all")}
-            className={`rounded-full border px-3 py-1.5 font-telugu text-xs font-semibold transition ${
-              filter === "all"
-                ? "border-civic-bronze bg-civic-bronze text-white"
-                : "border-civic-border bg-white text-civic-navy hover:bg-civic-subtle"
-            }`}
-          >
-            అన్నీ
-          </button>
-          {(data?.filters || NEWSLETTER_FILTERS).map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => selectFilter(f.id)}
-              className={`rounded-full border px-3 py-1.5 font-telugu text-xs font-semibold transition ${
-                filter === f.id
-                  ? "border-civic-bronze bg-civic-bronze text-white"
-                  : "border-civic-border bg-white text-civic-navy hover:bg-civic-subtle"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        {loading && (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-slate-500">
-            <Loader2 className="h-8 w-8 animate-spin text-civic-bronze" />
-            <p className="font-telugu text-sm">సంకలనం లోడ్ అవుతోంది…</p>
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-900">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <div>
-                <p className="font-telugu font-bold">సంకలనం లోడ్ కాలేదు</p>
-                <p className="mt-1 text-sm">{error}</p>
+          <div className="no-print mb-6 flex flex-wrap gap-2 print:hidden">
+            {CATEGORY_FILTER_TABS.map((tab) => {
+              const active = filter === tab.id;
+              return (
                 <button
+                  key={tab.id}
                   type="button"
-                  onClick={() => selectFilter(filter)}
-                  className="mt-3 rounded-lg bg-red-800 px-3 py-1.5 text-xs font-bold text-white"
+                  onClick={() => setFilter(tab.id)}
+                  className={`rounded-full border px-3 py-1.5 font-telugu text-xs font-semibold transition ${
+                    active
+                      ? "border-[#B45309] bg-[#B45309] text-white"
+                      : "border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] hover:border-[#B45309]/40"
+                  }`}
                 >
-                  Retry
+                  {tab.label}
                 </button>
-              </div>
+              );
+            })}
+          </div>
+
+          {filteredCurrentCount === 0 &&
+          archives.every(
+            (ed) =>
+              ed.bulletins.filter((b) => matchesFilter(b, filter)).length === 0,
+          ) ? (
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#FBFBFA] px-6 py-14 text-center">
+              <Newspaper className="mx-auto h-10 w-10 text-slate-300" />
+              <p className="mt-4 font-telugu text-base font-bold text-[#0F172A]">
+                ఈ వర్గంలో నోటీసులు లేవు
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Try another category filter or check back after cron sync.
+              </p>
             </div>
-          </div>
-        )}
-
-        {!loading && !error && total === 0 && (
-          <div className="rounded-2xl border border-dashed border-civic-border bg-white px-6 py-16 text-center">
-            <Newspaper className="mx-auto h-10 w-10 text-slate-300" />
-            <p className="mt-4 font-telugu text-base font-bold text-civic-ink">
-              ఈ పాక్షిక విండోలో నోటీసులు లేవు
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              Cron sync will populate approved bulletins automatically.
-            </p>
-          </div>
-        )}
-
-        {!loading && !error && total > 0 && (
-          <div className="space-y-4">
-            {data?.bulletins.map((b) => (
-              <article
-                key={b.id}
-                className="rounded-2xl border border-civic-border bg-white p-5 shadow-xs print:break-inside-avoid print:rounded-none print:border print:border-slate-300 print:shadow-none"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${categoryBadgeClass(b.category as BulletinCategory)}`}
-                  >
-                    {b.category}
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    {formatDate(b.published_at)}
-                  </span>
-                </div>
-                <h2 className="mt-2 font-telugu text-base font-bold leading-snug text-civic-ink md:text-lg">
-                  {b.title}
-                </h2>
-                <p className="mt-2 font-telugu text-sm leading-relaxed text-civic-navy">
-                  {b.summary_te}
-                </p>
-                {b.target_districts?.length > 0 && (
-                  <p className="mt-3 flex items-start gap-1.5 text-[11px] text-slate-500">
-                    <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-civic-bronze" />
-                    <span>{b.target_districts.join(" · ")}</span>
+          ) : (
+            <div className="space-y-10">
+              <EditionBlock edition={currentEdition} filter={filter} />
+              {archives.length > 0 ? (
+                <div className="space-y-8 border-t border-[#E2E8F0] pt-8">
+                  <p className="font-telugu text-xs font-bold uppercase tracking-wider text-slate-500">
+                    గత సంకలనాలు (Archives)
                   </p>
-                )}
-                {(b.source_url || b.pdf_url) && (
-                  <a
-                    href={b.pdf_url || b.source_url || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="no-print mt-3 inline-flex items-center gap-1 font-telugu text-xs font-semibold text-civic-bronze hover:underline print:hidden"
-                  >
-                    మూల పత్రం <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
-              </article>
-            ))}
-
-            {data?.field_reports.map((r) => (
-              <article
-                key={r.id}
-                className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-xs print:break-inside-avoid"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
-                    క్షేత్రస్థాయి నివేదికలు
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    {formatDate(r.published_at)}
-                  </span>
+                  {archives.map((ed) => (
+                    <EditionBlock
+                      key={ed.id}
+                      edition={ed}
+                      filter={filter}
+                      archived
+                    />
+                  ))}
                 </div>
-                <h2 className="mt-2 font-telugu text-base font-bold text-civic-ink">
-                  {r.title}
-                </h2>
-                <p className="mt-2 font-telugu text-sm leading-relaxed text-civic-navy">
-                  {r.summary_te}
-                </p>
-                {(r.district_te || r.mandal_te) && (
-                  <p className="mt-3 flex items-center gap-1.5 font-telugu text-[11px] text-slate-500">
-                    <MapPin className="h-3 w-3 text-emerald-700" />
-                    {[r.mandal_te, r.district_te].filter(Boolean).join(", ")}
-                  </p>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+              ) : null}
+            </div>
+          )}
+        </div>
       </main>
 
       <style
         dangerouslySetInnerHTML={{
           __html: `
         @media print {
-          @page { size: A4; margin: 14mm; }
-          body { background: white !important; }
+          @page { size: A4; margin: 12mm; }
+          html, body { background: white !important; color: #0F172A !important; }
           .no-print { display: none !important; }
           #newsletter-print-root {
             max-width: none !important;
             padding: 0 !important;
           }
+          a { color: inherit !important; text-decoration: none !important; }
         }
       `,
         }}
