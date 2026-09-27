@@ -38,24 +38,25 @@ export default function CoordinatorCardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
       <header className="no-print sticky top-0 z-20 border-b border-civic-border bg-white shadow-xs print:hidden">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3.5">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 items-start gap-3 sm:items-center">
             <Link
               href="/"
-              className="rounded-lg border border-civic-border p-1.5 text-slate-500 transition-colors hover:bg-civic-subtle hover:text-civic-ink"
+              className="mt-0.5 shrink-0 rounded-lg border border-civic-border p-1.5 text-slate-500 transition-colors hover:bg-civic-subtle hover:text-civic-ink sm:mt-0"
+              aria-label="Back to home"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <IdCard className="h-4 w-4 text-civic-bronze" />
-                <h1 className="font-telugu text-base font-bold text-civic-ink md:text-lg">
+                <IdCard className="h-4 w-4 shrink-0 text-civic-bronze" />
+                <h1 className="font-telugu text-base font-bold leading-snug text-civic-ink md:text-lg">
                   {
                     "\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"
                   }
                 </h1>
               </div>
-              <p className="text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
                 Executive Civic ID — Print / Laminate Ready
               </p>
             </div>
@@ -64,7 +65,7 @@ export default function CoordinatorCardPage() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
+            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-civic-bronze px-3.5 py-2.5 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover sm:w-auto sm:py-2"
           >
             <Printer className="h-4 w-4" />
             {
