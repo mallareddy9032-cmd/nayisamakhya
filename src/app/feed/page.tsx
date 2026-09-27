@@ -320,7 +320,7 @@ export default function CivicFeedPage() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-2.5 font-telugu text-sm font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover sm:w-auto"
                 >
                   {
-                    "Telegram \u0c2c\u0c3e\u0c1f\u0c4d\u0c15\u0c41 \u0c24\u0c46\u0c30\u0c41\u0c35\u0c02\u0c21\u0c3f"
+                    "Telegram \u0c2c\u0c3e\u0c1f\u0c4d \u0c24\u0c46\u0c30\u0c35\u0c02\u0c21\u0c3f"
                   }
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
