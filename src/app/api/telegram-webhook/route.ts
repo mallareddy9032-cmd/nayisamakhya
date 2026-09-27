@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { parseCaptionLocations } from "@/lib/moderation/parseCaption";
+import {
+  formatHubsForTelegramHtml,
+  getAllCommHubs,
+} from "@/lib/comms/hubs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -157,11 +161,22 @@ async function sendWelcomeMenu(chatId: number | string, senderName: string) {
   const origin = siteOrigin();
   const miniAppUrl = `${origin}/twa`;
   const safeName = escapeHtml(senderName);
+  const hubs = getAllCommHubs();
   const welcomeText =
     `\u{1F64F} <b>\u0C28\u0C2E\u0C38\u0C4D\u0C15\u0C3E\u0C30\u0C02 ${safeName} \u0C17\u0C3E\u0C30\u0C41!</b>\n\n` +
     `<b>\u0C28\u0C3E\u0C2F\u0C3F \u0C38\u0C2E\u0C3E\u0C16\u0C4D\u0C2F \u0C21\u0C3F\u0C1C\u0C3F\u0C1F\u0C32\u0C4D \u0C38\u0C47\u0C35\u0C3E \u0C21\u0C46\u0C38\u0C4D\u0C15\u0C4D</b> \u0C15\u0C41 \u0C38\u0C4D\u0C35\u0C3E\u0C17\u0C24\u0C02. ` +
     `\u0C30\u0C3E\u0C37\u0C4D\u0C1F\u0C4D\u0C30\u0C35\u0C4D\u0C2F\u0C3E\u0C2A\u0C4D\u0C24\u0C02\u0C17\u0C3E \u0C2E\u0C28 \u0C15\u0C2E\u0C4D\u0C2F\u0C42\u0C28\u0C3F\u0C1F\u0C40 \u0C38\u0C2E\u0C38\u0C4D\u0C2F\u0C32 \u0C2A\u0C30\u0C3F\u0C37\u0C4D\u0C15\u0C3E\u0C30\u0C02, \u0C38\u0C02\u0C15\u0C4D\u0C37\u0C47\u0C2E\u0C02 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C38\u0C2E\u0C3E\u0C1A\u0C3E\u0C30\u0C02 \u0C15\u0C4A\u0C30\u0C15\u0C41 \u0C08 \u0C05\u0C27\u0C3F\u0C15\u0C3E\u0C30\u0C3F\u0C15 \u0C15\u0C47\u0C02\u0C26\u0C4D\u0C30\u0C02 \u0C2A\u0C28\u0C3F\u0C1A\u0C47\u0C38\u0C4D\u0C24\u0C41\u0C02\u0C26\u0C3F.\n\n` +
     `\u0C2E\u0C40\u0C30\u0C41 \u0C15\u0C4D\u0C30\u0C3F\u0C02\u0C26\u0C3F \u0C38\u0C47\u0C35\u0C32\u0C28\u0C41 \u0C28\u0C47\u0C30\u0C41\u0C17\u0C3E \u0C09\u0C2A\u0C2F\u0C4B\u0C17\u0C3F\u0C02\u0C1A\u0C41\u0C15\u0C4B\u0C35\u0C1A\u0C4D\u0C1A\u0C41:`;
+
+  const hubButtons = hubs.slice(0, 4).map((hub) => [
+    {
+      text:
+        hub.channel === "telegram"
+          ? `📢 ${hub.name_en}`
+          : `💬 ${hub.name_en}`,
+      url: hub.join_url,
+    },
+  ]);
 
   await replyText(chatId, welcomeText, {
     inline_keyboard: [
@@ -187,10 +202,21 @@ async function sendWelcomeMenu(chatId: number | string, senderName: string) {
           url: `${origin}/representation`,
         },
         {
+          text: "\u{1F4F0} Newsletter",
+          url: `${origin}/newsletter`,
+        },
+      ],
+      [
+        {
           text: "\u{1F310} \u0C2E\u0C28 \u0C35\u0C46\u0C2C\u0C4D\u200C\u0C38\u0C3E\u0C1F\u0C4D",
           url: origin,
         },
+        {
+          text: "\u{1F4E2} Hubs list",
+          callback_data: "list_hubs",
+        },
       ],
+      ...hubButtons.slice(0, 2),
     ],
   });
 }
@@ -280,6 +306,8 @@ async function handleCallbackQuery(
         `   \u2022 <b>\u0C35\u0C3F\u0C37\u0C2F\u0C02</b>\n` +
         `\u0C2E\u0C46\u0C38\u0C47\u0C1C\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F. \u0C2E\u0C3E \u0C2C\u0C43\u0C02\u0C26\u0C02 \u0C35\u0C46\u0C02\u0C1F\u0C28\u0C47 \u0C2A\u0C30\u0C3F\u0C36\u0C40\u0C32\u0C3F\u0C38\u0C4D\u0C24\u0C41\u0C02\u0C26\u0C3F.`,
     );
+  } else if (cq.data === "list_hubs") {
+    await replyText(chatId, formatHubsForTelegramHtml());
   } else if (cq.data === "find_officer") {
     await replyText(
       chatId,

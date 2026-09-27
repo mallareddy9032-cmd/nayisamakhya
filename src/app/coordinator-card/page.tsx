@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   IdCard,
 } from "lucide-react";
+import { HubJoinLinks } from "@/components/comms/HubJoinLinks";
+import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 
 export default function CoordinatorCardPage() {
   const [name, setName] = useState(
@@ -34,6 +36,19 @@ export default function CoordinatorCardPage() {
       `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(botUrl)}`,
     [botUrl],
   );
+
+  /** Best-effort English slug for regional hub highlighting. */
+  const districtSlugHint = useMemo(() => {
+    const q = district.trim().toLowerCase();
+    if (!q) return "";
+    const hit = TELANGANA_DISTRICTS.find(
+      (d) =>
+        d.slug === q ||
+        d.name_en.toLowerCase() === q ||
+        d.name_te === district.trim(),
+    );
+    return hit?.slug || "";
+  }, [district]);
 
   return (
     <div className="flex min-h-screen flex-col bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
@@ -218,6 +233,10 @@ export default function CoordinatorCardPage() {
             "\u0c2a\u0c4d\u0c30\u0c3f\u0c02\u0c1f\u0c4d \u0c24\u0c40\u0c38\u0c41\u0c15\u0c41\u0c28\u0c4d\u0c28\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c41 \u0c15\u0c47\u0c35\u0c32 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41 \u0c2e\u0c3e\u0c24\u0c4d\u0c30\u0c2e\u0c47 \u0c35\u0c3f\u0c2d\u0c1c\u0c28\u0c2a\u0c21\u0c41\u0c24\u0c41\u0c02\u0c26\u0c3f. QR \u0c38\u0c4d\u0c15\u0c3e\u0c28\u0c4d \u0c1a\u0c47\u0c38\u0c4d\u0c24\u0c47 \u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c2c\u0c3e\u0c1f\u0c4d\u0c15\u0c41 \u0c24\u0c46\u0c30\u0c41\u0c38\u0c4d\u0c24\u0c41\u0c02\u0c26\u0c3f."
           }
         </p>
+
+        <div className="no-print w-full max-w-md print:hidden">
+          <HubJoinLinks districtHint={districtSlugHint} />
+        </div>
       </main>
 
       <style
