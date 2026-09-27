@@ -32,10 +32,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default function RepresentationPage() {
+  // Print/PDF behavior (TWA html2canvas+jspdf, External Browser, A4 @page,
+  // translate="no" lang="te") lives on RepresentationLetterPage + globals.css.
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[40vh] items-center justify-center bg-civic-paper font-telugu text-sm text-slate-500">
+        <div className="no-print flex min-h-[40vh] items-center justify-center bg-civic-paper font-telugu text-sm text-slate-500 print:hidden">
           {"\u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02 \u0c32\u0c4b\u0c21\u0c4d \u0c05\u0c35\u0c41\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c26\u0c3f\u2026"}
         </div>
       }

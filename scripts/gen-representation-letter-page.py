@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
-"""Generate RepresentationLetterPage.tsx from UI JSON (ASCII-safe unicode escapes)."""
+"""Generate RepresentationLetterPage.tsx from UI JSON (ASCII-safe unicode escapes).
+
+IMPORTANT: The production petition maker is the civic redesign in
+src/components/RepresentationLetterPage.tsx (TWA PDF + A4 print). This legacy
+generator writes a different layout. It will refuse to overwrite the live file
+unless --force is passed. Prefer editing RepresentationLetterPage.tsx directly
+or extending scripts/gen-representation-page.py.
+"""
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_PATH = ROOT / "src/lib/data/representation-letter-ui.json"
 OUT_PATH = ROOT / "src/components/RepresentationLetterPage.tsx"
+LEGACY_OUT = ROOT / "src/components/RepresentationLetterPage.legacy.generated.tsx"
 
 
 def esc(s: str) -> str:
@@ -454,8 +463,11 @@ export function RepresentationLetterPage() {{
           </div>
         </div>
 
-        <div className="printable-card print-document rounded-2xl border border-slate-200 bg-white p-8 font-serif leading-relaxed text-slate-900 shadow-md sm:p-10">
-          <div className="mb-6 border-b-2 border-slate-900 pb-4 text-center">
+        <div
+          translate="no"
+          lang="te"
+          className="printable-card print-document print-only-document rounded-2xl border border-slate-200 bg-white p-8 font-serif leading-relaxed text-slate-900 shadow-md sm:p-10 print:p-0"
+        >          <div className="mb-6 border-b-2 border-slate-900 pb-4 text-center">
             <div
               className={{cn(
                 "text-xl font-bold tracking-tight text-slate-900 sm:text-2xl",
@@ -619,11 +631,24 @@ export function RepresentationLetterPage() {{
 }}
 '''
 
-    OUT_PATH.write_text(tsx, encoding="utf-8")
-    text = OUT_PATH.read_text(encoding="utf-8")
+    force = "--force" in sys.argv
+    target = OUT_PATH if force else LEGACY_OUT
+    if force:
+        print(
+            "WARNING: --force overwrites live RepresentationLetterPage.tsx "
+            "(will wipe TWA PDF helpers unless you merge carefully).",
+            file=sys.stderr,
+        )
+    target.write_text(tsx, encoding="utf-8")
+    text = target.read_text(encoding="utf-8")
     if "\ufffd" in text:
         raise SystemExit("Generated file contains replacement characters")
-    print(f"Wrote {OUT_PATH} ({OUT_PATH.stat().st_size} bytes)")
+    print(f"Wrote {target} ({target.stat().st_size} bytes)")
+    if not force:
+        print(
+            f"Refused to overwrite {OUT_PATH.name}; wrote legacy draft to {target.name}. "
+            "Pass --force only if intentional."
+        )
 
 
 if __name__ == "__main__":

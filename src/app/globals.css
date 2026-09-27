@@ -125,8 +125,9 @@ body {
 
 @media print {
   @page {
-    size: A4;
-    margin: 12mm 14mm;
+    size: A4 portrait;
+    /* Tight margins shrink browser header/footer URL + page-number chrome. */
+    margin: 12mm 15mm 12mm 15mm;
   }
 
   html,
@@ -137,6 +138,8 @@ body {
     padding: 0 !important;
     height: auto !important;
     overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* Hide site chrome (a11y bar, nav, ticker, footer, chatbot, controls). */
@@ -176,7 +179,16 @@ body {
     margin: 0 !important;
     max-width: none !important;
     width: 100% !important;
+    min-height: 0 !important;
     background: #fff !important;
+  }
+
+  /* Keep signature + verification stamp on the same A4 sheet as the body. */
+  .print-signature-block {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    break-before: avoid !important;
+    page-break-before: avoid !important;
   }
 
   #main-content {
