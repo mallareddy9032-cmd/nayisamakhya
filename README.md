@@ -48,14 +48,17 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 ## Supabase (optional)
 
-Mandal hubs and urban ULB pages read from Postgres when env is set; otherwise they fall back to static JSON (`mandals.ts`, `urban-directory.json`). Apply `supabase/migrations/004_urban_local_bodies.sql` for the urban tables.
+Geography coverage (static fallbacks always available): **33 districts**, **589 mandals**, **135 ULBs** (12 municipal corporations + 123 municipalities).
+
+Mandal hubs and urban ULB pages read from Postgres when env is set; otherwise they fall back to static JSON (`mandals-directory.json`, `urban-directory.json`). Apply `supabase/migrations/004_urban_local_bodies.sql` for the urban tables.
 
 1. Create a Supabase project and copy URL + anon key into `.env.local` (see `.env.example`).
 2. Run migrations in order:
    - `supabase/migrations/001_civic_schema.sql`
    - `supabase/migrations/002_surveys.sql`
+   - `supabase/migrations/004_urban_local_bodies.sql`
    - `supabase/migrations/create_mandal_officers.sql`
-3. Seed districts + mandals: `seed_phase1_districts.sql`, then `seed_phase2_mandals.sql` (or `seed.sql`).
+3. Seed districts + mandals + ULBs: `seed_phase1_districts.sql`, `seed_phase1_ulbs.sql`, then `seed_phase2_mandals.sql` (or `seed.sql`).
 4. Seed nodal officers roster:
    ```bash
    npm run seed:officers

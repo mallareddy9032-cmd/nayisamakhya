@@ -32,7 +32,20 @@ export type StaticUlb = {
   }>;
 };
 
+/** Canonical TG ULB set: 12 municipal corporations + 123 municipalities. */
+export const EXPECTED_ULB_COUNT = 135;
+
 export const URBAN_DIRECTORY = directory as StaticUlb[];
+
+if (URBAN_DIRECTORY.length !== EXPECTED_ULB_COUNT) {
+  throw new Error(
+    `Expected ${EXPECTED_ULB_COUNT} Telangana ULBs, got ${URBAN_DIRECTORY.length}`,
+  );
+}
+
+export function listUrbanDirectory(): StaticUlb[] {
+  return URBAN_DIRECTORY;
+}
 
 export function listStaticUlbsForDistrict(districtSlug: string): StaticUlb[] {
   return URBAN_DIRECTORY.filter((u) => u.district_slug === districtSlug);
