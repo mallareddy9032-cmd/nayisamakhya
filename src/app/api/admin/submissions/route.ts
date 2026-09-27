@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  clearedPhotoFields,
+  collectPhotoUrls,
+  deleteSurveyPhotosFromStorage,
+} from "@/lib/moderation/deleteSurveyPhotos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,6 +21,13 @@ function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: { persistSession: false },
   });
+}
+
+async function purgeSubmissionPhotos(
+  supabase: SupabaseClient,
+  row: { photo_url?: string | null; photo_urls?: unknown },
+) {
+  return deleteSurveyPhotosFromStorage(supabase, collectPhotoUrls(row));
 }
 
 function verifyAuth(req: NextRequest): boolean {
@@ -222,10 +234,12 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Fetch recipient details before update (needed for Telegram notify).
+    // Fetch recipient + photo URLs before update (Telegram notify + Storage cleanup).
     const { data: existing, error: fetchErr } = await supabase
       .from("survey_submissions")
-      .select("telegram_chat_id, sender_name, raw_caption")
+      .select(
+        "telegram_chat_id, sender_name, raw_caption, photo_url, photo_urls, status",
+      )
       .eq("id", id)
       .single();
 
@@ -236,18 +250,38 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    // Hard-delete Storage objects on reject so rejected photos do not waste quota.
+    // Missing files are treated as success. Never delete Storage for approve.
+    let storageCleanup: Awaited<
+      ReturnType<typeof purgeSubmissionPhotos>
+    > | null = null;
+    if (status === "rejected") {
+      storageCleanup = await purgeSubmissionPhotos(supabase, existing);
+      if (storageCleanup.errors.length) {
+        console.error(
+          "survey-photos delete on reject:",
+          storageCleanup.errors.join("; "),
+        );
+      }
+    }
+
+    const updatePayload: Record<string, unknown> = {
+      status,
+      district_id: district_id || null,
+      mandal_id: mandal_id || null,
+      panchayat_name: panchayat_name || null,
+      admin_notes: admin_notes || null,
+      reviewed_at: new Date().toISOString(),
+      moderated_at: new Date().toISOString(),
+      moderated_by: "admin-desk",
+    };
+    if (status === "rejected") {
+      Object.assign(updatePayload, clearedPhotoFields());
+    }
+
     const { data, error } = await supabase
       .from("survey_submissions")
-      .update({
-        status,
-        district_id: district_id || null,
-        mandal_id: mandal_id || null,
-        panchayat_name: panchayat_name || null,
-        admin_notes: admin_notes || null,
-        reviewed_at: new Date().toISOString(),
-        moderated_at: new Date().toISOString(),
-        moderated_by: "admin-desk",
-      })
+      .update(updatePayload)
       .eq("id", id)
       .select(
         `
@@ -317,9 +351,146 @@ export async function PATCH(req: NextRequest) {
       await sendTelegramMessage(chatId, rejectionMsg);
     }
 
-    return NextResponse.json({ success: true, submission: data });
+    return NextResponse.json({
+      success: true,
+      submission: data,
+      storage_cleanup: storageCleanup,
+    });
   } catch (err) {
     console.error("PATCH /api/admin/submissions", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "server_error" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * Hard-delete one rejected submission (DB row + Storage), or purge Storage for
+ * all already-rejected rows that still hold photo URLs.
+ *
+ * Body:
+ * - `{ id }` — delete that row forever (Storage + DB). Refuses approved rows.
+ * - `{ purge_rejected_storage: true }` — one-shot Storage cleanup for status=rejected.
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    if (!verifyAuth(req)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let body: {
+      id?: string;
+      purge_rejected_storage?: boolean;
+    };
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+    }
+
+    const supabase = getSupabase();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "supabase_not_configured" },
+        { status: 503 },
+      );
+    }
+
+    if (body.purge_rejected_storage) {
+      const { data: rows, error } = await supabase
+        .from("survey_submissions")
+        .select("id, photo_url, photo_urls")
+        .eq("status", "rejected")
+        .limit(500);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      let attempted = 0;
+      let deleted = 0;
+      let missing = 0;
+      const errors: string[] = [];
+      const clearedIds: string[] = [];
+
+      for (const row of rows || []) {
+        const urls = collectPhotoUrls(row);
+        if (!urls.length) continue;
+        const result = await purgeSubmissionPhotos(supabase, row);
+        attempted += result.attempted;
+        deleted += result.deleted.length;
+        missing += result.missing.length;
+        errors.push(...result.errors);
+        if (!result.errors.length) {
+          await supabase
+            .from("survey_submissions")
+            .update(clearedPhotoFields())
+            .eq("id", row.id);
+          clearedIds.push(row.id);
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: "purge_rejected_storage",
+        rows_cleared: clearedIds.length,
+        storage: { attempted, deleted, missing, errors },
+      });
+    }
+
+    if (!body.id) {
+      return NextResponse.json(
+        { error: "Missing id or purge_rejected_storage" },
+        { status: 400 },
+      );
+    }
+
+    const { data: existing, error: fetchErr } = await supabase
+      .from("survey_submissions")
+      .select("id, status, photo_url, photo_urls")
+      .eq("id", body.id)
+      .maybeSingle();
+
+    if (fetchErr || !existing) {
+      return NextResponse.json(
+        { error: "Submission not found" },
+        { status: 404 },
+      );
+    }
+
+    if (existing.status === "approved") {
+      return NextResponse.json(
+        { error: "refusing_to_delete_approved" },
+        { status: 409 },
+      );
+    }
+
+    const storageCleanup = await purgeSubmissionPhotos(supabase, existing);
+    if (storageCleanup.errors.length) {
+      console.error(
+        "survey-photos delete forever:",
+        storageCleanup.errors.join("; "),
+      );
+    }
+
+    const { error: deleteErr } = await supabase
+      .from("survey_submissions")
+      .delete()
+      .eq("id", body.id);
+
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      action: "delete_forever",
+      id: body.id,
+      storage_cleanup: storageCleanup,
+    });
+  } catch (err) {
+    console.error("DELETE /api/admin/submissions", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "server_error" },
       { status: 500 },

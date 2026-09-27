@@ -12,6 +12,8 @@ import {
   LogOut,
   Camera,
   BarChart3,
+  Trash2,
+  Eraser,
 } from "lucide-react";
 import DistrictHeatMap from "@/components/admin/DistrictHeatMap";
 import type { DistrictSaturation } from "@/lib/analytics/saturation";
@@ -268,6 +270,13 @@ export default function AdminDeskPage() {
     id: string,
     newStatus: "approved" | "rejected",
   ) => {
+    if (newStatus === "rejected") {
+      const ok = window.confirm(
+        "Reject this photo? The image will be deleted from Supabase Storage (cannot undo). The rejected audit row is kept.",
+      );
+      if (!ok) return;
+    }
+
     setError("");
     try {
       const res = await fetch("/api/admin/submissions", {
@@ -304,6 +313,77 @@ export default function AdminDeskPage() {
     } catch (err) {
       console.error("Failed to update status:", err);
       setError(err instanceof Error ? err.message : "Update failed");
+    }
+  };
+
+  const handleDeleteForever = async (id: string) => {
+    const ok = window.confirm(
+      "Delete forever? This removes the DB row and any remaining Storage objects. Cannot undo.",
+    );
+    if (!ok) return;
+
+    setError("");
+    try {
+      const res = await fetch("/api/admin/submissions", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+      const json = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(json.error || `Delete failed (${res.status})`);
+        return;
+      }
+      setSubmissions((prev) => prev.filter((item) => item.id !== id));
+      setSelectedSubmission(null);
+      setCounts((prev) => ({
+        ...prev,
+        rejected: Math.max(0, prev.rejected - 1),
+      }));
+    } catch (err) {
+      console.error("Failed to delete forever:", err);
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
+  };
+
+  const handlePurgeRejectedStorage = async () => {
+    const ok = window.confirm(
+      "Purge Storage for all Rejected items that still have photos? Audit rows stay; only Storage objects are removed.",
+    );
+    if (!ok) return;
+
+    setError("");
+    try {
+      const res = await fetch("/api/admin/submissions", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ purge_rejected_storage: true }),
+      });
+      const json = (await res.json()) as {
+        error?: string;
+        rows_cleared?: number;
+        storage?: { deleted?: number; missing?: number; errors?: string[] };
+      };
+      if (!res.ok) {
+        setError(json.error || `Purge failed (${res.status})`);
+        return;
+      }
+      const deleted = json.storage?.deleted ?? 0;
+      const cleared = json.rows_cleared ?? 0;
+      const purgeWarning = json.storage?.errors?.length
+        ? `Purged ${deleted} object(s) / ${cleared} row(s); some errors: ${json.storage.errors.join("; ")}`
+        : "";
+      await loadDesk(token, "rejected");
+      if (purgeWarning) setError(purgeWarning);
+    } catch (err) {
+      console.error("Failed to purge rejected storage:", err);
+      setError(err instanceof Error ? err.message : "Purge failed");
     }
   };
 
@@ -355,7 +435,7 @@ export default function AdminDeskPage() {
           </h1>
           <p className="mt-1 text-xs text-slate-400">
             Review field photos from @NayiSamakhyaDeskBot — approve to publish,
-            reject to dismiss.
+            reject to dismiss and free Supabase Storage.
           </p>
         </div>
 
@@ -400,6 +480,18 @@ export default function AdminDeskPage() {
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
+          {activeTab === "rejected" ? (
+            <button
+              type="button"
+              onClick={() => void handlePurgeRejectedStorage()}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-200 hover:bg-rose-500/20 disabled:opacity-50"
+              title="Delete Storage objects for rejected rows that still have photos"
+            >
+              <Eraser className="h-3.5 w-3.5" />
+              Purge storage
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={handleLogout}
@@ -708,6 +800,24 @@ export default function AdminDeskPage() {
                       >
                         <XCircle className="h-4 w-4" />
                         <span className="font-telugu">{"\u0c24\u0c3f\u0c30\u0c38\u0c4d\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c41 (Reject)"}</span>
+                      </button>
+                    </div>
+                  ) : null}
+                  {activeTab === "rejected" ? (
+                    <div className="space-y-2">
+                      <p className="text-[11px] leading-relaxed text-slate-500">
+                        Reject already frees Storage. Use Delete forever only to
+                        remove the audit row too.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleDeleteForever(selectedSubmission.id)
+                        }
+                        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-950/40 py-2 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-900/50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete forever
                       </button>
                     </div>
                   ) : null}
