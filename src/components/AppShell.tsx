@@ -24,9 +24,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/twa");
 
   if (isChromeFree) {
-    // Light civic tools (/feed, /poster, …) sit on paper; dark desks keep slate.
+    // Light civic tools (/feed, /poster, /announce, …) sit on paper; admin desks keep slate.
     // Use <div> — tool pages own their own <main> landmark.
-    const shellBg = pathname.startsWith("/admin") || pathname.startsWith("/announce")
+    const shellBg = pathname.startsWith("/admin")
       ? "bg-slate-950"
       : "bg-civic-paper";
     return (

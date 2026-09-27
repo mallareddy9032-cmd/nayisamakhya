@@ -99,36 +99,39 @@ export function CivicFooter() {
         <div>
           <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
             <Users className="h-3.5 w-3.5 text-civic-bronze" />
-            {"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24\u0c32 \u0c35\u0c47\u0c26\u0c3f\u0c15"}
+            {"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24\u0c32\u0c15\u0c41"}
+            <span className="ml-1 font-sans text-[10px] font-medium normal-case tracking-normal text-slate-500">
+              / For coordinators
+            </span>
           </h3>
           <ul className="space-y-2.5 font-telugu text-[12px]">
-            <li>
-              <Link
-                href="/coordinators/card"
-                className="flex items-center justify-between hover:text-civic-bronze"
-              >
-                <span>{"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"}</span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /coordinators/card
-                </span>
-              </Link>
-            </li>
             <li>
               <Link
                 href="/poster"
                 className="flex items-center justify-between hover:text-civic-bronze"
               >
-                <span>{"\u0c38\u0c46\u0c32\u0c42\u0c28\u0c4d \u0c37\u0c3e\u0c2a\u0c41 QR \u0c2a\u0c4b\u0c38\u0c4d\u0c1f\u0c30\u0c4d (A4)"}</span>
+                <span>{"\u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c2a\u0c4b\u0c38\u0c4d\u0c1f\u0c30\u0c4d (QR / A4)"}</span>
                 <span className="font-sans text-[10px] text-slate-400">/poster</span>
               </Link>
             </li>
             <li>
               <Link
-                href="/twa"
+                href="/announce"
                 className="flex items-center justify-between hover:text-civic-bronze"
               >
-                <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d Mini App \u0c39\u0c2c\u0c4d"}</span>
-                <span className="font-sans text-[10px] text-slate-400">/twa</span>
+                <span>{"WhatsApp \u0c38\u0c02\u0c26\u0c47\u0c36 \u0c15\u0c3f\u0c1f\u0c4d"}</span>
+                <span className="font-sans text-[10px] text-slate-400">/announce</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/coordinator-card"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"}</span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /coordinator-card
+                </span>
               </Link>
             </li>
           </ul>
@@ -150,6 +153,15 @@ export function CivicFooter() {
                 <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d \u0c2c\u0c3e\u0c1f\u0c4d (@NayiSamakhyaDeskBot)"}</span>
                 <ExternalLink className="h-3 w-3 text-slate-400" />
               </a>
+            </li>
+            <li>
+              <Link
+                href="/twa"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d Mini App \u0c39\u0c2c\u0c4d"}</span>
+                <span className="font-sans text-[10px] text-slate-400">/twa</span>
+              </Link>
             </li>
             <li>
               <Link

@@ -1,4 +1,4 @@
-/** Community WhatsApp / Telegram blasts — keep *markers* for chat formatting. */
+/** Manual WhatsApp message kit — keep *markers* for chat formatting. */
 
 export const TELEGRAM_BOT_URL = "https://t.me/NayiSamakhyaDeskBot";
 export const PORTAL_URL = "https://www.nayisamakhya.org";
@@ -6,8 +6,11 @@ export const ANNOUNCE_PAGE_URL = `${PORTAL_URL}/announce`;
 
 export type CommunityBlastId = "desk" | "representation" | "feed" | "sop";
 
+export type CommunityBlastAudience = "public" | "coordinator";
+
 export type CommunityBlast = {
   id: CommunityBlastId;
+  audience: CommunityBlastAudience;
   title_te: string;
   title_en: string;
   blurb_te: string;
@@ -18,6 +21,7 @@ export type CommunityBlast = {
 export const COMMUNITY_BLASTS: CommunityBlast[] = [
   {
     "id": "desk",
+    "audience": "public",
     "title_te": "డిజిటల్ డెస్క్ ప్రారంభం",
     "title_en": "Digital Desk launch",
     "blurb_te": "సేవా డెస్క్ + Telegram bot",
@@ -26,6 +30,7 @@ export const COMMUNITY_BLASTS: CommunityBlast[] = [
   },
   {
     "id": "representation",
+    "audience": "public",
     "title_te": "వినతిపత్రం",
     "title_en": "Representation letter",
     "blurb_te": "1 నిమిషంలో A4 లెటర్",
@@ -34,6 +39,7 @@ export const COMMUNITY_BLASTS: CommunityBlast[] = [
   },
   {
     "id": "feed",
+    "audience": "public",
     "title_te": "ఫోటో / ఫీడ్",
     "title_en": "Field photo feed",
     "blurb_te": "సెలూన్ ఫోటో నమోదు",
@@ -42,6 +48,7 @@ export const COMMUNITY_BLASTS: CommunityBlast[] = [
   },
   {
     "id": "sop",
+    "audience": "coordinator",
     "title_te": "సమన్వయకర్త SOP",
     "title_en": "Coordinator SOP",
     "blurb_te": "మండల మార్గదర్శకాలు",
@@ -49,6 +56,11 @@ export const COMMUNITY_BLASTS: CommunityBlast[] = [
     "text": "================================================================================\n          నాయి సమాఖ్య తెలంగాణ - మండల సమన్వయకర్తల మార్గదర్శకాలు (SOP)\n================================================================================\n\n1. డిజిటల్ గుర్తింపు కార్డు (Coordinator Digital Card):\n   • ప్రతి మండల సమన్వయకర్త https://www.nayisamakhya.org/coordinators/card\n     వెబ్‌సైట్‌కు వెళ్లి మీ పేరు, మండలం, మొబైల్ నంబర్ నమోదు చేయండి.\n   • 'Print Card' / 'ప్రింట్ కార్డు' బటన్ నొక్కి మీ అధికారిక డిజిటల్ కార్డును PDF గా సేవ్\n     చేసుకోండి లేదా లామినేషన్ చేయించుకోండి.\n   • మీ కార్డుపై ఉన్న QR కోడ్ స్కాన్ చేస్తే ఎవరైనా నేరుగా మన సేవా డెస్క్‌కు చేరుకుంటారు.\n\n2. వాట్సాప్ గ్రూపుల అనుసంధానం:\n   • మీ మండల పరిధిలోని సెలూన్ యజమానుల వాట్సాప్ గ్రూపులలో పై బ్రాడ్‌కాస్ట్\n     సందేశాలను క్రమం తప్పకుండా షేర్ చేయండి.\n   • పెద్దలు మరియు వృత్తిదారులకు మొబైల్ ద్వారా వినతిపత్రాలు ఎలా తయారుచేయాలో\n     సహాయం అందించండి.\n\n3. అధికారులకు వినతిపత్రాల సమర్పణ (Official Representations):\n   • స్థానిక సమస్యలు (కమ్యూనిటీ హాల్స్, ఆధునిక షాపుల స్థలాలు, గుర్తింపు కార్డులు) ఉన్నప్పుడు\n     https://www.nayisamakhya.org/representation టూల్ ద్వారా వినతిపత్రం ప్రింట్ చేయించండి.\n   • తహశీల్దార్, RDO లేదా మున్సిపల్ అధికారులకు సమర్పించి తప్పనిసరిగా\n     అక్నాలెడ్జ్‌మెంట్ (రసీదు) తీసుకోవాలని సూచించండి.\n\n4. క్షేత్ర సమాచార నమోదు (Field Documentation):\n   • మండలంలో జరిగే ప్రతి సంఘ సమావేశం లేదా దుకాణాల వివరాలను ఫోటో తీసి\n     వెంటనే @NayiSamakhyaDeskBot\n     https://t.me/NayiSamakhyaDeskBot కు మండలం పేరుతో పంపించండి.\n   • రాష్ట్ర డెస్క్ అడ్మిన్ ద్వారా ఆమోదించబడిన తర్వాత అవి పబ్లిక్ ఫీడ్\n     (https://www.nayisamakhya.org/feed) లో ప్రదర్శించబడతాయి.\n================================================================================"
   }
 ];
+
+export const PUBLIC_BLASTS = COMMUNITY_BLASTS.filter((b) => b.audience === "public");
+export const COORDINATOR_BLASTS = COMMUNITY_BLASTS.filter(
+  (b) => b.audience === "coordinator",
+);
 
 export function getCommunityBlast(id: string | null | undefined): CommunityBlast {
   return (
