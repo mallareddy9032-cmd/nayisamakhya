@@ -372,6 +372,79 @@ async function handleOfficerLookup(
   return NextResponse.json({ ok: true });
 }
 
+async function insertSurveySubmission(
+  admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  payload: Record<string, unknown>,
+): Promise<{
+  data: { id: string } | null;
+  error: { message?: string; code?: string } | null;
+}> {
+  const OPTIONAL_COLUMNS = [
+    "media_group_id",
+    "reminder_sent",
+    "last_activity_at",
+    "photo_urls",
+    "ulb_id",
+    "panchayat_name",
+    "admin_notes",
+    "reviewed_at",
+  ] as const;
+
+  let attempt: Record<string, unknown> = { ...payload };
+  let lastError: { message?: string; code?: string } | null = null;
+
+  for (let round = 0; round < 6; round++) {
+    const { data, error } = await admin
+      .from("survey_submissions")
+      .insert(attempt)
+      .select("id")
+      .maybeSingle();
+
+    if (!error) {
+      return { data: data as { id: string } | null, error: null };
+    }
+    lastError = error;
+    if (error.code === "23505") {
+      return { data: null, error };
+    }
+
+    const msg = error.message || "";
+    console.error("insert survey_submissions attempt", round, {
+      message: msg,
+      code: error.code,
+      details: (error as { details?: string }).details,
+      hint: (error as { hint?: string }).hint,
+      columns: Object.keys(attempt),
+    });
+
+    let stripped = false;
+    for (const col of OPTIONAL_COLUMNS) {
+      if (col in attempt && new RegExp(`\\b${col}\\b`, "i").test(msg)) {
+        delete attempt[col];
+        stripped = true;
+      }
+    }
+    // PostgREST: "Could not find the 'foo' column of 'survey_submissions' in the schema cache"
+    const missing = msg.match(/Could not find the '(\w+)' column/i);
+    if (missing?.[1] && missing[1] in attempt) {
+      delete attempt[missing[1]];
+      stripped = true;
+    }
+    // If schema is older, strip all optional columns in one shot after first miss.
+    if (!stripped && round === 0) {
+      for (const col of OPTIONAL_COLUMNS) {
+        if (col in attempt) {
+          delete attempt[col];
+          stripped = true;
+        }
+      }
+    }
+    if (!stripped) break;
+  }
+
+  return { data: null, error: lastError };
+}
+
 async function ingestPhoto(
   admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
   message: TelegramMessage,
@@ -402,6 +475,7 @@ async function ingestPhoto(
   const fileMeta = await telegramApi("getFile", { file_id: fileId });
   const filePath = fileMeta?.result?.file_path as string | undefined;
   if (!filePath) {
+    console.error("telegram getFile failed", { fileId, fileMeta });
     await replyText(
       chatId,
       "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C35\u0C3F\u0C2B\u0C32\u0C2E\u0C48\u0C02\u0C26\u0C3F. \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C2A\u0C4D\u0C30\u0C2F\u0C24\u0C4D\u0C28\u0C3F\u0C02\u0C1A\u0C02\u0C21\u0C3F.",
@@ -413,6 +487,10 @@ async function ingestPhoto(
     `https://api.telegram.org/file/bot${botToken()}/${filePath}`,
   );
   if (!fileRes.ok) {
+    console.error("telegram file download failed", {
+      status: fileRes.status,
+      filePath,
+    });
     await replyText(
       chatId,
       "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C35\u0C3F\u0C2B\u0C32\u0C2E\u0C48\u0C02\u0C26\u0C3F. \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C2A\u0C4D\u0C30\u0C2F\u0C24\u0C4D\u0C28\u0C3F\u0C02\u0C1A\u0C02\u0C21\u0C3F.",
@@ -447,10 +525,15 @@ async function ingestPhoto(
     });
 
   if (uploadError && !/already exists/i.test(uploadError.message)) {
-    console.error("storage upload", uploadError);
+    console.error("storage upload survey-photos", {
+      message: uploadError.message,
+      name: uploadError.name,
+      objectPath,
+      bytes: buffer.byteLength,
+    });
     await replyText(
       chatId,
-      "\u274C \u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C35\u0C3F\u0C2B\u0C32\u0C2E\u0C48\u0C02\u0C26\u0C3F. \u0C24\u0C30\u0C4D\u0C35\u0C3E\u0C24 \u0C2A\u0C4D\u0C30\u0C2F\u0C24\u0C4D\u0C28\u0C3F\u0C02\u0C1A\u0C02\u0C21\u0C3F.",
+      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C28\u0C3F\u0C32\u0C4D\u0C35\u0C3E \u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D\u0C32\u0C4B \u0C38\u0C47\u0C35\u0C4D \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41. \u0C2E\u0C40 \u0C2B\u0C4B\u0C1F\u0C4B \u0C07\u0C2A\u0C4D\u0C2A\u0C41\u0C21\u0C41 \u0C05\u0C32\u0C3E; \u0C15\u0C3E\u0C38\u0C4D\u0C24\u0C02 \u0C32\u0C47\u0C15\u0C4D\u0C15\u0C3E \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F. (\u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C32\u0C4B\u0C2A\u0C41)",
     );
     return NextResponse.json({ ok: false, error: "upload_failed" }, { status: 502 });
   }
@@ -461,25 +544,43 @@ async function ingestPhoto(
   const photoUrl = publicUrlData.publicUrl;
 
   // Silent album batching: append to existing media_group row, no extra ack.
+  // Skip when media_group_id column is missing (older schemas) — insert path still works.
   if (mediaGroupId) {
-    const { data: existingGroup } = await admin
+    const { data: existingGroup, error: groupErr } = await admin
       .from("survey_submissions")
       .select("id, photo_urls, raw_caption")
       .eq("media_group_id", mediaGroupId)
       .maybeSingle();
 
-    if (existingGroup?.id) {
+    if (groupErr) {
+      console.error("media_group lookup", {
+        message: groupErr.message,
+        code: groupErr.code,
+        mediaGroupId,
+      });
+    } else if (existingGroup?.id) {
       const prevUrls = Array.isArray(existingGroup.photo_urls)
         ? existingGroup.photo_urls
         : [];
-      await admin
+      const albumUpdate: Record<string, unknown> = {
+        photo_urls: [...prevUrls, photoUrl],
+        raw_caption: existingGroup.raw_caption || caption || null,
+      };
+      // last_activity_at may be absent on older schemas — ignore update errors.
+      albumUpdate.last_activity_at = new Date().toISOString();
+      const { error: albumUpdateErr } = await admin
         .from("survey_submissions")
-        .update({
-          photo_urls: [...prevUrls, photoUrl],
-          last_activity_at: new Date().toISOString(),
-          raw_caption: existingGroup.raw_caption || caption || null,
-        })
+        .update(albumUpdate)
         .eq("id", existingGroup.id);
+      if (albumUpdateErr) {
+        console.error("album append update", albumUpdateErr);
+        const { last_activity_at: _drop, ...withoutActivity } = albumUpdate;
+        void _drop;
+        await admin
+          .from("survey_submissions")
+          .update(withoutActivity)
+          .eq("id", existingGroup.id);
+      }
       return NextResponse.json({ ok: true, album_append: true });
     }
   }
@@ -528,6 +629,8 @@ async function ingestPhoto(
       district_slug: refined.district_slug || null,
       mandal_slug: refined.mandal_slug || null,
       telegram_username: message.from?.username || null,
+      media_group_id: mediaGroupId,
+      missing_caption: !caption,
     },
     photo_url: photoUrl,
     photo_urls: [photoUrl],
@@ -538,40 +641,34 @@ async function ingestPhoto(
     last_activity_at: new Date().toISOString(),
   };
 
-  let { data: inserted, error: insertError } = await admin
-    .from("survey_submissions")
-    .insert(payload)
-    .select("id")
-    .maybeSingle();
-
-  // Retry without columns that may be missing on older schemas.
-  if (insertError) {
-    const msg = insertError.message || "";
-    const legacy = { ...payload };
-    if (/photo_urls/i.test(msg)) delete legacy.photo_urls;
-    if (/media_group_id/i.test(msg)) delete legacy.media_group_id;
-    if (/reminder_sent|last_activity_at/i.test(msg)) {
-      delete legacy.reminder_sent;
-      delete legacy.last_activity_at;
-    }
-    if (Object.keys(legacy).length !== Object.keys(payload).length) {
-      ({ data: inserted, error: insertError } = await admin
-        .from("survey_submissions")
-        .insert(legacy)
-        .select("id")
-        .maybeSingle());
-    }
-  }
+  const { data: inserted, error: insertError } = await insertSurveySubmission(
+    admin,
+    payload,
+  );
 
   if (insertError) {
     if (insertError.code === "23505") {
       return NextResponse.json({ ok: true, duplicate: true });
     }
-    console.error("insert survey_submissions", insertError);
-    await replyText(
-      chatId,
-      "\u274C \u0C28\u0C2E\u0C4B\u0C26\u0C41 \u0C35\u0C3F\u0C2B\u0C32\u0C2E\u0C48\u0C02\u0C26\u0C3F. \u0C24\u0C30\u0C4D\u0C35\u0C3E\u0C24 \u0C2A\u0C4D\u0C30\u0C2F\u0C24\u0C4D\u0C28\u0C3F\u0C02\u0C1A\u0C02\u0C21\u0C3F.",
-    );
+    console.error("insert survey_submissions final", insertError);
+    const detail = (insertError.message || "unknown").slice(0, 120);
+    // Photo is already in storage — tell user clearly; do not ask for blind re-upload.
+    if (!caption) {
+      await replyText(
+        chatId,
+        `\u274C <b>\u0C28\u0C2E\u0C4B\u0C26\u0C41 \u0C07\u0C02\u0C15\u0C3E \u0C2A\u0C42\u0C30\u0C4D\u0C24\u0C3F \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41.</b>\n` +
+          `\u0C2B\u0C4B\u0C1F\u0C4B \u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D\u0C95\u0C41 \u0C1A\u0C47\u0C30\u0C3F\u0C02\u0C26\u0C3F, \u0C15\u0C3E\u0C28\u0C3F \u0C21\u0C47\u0C1F\u0C3E\u0C2C\u0C47\u0C38\u0C4D \u0C32\u0C4B \u0C30\u0C4B \u0C38\u0C47\u0C35\u0C4D \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41.\n\n` +
+          `\u0C26\u0C2F\u0C1A\u0C47\u0C38\u0C3F <b>\u0C2B\u0C4B\u0C1F\u0C4B\u0C28\u0C41 \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C1A\u0C47\u0C2F\u0C15\u0C02\u0C21\u0C3F</b> — \u0C07\u0C2A\u0C4D\u0C2A\u0C41\u0C21\u0C41 \u0C15\u0C4D\u0C2F\u0C3E\u0C2A\u0C4D\u0C37\u0C28\u0C4D\u0C24\u0C4B \u0C1C\u0C3F\u0C32\u0C4D\u0C32\u0C3E / \u0C2E\u0C02\u0C21\u0C32\u0C02 / \u0C35\u0C3F\u0C37\u0C2F\u0C02 \u0C1F\u0C48\u0C2A\u0C4D \u0C1A\u0C47\u0C38\u0C3F \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.\n` +
+          `<i>(tech: ${escapeHtml(detail)})</i>`,
+      );
+    } else {
+      await replyText(
+        chatId,
+        `\u274C <b>\u0C28\u0C2E\u0C4B\u0C26\u0C41 \u0C07\u0C02\u0C15\u0C3E \u0C2A\u0C42\u0C30\u0C4D\u0C24\u0C3F \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41.</b>\n` +
+          `\u0C2B\u0C4B\u0C1F\u0C4B \u0C07\u0C2A\u0C4D\u0C2A\u0C41\u0C21\u0C41 \u0C05\u0C32\u0C3E; \u0C21\u0C47\u0C1F\u0C3E\u0C2C\u0C47\u0C38\u0C4D \u0C30\u0C4B \u0C32\u0C4B\u0C2A\u0C41. \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C05\u0C35\u0C38\u0C30\u0C02 \u0C32\u0C47\u0C26\u0C41 — \u0C15\u0C3E\u0C38\u0C4D\u0C24\u0C02 \u0C32\u0C47\u0C15\u0C4D\u0C15\u0C3E \u0C2E\u0C40 \u0C15\u0C4D\u0C2F\u0C3E\u0C2A\u0C4D\u0C37\u0C28\u0C4D \u0C1F\u0C46\u0C15\u0C4D\u0C38\u0C4D\u0C1F\u0C4D \u0C2E\u0C3E\u0C24\u0C4D\u0C30\u0C2E\u0C47 \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.\n` +
+          `<i>(tech: ${escapeHtml(detail)})</i>`,
+      );
+    }
     return NextResponse.json({ ok: false, error: "insert_failed" }, { status: 500 });
   }
 
@@ -684,14 +781,34 @@ export async function POST(req: Request) {
           ? `${recentSub.raw_caption}\n\n${text}`
           : text;
 
-        await admin
+        const followUp: Record<string, unknown> = {
+          raw_caption: updatedCaption,
+          reminder_sent: true,
+          last_activity_at: new Date().toISOString(),
+        };
+        let { error: followErr } = await admin
           .from("survey_submissions")
-          .update({
-            raw_caption: updatedCaption,
-            reminder_sent: true,
-            last_activity_at: new Date().toISOString(),
-          })
+          .update(followUp)
           .eq("id", recentSub.id);
+        if (followErr) {
+          console.error("follow-up caption update", followErr);
+          const msg = followErr.message || "";
+          const slim = { ...followUp };
+          if (/reminder_sent/i.test(msg)) delete slim.reminder_sent;
+          if (/last_activity_at/i.test(msg)) delete slim.last_activity_at;
+          // Strip both optional columns if schema is older.
+          if (Object.keys(slim).length === Object.keys(followUp).length) {
+            delete slim.reminder_sent;
+            delete slim.last_activity_at;
+          }
+          ({ error: followErr } = await admin
+            .from("survey_submissions")
+            .update(slim)
+            .eq("id", recentSub.id));
+          if (followErr) {
+            console.error("follow-up caption update retry", followErr);
+          }
+        }
 
         await replyText(
           chatId,
