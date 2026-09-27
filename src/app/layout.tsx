@@ -23,7 +23,17 @@ const title =
   "\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 | \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d";
 const description =
   "\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c38\u0c3e\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c24, \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c38\u0c2e\u0c30\u0c4d\u0c2a\u0c23 \u0c15\u0c47\u0c02\u0c26\u0c4d\u0c30\u0c02.";
-const ogImage = { url: "/api/og", width: 1200, height: 630, alt: "Nayi Samakhya Telangana" };
+// WhatsApp/crawlers need a strictly absolute og:image URL (never relative /api/og).
+const ogImageUrl = "https://www.nayisamakhya.org/api/og";
+const ogImageAlt =
+  "\u0c28\u0c3e\u0c2f\u0c40 \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02";
+const ogImage = {
+  url: ogImageUrl,
+  type: "image/png" as const,
+  width: 1200,
+  height: 630,
+  alt: ogImageAlt,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.nayisamakhya.org"),
@@ -44,7 +54,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: [ogImage],
+    images: [ogImageUrl],
   },
 };
 

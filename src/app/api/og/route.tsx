@@ -150,8 +150,8 @@ export async function GET(req: Request) {
 
   return new Response(new Uint8Array(png), {
     headers: {
-      "content-type": "image/png",
-      "cache-control": "public, immutable, no-transform, max-age=31536000",
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400, stale-while-revalidate=43200",
     },
   });
 }
