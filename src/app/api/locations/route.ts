@@ -6,6 +6,7 @@ import {
   canonicalMandalSlug,
 } from "@/lib/data/locationAliases";
 import { listMandalsDirectory } from "@/lib/data/mandalsDirectory";
+import { listUrbanDirectory } from "@/lib/data/urbanDirectory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,9 +26,19 @@ export type LocationMandal = {
   name_te: string;
 };
 
+export type LocationUlb = {
+  id: string;
+  district_id: string;
+  slug: string;
+  name_en: string;
+  name_te: string;
+  ulb_type: string;
+};
+
 function staticLocations(): {
   districts: LocationDistrict[];
   mandals: LocationMandal[];
+  ulbs: LocationUlb[];
 } {
   const districts: LocationDistrict[] = listDistricts()
     .map((d) => ({
@@ -48,7 +59,18 @@ function staticLocations(): {
     }))
     .sort((a, b) => a.name_en.localeCompare(b.name_en));
 
-  return { districts, mandals };
+  const ulbs: LocationUlb[] = listUrbanDirectory()
+    .map((u) => ({
+      id: `${u.district_slug}-${u.slug}`,
+      district_id: u.district_slug,
+      slug: u.slug,
+      name_en: u.name_en,
+      name_te: u.name_te,
+      ulb_type: u.ulb_type,
+    }))
+    .sort((a, b) => a.name_en.localeCompare(b.name_en));
+
+  return { districts, mandals, ulbs };
 }
 
 function mergeByKey<T>(
@@ -67,11 +89,12 @@ export async function GET() {
   const fallback = staticLocations();
   let districts = fallback.districts;
   let mandals = fallback.mandals;
+  let ulbs = fallback.ulbs;
 
   try {
     const supabase = getSupabase();
     if (supabase) {
-      const [dRes, mRes] = await Promise.all([
+      const [dRes, mRes, uRes] = await Promise.all([
         supabase
           .from("districts")
           .select("id, slug, name_en, name_te")
@@ -79,6 +102,10 @@ export async function GET() {
         supabase
           .from("mandals")
           .select("id, district_id, slug, name_en, name_te")
+          .order("name_en", { ascending: true }),
+        supabase
+          .from("urban_local_bodies")
+          .select("id, district_id, slug, name_en, name_te, ulb_type")
           .order("name_en", { ascending: true }),
       ]);
 
@@ -148,6 +175,39 @@ export async function GET() {
           (row) => `${row.district_id}::${row.slug}`,
         ).sort((a, b) => a.name_en.localeCompare(b.name_en));
       }
+
+      if (!uRes.error && uRes.data?.length) {
+        const remoteUlbs: LocationUlb[] = (
+          uRes.data as Array<{
+            id: string;
+            district_id: string;
+            slug: string;
+            name_en: string;
+            name_te: string;
+            ulb_type: string;
+          }>
+        )
+          .map((row) => {
+            const districtSlug = canonicalDistrictSlug(
+              uuidToSlug.get(row.district_id) || row.district_id,
+            );
+            return {
+              id: row.id,
+              district_id: districtSlug,
+              slug: row.slug,
+              name_en: row.name_en,
+              name_te: row.name_te,
+              ulb_type: row.ulb_type || "municipality",
+            };
+          })
+          .filter((row) => Boolean(row.district_id));
+
+        ulbs = mergeByKey(
+          fallback.ulbs,
+          remoteUlbs,
+          (row) => `${row.district_id}::${row.slug}`,
+        ).sort((a, b) => a.name_en.localeCompare(b.name_en));
+      }
     }
   } catch {
     // keep static fallback
@@ -157,10 +217,12 @@ export async function GET() {
     {
       districts,
       mandals,
+      ulbs,
       meta: {
         district_count: districts.length,
         mandal_count: mandals.length,
-        phase: "districts+mandals",
+        ulb_count: ulbs.length,
+        phase: "districts+mandals+ulbs",
       },
     },
     {
