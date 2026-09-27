@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Cursor / cloud agent port-forward previews hit the app via 127.0.0.1.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // harfbuzzjs (via satori) locates hb.wasm relative to its own file; bundling breaks that.
+  serverExternalPackages: ["satori"],
   images: {
     remotePatterns: [
       {
