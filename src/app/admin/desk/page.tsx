@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle,
   XCircle,
@@ -12,12 +12,26 @@ import {
   LogOut,
   Camera,
   BarChart3,
+  MapPin,
+  X,
 } from "lucide-react";
-import DistrictHeatMap from "@/components/admin/DistrictHeatMap";
-import type { DistrictSaturation } from "@/lib/analytics/saturation";
+import { TelanganaHeatMap } from "@/components/admin/TelanganaHeatMap";
+import type {
+  DistrictSaturation,
+  PilotCorridorKpi,
+} from "@/lib/analytics/saturation";
+import { slugFromDistrictLabel } from "@/lib/analytics/saturation";
+import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 
 type QueueTab = "pending" | "approved" | "rejected";
 type Tab = QueueTab | "analytics";
+
+type PlaceRel = {
+  id?: string;
+  name_en?: string | null;
+  name_te?: string | null;
+  slug?: string | null;
+} | null;
 
 interface Submission {
   id: string;
@@ -32,6 +46,8 @@ interface Submission {
   mandal_id?: string;
   panchayat_name?: string;
   admin_notes?: string;
+  districts?: PlaceRel | PlaceRel[];
+  mandals?: PlaceRel | PlaceRel[];
 }
 
 interface AnalyticsRow {
@@ -47,7 +63,7 @@ interface SaturationPayload {
   districts: DistrictSaturation[];
   thresholds?: { high: number; active: number };
   formula?: string;
-  active_definition?: string;
+  verified_definition?: string;
   verified_coordinators_source?: string;
   notes?: string[];
 }
@@ -57,6 +73,22 @@ type Counts = Record<QueueTab, number>;
 const EMPTY_COUNTS: Counts = { pending: 0, approved: 0, rejected: 0 };
 const QUEUE_TABS: QueueTab[] = ["pending", "approved", "rejected"];
 const ALL_TABS: Tab[] = ["pending", "approved", "rejected", "analytics"];
+
+function placeOf(rel: PlaceRel | PlaceRel[] | undefined): PlaceRel {
+  if (!rel) return null;
+  return Array.isArray(rel) ? rel[0] || null : rel;
+}
+
+function submissionDistrictSlug(sub: Submission): string | null {
+  const d = placeOf(sub.districts);
+  if (d?.slug) {
+    const s = String(d.slug).toLowerCase();
+    if (TELANGANA_DISTRICTS.some((x) => x.slug === s)) return s;
+  }
+  return slugFromDistrictLabel(
+    String(d?.name_en || d?.name_te || "").trim(),
+  );
+}
 
 function usablePhotoUrl(url: unknown): url is string {
   if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return false;
@@ -85,6 +117,8 @@ export default function AdminDeskPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
   const [saturation, setSaturation] = useState<SaturationPayload | null>(null);
+  const [pilotCorridors, setPilotCorridors] = useState<PilotCorridorKpi[]>([]);
+  const [districtFilter, setDistrictFilter] = useState<string | null>(null);
   const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS);
   const [activeTab, setActiveTab] = useState<Tab>("pending");
   const [loading, setLoading] = useState(false);
@@ -124,16 +158,19 @@ export default function AdminDeskPage() {
         const json = (await res.json()) as {
           analytics?: AnalyticsRow[];
           saturation?: SaturationPayload;
+          pilot_corridors?: PilotCorridorKpi[];
           error?: string;
         };
         if (!res.ok) {
           setError(json.error || `HTTP ${res.status}`);
           setAnalytics([]);
           setSaturation(null);
+          setPilotCorridors([]);
           return;
         }
         setAnalytics(json.analytics || []);
         setSaturation(json.saturation || null);
+        setPilotCorridors(json.pilot_corridors || []);
       } catch (err) {
         console.error("Failed to load analytics:", err);
         setError(err instanceof Error ? err.message : "Failed to load analytics");
@@ -259,6 +296,8 @@ export default function AdminDeskPage() {
     setSubmissions([]);
     setAnalytics([]);
     setSaturation(null);
+    setPilotCorridors([]);
+    setDistrictFilter(null);
     setCounts(EMPTY_COUNTS);
     setSelectedSubmission(null);
     setActiveTab("pending");
@@ -307,6 +346,31 @@ export default function AdminDeskPage() {
     }
   };
 
+  const handleDistrictSelect = useCallback((slug: string | null) => {
+    setDistrictFilter(slug);
+    if (slug) {
+      setActiveTab("pending");
+      setSelectedSubmission(null);
+    }
+  }, []);
+
+  const filteredSubmissions = useMemo(() => {
+    if (!districtFilter) return submissions;
+    return submissions.filter(
+      (s) => submissionDistrictSlug(s) === districtFilter,
+    );
+  }, [submissions, districtFilter]);
+
+  const filterLabel = useMemo(() => {
+    if (!districtFilter) return null;
+    const hit = TELANGANA_DISTRICTS.find((d) => d.slug === districtFilter);
+    return hit || { slug: districtFilter, name_en: districtFilter, name_te: "" };
+  }, [districtFilter]);
+
+  const otherNonEmpty = QUEUE_TABS.filter(
+    (t) => t !== activeTab && counts[t] > 0,
+  );
+
   if (!isAuthorized) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-slate-950 p-4">
@@ -338,10 +402,6 @@ export default function AdminDeskPage() {
       </div>
     );
   }
-
-  const otherNonEmpty = QUEUE_TABS.filter(
-    (t) => t !== activeTab && counts[t] > 0,
-  );
 
   return (
     <div className="min-h-dvh bg-slate-950 p-4 text-slate-100 sm:p-6">
@@ -421,11 +481,14 @@ export default function AdminDeskPage() {
 
         {activeTab === "analytics" ? (
           <div className="space-y-6">
-            <DistrictHeatMap
+            <TelanganaHeatMap
               districts={saturation?.districts || []}
+              pilotCorridors={pilotCorridors}
               loading={loading}
               notes={saturation?.notes}
               verifiedSource={saturation?.verified_coordinators_source}
+              selectedSlug={districtFilter}
+              onDistrictSelect={handleDistrictSelect}
             />
 
             <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
@@ -434,7 +497,7 @@ export default function AdminDeskPage() {
                   {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e \u0c35\u0c3e\u0c30\u0c40\u0c17\u0c3e \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 (District Performance)"}
                 </h2>
                 <span className="text-xs text-slate-400">
-                  Submission volume by status (existing analytics)
+                  Submission volume by status (live from /api/admin/analytics)
                 </span>
               </div>
               <div className="overflow-x-auto">
@@ -491,18 +554,44 @@ export default function AdminDeskPage() {
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <section className="space-y-4 lg:col-span-7">
-              {submissions.length === 0 ? (
+              {filterLabel ? (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
+                  <p className="inline-flex items-center gap-2 text-amber-100">
+                    <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+                    <span className="font-telugu font-semibold">
+                      {filterLabel.name_te}
+                    </span>
+                    <span className="text-amber-200/80">
+                      ({filterLabel.name_en}) — queue filtered
+                    </span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setDistrictFilter(null)}
+                    className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-slate-950/40 px-2.5 py-1 text-xs font-semibold text-amber-200 hover:bg-slate-950/70"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden />
+                    Clear filter
+                  </button>
+                </div>
+              ) : null}
+
+              {filteredSubmissions.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/80 p-8 text-center">
                   <Camera className="mx-auto mb-3 h-8 w-8 text-slate-600" />
                   <p className="font-telugu text-sm font-medium text-slate-300">
-                    {"\u0c28\u0c4b\u0c1f\u0c3f\u0c2b\u0c3f\u0c15\u0c47\u0c37\u0c28\u0c4d\u0c32\u0c41 \u0c0f\u0c35\u0c40 \u0c32\u0c47\u0c35\u0c41"} (No {activeTab} submissions found).
+                    {"\u0c28\u0c4b\u0c1f\u0c3f\u0c2b\u0c3f\u0c15\u0c47\u0c37\u0c28\u0c4d\u0c32\u0c41 \u0c0f\u0c35\u0c40 \u0c32\u0c47\u0c35\u0c41"}{" "}
+                    (No {activeTab} submissions
+                    {filterLabel ? ` in ${filterLabel.name_en}` : ""}).
                   </p>
                   <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                    {activeTab === "pending"
-                      ? "Pending includes new and flagged intake. Send a photo to @NayiSamakhyaDeskBot to queue work."
-                      : `Nothing in ${activeTab} right now.`}
+                    {districtFilter
+                      ? "Try another district on the Analytics heat map, or clear the filter."
+                      : activeTab === "pending"
+                        ? "Pending includes new and flagged intake. Send a photo to @NayiSamakhyaDeskBot to queue work."
+                        : `Nothing in ${activeTab} right now.`}
                   </p>
-                  {otherNonEmpty.length > 0 ? (
+                  {otherNonEmpty.length > 0 && !districtFilter ? (
                     <div className="mt-4 flex flex-wrap justify-center gap-2">
                       {otherNonEmpty.map((tab) => (
                         <button
@@ -516,9 +605,18 @@ export default function AdminDeskPage() {
                       ))}
                     </div>
                   ) : null}
+                  {districtFilter ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("analytics")}
+                      className="mt-4 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20"
+                    >
+                      Back to heat map
+                    </button>
+                  ) : null}
                 </div>
               ) : (
-                submissions.map((sub) => {
+                filteredSubmissions.map((sub) => {
                   const photos = photosOf(sub);
                   const isSelected = selectedSubmission?.id === sub.id;
 

@@ -144,8 +144,8 @@ export async function GET(req: NextRequest) {
       mandal_id,
       panchayat_name,
       admin_notes,
-      districts(id, name_en, name_te),
-      mandals(id, name_en, name_te)
+      districts(id, name_en, name_te, slug),
+      mandals(id, name_en, name_te, slug)
     `,
       )
       .order("created_at", { ascending: false })
@@ -252,8 +252,8 @@ export async function PATCH(req: NextRequest) {
       .select(
         `
       *,
-      districts(name_en, name_te),
-      mandals(name_en, name_te)
+      districts(name_en, name_te, slug),
+      mandals(name_en, name_te, slug)
     `,
       )
       .single();
