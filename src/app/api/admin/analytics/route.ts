@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
+import {
+  buildEmptySaturationRows,
+  computeSaturationIndex,
+  SATURATION_THRESHOLDS,
+  slugFromDistrictLabel,
+  staticMandalCountBySlug,
+  tierForIndex,
+  type DistrictSaturation,
+} from "@/lib/analytics/saturation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type PlaceRel = { name_en?: string | null; name_te?: string | null } | null;
+type PlaceRel = {
+  name_en?: string | null;
+  name_te?: string | null;
+  slug?: string | null;
+} | null;
 
 type DistrictCounts = {
   total: number;
@@ -38,6 +52,23 @@ function placeName(rel: PlaceRel | PlaceRel[] | undefined): string {
   return String(row.name_te || row.name_en || "").trim();
 }
 
+function placeSlug(rel: PlaceRel | PlaceRel[] | undefined): string | null {
+  const row = Array.isArray(rel) ? rel[0] : rel;
+  if (!row) return null;
+  if (row.slug) {
+    const s = String(row.slug).trim().toLowerCase();
+    if (TELANGANA_DISTRICTS.some((d) => d.slug === s)) return s;
+  }
+  return slugFromDistrictLabel(
+    String(row.name_en || row.name_te || "").trim(),
+  );
+}
+
+/** Active = still in the civic pipeline (exclude rejected). */
+function isActiveStatus(status: string | null | undefined): boolean {
+  return status === "pending" || status === "approved" || status === "flagged";
+}
+
 export async function GET(req: NextRequest) {
   try {
     if (!verifyAuth(req)) {
@@ -52,9 +83,19 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const staticMandals = staticMandalCountBySlug();
+    const saturationRows = buildEmptySaturationRows(staticMandals);
+    const bySlug = new Map(saturationRows.map((r) => [r.slug, r]));
+
+    const notes: string[] = [];
+    let verifiedCoordinatorsSource:
+      | "mandal_officers.is_verified"
+      | "fallback_zero" = "fallback_zero";
+
+    // --- Submissions by district (legacy table + saturation inputs) ---
     const { data, error } = await supabase
       .from("survey_submissions")
-      .select("status, districts(name_en, name_te)");
+      .select("status, districts(name_en, name_te, slug)");
 
     if (error) {
       throw error;
@@ -86,13 +127,114 @@ export async function GET(req: NextRequest) {
       else if (row.status === "pending") stats[dist].pending += 1;
       else if (row.status === "rejected") stats[dist].rejected += 1;
       else if (row.status === "flagged") stats[dist].flagged += 1;
+
+      const slug = placeSlug(row.districts);
+      if (slug && isActiveStatus(row.status)) {
+        const sat = bySlug.get(slug);
+        if (sat) sat.active_submissions += 1;
+      }
     }
 
     const sortedAnalytics = Object.entries(stats)
       .map(([district, counts]) => ({ district, ...counts }))
       .sort((a, b) => b.total - a.total);
 
-    return NextResponse.json({ analytics: sortedAnalytics });
+    // Prefer live mandal counts from Supabase when available.
+    const { data: mandalRows, error: mandalErr } = await supabase
+      .from("mandals")
+      .select("id, district_id, districts(slug)");
+
+    const mandalIdToDistrictSlug = new Map<string, string>();
+    if (!mandalErr && mandalRows) {
+      const liveCounts: Record<string, number> = {};
+      for (const m of mandalRows) {
+        const row = m as {
+          id: string;
+          districts?: PlaceRel | PlaceRel[];
+        };
+        const slug = placeSlug(row.districts);
+        if (!slug) continue;
+        liveCounts[slug] = (liveCounts[slug] || 0) + 1;
+        mandalIdToDistrictSlug.set(row.id, slug);
+      }
+      for (const sat of saturationRows) {
+        if (liveCounts[sat.slug]) {
+          sat.total_mandals = liveCounts[sat.slug];
+        }
+      }
+    } else {
+      notes.push(
+        "Live mandals table unavailable — using static mandals-directory.json counts (589).",
+      );
+    }
+
+    // Verified coordinators: mandal_officers where is_verified (fallback 0).
+    const { data: officerRows, error: officerErr } = await supabase
+      .from("mandal_officers")
+      .select("mandal_id, is_verified, status");
+
+    if (!officerErr && officerRows) {
+      verifiedCoordinatorsSource = "mandal_officers.is_verified";
+      // If mandal→district map empty (mandals query failed), resolve via join.
+      if (mandalIdToDistrictSlug.size === 0) {
+        const { data: m2 } = await supabase
+          .from("mandals")
+          .select("id, districts(slug)");
+        for (const m of m2 || []) {
+          const row = m as { id: string; districts?: PlaceRel | PlaceRel[] };
+          const slug = placeSlug(row.districts);
+          if (slug) mandalIdToDistrictSlug.set(row.id, slug);
+        }
+      }
+
+      for (const off of officerRows) {
+        const row = off as {
+          mandal_id: string;
+          is_verified?: boolean | null;
+          status?: string | null;
+        };
+        if (row.is_verified === false) continue;
+        if (row.status && row.status !== "active") continue;
+        const slug = mandalIdToDistrictSlug.get(row.mandal_id);
+        if (!slug) continue;
+        const sat = bySlug.get(slug);
+        if (sat) sat.verified_coordinators += 1;
+      }
+    } else {
+      verifiedCoordinatorsSource = "fallback_zero";
+      notes.push(
+        "Verified Coordinators unavailable (mandal_officers missing or query failed) — using 0 per district.",
+      );
+    }
+
+    const saturation: DistrictSaturation[] = saturationRows
+      .map((r) => {
+        const index = computeSaturationIndex(
+          r.active_submissions,
+          r.verified_coordinators,
+          r.total_mandals,
+        );
+        return {
+          ...r,
+          index: Math.round(index * 1000) / 1000,
+          tier: tierForIndex(index),
+        };
+      })
+      .sort((a, b) => b.index - a.index || a.name_en.localeCompare(b.name_en));
+
+    return NextResponse.json({
+      analytics: sortedAnalytics,
+      saturation: {
+        districts: saturation,
+        thresholds: SATURATION_THRESHOLDS,
+        formula:
+          "(Active Submissions + Verified Coordinators) / Total Mandals per District",
+        active_definition:
+          "pending + approved + flagged (excludes rejected)",
+        verified_coordinators_source: verifiedCoordinatorsSource,
+        notes,
+      },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "analytics_failed";
     return NextResponse.json({ error: message }, { status: 500 });

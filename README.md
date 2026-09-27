@@ -29,7 +29,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | Path | View |
 |------|------|
 | `/` | Civic homepage (hero, actions, FAQ, gallery, press) |
-| `/api/admin/analytics` | Desk Bearer auth — survey intake counts by district |
+| `/api/admin/analytics` | Desk Bearer auth — district volume + **Saturation Index** (active submissions + verified coordinators ÷ mandals) |
 | `/verticals/[slug]` | Welfare, Education, Livelihood, Bajantri, … |
 | `/mandals` | Mandal directory |
 | `/{district}` | Unified rural & urban directory (tabs + search) |
@@ -41,7 +41,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/twa` | Telegram Mini App hub (petition, feed, GO 23, ID card) |
 | `/announce` | Community WhatsApp blasts + coordinator SOP (`?blast=desk|representation|feed|sop`) |
 | `/poster` | Printable A4 Digital Desk QR poster (`@NayiSamakhyaDeskBot`) |
-| `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → submissions + **analytics** tab via `/api/admin/analytics`; approve/reject notifies submitter on Telegram) |
+| `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → submissions + **analytics** tab with statewide choropleth / Saturation Index; approve/reject notifies submitter on Telegram) |
 | `/admin/moderation` | Field photo moderation desk (cookie PIN via `MODERATION_DESK_SECRET`) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
 | `/policies/*` · `/sitemap` | Legal pages |

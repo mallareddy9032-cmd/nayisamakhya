@@ -13,6 +13,8 @@ import {
   Camera,
   BarChart3,
 } from "lucide-react";
+import DistrictHeatMap from "@/components/admin/DistrictHeatMap";
+import type { DistrictSaturation } from "@/lib/analytics/saturation";
 
 type QueueTab = "pending" | "approved" | "rejected";
 type Tab = QueueTab | "analytics";
@@ -39,6 +41,15 @@ interface AnalyticsRow {
   pending: number;
   rejected: number;
   flagged?: number;
+}
+
+interface SaturationPayload {
+  districts: DistrictSaturation[];
+  thresholds?: { high: number; active: number };
+  formula?: string;
+  active_definition?: string;
+  verified_coordinators_source?: string;
+  notes?: string[];
 }
 
 type Counts = Record<QueueTab, number>;
@@ -73,6 +84,7 @@ export default function AdminDeskPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsRow[]>([]);
+  const [saturation, setSaturation] = useState<SaturationPayload | null>(null);
   const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS);
   const [activeTab, setActiveTab] = useState<Tab>("pending");
   const [loading, setLoading] = useState(false);
@@ -111,14 +123,17 @@ export default function AdminDeskPage() {
         }
         const json = (await res.json()) as {
           analytics?: AnalyticsRow[];
+          saturation?: SaturationPayload;
           error?: string;
         };
         if (!res.ok) {
           setError(json.error || `HTTP ${res.status}`);
           setAnalytics([]);
+          setSaturation(null);
           return;
         }
         setAnalytics(json.analytics || []);
+        setSaturation(json.saturation || null);
       } catch (err) {
         console.error("Failed to load analytics:", err);
         setError(err instanceof Error ? err.message : "Failed to load analytics");
@@ -243,6 +258,7 @@ export default function AdminDeskPage() {
     setToken("");
     setSubmissions([]);
     setAnalytics([]);
+    setSaturation(null);
     setCounts(EMPTY_COUNTS);
     setSelectedSubmission(null);
     setActiveTab("pending");
@@ -404,63 +420,72 @@ export default function AdminDeskPage() {
         ) : null}
 
         {activeTab === "analytics" ? (
-          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
-            <div className="flex flex-col gap-1 border-b border-slate-800 p-5 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="font-telugu text-sm font-semibold text-white">
-                {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e \u0c35\u0c3e\u0c30\u0c40\u0c17\u0c3e \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 (District Performance)"}
-              </h2>
-              <span className="text-xs text-slate-400">
-                Total volume tracking for coordinator engagement
-              </span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="border-b border-slate-800 bg-slate-950 text-xs uppercase text-slate-500">
-                  <tr>
-                    <th className="px-6 py-4 font-telugu">{"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e (District)"}</th>
-                    <th className="px-6 py-4 text-center font-telugu">
-                      {"\u0c2e\u0c4a\u0c24\u0c4d\u0c24\u0c02 (Total)"}
-                    </th>
-                    <th className="px-6 py-4 text-center font-telugu text-emerald-400">
-                      {"\u0c06\u0c2e\u0c4b\u0c26\u0c3f\u0c02\u0c1a\u0c3f\u0c28\u0c35\u0c3f (Approved)"}
-                    </th>
-                    <th className="px-6 py-4 text-center font-telugu text-amber-400">
-                      {"\u0c2a\u0c46\u0c02\u0c21\u0c3f\u0c02\u0c17\u0c4d (Pending)"}
-                    </th>
-                    <th className="px-6 py-4 text-center font-telugu text-rose-400">
-                      {"\u0c24\u0c3f\u0c30\u0c38\u0c4d\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c3f\u0c28\u0c35\u0c3f (Rejected)"}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50">
-                  {analytics.map((row) => (
-                    <tr
-                      key={row.district}
-                      className="transition-colors hover:bg-slate-800/50"
-                    >
-                      <td className="px-6 py-4 font-telugu font-medium text-white">
-                        {row.district}
-                      </td>
-                      <td className="px-6 py-4 text-center font-bold text-slate-200">
-                        {row.total}
-                      </td>
-                      <td className="px-6 py-4 text-center">{row.approved}</td>
-                      <td className="px-6 py-4 text-center">{row.pending}</td>
-                      <td className="px-6 py-4 text-center">{row.rejected}</td>
-                    </tr>
-                  ))}
-                  {analytics.length === 0 && !loading ? (
+          <div className="space-y-6">
+            <DistrictHeatMap
+              districts={saturation?.districts || []}
+              loading={loading}
+              notes={saturation?.notes}
+              verifiedSource={saturation?.verified_coordinators_source}
+            />
+
+            <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
+              <div className="flex flex-col gap-1 border-b border-slate-800 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="font-telugu text-sm font-semibold text-white">
+                  {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e \u0c35\u0c3e\u0c30\u0c40\u0c17\u0c3e \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 (District Performance)"}
+                </h2>
+                <span className="text-xs text-slate-400">
+                  Submission volume by status (existing analytics)
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-300">
+                  <thead className="border-b border-slate-800 bg-slate-950 text-xs uppercase text-slate-500">
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-6 py-8 text-center font-telugu text-slate-500"
-                      >
-                        {"\u0c21\u0c47\u0c1f\u0c3e \u0c32\u0c47\u0c26\u0c41 (No data available)"}
-                      </td>
+                      <th className="px-6 py-4 font-telugu">{"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e (District)"}</th>
+                      <th className="px-6 py-4 text-center font-telugu">
+                        {"\u0c2e\u0c4a\u0c24\u0c4d\u0c24\u0c02 (Total)"}
+                      </th>
+                      <th className="px-6 py-4 text-center font-telugu text-emerald-400">
+                        {"\u0c06\u0c2e\u0c4b\u0c26\u0c3f\u0c02\u0c1a\u0c3f\u0c28\u0c35\u0c3f (Approved)"}
+                      </th>
+                      <th className="px-6 py-4 text-center font-telugu text-amber-400">
+                        {"\u0c2a\u0c46\u0c02\u0c21\u0c3f\u0c02\u0c17\u0c4d (Pending)"}
+                      </th>
+                      <th className="px-6 py-4 text-center font-telugu text-rose-400">
+                        {"\u0c24\u0c3f\u0c30\u0c38\u0c4d\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c3f\u0c28\u0c35\u0c3f (Rejected)"}
+                      </th>
                     </tr>
-                  ) : null}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/50">
+                    {analytics.map((row) => (
+                      <tr
+                        key={row.district}
+                        className="transition-colors hover:bg-slate-800/50"
+                      >
+                        <td className="px-6 py-4 font-telugu font-medium text-white">
+                          {row.district}
+                        </td>
+                        <td className="px-6 py-4 text-center font-bold text-slate-200">
+                          {row.total}
+                        </td>
+                        <td className="px-6 py-4 text-center">{row.approved}</td>
+                        <td className="px-6 py-4 text-center">{row.pending}</td>
+                        <td className="px-6 py-4 text-center">{row.rejected}</td>
+                      </tr>
+                    ))}
+                    {analytics.length === 0 && !loading ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-6 py-8 text-center font-telugu text-slate-500"
+                        >
+                          {"\u0c21\u0c47\u0c1f\u0c3e \u0c32\u0c47\u0c26\u0c41 (No data available)"}
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         ) : (
