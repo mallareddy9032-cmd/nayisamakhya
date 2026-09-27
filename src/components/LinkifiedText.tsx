@@ -36,7 +36,7 @@ export function LinkifiedText({ text }: { text: string }) {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="break-all font-medium text-[#F0A070] underline underline-offset-2 hover:text-[#FFC09A]"
+          className="break-all font-medium text-civic-bronze underline underline-offset-2 hover:text-civic-bronze-hover"
         >
           {display}
         </a>,
@@ -52,7 +52,7 @@ export function LinkifiedText({ text }: { text: string }) {
   }
 
   return (
-    <pre className="font-telugu whitespace-pre-wrap break-words text-[14px] leading-relaxed text-[#F7F4EE] sm:text-[15px]">
+    <pre className="font-telugu whitespace-pre-wrap break-words text-[14px] leading-relaxed text-civic-ink sm:text-[15px]">
       {parts}
     </pre>
   );
