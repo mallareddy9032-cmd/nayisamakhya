@@ -37,7 +37,10 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/{district}/{mandal}` | Mandal civic portal (Supabase when configured, else static) |
 | `/representation` | Official petition / representation letter generator (print-ready) |
 | `/feed` | Public civic field feed (approved Telegram photos) |
-| `/coordinator-card` | Printable coordinator digital ID / visiting card |
+| `/newsletter` | Bi-weekly digest **పాక్షిక పౌర సమాచార పత్రిక** (auto from `civic_bulletins` + verified feed) |
+| `/coordinator-card` | Printable coordinator digital ID / visiting card (+ hub join links) |
+| `/api/cron/sync-bulletins` | Vercel Cron — ingest GOs/circulars (Bearer `CRON_SECRET` / desk secret) |
+| `/api/broadcast/dispatch` | District-scoped Telegram + WhatsApp dispatch to matching coordinators |
 | `/twa` | Telegram Mini App hub (petition, feed, GO 23, ID card) |
 | `/announce` | Community WhatsApp blasts + coordinator SOP (`?blast=desk|representation|feed|sop`) |
 | `/poster` | Printable A4 Digital Desk QR poster (`@NayiSamakhyaDeskBot`) |
@@ -58,6 +61,8 @@ Mandal hubs and urban ULB pages read from Postgres when env is set; otherwise th
    - `supabase/migrations/002_surveys.sql`
    - `supabase/migrations/004_urban_local_bodies.sql`
    - `supabase/migrations/create_mandal_officers.sql`
+   - … through `008_lock_survey_photos_insert.sql`
+   - `supabase/migrations/009_civic_bulletins.sql` (Modules 2–3 bulletins + coordinator endpoints)
 3. Seed districts + mandals + ULBs: `seed_phase1_districts.sql`, `seed_phase1_ulbs.sql`, then `seed_phase2_mandals.sql` (or `seed.sql`).
 4. Seed nodal officers roster:
    ```bash

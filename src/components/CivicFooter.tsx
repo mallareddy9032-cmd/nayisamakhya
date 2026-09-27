@@ -82,6 +82,17 @@ export function CivicFooter() {
                 <span className="font-sans text-[10px] text-slate-400">/feed</span>
               </Link>
             </li>
+            <li>
+              <Link
+                href="/newsletter"
+                className="flex items-center justify-between hover:text-civic-bronze"
+              >
+                <span>పాక్షిక పౌర సమాచార పత్రిక</span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /newsletter
+                </span>
+              </Link>
+            </li>
           </ul>
         </div>
 
