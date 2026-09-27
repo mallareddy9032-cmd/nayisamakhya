@@ -204,31 +204,170 @@ export default function CivicFeedPage() {
         ) : null}
 
         {loading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div
-                key={n}
-                className="h-80 animate-pulse rounded-xl border border-civic-border bg-white p-4 shadow-xs"
-              />
-            ))}
+          <div className="space-y-4">
+            <p className="font-telugu text-center text-xs text-slate-500">
+              {
+                "\u0c27\u0c4d\u0c30\u0c41\u0c35\u0c40\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c3f\u0c28 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 \u0c32\u0c4b\u0c21\u0c41\u0c24\u0c41\u0c28\u0c4d\u0c28\u0c3e\u0c2f\u0c3f\u2026"
+              }{" "}
+              (Loading verified field records…)
+            </p>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div
+                  key={n}
+                  className="h-80 animate-pulse rounded-xl border border-civic-border bg-white p-4 shadow-xs"
+                />
+              ))}
+            </div>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="mx-auto max-w-lg rounded-2xl border border-civic-border bg-white py-20 text-center shadow-xs">
-            <ImageIcon className="mx-auto mb-3 h-10 w-10 text-slate-400" />
-            <p className="font-telugu text-sm font-bold text-civic-ink">
-              {"\u0c0e\u0c32\u0c3e\u0c02\u0c1f\u0c3f \u0c35\u0c3f\u0c35\u0c30\u0c3e\u0c32\u0c41 \u0c15\u0c28\u0c41\u0c17\u0c4a\u0c28\u0c2c\u0c21\u0c32\u0c47\u0c26\u0c41"}
-            </p>
-            <p className="mx-auto mt-1 max-w-xs font-telugu text-xs leading-relaxed text-slate-500">
-              {"\u0c0e\u0c02\u0c1a\u0c41\u0c15\u0c41\u0c28\u0c4d\u0c28 \u0c2a\u0c4d\u0c30\u0c3e\u0c02\u0c24\u0c02\u0c32\u0c4b \u0c07\u0c02\u0c15\u0c3e \u0c27\u0c4d\u0c30\u0c41\u0c35\u0c40\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c3f\u0c28 \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 \u0c32\u0c47\u0c35\u0c41. \u0c2c\u0c3e\u0c1f\u0c4d \u0c26\u0c4d\u0c35\u0c3e\u0c30\u0c3e \u0c28\u0c47\u0c30\u0c41\u0c17\u0c3e \u0c38\u0c2e\u0c3e\u0c1a\u0c3e\u0c30\u0c02 \u0c2a\u0c02\u0c2a\u0c35\u0c1a\u0c4d\u0c1a\u0c41."}
-            </p>
-            <a
-              href="https://t.me/NayiSamakhyaDeskBot"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 font-telugu text-xs font-bold text-civic-bronze hover:text-civic-bronze-hover"
-            >
-              {"@NayiSamakhyaDeskBot \u0c32\u0c4b \u0c2b\u0c4b\u0c1f\u0c4b \u0c2a\u0c02\u0c2a\u0c02\u0c21\u0c3f \u2192"}
-            </a>
+          <div className="mx-auto max-w-2xl space-y-6">
+            <div className="rounded-2xl border border-civic-border bg-white p-6 shadow-xs sm:p-8">
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <span className="inline-flex rounded-xl border border-civic-bronze/20 bg-civic-bronze/10 p-2.5 text-civic-bronze">
+                  <ImageIcon className="h-6 w-6" />
+                </span>
+                <div>
+                  <p className="font-telugu text-base font-bold text-civic-ink">
+                    {
+                      "\u0c07\u0c02\u0c15\u0c3e \u0c27\u0c4d\u0c30\u0c41\u0c35\u0c40\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c3f\u0c28 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 \u0c32\u0c47\u0c35\u0c41"
+                    }
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-slate-500">
+                    No verified field photos published yet
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 font-telugu text-sm leading-relaxed text-civic-navy">
+                {
+                  "\u0c07\u0c26\u0c3f \u0c2b\u0c40\u0c21\u0c4d\u0c32\u0c4b \u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d \u0c06\u0c2e\u0c4b\u0c26\u0c02 \u0c24\u0c30\u0c4d\u0c35\u0c3e\u0c24 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c2b\u0c4b\u0c1f\u0c4b\u0c32\u0c41 \u0c2e\u0c3e\u0c24\u0c4d\u0c30\u0c2e\u0c47 \u0c15\u0c28\u0c3f\u0c2a\u0c3f\u0c38\u0c4d\u0c24\u0c3e\u0c2f\u0c3f \u2014 \u0c37\u0c3e\u0c2a\u0c41\u0c32\u0c41, \u0c38\u0c2e\u0c3e\u0c35\u0c47\u0c36\u0c3e\u0c32\u0c41, \u0c38\u0c02\u0c18 \u0c15\u0c3e\u0c30\u0c4d\u0c2f\u0c15\u0c4d\u0c30\u0c2e\u0c3e\u0c32\u0c41."
+                }
+              </p>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                This feed shows verified field photos after admin approval —
+                shops, meetings, and community activities across Telangana.
+              </p>
+
+              <ol className="mt-5 space-y-3 border-t border-civic-border pt-5">
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-navy font-telugu text-[11px] font-bold text-white">
+                    1
+                  </span>
+                  <div>
+                    <p className="font-telugu text-sm font-semibold text-civic-ink">
+                      {
+                        "\u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c2b\u0c4b\u0c1f\u0c4b \u0c24\u0c40\u0c2f\u0c02\u0c21\u0c3f"
+                      }
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Take a clear field photo (shop, meeting, or activity)
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-navy font-telugu text-[11px] font-bold text-white">
+                    2
+                  </span>
+                  <div>
+                    <p className="font-telugu text-sm font-semibold text-civic-ink">
+                      {
+                        "Telegram @NayiSamakhyaDeskBot \u0c15\u0c41 \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e / \u0c2e\u0c02\u0c21\u0c32\u0c02 / \u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c02 \u0c24\u0c4b \u0c2a\u0c02\u0c2a\u0c02\u0c21\u0c3f"
+                      }
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Send it to the desk bot with district, mandal, and village
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-navy font-telugu text-[11px] font-bold text-white">
+                    3
+                  </span>
+                  <div>
+                    <p className="font-telugu text-sm font-semibold text-civic-ink">
+                      {
+                        "\u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d \u0c27\u0c4d\u0c30\u0c41\u0c35\u0c40\u0c15\u0c30\u0c23\u0c15\u0c41 \u0c35\u0c47\u0c1a\u0c3f \u0c09\u0c02\u0c21\u0c02\u0c21\u0c3f"
+                      }
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Wait for admin verification — approved photos appear here
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-bronze font-telugu text-[11px] font-bold text-white">
+                    4
+                  </span>
+                  <div>
+                    <p className="font-telugu text-sm font-semibold text-civic-ink">
+                      {
+                        "\u0c06\u0c2e\u0c4b\u0c26\u0c02 \u0c24\u0c30\u0c4d\u0c35\u0c3e\u0c24 \u0c2b\u0c40\u0c21\u0c4d\u0c32\u0c4b \u0c15\u0c28\u0c3f\u0c2a\u0c3f\u0c38\u0c4d\u0c24\u0c41\u0c02\u0c26\u0c3f"
+                      }
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Your entry is listed on this statewide civic feed
+                    </p>
+                  </div>
+                </li>
+              </ol>
+
+              <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                <a
+                  href="https://t.me/NayiSamakhyaDeskBot"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-2.5 font-telugu text-sm font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover sm:w-auto"
+                >
+                  {
+                    "Telegram \u0c2c\u0c3e\u0c1f\u0c4d \u0c24\u0c46\u0c30\u0c35\u0c02\u0c21\u0c3f"
+                  }
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <Link
+                  href="/representation"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-2.5 font-telugu text-sm font-semibold text-civic-ink shadow-xs transition-colors hover:bg-civic-subtle sm:w-auto"
+                >
+                  <FileText className="h-3.5 w-3.5 text-civic-bronze" />
+                  {
+                    "\u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02 \u0c24\u0c2f\u0c3e\u0c30\u0c40"
+                  }
+                </Link>
+              </div>
+            </div>
+
+            {/* Structure-only sample — clearly labeled, not fake approved data */}
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-civic-subtle/60 p-4 sm:p-5">
+              <p className="mb-3 font-telugu text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                {
+                  "\u0c28\u0c2e\u0c42\u0c28\u0c3e \u0c2a\u0c4d\u0c30\u0c40\u0c35\u0c4d\u0c2f\u0c42 / Sample preview"
+                }{" "}
+                — structure only, not approved data
+              </p>
+              <article className="overflow-hidden rounded-xl border border-civic-border bg-white opacity-80 shadow-xs">
+                <div className="relative flex aspect-video w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                  <ImageIcon className="h-10 w-10 text-slate-400" />
+                  <div className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-md border border-slate-300 bg-white/95 px-2.5 py-1 font-telugu text-[11px] font-semibold text-slate-500">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {
+                      "\u0c28\u0c2e\u0c42\u0c28\u0c3e \u0c38\u0c40\u0c32\u0c4d"
+                    }
+                  </div>
+                </div>
+                <div className="space-y-2 p-4">
+                  <div className="flex items-center gap-1.5 font-telugu text-xs font-semibold text-civic-bronze/70">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>
+                      {
+                        "\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c02, \u0c2e\u0c02\u0c21\u0c32\u0c02, \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e"
+                      }
+                    </span>
+                  </div>
+                  <div className="h-2.5 w-[80%] rounded bg-slate-200" />
+                  <div className="h-2.5 w-[60%] rounded bg-slate-100" />
+                </div>
+              </article>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
