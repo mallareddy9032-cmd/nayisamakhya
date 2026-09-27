@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 import {
+  PILOT_CORRIDORS,
   buildEmptySaturationRows,
   computeSaturationIndex,
   SATURATION_THRESHOLDS,
@@ -9,6 +10,7 @@ import {
   staticMandalCountBySlug,
   tierForIndex,
   type DistrictSaturation,
+  type PilotCorridorKpi,
 } from "@/lib/analytics/saturation";
 
 export const runtime = "nodejs";
@@ -64,9 +66,25 @@ function placeSlug(rel: PlaceRel | PlaceRel[] | undefined): string | null {
   );
 }
 
-/** Active = still in the civic pipeline (exclude rejected). */
+function mandalSlug(rel: PlaceRel | PlaceRel[] | undefined): string | null {
+  const row = Array.isArray(rel) ? rel[0] : rel;
+  if (!row) return null;
+  if (row.slug) return String(row.slug).trim().toLowerCase();
+  const en = String(row.name_en || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return en || null;
+}
+
+/** Active pipeline = still in civic flow (exclude rejected). */
 function isActiveStatus(status: string | null | undefined): boolean {
   return status === "pending" || status === "approved" || status === "flagged";
+}
+
+function isVerifiedUpload(status: string | null | undefined): boolean {
+  return status === "approved";
 }
 
 export async function GET(req: NextRequest) {
@@ -92,10 +110,32 @@ export async function GET(req: NextRequest) {
       | "mandal_officers.is_verified"
       | "fallback_zero" = "fallback_zero";
 
-    // --- Submissions by district (legacy table + saturation inputs) ---
+    const statusByDistrict = new Map<
+      string,
+      { pending: number; rejected: number; petitions: number }
+    >();
+    const statusByMandal = new Map<
+      string,
+      { pending: number; rejected: number; petitions: number }
+    >();
+
+    const bump = (
+      map: Map<string, { pending: number; rejected: number; petitions: number }>,
+      key: string,
+      status: string | null | undefined,
+    ) => {
+      const cur = map.get(key) || { pending: 0, rejected: 0, petitions: 0 };
+      cur.petitions += 1;
+      if (status === "pending" || status === "flagged") cur.pending += 1;
+      if (status === "rejected") cur.rejected += 1;
+      map.set(key, cur);
+    };
+
     const { data, error } = await supabase
       .from("survey_submissions")
-      .select("status, districts(name_en, name_te, slug)");
+      .select(
+        "status, districts(name_en, name_te, slug), mandals(name_en, name_te, slug)",
+      );
 
     if (error) {
       throw error;
@@ -109,6 +149,7 @@ export async function GET(req: NextRequest) {
       const row = sub as {
         status?: string | null;
         districts?: PlaceRel | PlaceRel[];
+        mandals?: PlaceRel | PlaceRel[];
       };
       const dist = placeName(row.districts) || unassigned;
 
@@ -129,27 +170,37 @@ export async function GET(req: NextRequest) {
       else if (row.status === "flagged") stats[dist].flagged += 1;
 
       const slug = placeSlug(row.districts);
-      if (slug && isActiveStatus(row.status)) {
+      if (slug) {
+        bump(statusByDistrict, slug, row.status);
         const sat = bySlug.get(slug);
-        if (sat) sat.active_submissions += 1;
+        if (sat) {
+          sat.total_representations += 1;
+          if (isVerifiedUpload(row.status)) sat.verified_uploads += 1;
+          if (isActiveStatus(row.status)) {
+            sat.active_submissions = (sat.active_submissions || 0) + 1;
+          }
+        }
       }
+
+      const mSlug = mandalSlug(row.mandals);
+      if (mSlug) bump(statusByMandal, mSlug, row.status);
     }
 
     const sortedAnalytics = Object.entries(stats)
       .map(([district, counts]) => ({ district, ...counts }))
       .sort((a, b) => b.total - a.total);
 
-    // Prefer live mandal counts from Supabase when available.
+    const mandalIdToDistrictSlug = new Map<string, string>();
     const { data: mandalRows, error: mandalErr } = await supabase
       .from("mandals")
-      .select("id, district_id, districts(slug)");
+      .select("id, district_id, slug, districts(slug)");
 
-    const mandalIdToDistrictSlug = new Map<string, string>();
     if (!mandalErr && mandalRows) {
       const liveCounts: Record<string, number> = {};
       for (const m of mandalRows) {
         const row = m as {
           id: string;
+          slug?: string | null;
           districts?: PlaceRel | PlaceRel[];
         };
         const slug = placeSlug(row.districts);
@@ -168,14 +219,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Verified coordinators: mandal_officers where is_verified (fallback 0).
     const { data: officerRows, error: officerErr } = await supabase
       .from("mandal_officers")
       .select("mandal_id, is_verified, status");
 
     if (!officerErr && officerRows) {
       verifiedCoordinatorsSource = "mandal_officers.is_verified";
-      // If mandal→district map empty (mandals query failed), resolve via join.
       if (mandalIdToDistrictSlug.size === 0) {
         const { data: m2 } = await supabase
           .from("mandals")
@@ -198,29 +247,69 @@ export async function GET(req: NextRequest) {
         const slug = mandalIdToDistrictSlug.get(row.mandal_id);
         if (!slug) continue;
         const sat = bySlug.get(slug);
-        if (sat) sat.verified_coordinators += 1;
+        if (sat) sat.active_coordinators += 1;
       }
     } else {
       verifiedCoordinatorsSource = "fallback_zero";
       notes.push(
-        "Verified Coordinators unavailable (mandal_officers missing or query failed) — using 0 per district.",
+        "Active Coordinators unavailable (mandal_officers missing or query failed) — using 0 per district.",
       );
     }
 
     const saturation: DistrictSaturation[] = saturationRows
       .map((r) => {
         const index = computeSaturationIndex(
-          r.active_submissions,
-          r.verified_coordinators,
+          r.verified_uploads,
+          r.active_coordinators,
           r.total_mandals,
         );
         return {
           ...r,
-          index: Math.round(index * 1000) / 1000,
+          index,
           tier: tierForIndex(index),
+          verified_coordinators: r.active_coordinators,
+          active_submissions: r.active_submissions || r.total_representations,
         };
       })
       .sort((a, b) => b.index - a.index || a.name_en.localeCompare(b.name_en));
+
+    const satBySlug = new Map(saturation.map((s) => [s.slug, s]));
+
+    const pilot_corridors: PilotCorridorKpi[] = PILOT_CORRIDORS.map((p) => {
+      const counts =
+        p.scope === "mandal" && p.mandal_slug
+          ? statusByMandal.get(p.mandal_slug) || {
+              pending: 0,
+              rejected: 0,
+              petitions: 0,
+            }
+          : statusByDistrict.get(p.district_slug) || {
+              pending: 0,
+              rejected: 0,
+              petitions: 0,
+            };
+      const parent = satBySlug.get(p.district_slug);
+      return {
+        id: p.id,
+        scope: p.scope,
+        district_slug: p.district_slug,
+        mandal_slug: "mandal_slug" in p ? p.mandal_slug : undefined,
+        name_en: p.name_en,
+        name_te: p.name_te,
+        pending: counts.pending,
+        rejected: counts.rejected,
+        petitions: counts.petitions,
+        saturation_index: parent?.index ?? 0,
+        tier: parent?.tier ?? "critical",
+      };
+    });
+
+    console.info("[analytics]", {
+      districts: saturation.length,
+      pilots: pilot_corridors.length,
+      submissions: (data || []).length,
+      coordinators_source: verifiedCoordinatorsSource,
+    });
 
     return NextResponse.json({
       analytics: sortedAnalytics,
@@ -228,15 +317,16 @@ export async function GET(req: NextRequest) {
         districts: saturation,
         thresholds: SATURATION_THRESHOLDS,
         formula:
-          "(Active Submissions + Verified Coordinators) / Total Mandals per District",
-        active_definition:
-          "pending + approved + flagged (excludes rejected)",
+          "min(100, round(((verified_uploads * 1.5) + (active_coordinators * 3)) / total_mandals * 10))",
+        verified_definition: "approved survey_submissions (verified uploads)",
         verified_coordinators_source: verifiedCoordinatorsSource,
         notes,
       },
+      pilot_corridors,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "analytics_failed";
+    console.error("[analytics] failed", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

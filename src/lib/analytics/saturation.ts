@@ -1,12 +1,14 @@
 /**
  * Statewide Saturation Index for NayiSamakhya Admin Desk (Module 1).
  *
- * Index = (Active Submissions + Verified Coordinators) / Total Mandals per District
+ * Saturation Score =
+ *   min(100, round(((verified_uploads * 1.5) + (active_coordinators * 3))
+ *     / total_mandals * 10))
  *
- * Tiers (absolute thresholds on the index):
- * - high     (≥ 0.75) → High Engagement (Emerald)
- * - active   (≥ 0.25) → Active Rollout (Gold)
- * - critical (< 0.25) → Critical Outreach Needed (Slate/Red)
+ * Civic tiers (0–100 score):
+ * - high     (≥ 70) → High Engagement (Emerald #059669)
+ * - active   (30–69) → Active Pilot Corridor (Gold #D97706)
+ * - critical (< 30) → Outreach Deficit (Slate #94A3B8)
  */
 
 import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
@@ -15,8 +17,8 @@ import { listMandalsForDistrict } from "@/lib/data/mandalsDirectory";
 export type SaturationTier = "high" | "active" | "critical";
 
 export const SATURATION_THRESHOLDS = {
-  high: 0.75,
-  active: 0.25,
+  high: 70,
+  active: 30,
 } as const;
 
 /** Design tokens for desk heat map (must match product kit). */
@@ -24,22 +26,45 @@ export const HEATMAP_TOKENS = {
   warmPaper: "#FBFBFA",
   deepSlate: "#0F172A",
   navy: "#1E293B",
-  gold: "#B45309",
+  ceremonialGold: "#B45309",
+  /** Tier fills (spec) */
   emerald: "#059669",
-  emeraldSoft: "#10B981",
-  critical: "#9F1239",
-  criticalSoft: "#64748B",
+  gold: "#D97706",
+  slateMuted: "#94A3B8",
   stroke: "#334155",
+  border: "#E2E8F0",
 } as const;
 
 export type DistrictSaturation = {
   slug: string;
   name_en: string;
   name_te: string;
-  active_submissions: number;
-  verified_coordinators: number;
+  /** Approved / verified field uploads (representations) feeding the index. */
+  verified_uploads: number;
+  /** Active pipeline submissions (pending + approved + flagged) — tooltip KPI. */
+  total_representations: number;
+  active_coordinators: number;
   total_mandals: number;
+  /** 0–100 saturation score */
   index: number;
+  tier: SaturationTier;
+  /** @deprecated alias — prefer verified_uploads */
+  active_submissions?: number;
+  /** @deprecated alias — prefer active_coordinators */
+  verified_coordinators?: number;
+};
+
+export type PilotCorridorKpi = {
+  id: "suryapet" | "kodad" | "rangareddy";
+  scope: "district" | "mandal";
+  district_slug: string;
+  mandal_slug?: string;
+  name_en: string;
+  name_te: string;
+  pending: number;
+  rejected: number;
+  petitions: number;
+  saturation_index: number;
   tier: SaturationTier;
 };
 
@@ -54,30 +79,36 @@ export function tierLabel(tier: SaturationTier): string {
     case "high":
       return "High Engagement";
     case "active":
-      return "Active Rollout";
+      return "Active Pilot Corridor";
     case "critical":
-      return "Critical Outreach Needed";
+      return "Outreach Deficit";
   }
 }
 
 export function tierFill(tier: SaturationTier): string {
   switch (tier) {
     case "high":
-      return HEATMAP_TOKENS.emeraldSoft;
+      return HEATMAP_TOKENS.emerald;
     case "active":
       return HEATMAP_TOKENS.gold;
     case "critical":
-      return HEATMAP_TOKENS.criticalSoft;
+      return HEATMAP_TOKENS.slateMuted;
   }
 }
 
+/**
+ * Saturation Score =
+ * min(100, round(((verified_uploads * 1.5) + (active_coordinators * 3)) / total_mandals * 10))
+ */
 export function computeSaturationIndex(
-  activeSubmissions: number,
-  verifiedCoordinators: number,
+  verifiedUploads: number,
+  activeCoordinators: number,
   totalMandals: number,
 ): number {
   if (totalMandals <= 0) return 0;
-  return (activeSubmissions + verifiedCoordinators) / totalMandals;
+  const raw =
+    ((verifiedUploads * 1.5 + activeCoordinators * 3) / totalMandals) * 10;
+  return Math.min(100, Math.round(raw));
 }
 
 /** Static mandal counts from Phase-2 directory (589 mandals / 33 districts). */
@@ -149,7 +180,6 @@ export function slugFromDistrictLabel(label: string): string | null {
   const raw = label.trim();
   if (!raw) return null;
 
-  // Prefer English portion when rows are "తెలుగు (English)" or "English".
   const paren = raw.match(/\(([^)]+)\)\s*$/);
   const english = paren ? paren[1] : raw;
   const fromGeo = slugFromGeoDistrictName(english);
@@ -161,15 +191,13 @@ export function slugFromDistrictLabel(label: string): string | null {
     .replace(/^-|-$/g, "");
   if (TELANGANA_DISTRICTS.some((d) => d.slug === compact)) return compact;
 
-  // Match by name_en / name_te
-  const lower = raw.toLowerCase();
   const hit = TELANGANA_DISTRICTS.find(
     (d) =>
       d.name_en.toLowerCase() === english.toLowerCase() ||
       d.name_te === raw ||
       d.slug === compact,
   );
-  return hit?.slug ?? (lower.includes("unassigned") ? null : null);
+  return hit?.slug ?? null;
 }
 
 export function buildEmptySaturationRows(
@@ -182,11 +210,39 @@ export function buildEmptySaturationRows(
       slug: d.slug,
       name_en: d.name_en,
       name_te: d.name_te,
-      active_submissions: 0,
-      verified_coordinators: 0,
+      verified_uploads: 0,
+      total_representations: 0,
+      active_coordinators: 0,
       total_mandals: total,
       index,
       tier: tierForIndex(index),
+      active_submissions: 0,
+      verified_coordinators: 0,
     };
   });
 }
+
+export const PILOT_CORRIDORS = [
+  {
+    id: "suryapet" as const,
+    scope: "district" as const,
+    district_slug: "suryapet",
+    name_en: "Suryapet",
+    name_te: "సూర్యాపేట",
+  },
+  {
+    id: "kodad" as const,
+    scope: "mandal" as const,
+    district_slug: "suryapet",
+    mandal_slug: "kodad",
+    name_en: "Kodad (Mandal focus)",
+    name_te: "కోదాడ",
+  },
+  {
+    id: "rangareddy" as const,
+    scope: "district" as const,
+    district_slug: "rangareddy",
+    name_en: "Rangareddy",
+    name_te: "రంగారెడ్డి",
+  },
+] as const;
