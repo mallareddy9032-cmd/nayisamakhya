@@ -525,10 +525,12 @@ async function ingestPhoto(
           chatId,
           "⚠️ ఫోటో పరిమాణం చాలు పెద్దది. 10MB లోపు చిన్న ఫోటో పంపండి.",
         );
-        return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 413 });
+        // Always 200 after user reply — Telegram retries on 4xx/5xx cause spam loops.
+        return NextResponse.json({ ok: true, error: "file_too_large" });
       }
-      await replyText(chatId, MSG.criticalServer);
-      return NextResponse.json({ ok: false, error: media.error }, { status: 502 });
+      console.error("[Bot:MediaError]", media.error);
+      await replyText(chatId, MSG.uploadRetry);
+      return NextResponse.json({ ok: true, error: media.error });
     }
 
     const { buffer, contentType, fileUniqueId, ext } = media;
@@ -540,6 +542,10 @@ async function ingestPhoto(
       .eq("photo_file_unique_id", fileUniqueId)
       .maybeSingle();
     if (existing?.id) {
+      await replyText(
+        chatId,
+        "✅ ఈ ఫోటో ఇప్పటికే నమోదైంది. కొత్త వివరాలుంటే టైప్ చేసి పంపండి, లేదా కొత్త ఫోటో పంపండి.",
+      );
       return NextResponse.json({ ok: true, duplicate: true });
     }
 
@@ -553,9 +559,8 @@ async function ingestPhoto(
 
     if (uploaded.error || !uploaded.publicUrl) {
       console.error("[Bot:StorageError]", uploaded);
-      // Still stage without URL if needed — never crash the webhook loop.
-      await replyText(chatId, MSG.criticalServer);
-      return NextResponse.json({ ok: false, error: "upload_failed" }, { status: 502 });
+      await replyText(chatId, MSG.uploadRetry);
+      return NextResponse.json({ ok: true, error: "upload_failed" });
     }
 
     const photoUrl = uploaded.publicUrl;
@@ -731,7 +736,7 @@ async function ingestPhoto(
     if (!field.id && !inserted?.id) {
       console.error("[Bot:InsertFailed]", { field, insertError });
       await replyText(chatId, MSG.criticalServer);
-      return NextResponse.json({ ok: false, error: "insert_failed" }, { status: 500 });
+      return NextResponse.json({ ok: true, error: "insert_failed" });
     }
 
     const recordId = (field.id || inserted?.id || "").slice(0, 8);
@@ -754,8 +759,10 @@ async function ingestPhoto(
       await replyText(chatId, MSG.criticalServer);
     } catch (replyErr) {
       console.error("[Bot:ReplyCrash]", replyErr);
+      // Could not notify user — allow Telegram one retry.
+      return NextResponse.json({ ok: false, error: "ingest_crash" }, { status: 500 });
     }
-    return NextResponse.json({ ok: false, error: "ingest_crash" }, { status: 500 });
+    return NextResponse.json({ ok: true, error: "ingest_crash_notified" });
   }
 }
 
@@ -842,7 +849,7 @@ async function completeStagedProof(
 
   if (!field.id && !inserted?.id) {
     await replyText(chatId, MSG.criticalServer);
-    return NextResponse.json({ ok: false, error: "follow_up_insert_failed" }, { status: 500 });
+    return NextResponse.json({ ok: true, error: "follow_up_insert_failed" });
   }
 
   await clearUploadSession(admin, session.id);
@@ -1004,14 +1011,15 @@ export async function POST(req: Request) {
     try {
       const chatId = update.message?.chat?.id;
       if (chatId) await replyText(chatId, MSG.criticalServer);
+      // Ack 200 after notifying — stops Telegram retry spam.
+      return NextResponse.json({ ok: true, error: "internal_error_notified" });
     } catch (replyErr) {
       console.error("[Bot:CrashReplyFailed]", replyErr);
+      return NextResponse.json(
+        { ok: false, error: "internal_error" },
+        { status: 500 },
+      );
     }
-    // Return 500 so Telegram retries instead of silently dropping the update.
-    return NextResponse.json(
-      { ok: false, error: "internal_error" },
-      { status: 500 },
-    );
   }
 }
 

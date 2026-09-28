@@ -18,6 +18,8 @@ export const MSG = {
     "⚠️ వివరాలు అసంపూర్ణంగా ఉన్నాయి. దయచేసి మీ మండలం పేరు మరియు సమస్యను ఒకే మెసేజ్‌గా పంపండి.",
   criticalServer:
     `సర్వర్ అనుసంధానంలో సాంకేతిక సమస్య ఎదురైంది. దయచేసి మా సహాయవాణి ${BOT_HELPLINE_WA} కు నేరుగా వాట్సాప్ చేయండి.`,
+  uploadRetry:
+    "⚠️ ఫోటో సేవ్ కాలేదు. దయచేసి ఒకసారి మళ్లీ పంపండి (కాంప్రెస్ చేసిన జేపీజీ ఉత్తమం).",
   submitProofPrompt:
     "📸 దయచేసి ఫీల్డ్ ఫోటోను పంపండి. క్యాప్షన్‌లో జిల్లా, మండలం, సమస్య రాయండి — లేదా ఫోటో తర్వాత వివరాలు టైప్ చేయండి.",
 } as const;
@@ -170,8 +172,9 @@ export type StorageUploadResult = {
 };
 
 /**
- * Upload buffer to desk_proofs; fall back to survey-photos on failure.
- * Path: submissions/{chat_id}_{timestamp}.{ext}
+ * Upload buffer to survey-photos (proven) then desk_proofs.
+ * Path: submissions/{chat_id}_{timestamp}_{unique}.{ext}
+ * Uses Uint8Array — Node Buffer often fails with supabase-js storage upload.
  */
 export async function uploadProofToStorage(
   admin: SupabaseClient,
@@ -185,14 +188,19 @@ export async function uploadProofToStorage(
 ): Promise<StorageUploadResult> {
   const ts = Date.now();
   const safeExt = (opts.ext || "jpg").replace(/[^a-z0-9]/gi, "") || "jpg";
-  const objectPath = `submissions/${opts.chatId}_${ts}.${safeExt}`;
-  const buckets = ["desk_proofs", "survey-photos"] as const;
+  const unique = (opts.fileUniqueId || "img").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 24);
+  const objectPath = `submissions/${opts.chatId}_${ts}_${unique}.${safeExt}`;
+  // Prefer legacy survey-photos first (already live in prod), then desk_proofs.
+  const buckets = ["survey-photos", "desk_proofs"] as const;
+  const bytes = new Uint8Array(opts.buffer);
+  const errors: Array<{ bucket: string; message: string }> = [];
 
   for (const bucket of buckets) {
     try {
-      const { error } = await admin.storage.from(bucket).upload(objectPath, opts.buffer, {
+      const { error } = await admin.storage.from(bucket).upload(objectPath, bytes, {
         contentType: opts.contentType || "image/jpeg",
         upsert: true,
+        cacheControl: "3600",
       });
 
       if (error && !/already exists/i.test(error.message || "")) {
@@ -201,27 +209,35 @@ export async function uploadProofToStorage(
           objectPath,
           message: error.message,
           name: error.name,
-          bytes: opts.buffer.byteLength,
+          statusCode: (error as { statusCode?: string }).statusCode,
+          bytes: bytes.byteLength,
         });
+        errors.push({ bucket, message: error.message });
         continue;
       }
 
       const { data } = admin.storage.from(bucket).getPublicUrl(objectPath);
-      return {
-        bucket,
-        objectPath,
-        publicUrl: data?.publicUrl || null,
-      };
+      const publicUrl = data?.publicUrl || null;
+      if (!publicUrl) {
+        errors.push({ bucket, message: "missing_public_url" });
+        continue;
+      }
+      console.info("[Bot:StorageOk]", { bucket, objectPath, bytes: bytes.byteLength });
+      return { bucket, objectPath, publicUrl };
     } catch (err) {
-      console.error("[Bot:StorageError]", err);
+      console.error("[Bot:StorageError]", { bucket, err });
+      errors.push({
+        bucket,
+        message: err instanceof Error ? err.message : "throw",
+      });
     }
   }
 
   return {
-    bucket: "desk_proofs",
+    bucket: "survey-photos",
     objectPath,
     publicUrl: null,
-    error: "all_buckets_failed",
+    error: `all_buckets_failed:${errors.map((e) => `${e.bucket}=${e.message}`).join("|")}`,
   };
 }
 
