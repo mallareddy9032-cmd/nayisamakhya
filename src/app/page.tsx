@@ -8,6 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CivicStalwarts } from "@/components/CivicStalwarts";
+import { CivicTimeline } from "@/components/CivicTimeline";
 import { CivicMetricsTicker } from "@/components/home/CivicMetricsTicker";
 import { HeritageTriadRibbon } from "@/components/home/HeritageTriadRibbon";
 import { HeroArtisanShowcase } from "@/components/home/HeroArtisanShowcase";
@@ -134,6 +135,8 @@ export default function HomePage() {
       <HeritageTriadRibbon />
 
       <PersonaSwitcher />
+
+      <CivicTimeline />
 
       <ServiceActionCards />
 
