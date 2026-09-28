@@ -9,7 +9,9 @@ import {
 } from "lucide-react";
 import { CivicStalwarts } from "@/components/CivicStalwarts";
 import { CivicMetricsTicker } from "@/components/home/CivicMetricsTicker";
+import { HeritageTriadRibbon } from "@/components/home/HeritageTriadRibbon";
 import { HeroArtisanShowcase } from "@/components/home/HeroArtisanShowcase";
+import { PersonaSwitcher } from "@/components/home/PersonaSwitcher";
 import { QuickGrievanceWidget } from "@/components/home/QuickGrievanceWidget";
 import { ServiceActionCards } from "@/components/home/ServiceActionCards";
 
@@ -127,7 +129,11 @@ export default function HomePage() {
 
       <CivicMetricsTicker />
 
-      <div className="h-6 sm:h-8" aria-hidden />
+      <div className="h-5 sm:h-6" aria-hidden />
+
+      <HeritageTriadRibbon />
+
+      <PersonaSwitcher />
 
       <ServiceActionCards />
 

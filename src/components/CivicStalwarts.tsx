@@ -12,51 +12,52 @@ type Stalwart = {
   monogram: string;
 };
 
+/** Historical civic icons — ceremonial double-gold bezel portraits. */
 const STALWARTS: Stalwart[] = [
-  {
-    id: "bismillah-khan",
-    name: "ఉస్తాద్ బిస్మిల్లా ఖాన్",
-    domain: "శాస్త్రీయ సంగీతం (షెహనాయి)",
-    blurb:
-      "భారతరత్న గ్రహీత, సన్నాయి వాయిద్యానికి ప్రపంచ ఖ్యాతి తెచ్చిన కళారత్నం.",
-    imageSrc: "/stalwarts/bismillah-khan.jpg",
-    monogram: "ఉ",
-  },
-  {
-    id: "dakuri-narayanadasu",
-    name: "సంత శ్రీ డాకూరి నారాయణదాసు",
-    domain: "భక్తి & ఆధ్యాత్మిక చైతన్యం",
-    blurb:
-      "తెలంగాణ ప్రాంతంలో ఆత్మగౌరవం, ధర్మం మరియు విద్యా చైతన్యాన్ని రగిలించిన పూజ్య గురువు.",
-    imageSrc: "/stalwarts/dakuri-narayanadasu.jpg",
-    monogram: "స",
-  },
   {
     id: "dhanvantari",
     name: "ధన్వంతరి",
     domain: "ప్రాచీన ఆయుర్వేదం & శస్త్రచికిత్స",
     blurb:
-      "వృత్తిపరమైన సంప్రదాయ వైద్యం, ఆయుర్వేద ఆరోగ్య విజ్ఞాన మూలపురుషుడు.",
+      "వైద్య మూలపురుషుడు — సంప్రదాయ వైద్యం, ఆయుర్వేద ఆరోగ్య విజ్ఞాన ప్రదాత.",
     imageSrc: "/stalwarts/dhanvantari.jpg",
     monogram: "ధ",
   },
   {
-    id: "gone-perumallu",
-    name: "సర్దార్ గోనె పెరుమాళ్ళు",
-    domain: "ప్రజా పోరాటాలు & స్వాతంత్ర్యం",
+    id: "charaka",
+    name: "చరక మహర్షి",
+    domain: "ఆయుర్వేద సంహిత & చికిత్సా శాస్త్రం",
     blurb:
-      "తెలంగాణ సాయుధ పోరాటంలో వెట్టిచాకిరీ వ్యతిరేకంగా గ్రామీణ వృత్తిదారులను నడిపించిన యోధుడు.",
-    imageSrc: "/stalwarts/gone-perumallu.jpg",
-    monogram: "స",
+      "చరక సంహిత కర్త — రోగ నిర్ధారణ, ఔషధ విజ్ఞానానికి శాశ్వత మార్గదర్శి.",
+    imageSrc: "/stalwarts/charaka.jpg",
+    monogram: "చ",
   },
   {
-    id: "nayi-seshagirirao",
-    name: "ఆచార్య నాయి శేషగిరిరావు",
-    domain: "విద్యా సంస్కరణలు & BC హక్కులు",
+    id: "mahapadmananda",
+    name: "సమ్రాట్ మహాపద్మనంద",
+    domain: "నంద రాజవంశం & సామ్రాజ్య పాలన",
     blurb:
-      "ఆధునిక విద్యా వికాసం మరియు BC-A హక్కులకై ప్రభుత్వ కమిషన్లలో ప్రాతినిధ్యం వహించిన మార్గదర్శి.",
-    imageSrc: "/stalwarts/nayi-seshagirirao.jpg",
-    monogram: "ఆ",
+      "నంద సామ్రాజ్య ప్రాభవం — జనసంక్షేమం, వ్యవసాయం, పరిపాలనా వైభవం.",
+    imageSrc: "/stalwarts/mahapadmananda.jpg",
+    monogram: "మ",
+  },
+  {
+    id: "karpoori-thakur",
+    name: "కర్పూరి ఠాకూర్",
+    domain: "సామాజిక న్యాయం & వెనుకబడిన వర్గాలు",
+    blurb:
+      "భారతరత్న — వృత్తి సమాజాలు, విద్యా & సంక్షేమ హక్కుల పోరాట యోధుడు.",
+    imageSrc: "/stalwarts/karpoori-thakur.jpg",
+    monogram: "క",
+  },
+  {
+    id: "veerappa-moily",
+    name: "ఎం. వీరప్ప మొయిలి",
+    domain: "న్యాయ సంస్కరణలు & పౌర హక్కులు",
+    blurb:
+      "న్యాయ / పాలనా సంస్కరణలు — పౌర సేవలు, రాజ్యాంగ హక్కుల రక్షణకు తోడ్పాటు.",
+    imageSrc: "/stalwarts/veerappa-moily.jpg",
+    monogram: "వ",
   },
 ];
 
@@ -80,12 +81,12 @@ function StalwartPortrait({
       className="stalwart-bezel relative h-20 w-20 shrink-0"
       aria-label={name}
     >
-      {/* Outer soft ring separator matching warm paper canvas */}
+      {/* Outer soft ring + ceremonial gold double-bezel */}
       <div
         className="absolute inset-0 rounded-full"
         style={{
           boxShadow:
-            "0 0 0 1.5px #FBFBFA, 0 2px 8px rgb(15 23 42 / 0.12), 0 0 0 3px rgb(180 83 9 / 0.18)",
+            "0 0 0 1.5px #FBFBFA, 0 0 0 3px #B45309, 0 0 0 5px rgb(180 83 9 / 0.28), 0 2px 10px rgb(15 23 42 / 0.14)",
         }}
         aria-hidden
       />
@@ -143,6 +144,10 @@ export function CivicStalwarts() {
           >
             సమాజ మార్గదర్శకులు & విశిష్ట ప్రముఖులు
           </h2>
+          <p className="mt-1.5 font-telugu text-xs leading-relaxed text-slate-600">
+            ధన్వంతరి · చరక · మహాపద్మనంద · కర్పూరి ఠాకూర్ · వీరప్ప మొయిలి —
+            ఆత్మగౌరవ వారసత్వం.
+          </p>
         </header>
 
         <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x lg:grid lg:grid-cols-5 lg:gap-4 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
