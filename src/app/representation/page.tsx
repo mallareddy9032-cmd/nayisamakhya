@@ -44,9 +44,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default function RepresentationPage() {
-  // Print/PDF: desktop → window.print(); Telegram/WhatsApp/IG webviews →
-  // sticky breakout banner + html2canvas/jspdf → NayiSamakhya-Vinathipathram.pdf.
-  // Letter locked with translate="no" lang="te"; globals.css enforces single A4.
+  // Print/PDF Phase 1: desktop → window.print(); Telegram/WhatsApp/IG webviews →
+  // sticky navy breakout banner + html2canvas/jspdf →
+  // NayiSamakhya-Vinathipathram-[DISTRICT].pdf with helpline fallback.
+  // #petition-document locked with translate="no" lang="te"; globals.css enforces single A4.
   return (
     <Suspense
       fallback={

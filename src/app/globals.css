@@ -198,14 +198,23 @@ body {
     background: #fff !important;
   }
 
-  /* Keep signature + verification stamp + seal on the same A4 sheet. */
+  /* Keep masthead, reference block, signature + verification seal on one A4 sheet. */
+  .print-masthead,
+  .print-reference-block,
   .print-signature-block,
   .print-seal-block,
-  .print-coordinator-ref {
+  .print-coordinator-ref,
+  #petition-document .print-masthead,
+  #petition-document .print-reference-block {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     break-before: avoid !important;
     page-break-before: avoid !important;
+  }
+
+  #petition-document {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   #main-content {

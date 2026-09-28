@@ -20,11 +20,13 @@ import {
   PDF_LOADING_TE,
   IN_APP_PRINT_BANNER_TE,
   OPEN_IN_BROWSER_BTN_TE,
-  PETITION_PDF_FILENAME,
+  PETITION_HELPLINE_URL,
+  PETITION_HELPLINE_WA,
   downloadPetitionPdf,
   isInAppWebView,
   isTelegramWebApp,
   openCurrentPageExternally,
+  petitionPdfFilename,
   shouldUsePdfFallback,
 } from "@/lib/twa/printPetitionPdf";
 import { CommunityHubsSection } from "@/components/CommunityHubsSection";
@@ -239,26 +241,35 @@ export function RepresentationLetterPage() {
     const el = letterRef.current;
     if (!el) {
       setPdfError(
-        "పీడీఎఫ్ సిద్ధం కాలేదు. బ్రౌజర్‌లో తెరిచి మళ్లీ ప్రయత్నించండి.",
+        `పీడీఎఫ్ సిద్ధం కాలేదు. బ్రౌజర్‌లో తెరవండి లేదా వాట్సాప్ ${PETITION_HELPLINE_WA} కు సంప్రదించండి.`,
       );
       return;
     }
+
+    const filename = petitionPdfFilename(districtSlug || districtMeta.name_en);
 
     // Immediate visual feedback before the async canvas/jspdf work.
     setPdfBusy(true);
     try {
       // Ensure letter is in DOM (step 3) and measurable for capture.
       await new Promise<void>((r) => requestAnimationFrame(() => r()));
-      await downloadPetitionPdf(el, PETITION_PDF_FILENAME);
+      await downloadPetitionPdf(el, filename);
     } catch (err) {
       console.error("petition PDF generation failed", err);
       setPdfError(
-        "పీడీఎఫ్ తయారు విఫలమైంది. క్రోమ్ లేదా సఫారీలో తెరిచి ప్రింట్ చేయండి.",
+        `పీడీఎఫ్ తయారు విఫలమైంది. క్రోమ్/సఫారీలో తెరవండి లేదా హెల్ప్‌లైన్ ${PETITION_HELPLINE_WA} కు వాట్సాప్ చేయండి.`,
       );
+      try {
+        window.alert(
+          `పీడీఎఫ్ డౌన్‌లోడ్ కాలేదు.\n\nదయచేసి WhatsApp హెల్ప్‌లైన్ ${PETITION_HELPLINE_WA} కు సంప్రదించి వినతిపత్రం అందుకోండి.`,
+        );
+      } catch {
+        /* alert may be blocked in some webviews */
+      }
     } finally {
       setPdfBusy(false);
     }
-  }, []);
+  }, [districtSlug, districtMeta.name_en]);
 
   const canAdvanceStep1 = Boolean(districtSlug && (mandalSlug || mandal));
   const canAdvanceStep2 = useCustom
@@ -275,24 +286,24 @@ export function RepresentationLetterPage() {
         }}
       />
 
-      {/* Sticky in-app breakout banner — Executive Civic navy + gold */}
+      {/* Sticky in-app breakout banner — Executive Civic navy + bronze + warm paper */}
       {inAppWebView ? (
         <div
-          className="no-print sticky top-0 z-50 border-b border-[#B45309]/40 bg-[#1E293B] text-white print:hidden"
+          className="no-print sticky top-0 z-50 border-b border-[#B45309] bg-[#1E293B] print:hidden"
           role="region"
           aria-label="Open in browser for PDF"
           style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         >
-          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-            <p className="min-w-0 flex-1 font-telugu text-[11px] font-semibold leading-relaxed sm:text-xs">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2.5 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <p className="min-w-0 flex-1 font-telugu text-[11px] font-semibold leading-relaxed text-[#FBFBFA] sm:text-xs">
               {IN_APP_PRINT_BANNER_TE}
             </p>
             <button
               type="button"
               onClick={() => openCurrentPageExternally()}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#B45309] px-4 py-2.5 font-telugu text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#92400E]"
+              className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#B45309] px-4 py-3 font-telugu text-xs font-bold text-[#FBFBFA] shadow-sm transition-colors hover:bg-[#92400E]"
             >
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              <ExternalLink className="h-4 w-4" aria-hidden />
               {OPEN_IN_BROWSER_BTN_TE}
             </button>
           </div>
@@ -306,13 +317,13 @@ export function RepresentationLetterPage() {
           aria-live="polite"
           aria-busy="true"
         >
-          <div className="flex max-w-sm flex-col items-center gap-3 rounded-2xl bg-white px-6 py-5 text-center shadow-xl">
+          <div className="flex max-w-sm flex-col items-center gap-3 rounded-2xl bg-[#FBFBFA] px-6 py-5 text-center shadow-xl">
             <Loader2 className="h-7 w-7 animate-spin text-[#B45309]" aria-hidden />
-            <p className="font-telugu text-sm font-semibold leading-relaxed text-[#0F172A]">
+            <p className="font-telugu text-sm font-semibold leading-relaxed text-[#1E293B]">
               {PDF_LOADING_TE}
             </p>
             <p className="text-[11px] text-slate-500">
-              NayiSamakhya-Vinathipathram.pdf
+              {petitionPdfFilename(districtSlug || districtMeta.name_en)}
             </p>
           </div>
         </div>
@@ -347,15 +358,17 @@ export function RepresentationLetterPage() {
               type="button"
               onClick={() => void handlePrintOrPdf()}
               disabled={pdfBusy}
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-civic-bronze px-3 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover hover:shadow-md disabled:cursor-wait disabled:opacity-70 sm:px-4"
+              className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-civic-bronze px-3 py-3 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover hover:shadow-md disabled:cursor-wait disabled:opacity-70 sm:px-4"
             >
               {pdfBusy ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               ) : (
                 <Printer className="h-4 w-4" />
               )}
-              <span className="hidden sm:inline">ప్రింట్ / PDF సేవ్</span>
-              <span className="sm:hidden">PDF</span>
+              <span className="hidden sm:inline">
+                {pdfBusy ? PDF_LOADING_TE : "ప్రింట్ / PDF సేవ్"}
+              </span>
+              <span className="sm:hidden">{pdfBusy ? "…" : "PDF"}</span>
             </button>
           ) : null}
         </div>
@@ -401,7 +414,7 @@ export function RepresentationLetterPage() {
         </div>
 
         {pdfError ? (
-          <div className="border-t border-red-200 bg-red-50 px-4 py-2 text-center font-telugu text-xs font-medium leading-relaxed text-red-800">
+          <div className="border-t border-red-200 bg-red-50 px-4 py-2.5 text-center font-telugu text-xs font-medium leading-relaxed text-red-800">
             {pdfError}{" "}
             <button
               type="button"
@@ -410,12 +423,21 @@ export function RepresentationLetterPage() {
             >
               {OPEN_IN_BROWSER_BTN_TE}
             </button>
+            {" · "}
+            <a
+              href={PETITION_HELPLINE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline"
+            >
+              WhatsApp {PETITION_HELPLINE_WA}
+            </a>
           </div>
         ) : null}
       </header>
 
       <main
-        className={`mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-6 pb-[max(2rem,env(safe-area-inset-bottom))] lg:grid-cols-12 print:m-0 print:block print:p-0 ${
+        className={`mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] lg:grid-cols-12 print:m-0 print:block print:p-0 ${
           step < 3 ? "lg:grid-cols-1" : ""
         }`}
       >
@@ -512,7 +534,7 @@ export function RepresentationLetterPage() {
                 type="button"
                 disabled={!canAdvanceStep1}
                 onClick={() => setStep(2)}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3 font-telugu text-sm font-bold text-white disabled:opacity-50"
+                className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:opacity-50"
               >
                 తరువాత — వినతి అంశం
                 <ArrowRight className="h-4 w-4" />
@@ -586,7 +608,7 @@ export function RepresentationLetterPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3 font-telugu text-sm font-bold text-civic-ink"
+                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3.5 font-telugu text-sm font-bold text-civic-ink"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   వెనక్కి
@@ -595,7 +617,7 @@ export function RepresentationLetterPage() {
                   type="button"
                   disabled={!canAdvanceStep2}
                   onClick={() => setStep(3)}
-                  className="inline-flex flex-[1.4] items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3 font-telugu text-sm font-bold text-white disabled:opacity-50"
+                  className="inline-flex min-h-12 flex-[1.4] items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:opacity-50"
                 >
                   ప్రివ్యూ చూడండి
                   <ArrowRight className="h-4 w-4" />
@@ -651,24 +673,24 @@ export function RepresentationLetterPage() {
                 </dl>
               </div>
 
-              <div className="mt-5 flex flex-col gap-2">
+              <div className="mt-5 flex flex-col gap-2 pb-[env(safe-area-inset-bottom,0px)]">
                 <button
                   type="button"
                   onClick={() => void handlePrintOrPdf()}
                   disabled={pdfBusy}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:opacity-70"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"
                 >
                   {pdfBusy ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   ) : (
                     <Printer className="h-4 w-4" />
                   )}
-                  వినతిపత్రం ప్రింట్ / PDF సేవ్
+                  {pdfBusy ? PDF_LOADING_TE : "వినతిపత్రం ప్రింట్ / PDF సేవ్"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-2.5 font-telugu text-xs font-bold text-civic-ink"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3 font-telugu text-xs font-bold text-civic-ink"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   అంశం మార్చండి
@@ -697,13 +719,14 @@ export function RepresentationLetterPage() {
         >
           <div
             ref={letterRef}
-            id="representation-letter-print"
+            id="petition-document"
+            data-print-id="representation-letter-print"
             translate="no"
             lang="te"
             className="print-only-document print-document printable-card flex min-h-[297mm] w-full max-w-[210mm] flex-col justify-between overflow-hidden rounded-lg border border-slate-300 bg-white p-10 shadow-xl md:p-14 print:m-0 print:h-auto print:max-h-[277mm] print:min-h-0 print:w-full print:max-w-none print:overflow-hidden print:rounded-none print:border-none print:p-0 print:shadow-none"
           >
             <div className="print:space-y-2">
-              <div className="mb-8 border-b-2 border-civic-ink pb-6 text-center print:mb-2 print:pb-2">
+              <div className="print-masthead mb-8 break-inside-avoid border-b-2 border-civic-ink pb-6 text-center print:mb-2 print:pb-2">
                 <h2 className="font-telugu text-xl font-black leading-relaxed tracking-wide text-civic-ink md:text-2xl print:text-base">
                   వినతిపత్రం (REPRESENTATION)
                 </h2>
@@ -715,7 +738,7 @@ export function RepresentationLetterPage() {
                 </div>
               </div>
 
-              <div className="mb-8 flex items-start justify-between font-telugu text-xs leading-relaxed md:text-sm print:mb-2 print:text-sm print:leading-snug">
+              <div className="print-reference-block mb-8 flex break-inside-avoid items-start justify-between font-telugu text-xs leading-relaxed md:text-sm print:mb-2 print:text-sm print:leading-snug">
                 <div>
                   <p className="font-bold text-civic-ink">స్వీకర్త (To):</p>
                   <p className="font-semibold text-slate-800">

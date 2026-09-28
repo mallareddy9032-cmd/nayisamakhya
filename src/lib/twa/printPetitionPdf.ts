@@ -16,18 +16,41 @@ type TelegramWindow = Window & {
   Telegram?: { WebApp?: TelegramWebAppLike };
 };
 
-export const PDF_LOADING_TE = "పీడీఎఫ్ సిద్ధం అవుతోంది...";
+export const PDF_LOADING_TE =
+  "పీడీఎఫ్ సిద్ధం అవుతోంది... (Generating PDF)";
 
 /** Sticky banner copy for restricted in-app browsers. */
 export const IN_APP_PRINT_BANNER_TE =
   "మొబైల్ యాప్‌లో ప్రింట్ సపోర్ట్ పరిమితం. పీడీఎఫ్ డౌన్‌లోడ్ కోసం క్రోమ్ లేదా సఫారీలో తెరవండి.";
 
-export const OPEN_IN_BROWSER_BTN_TE = "బ్రౌజర్‌లో తెరవండి";
+export const OPEN_IN_BROWSER_BTN_TE =
+  "బ్రౌజర్‌లో తెరవండి (Open in Browser)";
 
 /** @deprecated prefer OPEN_IN_BROWSER_BTN_TE */
 export const OPEN_EXTERNAL_BROWSER_LABEL = OPEN_IN_BROWSER_BTN_TE;
 
 export const PETITION_PDF_FILENAME = "NayiSamakhya-Vinathipathram.pdf";
+
+export const PETITION_HELPLINE_WA = "+91 9032654111";
+export const PETITION_HELPLINE_URL =
+  "https://wa.me/919032654111?text=" +
+  encodeURIComponent(
+    "వినతిపత్రం పీడీఎఫ్ డౌన్‌లోడ్ కాలేదు. దయచేసి సహాయం చేయండి.",
+  );
+
+/** Build `NayiSamakhya-Vinathipathram-[DISTRICT].pdf` with ASCII-safe district token. */
+export function petitionPdfFilename(districtSlugOrName?: string | null): string {
+  const raw = (districtSlugOrName || "").trim();
+  const token =
+    raw
+      .normalize("NFKD")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "Telangana";
+  return `NayiSamakhya-Vinathipathram-${token}.pdf`;
+}
 
 function telegramWindow(): TelegramWindow | null {
   if (typeof window === "undefined") return null;
@@ -134,7 +157,7 @@ function triggerBlobDownload(blob: Blob, filename: string) {
 }
 
 /**
- * Capture the printable letter into a single A4 PDF and trigger download.
+ * Capture the printable letter (#petition-document) into a single A4 PDF.
  * Scales content to fit one page — never spills onto page 2.
  */
 export async function downloadPetitionPdf(
@@ -149,6 +172,7 @@ export async function downloadPetitionPdf(
   // Ensure Telugu / layout locks are visible to the canvas renderer.
   element.setAttribute("translate", "no");
   element.setAttribute("lang", "te");
+  if (!element.id) element.id = "petition-document";
 
   const canvas = await html2canvas(element, {
     scale: Math.min(2, window.devicePixelRatio || 2),
@@ -157,8 +181,14 @@ export async function downloadPetitionPdf(
     backgroundColor: "#ffffff",
     logging: false,
     scrollX: 0,
-    scrollY: 0,
+    scrollY: -window.scrollY,
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight,
   });
+
+  if (!canvas.width || !canvas.height) {
+    throw new Error("empty_canvas");
+  }
 
   const imgData = canvas.toDataURL("image/jpeg", 0.93);
   const pdf = new jsPDF({
