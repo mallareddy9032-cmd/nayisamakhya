@@ -8,6 +8,8 @@ type Stalwart = {
   domain: string;
   blurb: string;
   imageSrc: string;
+  /** High-contrast gold glyph for Navy monogram fallback. */
+  monogram: string;
 };
 
 const STALWARTS: Stalwart[] = [
@@ -18,6 +20,7 @@ const STALWARTS: Stalwart[] = [
     blurb:
       "భారతరత్న గ్రహీత, సన్నాయి వాయిద్యానికి ప్రపంచ ఖ్యాతి తెచ్చిన కళారత్నం.",
     imageSrc: "/stalwarts/bismillah-khan.jpg",
+    monogram: "ఉ",
   },
   {
     id: "dakuri-narayanadasu",
@@ -26,6 +29,7 @@ const STALWARTS: Stalwart[] = [
     blurb:
       "తెలంగాణ ప్రాంతంలో ఆత్మగౌరవం, ధర్మం మరియు విద్యా చైతన్యాన్ని రగిలించిన పూజ్య గురువు.",
     imageSrc: "/stalwarts/dakuri-narayanadasu.jpg",
+    monogram: "స",
   },
   {
     id: "dhanvantari",
@@ -34,6 +38,7 @@ const STALWARTS: Stalwart[] = [
     blurb:
       "వృత్తిపరమైన సంప్రదాయ వైద్యం, ఆయుర్వేద ఆరోగ్య విజ్ఞాన మూలపురుషుడు.",
     imageSrc: "/stalwarts/dhanvantari.jpg",
+    monogram: "ధ",
   },
   {
     id: "gone-perumallu",
@@ -42,6 +47,7 @@ const STALWARTS: Stalwart[] = [
     blurb:
       "తెలంగాణ సాయుధ పోరాటంలో వెట్టిచాకిరీ వ్యతిరేకంగా గ్రామీణ వృత్తిదారులను నడిపించిన యోధుడు.",
     imageSrc: "/stalwarts/gone-perumallu.jpg",
+    monogram: "స",
   },
   {
     id: "nayi-seshagirirao",
@@ -50,48 +56,72 @@ const STALWARTS: Stalwart[] = [
     blurb:
       "ఆధునిక విద్యా వికాసం మరియు BC-A హక్కులకై ప్రభుత్వ కమిషన్లలో ప్రాతినిధ్యం వహించిన మార్గదర్శి.",
     imageSrc: "/stalwarts/nayi-seshagirirao.jpg",
+    monogram: "ఆ",
   },
 ];
 
-function teluguInitial(name: string): string {
-  const trimmed = name.trim();
-  if (!trimmed) return "న";
-  // First Unicode code point — correct for Telugu base letters.
-  return Array.from(trimmed)[0] ?? "న";
-}
-
-function StalwartPortrait({ name, imageSrc }: { name: string; imageSrc: string }) {
+function StalwartPortrait({
+  name,
+  imageSrc,
+  monogram,
+}: {
+  name: string;
+  imageSrc: string;
+  monogram: string;
+}) {
   // Show Navy monogram until a real portrait loads; never flash a broken-image icon.
-  const [status, setStatus] = useState<"pending" | "loaded" | "failed">("pending");
-  const initial = teluguInitial(name);
+  const [status, setStatus] = useState<"pending" | "loaded" | "failed">(
+    "pending",
+  );
   const showMonogram = status !== "loaded";
 
   return (
-    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-civic-bronze bg-civic-navy">
-      {showMonogram ? (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          aria-hidden
-        >
-          <span className="font-telugu text-2xl font-bold leading-none text-[#FBFBFA]">
-            {initial}
-          </span>
-        </div>
-      ) : null}
-      {status !== "failed" ? (
-        // eslint-disable-next-line @next/next/no-img-element -- onError monogram fallback requires native img
-        <img
-          src={imageSrc}
-          alt=""
-          width={80}
-          height={80}
-          className={`h-full w-full object-cover transition-opacity ${
-            status === "loaded" ? "opacity-100" : "opacity-0"
-          }`}
-          onLoad={() => setStatus("loaded")}
-          onError={() => setStatus("failed")}
-        />
-      ) : null}
+    <div
+      className="stalwart-bezel relative h-20 w-20 shrink-0"
+      aria-label={name}
+    >
+      {/* Outer soft ring separator matching warm paper canvas */}
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          boxShadow:
+            "0 0 0 1.5px #FBFBFA, 0 2px 8px rgb(15 23 42 / 0.12), 0 0 0 3px rgb(180 83 9 / 0.18)",
+        }}
+        aria-hidden
+      />
+      {/* Inner ceremonial gold bezel + navy fallback canvas */}
+      <div
+        className="relative h-full w-full overflow-hidden rounded-full bg-[#1E293B]"
+        style={{
+          border: "1.5px solid #B45309",
+          boxShadow: "inset 0 0 0 1px rgb(251 251 250 / 0.35)",
+        }}
+      >
+        {showMonogram ? (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-[#1E293B]"
+            aria-hidden
+          >
+            <span className="font-telugu text-2xl font-bold leading-none text-[#B45309]">
+              {monogram}
+            </span>
+          </div>
+        ) : null}
+        {status !== "failed" ? (
+          // eslint-disable-next-line @next/next/no-img-element -- onError monogram fallback requires native img
+          <img
+            src={imageSrc}
+            alt=""
+            width={80}
+            height={80}
+            className={`h-full w-full object-cover transition-opacity duration-200 ${
+              status === "loaded" ? "opacity-100" : "opacity-0"
+            }`}
+            onLoad={() => setStatus("loaded")}
+            onError={() => setStatus("failed")}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -99,17 +129,17 @@ function StalwartPortrait({ name, imageSrc }: { name: string; imageSrc: string }
 export function CivicStalwarts() {
   return (
     <section
-      className="border-t border-civic-border bg-civic-paper px-4 py-12"
+      className="civic-watermark border-t border-civic-border bg-civic-paper px-4 py-12"
       aria-labelledby="civic-stalwarts-heading"
     >
-      <div className="mx-auto max-w-6xl rounded-2xl border border-civic-border bg-white p-5 shadow-xs sm:p-7">
+      <div className="mx-auto max-w-6xl rounded-2xl border border-civic-border bg-white/95 p-5 shadow-xs sm:p-7">
         <header className="mb-6 border-b border-civic-border pb-4">
           <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-civic-bronze">
             Civic Heritage
           </p>
           <h2
             id="civic-stalwarts-heading"
-            className="mt-1.5 font-telugu text-xl font-black tracking-tight text-civic-ink sm:text-2xl"
+            className="mt-1.5 font-telugu text-xl font-black tracking-tight text-civic-ink leading-[1.8] sm:text-2xl"
           >
             సమాజ మార్గదర్శకులు & విశిష్ట ప్రముఖులు
           </h2>
@@ -125,17 +155,18 @@ export function CivicStalwarts() {
                 <StalwartPortrait
                   name={stalwart.name}
                   imageSrc={stalwart.imageSrc}
+                  monogram={stalwart.monogram}
                 />
 
-                <h3 className="font-telugu text-sm font-bold leading-snug text-civic-ink">
+                <h3 className="font-telugu text-sm font-bold leading-[1.8] text-civic-ink">
                   {stalwart.name}
                 </h3>
 
-                <span className="inline-flex max-w-full items-center justify-center rounded-md border border-x-civic-bronze/40 border-y-civic-border bg-[#F8FAFC] px-2.5 py-1 font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
+                <span className="inline-flex max-w-full items-center justify-center rounded-md border border-x-civic-bronze/40 border-y-civic-border bg-[#F8FAFC] px-2.5 py-1 font-telugu text-[11px] font-semibold leading-[1.8] text-civic-ink">
                   {stalwart.domain}
                 </span>
 
-                <p className="font-telugu text-[12px] leading-relaxed text-civic-navy/85">
+                <p className="font-telugu text-[12px] leading-[1.8] text-civic-navy/85 tabular-nums">
                   {stalwart.blurb}
                 </p>
               </article>

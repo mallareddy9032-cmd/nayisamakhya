@@ -14,7 +14,7 @@ export function HeroTactical() {
   const mandal = getMandal(districtSlug, mandalSlug);
 
   return (
-    <section className="px-4 pb-8 pt-6" id="home">
+    <section className="civic-hero-surface px-4 pb-8 pt-6" id="home">
       <div className="mx-auto max-w-6xl">
         <Stagger>
           <FadeItem>
@@ -24,12 +24,12 @@ export function HeroTactical() {
               {t("heroEyebrow", lang)}
             </p>
             <h1
-              className={`mt-3 max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl ${lang === "te" ? "font-telugu leading-relaxed" : ""}`}
+              className={`mt-3 max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl ${lang === "te" ? "font-telugu leading-[1.8]" : ""}`}
             >
               {t("heroTitle", lang)}
             </h1>
             <p
-              className={`mt-3 max-w-2xl text-base text-slate-600 ${lang === "te" ? "font-telugu leading-relaxed" : "leading-relaxed"}`}
+              className={`mt-3 max-w-2xl text-base text-slate-600 ${lang === "te" ? "font-telugu leading-[1.8]" : "leading-relaxed"}`}
             >
               {t("heroBody", lang)}
             </p>

@@ -768,10 +768,10 @@ export function RepresentationLetterPage() {
         >
           <div
             ref={letterRef}
-            id="representation-letter-print"
+            id="petition-document"
             translate="no"
             lang="te"
-            className="print-only-document print-document printable-card flex min-h-[297mm] w-full max-w-[210mm] flex-col justify-between overflow-hidden rounded-lg border border-slate-300 bg-white p-10 shadow-xl md:p-14 print:m-0 print:h-auto print:max-h-[277mm] print:min-h-0 print:w-full print:max-w-none print:overflow-hidden print:rounded-none print:border-none print:p-0 print:shadow-none"
+            className="print-only-document print-document printable-card representation-letter-print flex min-h-[297mm] w-full max-w-[210mm] flex-col justify-between overflow-hidden rounded-lg border border-slate-300 bg-white p-10 shadow-xl md:p-14 print:m-0 print:h-auto print:max-h-[277mm] print:min-h-0 print:w-full print:max-w-none print:overflow-hidden print:rounded-none print:border-none print:p-0 print:shadow-none"
           >
             <div className="print:space-y-2">
               <DocketHeader

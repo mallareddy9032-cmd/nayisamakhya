@@ -80,12 +80,69 @@ body {
 
 body {
   @apply antialiased;
+  /* Warm paper canvas + subtle grain (2–3% opacity) — zero layout shift */
+  background-color: #fbfbfa;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.06 0 0 0 0 0.07 0 0 0 0 0.08 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: 180px 180px;
+}
+
+/* Official civic watermark emblem — ultra-low opacity gazette letterhead feel */
+.civic-watermark,
+#petition-document,
+#representation-letter-print,
+.representation-letter-print,
+#newsletter-print-root,
+.civic-hero-surface {
+  position: relative;
+  isolation: isolate;
+}
+
+.civic-watermark::before,
+#petition-document::before,
+#representation-letter-print::before,
+.representation-letter-print::before,
+#newsletter-print-root::before,
+.civic-hero-surface::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%231E293B' stroke-width='2'%3E%3Ccircle cx='100' cy='100' r='78'/%3E%3Ccircle cx='100' cy='100' r='68'/%3E%3C/g%3E%3Ctext x='100' y='92' text-anchor='middle' font-family='Noto Sans Telugu,serif' font-size='28' font-weight='700' fill='%23B45309'%3E%E0%B0%A8%E0%B0%BE%3C/text%3E%3Ctext x='100' y='122' text-anchor='middle' font-family='Noto Sans Telugu,serif' font-size='11' font-weight='600' fill='%231E293B'%3E%E0%B0%B8%E0%B0%AE%E0%B0%BE%E0%B0%96%E0%B1%8D%E0%B0%AF%3C/text%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 42%;
+  background-size: min(42%, 220px);
+  opacity: 0.03;
+}
+
+.civic-watermark > *,
+#petition-document > *,
+#representation-letter-print > *,
+#newsletter-print-root > *,
+.civic-hero-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media print {
+  body {
+    background-image: none !important;
+  }
+  .civic-watermark::before,
+  #petition-document::before,
+  #representation-letter-print::before,
+  #newsletter-print-root::before,
+  .civic-hero-surface::before {
+    opacity: 0.04 !important;
+  }
 }
 
 .font-telugu {
   /* Noto Sans Telugu — relaxed leading protects ottulu / maatras from clipping */
   font-family: var(--font-telugu), var(--font-sans), system-ui, sans-serif;
-  line-height: 1.75;
+  line-height: 1.8;
   font-feature-settings: "kern" 1, "liga" 1;
 }
 
