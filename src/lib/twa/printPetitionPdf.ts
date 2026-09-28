@@ -1,6 +1,7 @@
 /**
  * Print / PDF helpers for Representation Petition Maker.
- * Desktop: native window.print(). Telegram Mini App / mobile webviews: html2canvas + jspdf.
+ * Desktop / Safari / Chrome: native window.print().
+ * Telegram Mini App / WhatsApp / Instagram / FB webviews: html2canvas + jspdf download.
  */
 
 type TelegramWebAppLike = {
@@ -16,8 +17,17 @@ type TelegramWindow = Window & {
 };
 
 export const PDF_LOADING_TE = "పీడీఎఫ్ సిద్ధం అవుతోంది...";
-export const OPEN_EXTERNAL_BROWSER_LABEL =
-  "పూర్తి ఫీచర్ల కొరకు క్రోమ్ లేదా సఫారీలో తెరవండి (Open in Browser)";
+
+/** Sticky banner copy for restricted in-app browsers. */
+export const IN_APP_PRINT_BANNER_TE =
+  "మొబైల్ యాప్‌లో ప్రింట్ సపోర్ట్ పరిమితం. పీడీఎఫ్ డౌన్‌లోడ్ కోసం క్రోమ్ లేదా సఫారీలో తెరవండి.";
+
+export const OPEN_IN_BROWSER_BTN_TE = "బ్రౌజర్‌లో తెరవండి";
+
+/** @deprecated prefer OPEN_IN_BROWSER_BTN_TE */
+export const OPEN_EXTERNAL_BROWSER_LABEL = OPEN_IN_BROWSER_BTN_TE;
+
+export const PETITION_PDF_FILENAME = "NayiSamakhya-Vinathipathram.pdf";
 
 function telegramWindow(): TelegramWindow | null {
   if (typeof window === "undefined") return null;
@@ -29,34 +39,55 @@ export function getTelegramWebApp(): TelegramWebAppLike | null {
 }
 
 export function isTelegramWebApp(): boolean {
+  if (typeof window === "undefined") return false;
   const wa = getTelegramWebApp();
-  if (!wa) return false;
-  // Real Mini Apps expose initData or a non-empty platform.
-  return Boolean(wa.initData) || Boolean(wa.platform && wa.platform !== "unknown");
+  if (wa?.initData) return true;
+  const ua = navigator.userAgent || "";
+  if (ua.includes("Telegram")) return true;
+  // Real Mini Apps expose a non-empty platform after SDK inject.
+  return Boolean(wa?.platform && wa.platform !== "unknown");
 }
 
-/** True when native print is unlikely to work (TWA or typical mobile in-app webview). */
-export function shouldUsePdfFallback(): boolean {
+/** Telegram / WhatsApp / Instagram / Facebook / generic WebView. */
+export function isInAppWebView(): boolean {
   if (typeof window === "undefined") return false;
   if (isTelegramWebApp()) return true;
+  const ua = navigator.userAgent || "";
+  return /WhatsApp|Instagram|FBAN|FBAV|FBIOS|Line\/|MicroMessenger|WV|; wv\)|WebView/i.test(
+    ua,
+  );
+}
+
+/**
+ * True when native print is unreliable — use client PDF download instead.
+ * Covers TWA + common mobile in-app browsers.
+ */
+export function shouldUsePdfFallback(): boolean {
+  if (typeof window === "undefined") return false;
+  if (isInAppWebView()) return true;
   const ua = navigator.userAgent || "";
   const mobile =
     /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
       ua,
     );
   if (!mobile) return false;
-  // In-app browsers / WebViews where print() is a no-op.
+  // Android WebView without Chrome object — print() is often a no-op.
   return (
-    /Telegram|FBAN|FBAV|Instagram|Line\/|MicroMessenger|WV|WebView/i.test(ua) ||
     (!(window as unknown as { chrome?: unknown }).chrome &&
-      /Android/i.test(ua))
+      /Android/i.test(ua)) ||
+    /; wv\)/i.test(ua)
   );
 }
 
+/**
+ * Break out of the in-app browser into Chrome / Safari.
+ * Tries Telegram.WebApp.openLink, then `_system`, then `_blank`.
+ */
 export function openCurrentPageExternally(): boolean {
-  const wa = getTelegramWebApp();
   const url = typeof window !== "undefined" ? window.location.href : "";
   if (!url) return false;
+
+  const wa = getTelegramWebApp();
   if (wa?.openLink) {
     try {
       wa.openLink(url, { try_instant_view: false });
@@ -65,39 +96,59 @@ export function openCurrentPageExternally(): boolean {
       console.error("Telegram.WebApp.openLink failed", err);
     }
   }
+
+  // Cordova / some WebViews honor `_system` for the OS browser.
+  try {
+    const sys = window.open(url, "_system");
+    if (sys) return true;
+  } catch {
+    /* continue */
+  }
+
   try {
     window.open(url, "_blank", "noopener,noreferrer");
     return true;
   } catch {
-    return false;
+    // Last resort: navigate current frame (user can then use OS share/open).
+    try {
+      window.location.href = url;
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
 function triggerBlobDownload(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
+  const objectUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
+  a.href = objectUrl;
   a.download = filename;
   a.rel = "noopener";
+  a.style.display = "none";
   document.body.appendChild(a);
   a.click();
   a.remove();
   // Delay revoke so Telegram / Safari can start the download.
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
 }
 
 /**
- * Capture `.printable-card` (or provided element) into an A4 PDF and download it.
- * Prefer this path inside Telegram Mini Apps.
+ * Capture the printable letter into a single A4 PDF and trigger download.
+ * Scales content to fit one page — never spills onto page 2.
  */
 export async function downloadPetitionPdf(
   element: HTMLElement,
-  filename = "nayi-samakhya-vinathipatra.pdf",
+  filename: string = PETITION_PDF_FILENAME,
 ): Promise<void> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas"),
     import("jspdf"),
   ]);
+
+  // Ensure Telugu / layout locks are visible to the canvas renderer.
+  element.setAttribute("translate", "no");
+  element.setAttribute("lang", "te");
 
   const canvas = await html2canvas(element, {
     scale: Math.min(2, window.devicePixelRatio || 2),
@@ -105,38 +156,35 @@ export async function downloadPetitionPdf(
     allowTaint: true,
     backgroundColor: "#ffffff",
     logging: false,
+    scrollX: 0,
+    scrollY: 0,
   });
 
-  const imgData = canvas.toDataURL("image/jpeg", 0.92);
+  const imgData = canvas.toDataURL("image/jpeg", 0.93);
   const pdf = new jsPDF({
     orientation: "portrait",
     unit: "mm",
     format: "a4",
+    compress: true,
   });
+
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 8;
   const usableWidth = pageWidth - margin * 2;
   const usableHeight = pageHeight - margin * 2;
-  const imgWidth = usableWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  let heightLeft = imgHeight;
-  let position = margin;
+  // Fit entirely on one A4 sheet (strict single-page contract).
+  const widthRatio = usableWidth / canvas.width;
+  const heightRatio = usableHeight / canvas.height;
+  const ratio = Math.min(widthRatio, heightRatio);
+  const imgWidth = canvas.width * ratio;
+  const imgHeight = canvas.height * ratio;
+  const x = margin + (usableWidth - imgWidth) / 2;
+  const y = margin;
 
-  pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-  heightLeft -= usableHeight;
-
-  while (heightLeft > 1) {
-    position = margin - (imgHeight - heightLeft);
-    pdf.addPage();
-    pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-    heightLeft -= usableHeight;
-  }
+  pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight, undefined, "FAST");
 
   const blob = pdf.output("blob");
   triggerBlobDownload(blob, filename);
-
-  // Escape hatch reserved for Telegram; download above is the primary path.
-  void getTelegramWebApp();
 }
