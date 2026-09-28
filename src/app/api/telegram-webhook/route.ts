@@ -7,7 +7,9 @@ import {
 } from "@/lib/comms/hubs";
 import {
   MSG,
+  TG_FILE_PREFIX,
   clearUploadSession,
+  downloadTelegramFileById,
   downloadTelegramMedia,
   getActiveUploadSession,
   insertFieldSubmission,
@@ -529,11 +531,11 @@ async function ingestPhoto(
         return NextResponse.json({ ok: true, error: "file_too_large" });
       }
       console.error("[Bot:MediaError]", media.error);
-      await replyText(chatId, MSG.uploadRetry);
+      await replyText(chatId, MSG.mediaDownloadFailed);
       return NextResponse.json({ ok: true, error: media.error });
     }
 
-    const { buffer, contentType, fileUniqueId, ext } = media;
+    const { buffer, contentType, fileUniqueId, fileId, ext } = media;
 
     // Deduplicate against survey_submissions when unique id already stored.
     const { data: existing } = await admin
@@ -557,10 +559,36 @@ async function ingestPhoto(
       fileUniqueId,
     });
 
+    // Storage failed after we already have the Telegram file — stage file_id and continue.
+    // Follow-up text will re-download + upload before final insert.
     if (uploaded.error || !uploaded.publicUrl) {
       console.error("[Bot:StorageError]", uploaded);
-      await replyText(chatId, MSG.uploadRetry);
-      return NextResponse.json({ ok: true, error: "upload_failed" });
+      await stageUploadSession(admin, {
+        chat_id: chatKey,
+        user_id: userId,
+        image_url: null,
+        object_path: `${TG_FILE_PREFIX}${fileId}`,
+        storage_bucket: null,
+        photo_file_unique_id: fileUniqueId,
+        sender_name: name,
+        intent: "submit_proof_pending_upload",
+      });
+      const captionParsed = parseProofCaption(caption);
+      // Caption already usable → ask to resend photo (storage issue); session kept for text retry.
+      // No caption → ask for district/mandal text (deferred upload on follow-up).
+      await replyText(
+        chatId,
+        caption && captionParsed.complete
+          ? MSG.uploadRetry
+          : MSG.photoReceivedNoCaption,
+      );
+      return NextResponse.json({
+        ok: true,
+        staged: true,
+        deferred_upload: true,
+        storage_error: uploaded.error,
+        had_caption: Boolean(caption),
+      });
     }
 
     const photoUrl = uploaded.publicUrl;
@@ -774,14 +802,18 @@ async function completeStagedProof(
 ): Promise<NextResponse | null> {
   const chatKey = String(chatId);
   const session = await getActiveUploadSession(admin, chatKey);
-  if (!session?.image_url && !session?.id) return null;
+  if (!session?.id) return null;
 
-  // Session exists but photo not yet uploaded (intent-only from /submit_proof).
-  if (session && !session.image_url) {
+  const deferredFileId =
+    session.object_path?.startsWith(TG_FILE_PREFIX)
+      ? session.object_path.slice(TG_FILE_PREFIX.length)
+      : null;
+
+  // Intent-only session (/submit_proof) — still waiting for a photo.
+  if (!session.image_url && !deferredFileId) {
     await replyText(chatId, MSG.submitProofPrompt);
     return NextResponse.json({ ok: true, awaiting_photo: true });
   }
-  if (!session) return null;
 
   const parsed = parseProofCaption(text);
   if (!parsed.complete && text.trim().length < 8) {
@@ -791,7 +823,45 @@ async function completeStagedProof(
 
   const name = senderName(message.from) || session.sender_name || "Field enumerator";
   const userId = message.from?.id ? String(message.from.id) : null;
-  const photoUrl = session.image_url;
+
+  let photoUrl = session.image_url;
+  let storageBucket = session.storage_bucket;
+  let objectPath = session.object_path;
+
+  // Deferred path: storage failed on first pass — re-download from Telegram and upload now.
+  if (!photoUrl && deferredFileId) {
+    const media = await downloadTelegramFileById({
+      botToken: botToken(),
+      telegramApi,
+      fileId: deferredFileId,
+      fileUniqueId: session.photo_file_unique_id || "deferred",
+    });
+    if ("error" in media) {
+      console.error("[Bot:DeferredDownload]", media.error);
+      await replyText(chatId, MSG.mediaDownloadFailed);
+      return NextResponse.json({ ok: true, error: media.error, deferred: true });
+    }
+    const uploaded = await uploadProofToStorage(admin, {
+      buffer: media.buffer,
+      contentType: media.contentType,
+      chatId,
+      ext: media.ext,
+      fileUniqueId: media.fileUniqueId,
+    });
+    if (uploaded.error || !uploaded.publicUrl) {
+      console.error("[Bot:DeferredStorage]", uploaded);
+      // Keep session (tg_file still staged) so user can retry with more text or resend photo.
+      await replyText(chatId, MSG.uploadRetry);
+      return NextResponse.json({
+        ok: true,
+        error: "deferred_upload_failed",
+        storage_error: uploaded.error,
+      });
+    }
+    photoUrl = uploaded.publicUrl;
+    storageBucket = uploaded.bucket;
+    objectPath = uploaded.objectPath;
+  }
 
   const [{ data: districts }, { data: mandals }] = await Promise.all([
     admin.from("districts").select("id, slug, name_en, name_te"),
@@ -813,8 +883,10 @@ async function completeStagedProof(
       matched: refined.matched,
       confidence: refined.confidence,
       from_session: true,
+      deferred_upload: Boolean(deferredFileId),
       district_text: parsed.district,
       mandal_text: parsed.mandal,
+      storage_bucket: storageBucket,
     },
     photo_url: photoUrl,
     photo_urls: photoUrl ? [photoUrl] : [],
@@ -844,7 +916,13 @@ async function completeStagedProof(
     telegram_message_id: String(message.message_id),
     sender_name: name,
     survey_submission_id: inserted?.id || null,
-    metadata: { from_session: true, session_id: session.id },
+    metadata: {
+      from_session: true,
+      session_id: session.id,
+      deferred_upload: Boolean(deferredFileId),
+      storage_bucket: storageBucket,
+      object_path: objectPath,
+    },
   });
 
   if (!field.id && !inserted?.id) {
@@ -858,6 +936,7 @@ async function completeStagedProof(
   return NextResponse.json({
     ok: true,
     follow_up: true,
+    deferred_upload: Boolean(deferredFileId),
     id: field.id || inserted?.id,
   });
 }

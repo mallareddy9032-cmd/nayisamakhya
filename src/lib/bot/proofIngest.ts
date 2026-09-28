@@ -20,9 +20,13 @@ export const MSG = {
     `సర్వర్ అనుసంధానంలో సాంకేతిక సమస్య ఎదురైంది. దయచేసి మా సహాయవాణి ${BOT_HELPLINE_WA} కు నేరుగా వాట్సాప్ చేయండి.`,
   uploadRetry:
     "⚠️ ఫోటో సేవ్ కాలేదు. దయచేసి ఒకసారి మళ్లీ పంపండి (కాంప్రెస్ చేసిన జేపీజీ ఉత్తమం).",
+  mediaDownloadFailed:
+    "⚠️ ఫోటో డౌన్‌లోడ్ కాలేదు. దయచేసి కొత్త ఫోటోగా (compress/JPG) మళ్లీ పంపండి.",
   submitProofPrompt:
     "📸 దయచేసి ఫీల్డ్ ఫోటోను పంపండి. క్యాప్షన్‌లో జిల్లా, మండలం, సమస్య రాయండి — లేదా ఫోటో తర్వాత వివరాలు టైప్ చేయండి.",
 } as const;
+
+export const TG_FILE_PREFIX = "tg_file:";
 
 export type ParsedProofCaption = {
   district: string | null;
@@ -96,6 +100,61 @@ type TelegramApiFn = (
   result?: Record<string, unknown>;
 } | null>;
 
+/** Download binary from Telegram by file_id (used for deferred storage uploads). */
+export async function downloadTelegramFileById(opts: {
+  botToken: string;
+  telegramApi: TelegramApiFn;
+  fileId: string;
+  fileUniqueId?: string;
+  hintType?: string;
+  ext?: string;
+}): Promise<DownloadedTelegramFile | { error: string }> {
+  const {
+    botToken,
+    telegramApi,
+    fileId,
+    fileUniqueId = "deferred",
+    hintType = "image/jpeg",
+    ext: hintExt = "jpg",
+  } = opts;
+
+  if (!fileId) return { error: "no_media" };
+
+  const fileMeta = await telegramApi("getFile", { file_id: fileId });
+  const filePath = fileMeta?.result?.file_path as string | undefined;
+  if (!filePath) {
+    console.error("[Bot:GetFileError]", { fileId, fileMeta });
+    return { error: "getFile_failed" };
+  }
+
+  const fileRes = await fetch(
+    `https://api.telegram.org/file/bot${botToken}/${filePath}`,
+  );
+  if (!fileRes.ok) {
+    console.error("[Bot:DownloadError]", {
+      status: fileRes.status,
+      filePath,
+    });
+    return { error: "download_failed" };
+  }
+
+  const MAX = 10 * 1024 * 1024;
+  const contentLength = Number(fileRes.headers.get("content-length") || 0);
+  if (contentLength > MAX) return { error: "file_too_large" };
+
+  const buffer = Buffer.from(await fileRes.arrayBuffer());
+  if (buffer.byteLength > MAX) return { error: "file_too_large" };
+
+  let ext = hintExt;
+  const contentType =
+    fileRes.headers.get("content-type") || hintType || "image/jpeg";
+  if (contentType.includes("png")) ext = "png";
+  else if (contentType.includes("webp")) ext = "webp";
+  else if (contentType.includes("pdf")) ext = "pdf";
+
+  return { buffer, contentType, fileUniqueId, fileId, ext };
+}
+
 /**
  * Pick highest-resolution photo or document and download binary from Telegram.
  */
@@ -130,38 +189,14 @@ export async function downloadTelegramMedia(opts: {
     return { error: "no_media" };
   }
 
-  const fileMeta = await telegramApi("getFile", { file_id: fileId });
-  const filePath = fileMeta?.result?.file_path as string | undefined;
-  if (!filePath) {
-    console.error("[Bot:GetFileError]", { fileId, fileMeta });
-    return { error: "getFile_failed" };
-  }
-
-  const fileRes = await fetch(
-    `https://api.telegram.org/file/bot${botToken}/${filePath}`,
-  );
-  if (!fileRes.ok) {
-    console.error("[Bot:DownloadError]", {
-      status: fileRes.status,
-      filePath,
-    });
-    return { error: "download_failed" };
-  }
-
-  const MAX = 10 * 1024 * 1024;
-  const contentLength = Number(fileRes.headers.get("content-length") || 0);
-  if (contentLength > MAX) return { error: "file_too_large" };
-
-  const buffer = Buffer.from(await fileRes.arrayBuffer());
-  if (buffer.byteLength > MAX) return { error: "file_too_large" };
-
-  const contentType =
-    fileRes.headers.get("content-type") || hintType || "image/jpeg";
-  if (contentType.includes("png")) ext = "png";
-  else if (contentType.includes("webp")) ext = "webp";
-  else if (contentType.includes("pdf")) ext = "pdf";
-
-  return { buffer, contentType, fileUniqueId, fileId, ext };
+  return downloadTelegramFileById({
+    botToken,
+    telegramApi,
+    fileId,
+    fileUniqueId,
+    hintType,
+    ext,
+  });
 }
 
 export type StorageUploadResult = {
@@ -171,10 +206,64 @@ export type StorageUploadResult = {
   error?: string;
 };
 
+function supabaseEnv(): { url: string; key: string } | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, "");
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!url || !key || url.includes("YOUR_PROJECT")) return null;
+  return { url, key };
+}
+
+/** Direct Storage REST upload — more reliable than supabase-js Body in Node/Vercel. */
+async function uploadViaStorageRest(
+  bucket: string,
+  objectPath: string,
+  bytes: Uint8Array,
+  contentType: string,
+): Promise<{ ok: true } | { ok: false; message: string; status: number }> {
+  const env = supabaseEnv();
+  if (!env) {
+    return { ok: false, message: "supabase_env_missing", status: 0 };
+  }
+
+  // Prefer POST without upsert first (INSERT). Fall back to upsert.
+  for (const upsert of [false, true] as const) {
+    const res = await fetch(
+      `${env.url}/storage/v1/object/${bucket}/${objectPath}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.key}`,
+          apikey: env.key,
+          "Content-Type": contentType || "image/jpeg",
+          "x-upsert": upsert ? "true" : "false",
+          "cache-control": "3600",
+        },
+        body: Buffer.from(bytes),
+      },
+    );
+
+    if (res.ok) return { ok: true };
+
+    const message = (await res.text().catch(() => "")).slice(0, 300);
+    // Duplicate → treat as success if object already there.
+    if (res.status === 400 && /already exists|Duplicate/i.test(message)) {
+      return { ok: true };
+    }
+    console.error("[Bot:StorageRestError]", {
+      bucket,
+      objectPath,
+      status: res.status,
+      upsert,
+      message,
+    });
+    if (!upsert) continue;
+    return { ok: false, message, status: res.status };
+  }
+  return { ok: false, message: "upload_exhausted", status: 0 };
+}
+
 /**
- * Upload buffer to survey-photos (proven) then desk_proofs.
- * Path: submissions/{chat_id}_{timestamp}_{unique}.{ext}
- * Uses Uint8Array — Node Buffer often fails with supabase-js storage upload.
+ * Upload to survey-photos then desk_proofs via REST, with supabase-js fallback.
  */
 export async function uploadProofToStorage(
   admin: SupabaseClient,
@@ -188,48 +277,71 @@ export async function uploadProofToStorage(
 ): Promise<StorageUploadResult> {
   const ts = Date.now();
   const safeExt = (opts.ext || "jpg").replace(/[^a-z0-9]/gi, "") || "jpg";
-  const unique = (opts.fileUniqueId || "img").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 24);
+  const unique = (opts.fileUniqueId || "img")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .slice(0, 24);
   const objectPath = `submissions/${opts.chatId}_${ts}_${unique}.${safeExt}`;
-  // Prefer legacy survey-photos first (already live in prod), then desk_proofs.
   const buckets = ["survey-photos", "desk_proofs"] as const;
   const bytes = new Uint8Array(opts.buffer);
-  const errors: Array<{ bucket: string; message: string }> = [];
+  const contentType = opts.contentType || "image/jpeg";
+  const errors: string[] = [];
 
   for (const bucket of buckets) {
-    try {
-      const { error } = await admin.storage.from(bucket).upload(objectPath, bytes, {
-        contentType: opts.contentType || "image/jpeg",
-        upsert: true,
-        cacheControl: "3600",
-      });
-
-      if (error && !/already exists/i.test(error.message || "")) {
-        console.error("[Bot:StorageError]", {
-          bucket,
-          objectPath,
-          message: error.message,
-          name: error.name,
-          statusCode: (error as { statusCode?: string }).statusCode,
-          bytes: bytes.byteLength,
-        });
-        errors.push({ bucket, message: error.message });
-        continue;
-      }
-
+    const rest = await uploadViaStorageRest(
+      bucket,
+      objectPath,
+      bytes,
+      contentType,
+    );
+    if (rest.ok) {
       const { data } = admin.storage.from(bucket).getPublicUrl(objectPath);
       const publicUrl = data?.publicUrl || null;
-      if (!publicUrl) {
-        errors.push({ bucket, message: "missing_public_url" });
+      if (publicUrl) {
+        console.info("[Bot:StorageOk]", {
+          bucket,
+          objectPath,
+          bytes: bytes.byteLength,
+          via: "rest",
+        });
+        return { bucket, objectPath, publicUrl };
+      }
+      errors.push(`${bucket}:rest_ok_but_no_public_url`);
+    } else {
+      errors.push(`${bucket}:rest:${rest.status}:${rest.message}`);
+    }
+
+    // supabase-js fallback (no upsert — unique path each time)
+    try {
+      const { error } = await admin.storage.from(bucket).upload(objectPath, bytes, {
+        contentType,
+        upsert: false,
+        cacheControl: "3600",
+      });
+      if (error && !/already exists/i.test(error.message || "")) {
+        console.error("[Bot:StorageSdkError]", {
+          bucket,
+          message: error.message,
+          statusCode: (error as { statusCode?: string }).statusCode,
+        });
+        errors.push(`${bucket}:sdk:${error.message}`);
         continue;
       }
-      console.info("[Bot:StorageOk]", { bucket, objectPath, bytes: bytes.byteLength });
-      return { bucket, objectPath, publicUrl };
+      const { data } = admin.storage.from(bucket).getPublicUrl(objectPath);
+      if (data?.publicUrl) {
+        console.info("[Bot:StorageOk]", {
+          bucket,
+          objectPath,
+          bytes: bytes.byteLength,
+          via: "sdk",
+        });
+        return { bucket, objectPath, publicUrl: data.publicUrl };
+      }
+      errors.push(`${bucket}:sdk_no_public_url`);
     } catch (err) {
-      console.error("[Bot:StorageError]", { bucket, err });
-      errors.push({
-        bucket,
-        message: err instanceof Error ? err.message : "throw",
-      });
+      console.error("[Bot:StorageSdkThrow]", { bucket, err });
+      errors.push(
+        `${bucket}:sdk_throw:${err instanceof Error ? err.message : "err"}`,
+      );
     }
   }
 
@@ -237,7 +349,7 @@ export async function uploadProofToStorage(
     bucket: "survey-photos",
     objectPath,
     publicUrl: null,
-    error: `all_buckets_failed:${errors.map((e) => `${e.bucket}=${e.message}`).join("|")}`,
+    error: `all_buckets_failed:${errors.join("|")}`,
   };
 }
 
