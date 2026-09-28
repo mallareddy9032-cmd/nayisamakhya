@@ -1,23 +1,34 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabaseClient";
 import { parseCaptionLocations } from "@/lib/moderation/parseCaption";
 import {
   formatHubsForTelegramHtml,
   getAllCommHubs,
 } from "@/lib/comms/hubs";
+import { dispatchDeskAudit } from "@/lib/bot/deskDispatch";
 import {
   MSG,
   TG_FILE_PREFIX,
-  clearUploadSession,
   downloadTelegramFileById,
   downloadTelegramMedia,
-  getActiveUploadSession,
   insertFieldSubmission,
-  markSubmitProofIntent,
+  logStoragePipelineError,
   parseProofCaption,
   stageUploadSession,
   uploadProofToStorage,
 } from "@/lib/bot/proofIngest";
+import {
+  DISTRICT_CALLBACK_LABELS,
+  MSG_AFTER_DISTRICT,
+  MSG_DISTRICT_STAGED,
+  MSG_OTHER_DISTRICT,
+  districtPickerKeyboard,
+  getBotSession,
+  markIdleSubmitIntent,
+  resetBotSession,
+  stagePhotoSession,
+  updateSessionDistrict,
+} from "@/lib/botSession";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -314,11 +325,126 @@ async function handleDeskToolCommand(
   return false;
 }
 
+async function handleAdminReviewCallback(
+  admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  chatId: number | string,
+  data: string,
+): Promise<boolean> {
+  const adminChannel = process.env.TELEGRAM_ADMIN_CHANNEL_ID?.trim();
+  if (!adminChannel || String(chatId) !== adminChannel) return false;
+
+  const approveMatch = data.match(/^admin_approve_(.+)$/);
+  const rejectMatch = data.match(/^admin_reject_(.+)$/);
+  const submissionId = approveMatch?.[1] || rejectMatch?.[1];
+  if (!submissionId) return false;
+
+  const status = approveMatch ? "approved" : "rejected";
+  const now = new Date().toISOString();
+
+  const { data: fieldRow, error: fieldErr } = await admin
+    .from("field_submissions")
+    .update({ status, updated_at: now })
+    .eq("id", submissionId)
+    .select("survey_submission_id")
+    .maybeSingle();
+
+  if (fieldErr) {
+    console.error("[Bot:AdminReviewField]", fieldErr);
+    await replyText(
+      chatId,
+      `⚠️ #${submissionId.slice(0, 8)} — field_submissions update failed.`,
+      undefined,
+      undefined,
+    );
+    return true;
+  }
+
+  const surveyId = fieldRow?.survey_submission_id as string | null | undefined;
+  if (surveyId) {
+    const { error: surveyErr } = await admin
+      .from("survey_submissions")
+      .update({
+        status,
+        reviewed_at: now,
+        moderated_at: now,
+        moderated_by: "telegram-admin-channel",
+      })
+      .eq("id", surveyId);
+    if (surveyErr) console.error("[Bot:AdminReviewSurvey]", surveyErr);
+  }
+
+  await replyText(
+    chatId,
+    `✅ Submission <b>#${escapeHtml(submissionId.slice(0, 8))}</b> marked <b>${status}</b>.`,
+  );
+  return true;
+}
+
+async function handleDistrictCallback(
+  admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  chatId: number | string,
+  data: string,
+): Promise<boolean> {
+  if (!data.startsWith("callback_dist_")) return false;
+
+  const chatKey = String(chatId);
+  const session = await getBotSession(admin, chatKey);
+  if (!session?.id || session.step !== "AWAITING_DETAILS") {
+    await replyText(chatId, MSG.submitProofPrompt);
+    return true;
+  }
+
+  if (data === "callback_dist_other") {
+    await updateSessionDistrict(admin, session.id, "Other");
+    await replyText(chatId, MSG_OTHER_DISTRICT);
+    return true;
+  }
+
+  const label =
+    DISTRICT_CALLBACK_LABELS[data] ||
+    data.replace(/^callback_dist_/, "").replace(/_/g, " ");
+  await updateSessionDistrict(admin, session.id, label);
+  await replyText(chatId, MSG_AFTER_DISTRICT(label));
+  return true;
+}
+
+async function notifySubmissionSuccess(
+  chatId: number | string,
+  recordId: string,
+  submission: {
+    id: string;
+    district: string | null;
+    mandal: string | null;
+    imageUrl: string | null;
+  },
+): Promise<void> {
+  await replyText(chatId, MSG.success(recordId));
+  await dispatchDeskAudit(telegramApi, {
+    id: submission.id,
+    district: submission.district,
+    mandal: submission.mandal,
+    imageUrl: submission.imageUrl,
+  });
+}
+
 async function handleCallbackQuery(
   cq: TelegramCallbackQuery,
+  admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
 ): Promise<NextResponse> {
   const chatId = cq.message?.chat?.id;
   if (!chatId) return NextResponse.json({ ok: true });
+
+  const data = cq.data || "";
+
+  if (await handleAdminReviewCallback(admin, chatId, data)) {
+    if (cq.id) await telegramApi("answerCallbackQuery", { callback_query_id: cq.id });
+    return NextResponse.json({ ok: true, admin_review: true });
+  }
+
+  if (await handleDistrictCallback(admin, chatId, data)) {
+    if (cq.id) await telegramApi("answerCallbackQuery", { callback_query_id: cq.id });
+    return NextResponse.json({ ok: true, district_callback: true });
+  }
 
   if (cq.data === "guide_photo") {
     await replyText(
@@ -562,7 +688,7 @@ async function ingestPhoto(
     // Storage failed after we already have the Telegram file — stage file_id and continue.
     // Follow-up text will re-download + upload before final insert.
     if (uploaded.error || !uploaded.publicUrl) {
-      console.error("[Bot:StorageError]", uploaded);
+      logStoragePipelineError(chatId, uploaded);
       await stageUploadSession(admin, {
         chat_id: chatKey,
         user_id: userId,
@@ -573,15 +699,7 @@ async function ingestPhoto(
         sender_name: name,
         intent: "submit_proof_pending_upload",
       });
-      const captionParsed = parseProofCaption(caption);
-      // Caption already usable → ask to resend photo (storage issue); session kept for text retry.
-      // No caption → ask for district/mandal text (deferred upload on follow-up).
-      await replyText(
-        chatId,
-        caption && captionParsed.complete
-          ? MSG.uploadRetry
-          : MSG.photoReceivedNoCaption,
-      );
+      await replyText(chatId, MSG.storagePipelineError);
       return NextResponse.json({
         ok: true,
         staged: true,
@@ -596,15 +714,14 @@ async function ingestPhoto(
 
     // No / incomplete caption → stage image, ask for details (no NOT NULL insert failure).
     if (!caption || !parsed.complete) {
-      await stageUploadSession(admin, {
+      await stagePhotoSession(admin, {
         chat_id: chatKey,
         user_id: userId,
-        image_url: photoUrl,
+        staged_photo_url: photoUrl,
         object_path: uploaded.objectPath,
         storage_bucket: uploaded.bucket,
         photo_file_unique_id: fileUniqueId,
         sender_name: name,
-        intent: "submit_proof",
       });
 
       // Soft desk row so legacy 15-min follow-up still works if sessions table is absent.
@@ -621,6 +738,7 @@ async function ingestPhoto(
           staged: true,
           missing_caption: !caption,
           storage_bucket: uploaded.bucket,
+          step: "AWAITING_DETAILS",
         },
         photo_url: photoUrl,
         photo_urls: [photoUrl],
@@ -630,10 +748,16 @@ async function ingestPhoto(
         last_activity_at: new Date().toISOString(),
       });
 
-      await replyText(
-        chatId,
-        !caption ? MSG.photoReceivedNoCaption : MSG.validationIncomplete,
-      );
+      if (!caption) {
+        await replyText(
+          chatId,
+          MSG_DISTRICT_STAGED,
+          districtPickerKeyboard(),
+          undefined,
+        );
+      } else {
+        await replyText(chatId, MSG.validationIncomplete);
+      }
       return NextResponse.json({
         ok: true,
         staged: true,
@@ -767,12 +891,21 @@ async function ingestPhoto(
       return NextResponse.json({ ok: true, error: "insert_failed" });
     }
 
-    const recordId = (field.id || inserted?.id || "").slice(0, 8);
-    await replyText(chatId, MSG.success(recordId));
+    const submissionId = field.id || inserted?.id || "";
+    const recordId = submissionId.slice(0, 8);
+    if (submissionId) {
+      await notifySubmissionSuccess(chatId, recordId, {
+        id: submissionId,
+        district: parsed.district || refined.district_slug || null,
+        mandal: parsed.mandal || refined.mandal_slug || null,
+        imageUrl: photoUrl,
+      });
+    } else {
+      await replyText(chatId, MSG.criticalServer);
+    }
 
-    // Clear any staged session for this chat.
-    const session = await getActiveUploadSession(admin, chatKey);
-    if (session?.id) await clearUploadSession(admin, session.id);
+    const session = await getBotSession(admin, chatKey);
+    if (session?.id) await resetBotSession(admin, session.id);
 
     return NextResponse.json({
       ok: true,
@@ -801,8 +934,8 @@ async function completeStagedProof(
   message: TelegramMessage,
 ): Promise<NextResponse | null> {
   const chatKey = String(chatId);
-  const session = await getActiveUploadSession(admin, chatKey);
-  if (!session?.id) return null;
+  const session = await getBotSession(admin, chatKey);
+  if (!session?.id || session.step !== "AWAITING_DETAILS") return null;
 
   const deferredFileId =
     session.object_path?.startsWith(TG_FILE_PREFIX)
@@ -810,12 +943,21 @@ async function completeStagedProof(
       : null;
 
   // Intent-only session (/submit_proof) — still waiting for a photo.
-  if (!session.image_url && !deferredFileId) {
+  if (!session.staged_photo_url && !deferredFileId) {
     await replyText(chatId, MSG.submitProofPrompt);
     return NextResponse.json({ ok: true, awaiting_photo: true });
   }
 
-  const parsed = parseProofCaption(text);
+  let parseText = text;
+  if (
+    session.staged_district &&
+    session.staged_district !== "Other" &&
+    !text.toLowerCase().includes(session.staged_district.toLowerCase())
+  ) {
+    parseText = `${session.staged_district}, ${text}`;
+  }
+
+  const parsed = parseProofCaption(parseText);
   if (!parsed.complete && text.trim().length < 8) {
     await replyText(chatId, MSG.validationIncomplete);
     return NextResponse.json({ ok: true, validation: "incomplete" });
@@ -824,7 +966,7 @@ async function completeStagedProof(
   const name = senderName(message.from) || session.sender_name || "Field enumerator";
   const userId = message.from?.id ? String(message.from.id) : null;
 
-  let photoUrl = session.image_url;
+  let photoUrl = session.staged_photo_url;
   let storageBucket = session.storage_bucket;
   let objectPath = session.object_path;
 
@@ -849,9 +991,8 @@ async function completeStagedProof(
       fileUniqueId: media.fileUniqueId,
     });
     if (uploaded.error || !uploaded.publicUrl) {
-      console.error("[Bot:DeferredStorage]", uploaded);
-      // Keep session (tg_file still staged) so user can retry with more text or resend photo.
-      await replyText(chatId, MSG.uploadRetry);
+      logStoragePipelineError(chatId, uploaded);
+      await replyText(chatId, MSG.storagePipelineError);
       return NextResponse.json({
         ok: true,
         error: "deferred_upload_failed",
@@ -867,8 +1008,11 @@ async function completeStagedProof(
     admin.from("districts").select("id, slug, name_en, name_te"),
     admin.from("mandals").select("id, district_id, slug, name_en, name_te"),
   ]);
-  const refined = parseCaptionLocations(text, districts || [], mandals || []);
+  const refined = parseCaptionLocations(parseText, districts || [], mandals || []);
   const status = refined.confidence === "none" ? "flagged" : "pending";
+  const districtLabel =
+    parsed.district || session.staged_district || refined.district_slug || null;
+  const mandalLabel = parsed.mandal || refined.mandal_slug || null;
 
   const surveyPayload: Record<string, unknown> = {
     telegram_chat_id: chatKey,
@@ -878,14 +1022,15 @@ async function completeStagedProof(
     district_id: refined.district_id || null,
     mandal_id: refined.mandal_id || null,
     gp_id: refined.gp_id || null,
-    raw_caption: text,
+    raw_caption: parseText,
     extracted_data: {
       matched: refined.matched,
       confidence: refined.confidence,
       from_session: true,
       deferred_upload: Boolean(deferredFileId),
-      district_text: parsed.district,
-      mandal_text: parsed.mandal,
+      district_text: districtLabel,
+      mandal_text: mandalLabel,
+      staged_district: session.staged_district,
       storage_bucket: storageBucket,
     },
     photo_url: photoUrl,
@@ -908,8 +1053,8 @@ async function completeStagedProof(
     user_id: userId,
     chat_id: chatKey,
     image_url: photoUrl,
-    district: parsed.district || refined.district_slug || null,
-    mandal: parsed.mandal || refined.mandal_slug || null,
+    district: districtLabel,
+    mandal: mandalLabel,
     description: parsed.description || text,
     status: "pending",
     photo_file_unique_id: session.photo_file_unique_id,
@@ -919,6 +1064,7 @@ async function completeStagedProof(
     metadata: {
       from_session: true,
       session_id: session.id,
+      staged_district: session.staged_district,
       deferred_upload: Boolean(deferredFileId),
       storage_bucket: storageBucket,
       object_path: objectPath,
@@ -930,9 +1076,18 @@ async function completeStagedProof(
     return NextResponse.json({ ok: true, error: "follow_up_insert_failed" });
   }
 
-  await clearUploadSession(admin, session.id);
-  const recordId = (field.id || inserted?.id || "").slice(0, 8);
-  await replyText(chatId, MSG.success(recordId));
+  const submissionId = field.id || inserted?.id || "";
+  const recordId = submissionId.slice(0, 8);
+  if (submissionId) {
+    await notifySubmissionSuccess(chatId, recordId, {
+      id: submissionId,
+      district: districtLabel,
+      mandal: mandalLabel,
+      imageUrl: photoUrl,
+    });
+  }
+
+  await resetBotSession(admin, session.id);
   return NextResponse.json({
     ok: true,
     follow_up: true,
@@ -971,7 +1126,7 @@ export async function POST(req: Request) {
 
   try {
     if (update.callback_query) {
-      return await handleCallbackQuery(update.callback_query);
+      return await handleCallbackQuery(update.callback_query, admin);
     }
 
     const message = update.message;
@@ -999,7 +1154,7 @@ export async function POST(req: Request) {
       cmdKey === "/proof" ||
       cmdKey === "/photo"
     ) {
-      await markSubmitProofIntent(
+      await markIdleSubmitIntent(
         admin,
         String(chatId),
         message.from?.id ? String(message.from.id) : null,

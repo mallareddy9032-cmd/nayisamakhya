@@ -12,14 +12,16 @@ export const BOT_HELPLINE_WA = "+91 9032654111";
 export const MSG = {
   photoReceivedNoCaption:
     "✅ మీ ఫోటో అందింది! దయచేసి దీనితో పాటు మీ జిల్లా, మండలం మరియు సమస్య వివరాలను టైప్ చేసి పంపండి. (ఉదా: సూర్యాపేట, కోదాడ, విద్యుత్ మీటర్ సమస్య)",
+  storagePipelineError:
+    "⚠️ ఫోటో భద్రపరచడంలో సాంకేతిక లోపం ఎదురైంది. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి.",
   success: (id: string) =>
-    `✅ మీ వివరాలు మరియు ఫోటో అధికారిక పరిశీలన నిమిత్తం నమోదయ్యాయి. మీ రికార్డు ఐడీ: #${id}.`,
+    `✅ మీ వివరాలు మరియు ఫోటో అధికారిక పరిశీలన నిమిత్తం నమోదయ్యాయి. మీ టికెట్ ఐడీ: #${id}.`,
   validationIncomplete:
     "⚠️ వివరాలు అసంపూర్ణంగా ఉన్నాయి. దయచేసి మీ మండలం పేరు మరియు సమస్యను ఒకే మెసేజ్‌గా పంపండి.",
   criticalServer:
-    `సర్వర్ అనుసంధానంలో సాంకేతిక సమస్య ఎదురైంది. దయచేసి మా సహాయవాణి ${BOT_HELPLINE_WA} కు నేరుగా వాట్సాప్ చేయండి.`,
+    `సర్వర్ అనుసంధానంలో సాంకేతిక సమస్య ఎదురైంది. సమస్య కొనసాగితే మన సహాయవాణి ${BOT_HELPLINE_WA} కు నేరుగా వాట్సాప్ చేయండి.`,
   uploadRetry:
-    "⚠️ ఫోటో సేవ్ కాలేదు. దయచేసి ఒకసారి మళ్లీ పంపండి (కాంప్రెస్ చేసిన జేపీజీ ఉత్తమం).",
+    "⚠️ ఫోటో భద్రపరచడంలో సాంకేతిక లోపం ఎదురైంది. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి.",
   mediaDownloadFailed:
     "⚠️ ఫోటో డౌన్‌లోడ్ కాలేదు. దయచేసి కొత్త ఫోటోగా (compress/JPG) మళ్లీ పంపండి.",
   submitProofPrompt:
@@ -205,10 +207,8 @@ export async function downloadTelegramMedia(opts: {
   let ext = "jpg";
 
   if (photo && photo.length > 0) {
-    const best = [...photo].sort(
-      (a, b) =>
-        (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0),
-    )[0];
+    // Telegram sends ascending sizes — last entry is highest resolution.
+    const best = photo[photo.length - 1];
     fileId = best.file_id;
     fileUniqueId = best.file_unique_id;
   } else if (document?.file_id) {
@@ -297,8 +297,21 @@ async function uploadViaStorageRest(
   return { ok: false, message: "upload_exhausted", status: 0 };
 }
 
+/** Log storage pipeline failures with timestamp + chat id for ops triage. */
+export function logStoragePipelineError(
+  chatId: string | number,
+  detail: unknown,
+): void {
+  console.error("[StoragePipelineError]", {
+    at: new Date().toISOString(),
+    chatId: String(chatId),
+    detail,
+  });
+}
+
 /**
- * Upload to survey-photos then desk_proofs via REST, with supabase-js fallback.
+ * Upload to desk_proofs (primary) then survey-photos fallback via REST + supabase-js.
+ * Object path: submissions/{chatId}_{timestamp}.jpg
  */
 export async function uploadProofToStorage(
   admin: SupabaseClient,
@@ -312,11 +325,9 @@ export async function uploadProofToStorage(
 ): Promise<StorageUploadResult> {
   const ts = Date.now();
   const safeExt = (opts.ext || "jpg").replace(/[^a-z0-9]/gi, "") || "jpg";
-  const unique = (opts.fileUniqueId || "img")
-    .replace(/[^a-zA-Z0-9_-]/g, "")
-    .slice(0, 24);
-  const objectPath = `submissions/${opts.chatId}_${ts}_${unique}.${safeExt}`;
-  const buckets = ["survey-photos", "desk_proofs"] as const;
+  const extForPath = safeExt === "jpeg" ? "jpg" : safeExt;
+  const objectPath = `submissions/${opts.chatId}_${ts}.${extForPath}`;
+  const buckets = ["desk_proofs", "survey-photos"] as const;
   const bytes = new Uint8Array(opts.buffer);
   // Telegram CDN often returns application/octet-stream — bucket allowlists reject it.
   const contentType = normalizeProofContentType(opts.contentType, safeExt);
@@ -390,8 +401,10 @@ export async function uploadProofToStorage(
     }
   }
 
+  logStoragePipelineError(opts.chatId, errors.join("|"));
+
   return {
-    bucket: "survey-photos",
+    bucket: "desk_proofs",
     objectPath,
     publicUrl: null,
     error: `all_buckets_failed:${errors.join("|")}`,
