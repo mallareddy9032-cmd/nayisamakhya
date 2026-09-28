@@ -198,10 +198,13 @@ body {
     background: #fff !important;
   }
 
-  /* Keep signature + verification stamp + seal on the same A4 sheet. */
+  /* Keep signature + verification stamp + seal + QR on the same A4 sheet. */
   .print-signature-block,
   .print-seal-block,
-  .print-coordinator-ref {
+  .print-coordinator-ref,
+  .print-receiving-stamp,
+  .print-qr-block,
+  .print-docket-header {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     break-before: avoid !important;

@@ -27,6 +27,19 @@ import {
   openCurrentPageExternally,
   shouldUsePdfFallback,
 } from "@/lib/twa/printPetitionPdf";
+import {
+  formatStatutoryBlock,
+  getCitationForPreset,
+} from "@/config/legalCitations";
+import {
+  buildDocketRef,
+  formatTeluguOfficialDate,
+  verifyUrlForDocket,
+} from "@/lib/representation/docket";
+import {
+  DocketHeader,
+  ReceivingStampBlock,
+} from "@/components/representation/DocketHeader";
 
 type WizardStep = 1 | 2 | 3;
 
@@ -41,31 +54,27 @@ interface GrievancePreset {
 const GRIEVANCE_PRESETS: GrievancePreset[] = [
   {
     id: "go23_free_power",
-    title: "జి.ఓ. 23 ఉచిత విద్యుత్",
-    subject:
-      "నాయి బ్రాహ్మణ వృత్తిదారులకు జి.ఓ. 23 ప్రకారం ఉచిత విద్యుత్ సదుపాయం అమలు చేయగలరని వినతి.",
-    body: "మా ప్రాంతంలో నాయి బ్రాహ్మణ, మంగలి వృత్తిదారులు అద్దె షాపులలో అధిక ఆర్థిక ఇబ్బందులు ఎదుర్కొంటున్నారు. కావున స్థానిక గ్రామ పంచాయతీ/మున్సిపాలిటీ పరిధిలోని అనువైన ప్రభుత్వ స్థలంలో కమ్యూనిటీ ఆధునిక సెలూన్‌ల నిర్మాణానికి స్థలం కేటాయించి, జి.ఓ. 23 ప్రకారం ఉచిత విద్యుత్ సదుపాయం అందజేయవలసిందిగా కోరుచున్నాము.",
+    title: "విద్యుత్ సబ్సిడీ (జి.ఓ. 23)",
+    subject: getCitationForPreset("go23_free_power").subjectRefTe,
+    body: "మా ప్రాంతంలో నాయీబ్రాహ్మణ సెలూన్ వృత్తిదారులు అధిక వాణిజ్య విద్యుత్ బిల్లులు మరియు మీటర్ వర్గీకరణ సమస్యలు ఎదుర్కొంటున్నారు. కావున జి.ఓ. Ms. No. 23 ప్రకారం ఉచిత 250 యూనిట్ల విద్యుత్ సదుపాయం అమలు చేసి, రీడింగ్ సర్దుబాటు చేయవలసిందిగా కోరుచున్నాము.",
   },
   {
     id: "modern_salon_space",
-    title: "ఆధునిక సెలూన్ షాపుల కొరకు స్థల కేటాయింపు",
-    subject:
-      "గ్రామ/పట్టణ పరిధిలో నాయి బ్రాహ్మణ వృత్తిదారులకు ఆధునిక సెలూన్ కాంప్లెక్స్ కొరకు ప్రభుత్వ స్థలం కేటాయించుట గురించి వినతి.",
-    body: "మా ప్రాంతంలో అనేక సంవత్సరాలుగా నాయి బ్రాహ్మణ, మంగలి వృత్తిదారులు అద్దె షాపులలో అధిక ఆర్థిక ఇబ్బందులు ఎదుర్కొంటున్నారు. కావున స్థానిక గ్రామ పంచాయతీ/మున్సిపాలిటీ పరిధిలోని అనువైన ప్రభుత్వ స్థలంలో కమ్యూనిటీ ఆధునిక సెలూన్‌ల నిర్మాణానికి స్థలం కేటాయించి, సహకరించవలసిందిగా కోరుచున్నాము.",
+    title: "స్థల కేటాయింపు & కమ్యూనిటీ భవనం",
+    subject: getCitationForPreset("modern_salon_space").subjectRefTe,
+    body: "మా ప్రాంతంలో అనేక సంవత్సరాలుగా నాయి బ్రాహ్మణ, మంగలి వృత్తిదారులు అద్దె షాపులలో అధిక ఆర్థిక ఇబ్బందులు ఎదుర్కొంటున్నారు. కావున స్థానిక గ్రామ పంచాయతీ/మున్సిపాలిటీ పరిధిలోని అనువైన ప్రభుత్వ స్థలంలో ఆత్మగౌరవ భవనం మరియు వృత్తి నైపుణ్య శిక్షణ కేంద్రం నిర్మాణానికి స్థలం మంజూరు చేయవలసిందిగా కోరుచున్నాము.",
   },
   {
     id: "trade_license_fee",
-    title: "ట్రేడ్ లైసెన్స్ రుసుము మినహాయింపు",
-    subject:
-      "నాయి బ్రాహ్మణ సంక్షేమ బోర్డు ద్వారా అర్హులైన సాంప్రదాయ వృత్తిదారులందరికీ ట్రేడ్ లైసెన్స్ రుసుము మినహాయింపు జారీ చేయుట గురించి.",
-    body: "మా పరిధిలో సెలూన్ వృత్తిపై ఆధారపడి జీవిస్తున్న కార్మికులకు ఎటువంటి అధికారిక సంక్షేమ గుర్తింపు కార్డులు లేకపోవడం వల్ల ప్రభుత్వ సంక్షేమ పథకాలు, ప్రమాద బీమా అందడం లేదు. కావున సర్వే నిర్వహించి అర్హులైన ప్రతి ఒక్కరికీ ట్రేడ్ లైసెన్స్ రుసుము మినహాయింపు అందజేయవలసిందిగా కోరుచున్నాము.",
+    title: "ట్రేడ్ లైసెన్స్ మినహాయింపు",
+    subject: getCitationForPreset("trade_license_fee").subjectRefTe,
+    body: "గ్రామీణ మరియు పట్టణ పరిధిలో సాంప్రదాయ సేవా సెలూన్లపై అదనపు వాణిజ్య ట్రేడ్ లైసెన్స్ ఫీజులు భారంగా ఉన్నాయి. కావున తెలంగాణ మున్సిపాలిటీల చట్టం 2019 మరియు పంచాయత్ రాజ్ నిబంధనల ప్రకారం రుసుము రద్దు / మినహాయింపు జారీ చేయవలసిందిగా కోరుచున్నాము.",
   },
   {
     id: "community_welfare_funds",
     title: "కమ్యూనిటీ భవనం & సంక్షేమ నిధులు",
-    subject:
-      "నాయి బ్రాహ్మణ సంఘం కమ్యూనిటీ భవనం నిర్మాణం మరియు సంక్షేమ నిధుల కేటాయింపు గురించి వినతి.",
-    body: "మా ప్రాంతంలో నాయి బ్రాహ్మణ, మంగలి మరియు సాంప్రదాయ వృత్తిదారులకు సమావేశాలు, శిక్షణ మరియు సంక్షేమ కార్యక్రమాలకు తగిన కమ్యూనిటీ భవనం లేదు. కావున ప్రభుత్వ భూమి/నిధులతో కమ్యూనిటీ భవనం నిర్మాణం చేపట్టి, సంక్షేమ నిధులు విడుదల చేయవలసిందిగా కోరుచున్నాము.",
+    subject: getCitationForPreset("community_welfare_funds").subjectRefTe,
+    body: "మా ప్రాంతంలో నాయి బ్రాహ్మణ, మంగలి మరియు సాంప్రదాయ వృత్తిదారులకు సమావేశాలు, శిక్షణ మరియు సంక్షేమ కార్యక్రమాలకు తగిన కమ్యూనిటీ భవనం లేదు. కావున బీసీ సంక్షేమ మార్గదర్శకాల ప్రకారం ప్రభుత్వ భూమి/నిధులతో ఆత్మగౌరవ భవన నిర్మాణం చేపట్టి, సంక్షేమ నిధులు విడుదల చేయవలసిందిగా కోరుచున్నాము.",
   },
 ];
 
@@ -140,14 +149,13 @@ export function RepresentationLetterPage() {
   );
   const [customBody, setCustomBody] = useState("");
   const [useCustom, setUseCustom] = useState(false);
-  const [recordId] = useState(() => Date.now().toString().slice(-6));
-  const [letterDate] = useState(() =>
-    new Date().toLocaleDateString("te-IN"),
-  );
+  const [issuedAt] = useState(() => new Date());
+  const [teluguDate] = useState(() => formatTeluguOfficialDate(issuedAt));
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [inAppWebView, setInAppWebView] = useState(false);
   const letterRef = useRef<HTMLDivElement>(null);
+  const docketRegistered = useRef(false);
 
   const districtMeta = useMemo(
     () =>
@@ -220,14 +228,89 @@ export function RepresentationLetterPage() {
     GRIEVANCE_PRESETS.find((p) => p.id === selectedPresetId) ||
     GRIEVANCE_PRESETS[0];
 
-  const letterSubject = activePreset.subject;
+  const citation = useMemo(
+    () => getCitationForPreset(activePreset.id),
+    [activePreset.id],
+  );
+
+  const docket = useMemo(
+    () =>
+      buildDocketRef({
+        districtSlug,
+        mandalSlug: effectiveMandalSlug,
+        presetId: activePreset.id,
+        seed: `${districtSlug}|${effectiveMandalSlug}|${activePreset.id}|${issuedAt.getTime()}`,
+        year: issuedAt.getFullYear(),
+      }),
+    [districtSlug, effectiveMandalSlug, activePreset.id, issuedAt],
+  );
+
+  const verifyUrl = useMemo(
+    () => verifyUrlForDocket(docket.docketId),
+    [docket.docketId],
+  );
+
+  const letterSubject = useCustom && customBody.trim()
+    ? activePreset.subject
+    : citation.subjectRefTe;
   const letterBody =
     useCustom && customBody.trim()
       ? customBody.trim()
       : activePreset.body;
+  const statutoryBlock = formatStatutoryBlock(citation);
+
+  const registerDocket = useCallback(async () => {
+    if (docketRegistered.current) return;
+    docketRegistered.current = true;
+    try {
+      await fetch("/api/petitions/docket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          docket_id: docket.docketId,
+          category_id: citation.id,
+          category_te: citation.categoryTe,
+          district_slug: districtSlug,
+          district_te: district,
+          mandal_slug: effectiveMandalSlug,
+          mandal_te: mandal,
+          statutory_te: statutoryBlock,
+          subject_te: letterSubject,
+          applicant_name: applicantName,
+          issued_at: issuedAt.toISOString(),
+        }),
+      });
+    } catch (err) {
+      console.error("[PetitionDocket:ClientRegister]", err);
+      docketRegistered.current = false;
+    }
+  }, [
+    docket.docketId,
+    citation.id,
+    citation.categoryTe,
+    districtSlug,
+    district,
+    effectiveMandalSlug,
+    mandal,
+    statutoryBlock,
+    letterSubject,
+    applicantName,
+    issuedAt,
+  ]);
+
+  // Persist docket when user reaches preview (QR becomes meaningful).
+  useEffect(() => {
+    docketRegistered.current = false;
+  }, [docket.docketId]);
+
+  useEffect(() => {
+    if (step !== 3) return;
+    void registerDocket();
+  }, [step, registerDocket]);
 
   const handlePrintOrPdf = useCallback(async () => {
     setPdfError(null);
+    await registerDocket();
 
     // Standard desktop / mobile Safari / Chrome → native print dialog.
     if (!shouldUsePdfFallback()) {
@@ -257,7 +340,7 @@ export function RepresentationLetterPage() {
     } finally {
       setPdfBusy(false);
     }
-  }, []);
+  }, [registerDocket]);
 
   const canAdvanceStep1 = Boolean(districtSlug && (mandalSlug || mandal));
   const canAdvanceStep2 = useCustom
@@ -691,44 +774,29 @@ export function RepresentationLetterPage() {
             className="print-only-document print-document printable-card flex min-h-[297mm] w-full max-w-[210mm] flex-col justify-between overflow-hidden rounded-lg border border-slate-300 bg-white p-10 shadow-xl md:p-14 print:m-0 print:h-auto print:max-h-[277mm] print:min-h-0 print:w-full print:max-w-none print:overflow-hidden print:rounded-none print:border-none print:p-0 print:shadow-none"
           >
             <div className="print:space-y-2">
-              <div className="mb-8 border-b-2 border-civic-ink pb-6 text-center print:mb-2 print:pb-2">
-                <h2 className="font-telugu text-xl font-black leading-relaxed tracking-wide text-civic-ink md:text-2xl print:text-base">
-                  వినతిపత్రం (REPRESENTATION)
-                </h2>
-                <p className="mt-1 font-telugu text-xs font-semibold leading-relaxed text-slate-600 print:mt-0.5 print:text-[10px]">
-                  నాయి బ్రాహ్మణ, మంగలి &amp; బజంత్రి కమ్యూనిటీ సంక్షేమ మరియు హక్కుల పరిరక్షణ వేదిక
+              <DocketHeader
+                refLabel={docket.refLabel}
+                teluguDate={teluguDate}
+                mandalTe={mandal}
+                districtTe={district}
+                recipientLine={`గౌరవనీయులైన ${recipientOfficer} గారి సమక్షంలోకి:\n${mandal} / సర్కిల్, ${district} జిల్లా, తెలంగాణ రాష్ట్రం.`}
+                verifyUrl={verifyUrl}
+                docketId={docket.docketId}
+              />
+
+              <div className="mb-4 font-telugu text-xs leading-relaxed text-slate-700 print:mb-1 print:text-[11px]">
+                <p>
+                  <strong>ప్రదేశం:</strong> {locality}
                 </p>
-                <div className="mt-0.5 font-telugu text-[11px] leading-relaxed text-slate-500 print:text-[9px]">
-                  తెలంగాణ రాష్ట్రం | అధికారిక రికార్డు ఐడీ: NS-TEL-{recordId}
-                </div>
               </div>
 
-              <div className="mb-8 flex items-start justify-between font-telugu text-xs leading-relaxed md:text-sm print:mb-2 print:text-sm print:leading-snug">
-                <div>
-                  <p className="font-bold text-civic-ink">స్వీకర్త (To):</p>
-                  <p className="font-semibold text-slate-800">
-                    {recipientOfficer},
-                  </p>
-                  <p className="text-slate-700">
-                    {mandal} మండల కార్యాలయం,
-                  </p>
-                  <p className="text-slate-700">
-                    {district} జిల్లా, తెలంగాణ రాష్ట్రం.
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-slate-700">
-                    <strong>తేదీ:</strong> {letterDate || "—"}
-                  </p>
-                  <p className="text-slate-700">
-                    <strong>ప్రదేశం:</strong> {locality}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-6 border-l-4 border-civic-ink bg-slate-50 p-3 font-telugu text-xs font-bold leading-relaxed text-civic-ink md:text-sm print:mb-2 print:p-2 print:text-sm print:leading-snug">
+              <div className="mb-4 border-l-4 border-civic-ink bg-slate-50 p-3 font-telugu text-xs font-bold leading-relaxed text-civic-ink md:text-sm print:mb-2 print:p-2 print:text-sm print:leading-snug">
                 విషయం: {letterSubject}
+              </div>
+
+              <div className="mb-4 rounded border border-slate-300 bg-white p-3 font-telugu text-[11px] leading-relaxed text-slate-800 print:mb-2 print:p-2 print:text-[10px]">
+                <p className="font-bold text-civic-ink">చట్టబద్ధమైన ఆధారం / Statutory Grounds:</p>
+                <p className="mt-1 whitespace-pre-wrap">{statutoryBlock}</p>
               </div>
 
               <div className="space-y-4 text-justify font-telugu text-xs leading-relaxed text-slate-900 md:text-sm print:space-y-2 print:text-sm print:leading-snug">
@@ -751,30 +819,37 @@ export function RepresentationLetterPage() {
               </div>
             </div>
 
-            <div className="print-signature-block print-seal-block mt-8 flex break-inside-avoid items-end justify-between border-t border-slate-300 pt-12 font-telugu text-xs leading-relaxed md:text-sm print:mt-3 print:pt-4 print:text-sm">
-              <div className="print-coordinator-ref">
-                <p className="font-sans text-[11px] text-slate-500 print:text-[9px]">
-                  Verification Stamp / Ref: nayisamakhya.org
-                </p>
-                <p className="mt-1 font-semibold text-slate-800">
-                  ఫోన్ నంబర్: +91 {applicantPhone || "—"}
-                </p>
+            <div className="print-signature-block print-seal-block mt-6 break-inside-avoid border-t border-slate-300 pt-8 font-telugu text-xs leading-relaxed md:text-sm print:mt-3 print:pt-3 print:text-sm">
+              <div className="flex items-end justify-between gap-4">
+                <div className="print-coordinator-ref">
+                  <p className="font-sans text-[10px] font-semibold text-slate-600 print:text-[8px]">
+                    డిజిటల్ వెరిఫికేషన్ కోడ్ | Scan to verify official record
+                  </p>
+                  <p className="mt-0.5 font-mono text-[10px] text-slate-500 print:text-[8px]">
+                    {docket.refLabel}
+                  </p>
+                  <p className="mt-1 font-semibold text-slate-800">
+                    ఫోన్ నంబర్: +91 {applicantPhone || "—"}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="font-medium text-slate-700">భవదీయుడు / ఇట్లు,</p>
+                  <div className="flex h-12 items-end justify-end print:h-8">
+                    <span className="font-sans text-[11px] italic text-slate-400 print:text-[9px]">
+                      ( సంతకం / Signature )
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm font-bold text-civic-ink">
+                    {applicantName}
+                  </p>
+                  <p className="text-xs leading-relaxed text-slate-600 print:text-[10px]">
+                    {locality}, {mandal}
+                  </p>
+                </div>
               </div>
 
-              <div className="text-right">
-                <p className="font-medium text-slate-700">భవదీయుడు / ఇట్లు,</p>
-                <div className="flex h-12 items-end justify-end print:h-8">
-                  <span className="font-sans text-[11px] italic text-slate-400 print:text-[9px]">
-                    ( సంతకం / Signature )
-                  </span>
-                </div>
-                <p className="mt-1 text-sm font-bold text-civic-ink">
-                  {applicantName}
-                </p>
-                <p className="text-xs leading-relaxed text-slate-600 print:text-[10px]">
-                  {locality}, {mandal}
-                </p>
-              </div>
+              <ReceivingStampBlock />
             </div>
           </div>
         </section>

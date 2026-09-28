@@ -46,6 +46,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 export default function RepresentationPage() {
   // Print/PDF: desktop → window.print(); Telegram/WhatsApp/IG webviews →
   // sticky breakout banner + html2canvas/jspdf → NayiSamakhya-Vinathipathram.pdf.
+  // Phase 3: official docket REF + statutory QR → /verify/[id], receiving seal block.
   // Letter locked with translate="no" lang="te"; globals.css enforces single A4.
   return (
     <Suspense
