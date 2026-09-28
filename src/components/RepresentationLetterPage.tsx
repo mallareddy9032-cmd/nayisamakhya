@@ -437,14 +437,14 @@ export function RepresentationLetterPage() {
       </header>
 
       <main
-        className={`mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] lg:grid-cols-12 print:m-0 print:block print:p-0 ${
-          step < 3 ? "lg:grid-cols-1" : ""
+        className={`mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] print:m-0 print:block print:max-w-none print:p-0 ${
+          step === 3 ? "lg:grid-cols-12" : "lg:grid-cols-1"
         }`}
       >
         {/* ——— Wizard controls (steps 1–2 always; step 3 as sidebar on lg) ——— */}
         <section
-          className={`no-print space-y-5 print:hidden ${
-            step === 3 ? "lg:col-span-5" : "mx-auto w-full max-w-xl"
+          className={`no-print w-full min-w-0 space-y-5 print:hidden ${
+            step === 3 ? "lg:col-span-5" : "mx-auto max-w-xl"
           }`}
         >
           {step === 1 ? (
