@@ -5,6 +5,17 @@ import {
   formatHubsForTelegramHtml,
   getAllCommHubs,
 } from "@/lib/comms/hubs";
+import {
+  MSG,
+  clearUploadSession,
+  downloadTelegramMedia,
+  getActiveUploadSession,
+  insertFieldSubmission,
+  markSubmitProofIntent,
+  parseProofCaption,
+  stageUploadSession,
+  uploadProofToStorage,
+} from "@/lib/bot/proofIngest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,11 +34,19 @@ type TelegramUser = {
   username?: string;
 };
 
+type TelegramDocument = {
+  file_id: string;
+  file_unique_id: string;
+  mime_type?: string;
+  file_name?: string;
+};
+
 type TelegramMessage = {
   message_id: number;
   caption?: string;
   text?: string;
   photo?: TelegramPhotoSize[];
+  document?: TelegramDocument;
   media_group_id?: string | number;
   from?: TelegramUser;
   chat?: { id: number };
@@ -286,6 +305,10 @@ async function handleDeskToolCommand(
     return true;
   }
 
+  if (key === "/submit_proof" || key === "/proof" || key === "/photo") {
+    return false; // handled in POST with session mark
+  }
+
   return false;
 }
 
@@ -446,28 +469,30 @@ async function insertSurveySubmission(
     });
 
     let stripped = false;
+    const next = { ...attempt };
     for (const col of OPTIONAL_COLUMNS) {
-      if (col in attempt && new RegExp(`\\b${col}\\b`, "i").test(msg)) {
-        delete attempt[col];
+      if (col in next && new RegExp(`\\b${col}\\b`, "i").test(msg)) {
+        delete next[col];
         stripped = true;
       }
     }
     // PostgREST: "Could not find the 'foo' column of 'survey_submissions' in the schema cache"
     const missing = msg.match(/Could not find the '(\w+)' column/i);
-    if (missing?.[1] && missing[1] in attempt) {
-      delete attempt[missing[1]];
+    if (missing?.[1] && missing[1] in next) {
+      delete next[missing[1]];
       stripped = true;
     }
     // If schema is older, strip all optional columns in one shot after first miss.
     if (!stripped && round === 0) {
       for (const col of OPTIONAL_COLUMNS) {
-        if (col in attempt) {
-          delete attempt[col];
+        if (col in next) {
+          delete next[col];
           stripped = true;
         }
       }
     }
     if (!stripped) break;
+    attempt = next;
   }
 
   return { data: null, error: lastError };
@@ -478,259 +503,355 @@ async function ingestPhoto(
   message: TelegramMessage,
   chatId: number,
 ): Promise<NextResponse> {
-  const photos = message.photo || [];
-  const best = [...photos].sort(
-    (a, b) => (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0),
-  )[0];
-  const fileId = best.file_id;
-  const fileUniqueId = best.file_unique_id;
+  const caption = (message.caption || "").trim();
+  const name = senderName(message.from);
+  const userId = message.from?.id ? String(message.from.id) : null;
+  const chatKey = String(chatId);
   const mediaGroupId = message.media_group_id
     ? String(message.media_group_id)
     : null;
-  const caption = (message.caption || "").trim();
-  const name = senderName(message.from);
 
-  const { data: existing } = await admin
-    .from("survey_submissions")
-    .select("id")
-    .eq("photo_file_unique_id", fileUniqueId)
-    .maybeSingle();
-
-  if (existing?.id) {
-    return NextResponse.json({ ok: true, duplicate: true });
-  }
-
-  const fileMeta = await telegramApi("getFile", { file_id: fileId });
-  const filePath = fileMeta?.result?.file_path as string | undefined;
-  if (!filePath) {
-    console.error("telegram getFile failed", { fileId, fileMeta });
-    await replyText(
-      chatId,
-      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C35\u0C3F\u0C2B\u0C32\u0C2E\u0C48\u0C02\u0C26\u0C3F. \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C2A\u0C4D\u0C30\u0C2F\u0C24\u0C4D\u0C28\u0C3F\u0C02\u0C1A\u0C02\u0C21\u0C3F.",
-    );
-    return NextResponse.json({ ok: false, error: "getFile_failed" }, { status: 502 });
-  }
-
-  const fileRes = await fetch(
-    `https://api.telegram.org/file/bot${botToken()}/${filePath}`,
-  );
-  if (!fileRes.ok) {
-    console.error("telegram file download failed", {
-      status: fileRes.status,
-      filePath,
-    });
-    await replyText(
-      chatId,
-      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C35\u0C3F\u0C2B\u0C32\u0C2E\u0C48\u0C02\u0C26\u0C3F. \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C2A\u0C4D\u0C30\u0C2F\u0C24\u0C4D\u0C28\u0C3F\u0C02\u0C1A\u0C02\u0C21\u0C3F.",
-    );
-    return NextResponse.json({ ok: false, error: "download_failed" }, { status: 502 });
-  }
-  // Cap at bucket limit (10MB) before buffering to avoid memory pressure.
-  const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
-  const contentLength = Number(fileRes.headers.get("content-length") || 0);
-  if (contentLength > MAX_PHOTO_BYTES) {
-    await replyText(
-      chatId,
-      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C30\u0C3F\u0C2E\u0C3E\u0C23\u0C02 \u0C1A\u0C3E\u0C32\u0C41 \u0C2A\u0C46\u0C26\u0C4D\u0C26\u0C3F. 10MB \u0C32\u0C4B\u0C2A\u0C41 \u0C1A\u0C3F\u0C28\u0C4D\u0C28 \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.",
-    );
-    return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 413 });
-  }
-  const buffer = Buffer.from(await fileRes.arrayBuffer());
-  if (buffer.byteLength > MAX_PHOTO_BYTES) {
-    await replyText(
-      chatId,
-      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C30\u0C3F\u0C2E\u0C3E\u0C23\u0C02 \u0C1A\u0C3E\u0C32\u0C41 \u0C2A\u0C46\u0C26\u0C4D\u0C26\u0C3F. 10MB \u0C32\u0C4B\u0C2A\u0C41 \u0C1A\u0C3F\u0C28\u0C4D\u0C28 \u0C2B\u0C4B\u0C1F\u0C4B \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.",
-    );
-    return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 413 });
-  }
-  const objectPath = `submissions/${fileUniqueId}.jpg`;
-
-  const { error: uploadError } = await admin.storage
-    .from("survey-photos")
-    .upload(objectPath, buffer, {
-      contentType: "image/jpeg",
-      upsert: true,
+  try {
+    const media = await downloadTelegramMedia({
+      botToken: botToken(),
+      telegramApi,
+      photo: message.photo,
+      document: message.document,
     });
 
-  if (uploadError && !/already exists/i.test(uploadError.message)) {
-    console.error("storage upload survey-photos", {
-      message: uploadError.message,
-      name: uploadError.name,
-      objectPath,
-      bytes: buffer.byteLength,
-    });
-    await replyText(
-      chatId,
-      "\u274C \u0C2B\u0C4B\u0C1F\u0C4B \u0C28\u0C3F\u0C32\u0C4D\u0C35\u0C3E \u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D\u0C32\u0C4B \u0C38\u0C47\u0C35\u0C4D \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41. \u0C2E\u0C40 \u0C2B\u0C4B\u0C1F\u0C4B \u0C07\u0C2A\u0C4D\u0C2A\u0C41\u0C21\u0C41 \u0C05\u0C32\u0C3E; \u0C15\u0C3E\u0C38\u0C4D\u0C24\u0C02 \u0C32\u0C47\u0C15\u0C4D\u0C15\u0C3E \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F. (\u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C32\u0C4B\u0C2A\u0C41)",
-    );
-    return NextResponse.json({ ok: false, error: "upload_failed" }, { status: 502 });
-  }
-
-  const { data: publicUrlData } = admin.storage
-    .from("survey-photos")
-    .getPublicUrl(objectPath);
-  const photoUrl = publicUrlData.publicUrl;
-
-  // Silent album batching: append to existing media_group row, no extra ack.
-  // Skip when media_group_id column is missing (older schemas) — insert path still works.
-  if (mediaGroupId) {
-    const { data: existingGroup, error: groupErr } = await admin
-      .from("survey_submissions")
-      .select("id, photo_urls, raw_caption")
-      .eq("media_group_id", mediaGroupId)
-      .maybeSingle();
-
-    if (groupErr) {
-      console.error("media_group lookup", {
-        message: groupErr.message,
-        code: groupErr.code,
-        mediaGroupId,
-      });
-    } else if (existingGroup?.id) {
-      const prevUrls = Array.isArray(existingGroup.photo_urls)
-        ? existingGroup.photo_urls
-        : [];
-      const albumUpdate: Record<string, unknown> = {
-        photo_urls: [...prevUrls, photoUrl],
-        raw_caption: existingGroup.raw_caption || caption || null,
-      };
-      // last_activity_at may be absent on older schemas — ignore update errors.
-      albumUpdate.last_activity_at = new Date().toISOString();
-      const { error: albumUpdateErr } = await admin
-        .from("survey_submissions")
-        .update(albumUpdate)
-        .eq("id", existingGroup.id);
-      if (albumUpdateErr) {
-        console.error("album append update", albumUpdateErr);
-        const { last_activity_at: _drop, ...withoutActivity } = albumUpdate;
-        void _drop;
-        await admin
-          .from("survey_submissions")
-          .update(withoutActivity)
-          .eq("id", existingGroup.id);
+    if ("error" in media) {
+      if (media.error === "file_too_large") {
+        await replyText(
+          chatId,
+          "⚠️ ఫోటో పరిమాణం చాలు పెద్దది. 10MB లోపు చిన్న ఫోటో పంపండి.",
+        );
+        return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 413 });
       }
-      return NextResponse.json({ ok: true, album_append: true });
+      await replyText(chatId, MSG.criticalServer);
+      return NextResponse.json({ ok: false, error: media.error }, { status: 502 });
     }
+
+    const { buffer, contentType, fileUniqueId, ext } = media;
+
+    // Deduplicate against survey_submissions when unique id already stored.
+    const { data: existing } = await admin
+      .from("survey_submissions")
+      .select("id")
+      .eq("photo_file_unique_id", fileUniqueId)
+      .maybeSingle();
+    if (existing?.id) {
+      return NextResponse.json({ ok: true, duplicate: true });
+    }
+
+    const uploaded = await uploadProofToStorage(admin, {
+      buffer,
+      contentType,
+      chatId,
+      ext,
+      fileUniqueId,
+    });
+
+    if (uploaded.error || !uploaded.publicUrl) {
+      console.error("[Bot:StorageError]", uploaded);
+      // Still stage without URL if needed — never crash the webhook loop.
+      await replyText(chatId, MSG.criticalServer);
+      return NextResponse.json({ ok: false, error: "upload_failed" }, { status: 502 });
+    }
+
+    const photoUrl = uploaded.publicUrl;
+    const parsed = parseProofCaption(caption);
+
+    // No / incomplete caption → stage image, ask for details (no NOT NULL insert failure).
+    if (!caption || !parsed.complete) {
+      await stageUploadSession(admin, {
+        chat_id: chatKey,
+        user_id: userId,
+        image_url: photoUrl,
+        object_path: uploaded.objectPath,
+        storage_bucket: uploaded.bucket,
+        photo_file_unique_id: fileUniqueId,
+        sender_name: name,
+        intent: "submit_proof",
+      });
+
+      // Soft desk row so legacy 15-min follow-up still works if sessions table is absent.
+      await insertSurveySubmission(admin, {
+        telegram_chat_id: chatKey,
+        telegram_message_id: String(message.message_id),
+        sender_name: name,
+        phone: null,
+        district_id: null,
+        mandal_id: null,
+        gp_id: null,
+        raw_caption: caption || null,
+        extracted_data: {
+          staged: true,
+          missing_caption: !caption,
+          storage_bucket: uploaded.bucket,
+        },
+        photo_url: photoUrl,
+        photo_urls: [photoUrl],
+        photo_file_unique_id: fileUniqueId,
+        status: "flagged",
+        reminder_sent: false,
+        last_activity_at: new Date().toISOString(),
+      });
+
+      await replyText(
+        chatId,
+        !caption ? MSG.photoReceivedNoCaption : MSG.validationIncomplete,
+      );
+      return NextResponse.json({
+        ok: true,
+        staged: true,
+        bucket: uploaded.bucket,
+        has_caption: Boolean(caption),
+      });
+    }
+
+    // Caption present + parseable → dual-write field_submissions + survey_submissions.
+    const [{ data: districts }, { data: mandals }] = await Promise.all([
+      admin.from("districts").select("id, slug, name_en, name_te"),
+      admin.from("mandals").select("id, district_id, slug, name_en, name_te"),
+    ]);
+
+    const location = parseCaptionLocations(
+      caption,
+      districts || [],
+      mandals || [],
+    );
+    let gps: Array<{
+      id: string;
+      mandal_id: string;
+      name_en: string;
+      name_te: string;
+    }> = [];
+    if (location.mandal_id) {
+      const { data: gpRows } = await admin
+        .from("gram_panchayats")
+        .select("id, mandal_id, name_en, name_te")
+        .eq("mandal_id", location.mandal_id);
+      gps = gpRows || [];
+    }
+    const refined = parseCaptionLocations(
+      caption,
+      districts || [],
+      mandals || [],
+      gps,
+    );
+    const status = refined.confidence === "none" ? "flagged" : "pending";
+
+    // Silent album append when media_group_id already exists.
+    if (mediaGroupId) {
+      const { data: existingGroup, error: groupErr } = await admin
+        .from("survey_submissions")
+        .select("id, photo_urls, raw_caption")
+        .eq("media_group_id", mediaGroupId)
+        .maybeSingle();
+      if (groupErr) {
+        console.error("[Bot:AlbumLookup]", groupErr);
+      } else if (existingGroup?.id) {
+        const prevUrls = Array.isArray(existingGroup.photo_urls)
+          ? existingGroup.photo_urls
+          : [];
+        const albumUpdate: Record<string, unknown> = {
+          photo_urls: [...prevUrls, photoUrl],
+          raw_caption: existingGroup.raw_caption || caption || null,
+          last_activity_at: new Date().toISOString(),
+        };
+        const { error: albumUpdateErr } = await admin
+          .from("survey_submissions")
+          .update(albumUpdate)
+          .eq("id", existingGroup.id);
+        if (albumUpdateErr) {
+          console.error("[Bot:AlbumAppend]", albumUpdateErr);
+        }
+        return NextResponse.json({ ok: true, album_append: true });
+      }
+    }
+
+    const surveyPayload: Record<string, unknown> = {
+      telegram_chat_id: chatKey,
+      telegram_message_id: String(message.message_id),
+      sender_name: name,
+      phone: null as string | null,
+      district_id: refined.district_id || null,
+      mandal_id: refined.mandal_id || null,
+      gp_id: refined.gp_id || null,
+      raw_caption: caption,
+      extracted_data: {
+        matched: refined.matched,
+        confidence: refined.confidence,
+        district_slug: refined.district_slug || null,
+        mandal_slug: refined.mandal_slug || null,
+        district_text: parsed.district,
+        mandal_text: parsed.mandal,
+        telegram_username: message.from?.username || null,
+        media_group_id: mediaGroupId,
+        storage_bucket: uploaded.bucket,
+      },
+      photo_url: photoUrl,
+      photo_urls: [photoUrl],
+      photo_file_unique_id: fileUniqueId,
+      media_group_id: mediaGroupId,
+      status,
+      reminder_sent: false,
+      last_activity_at: new Date().toISOString(),
+    };
+
+    const { data: inserted, error: insertError } = await insertSurveySubmission(
+      admin,
+      surveyPayload,
+    );
+
+    if (insertError && insertError.code !== "23505") {
+      console.error("[Bot:SurveyInsertError]", insertError);
+      // Fall through — still try field_submissions so user gets a record id.
+    }
+
+    const field = await insertFieldSubmission(admin, {
+      user_id: userId,
+      chat_id: chatKey,
+      image_url: photoUrl,
+      district: parsed.district || refined.district_slug || null,
+      mandal: parsed.mandal || refined.mandal_slug || null,
+      description: parsed.description || caption,
+      status: "pending",
+      photo_file_unique_id: fileUniqueId,
+      telegram_message_id: String(message.message_id),
+      sender_name: name,
+      survey_submission_id: inserted?.id || null,
+      metadata: {
+        storage_bucket: uploaded.bucket,
+        object_path: uploaded.objectPath,
+        confidence: refined.confidence,
+      },
+    });
+
+    if (!field.id && !inserted?.id) {
+      console.error("[Bot:InsertFailed]", { field, insertError });
+      await replyText(chatId, MSG.criticalServer);
+      return NextResponse.json({ ok: false, error: "insert_failed" }, { status: 500 });
+    }
+
+    const recordId = (field.id || inserted?.id || "").slice(0, 8);
+    await replyText(chatId, MSG.success(recordId));
+
+    // Clear any staged session for this chat.
+    const session = await getActiveUploadSession(admin, chatKey);
+    if (session?.id) await clearUploadSession(admin, session.id);
+
+    return NextResponse.json({
+      ok: true,
+      id: field.id || inserted?.id,
+      status,
+      confidence: refined.confidence,
+      bucket: uploaded.bucket,
+    });
+  } catch (err) {
+    console.error("[Bot:IngestCrash]", err);
+    try {
+      await replyText(chatId, MSG.criticalServer);
+    } catch (replyErr) {
+      console.error("[Bot:ReplyCrash]", replyErr);
+    }
+    return NextResponse.json({ ok: false, error: "ingest_crash" }, { status: 500 });
   }
+}
+
+async function completeStagedProof(
+  admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  chatId: number,
+  text: string,
+  message: TelegramMessage,
+): Promise<NextResponse | null> {
+  const chatKey = String(chatId);
+  const session = await getActiveUploadSession(admin, chatKey);
+  if (!session?.image_url && !session?.id) return null;
+
+  // Session exists but photo not yet uploaded (intent-only from /submit_proof).
+  if (session && !session.image_url) {
+    await replyText(chatId, MSG.submitProofPrompt);
+    return NextResponse.json({ ok: true, awaiting_photo: true });
+  }
+  if (!session) return null;
+
+  const parsed = parseProofCaption(text);
+  if (!parsed.complete && text.trim().length < 8) {
+    await replyText(chatId, MSG.validationIncomplete);
+    return NextResponse.json({ ok: true, validation: "incomplete" });
+  }
+
+  const name = senderName(message.from) || session.sender_name || "Field enumerator";
+  const userId = message.from?.id ? String(message.from.id) : null;
+  const photoUrl = session.image_url;
 
   const [{ data: districts }, { data: mandals }] = await Promise.all([
     admin.from("districts").select("id, slug, name_en, name_te"),
     admin.from("mandals").select("id, district_id, slug, name_en, name_te"),
   ]);
-
-  const location = parseCaptionLocations(caption, districts || [], mandals || []);
-
-  let gps: Array<{
-    id: string;
-    mandal_id: string;
-    name_en: string;
-    name_te: string;
-  }> = [];
-  if (location.mandal_id) {
-    const { data: gpRows } = await admin
-      .from("gram_panchayats")
-      .select("id, mandal_id, name_en, name_te")
-      .eq("mandal_id", location.mandal_id);
-    gps = gpRows || [];
-  }
-  const refined = parseCaptionLocations(
-    caption,
-    districts || [],
-    mandals || [],
-    gps,
-  );
-
+  const refined = parseCaptionLocations(text, districts || [], mandals || []);
   const status = refined.confidence === "none" ? "flagged" : "pending";
 
-  const payload: Record<string, unknown> = {
-    telegram_chat_id: String(chatId),
+  const surveyPayload: Record<string, unknown> = {
+    telegram_chat_id: chatKey,
     telegram_message_id: String(message.message_id),
     sender_name: name,
-    phone: null as string | null,
+    phone: null,
     district_id: refined.district_id || null,
     mandal_id: refined.mandal_id || null,
     gp_id: refined.gp_id || null,
-    raw_caption: caption || null,
+    raw_caption: text,
     extracted_data: {
       matched: refined.matched,
       confidence: refined.confidence,
-      district_slug: refined.district_slug || null,
-      mandal_slug: refined.mandal_slug || null,
-      telegram_username: message.from?.username || null,
-      media_group_id: mediaGroupId,
-      missing_caption: !caption,
+      from_session: true,
+      district_text: parsed.district,
+      mandal_text: parsed.mandal,
     },
     photo_url: photoUrl,
-    photo_urls: [photoUrl],
-    photo_file_unique_id: fileUniqueId,
-    media_group_id: mediaGroupId,
+    photo_urls: photoUrl ? [photoUrl] : [],
+    photo_file_unique_id: session.photo_file_unique_id,
     status,
-    reminder_sent: false,
+    reminder_sent: true,
     last_activity_at: new Date().toISOString(),
   };
 
   const { data: inserted, error: insertError } = await insertSurveySubmission(
     admin,
-    payload,
+    surveyPayload,
   );
-
-  if (insertError) {
-    if (insertError.code === "23505") {
-      return NextResponse.json({ ok: true, duplicate: true });
-    }
-    console.error("insert survey_submissions final", insertError);
-    const detail = (insertError.message || "unknown").slice(0, 120);
-    // Photo is already in storage — tell user clearly; do not ask for blind re-upload.
-    if (!caption) {
-      await replyText(
-        chatId,
-        `\u274C <b>\u0C28\u0C2E\u0C4B\u0C26\u0C41 \u0C07\u0C02\u0C15\u0C3E \u0C2A\u0C42\u0C30\u0C4D\u0C24\u0C3F \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41.</b>\n` +
-          `\u0C2B\u0C4B\u0C1F\u0C4B \u0C38\u0C4D\u0C1F\u0C4B\u0C30\u0C47\u0C1C\u0C4D\u0C95\u0C41 \u0C1A\u0C47\u0C30\u0C3F\u0C02\u0C26\u0C3F, \u0C15\u0C3E\u0C28\u0C3F \u0C21\u0C47\u0C1F\u0C3E\u0C2C\u0C47\u0C38\u0C4D \u0C32\u0C4B \u0C30\u0C4B \u0C38\u0C47\u0C35\u0C4D \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41.\n\n` +
-          `\u0C26\u0C2F\u0C1A\u0C47\u0C38\u0C3F <b>\u0C2B\u0C4B\u0C1F\u0C4B\u0C28\u0C41 \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C1A\u0C47\u0C2F\u0C15\u0C02\u0C21\u0C3F</b> — \u0C07\u0C2A\u0C4D\u0C2A\u0C41\u0C21\u0C41 \u0C15\u0C4D\u0C2F\u0C3E\u0C2A\u0C4D\u0C37\u0C28\u0C4D\u0C24\u0C4B \u0C1C\u0C3F\u0C32\u0C4D\u0C32\u0C3E / \u0C2E\u0C02\u0C21\u0C32\u0C02 / \u0C35\u0C3F\u0C37\u0C2F\u0C02 \u0C1F\u0C48\u0C2A\u0C4D \u0C1A\u0C47\u0C38\u0C3F \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.\n` +
-          `<i>(tech: ${escapeHtml(detail)})</i>`,
-      );
-    } else {
-      await replyText(
-        chatId,
-        `\u274C <b>\u0C28\u0C2E\u0C4B\u0C26\u0C41 \u0C07\u0C02\u0C15\u0C3E \u0C2A\u0C42\u0C30\u0C4D\u0C24\u0C3F \u0C15\u0C3E\u0C32\u0C47\u0C26\u0C41.</b>\n` +
-          `\u0C2B\u0C4B\u0C1F\u0C4B \u0C07\u0C2A\u0C4D\u0C2A\u0C41\u0C21\u0C41 \u0C05\u0C32\u0C3E; \u0C21\u0C47\u0C1F\u0C3E\u0C2C\u0C47\u0C38\u0C4D \u0C30\u0C4B \u0C32\u0C4B\u0C2A\u0C41. \u0C2E\u0C33\u0C4D\u0C32\u0C40 \u0C05\u0C2A\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C05\u0C35\u0C38\u0C30\u0C02 \u0C32\u0C47\u0C26\u0C41 — \u0C15\u0C3E\u0C38\u0C4D\u0C24\u0C02 \u0C32\u0C47\u0C15\u0C4D\u0C15\u0C3E \u0C2E\u0C40 \u0C15\u0C4D\u0C2F\u0C3E\u0C2A\u0C4D\u0C37\u0C28\u0C4D \u0C1F\u0C46\u0C15\u0C4D\u0C38\u0C4D\u0C1F\u0C4D \u0C2E\u0C3E\u0C24\u0C4D\u0C30\u0C2E\u0C47 \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F.\n` +
-          `<i>(tech: ${escapeHtml(detail)})</i>`,
-      );
-    }
-    return NextResponse.json({ ok: false, error: "insert_failed" }, { status: 500 });
+  if (insertError && insertError.code !== "23505") {
+    console.error("[Bot:FollowUpSurveyInsert]", insertError);
   }
 
-  // For albums, only ack once (first photo creates the row).
-  if (!caption) {
-    await replyText(
-      chatId,
-      `\u2705 <b>\u0C2E\u0C40\u0C30\u0C41 \u0C2A\u0C02\u0C2A\u0C3F\u0C28 \u0C2B\u0C4B\u0C1F\u0C4B(\u0C32\u0C41) \u0C35\u0C3F\u0C1C\u0C2F\u0C35\u0C02\u0C24\u0C02\u0C17\u0C3E \u0C05\u0C02\u0C26\u0C3E\u0C2F\u0C3F!</b>\n\n` +
-        `\u0C05\u0C2F\u0C3F\u0C24\u0C47 \u0C35\u0C40\u0C1F\u0C3F\u0C15\u0C3F \u0C38\u0C02\u0C2C\u0C02\u0C27\u0C3F\u0C02\u0C1A\u0C3F\u0C28 \u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C41 \u0C30\u0C3E\u0C32\u0C47\u0C26\u0C41. \u0C26\u0C2F\u0C1A\u0C47\u0C38\u0C3F \u0C15\u0C4D\u0C30\u0C3F\u0C02\u0C26\u0C3F \u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C41 \u0C1F\u0C48\u0C2A\u0C4D \u0C1A\u0C47\u0C38\u0C3F \u0C2A\u0C02\u0C2A\u0C02\u0C21\u0C3F:\n\n` +
-        `\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n` +
-        `\u{1F4CD} <b>\u0C1C\u0C3F\u0C32\u0C4D\u0C32\u0C3E \u0C2A\u0C47\u0C30\u0C41:</b>\n` +
-        `\u{1F3DB}\uFE0F <b>\u0C2E\u0C02\u0C21\u0C32\u0C02 / \u0C2A\u0C1F\u0C4D\u0C1F\u0C23\u0C02:</b>\n` +
-        `\u{1F3E1} <b>\u0C17\u0C4D\u0C30\u0C3E\u0C2E\u0C02 \u0C32\u0C47\u0C26\u0C3E \u0C2A\u0C4D\u0C30\u0C3E\u0C02\u0C24\u0C02:</b>\n` +
-        `\u{1F4DD} <b>\u0C35\u0C3F\u0C37\u0C2F\u0C02 / \u0C38\u0C2E\u0C38\u0C4D\u0C2F:</b>\n` +
-        `\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n` +
-        `<i>(\u0C2E\u0C40\u0C15\u0C41 \u0C38\u0C2E\u0C2F\u0C02 \u0C32\u0C47\u0C15\u0C2A\u0C4B\u0C24\u0C47 \u0C15\u0C47\u0C35\u0C32\u0C02 \u0C0A\u0C30\u0C41, \u0C2E\u0C02\u0C21\u0C32\u0C02 \u0C2A\u0C47\u0C30\u0C41 \u0C30\u0C3E\u0C38\u0C3F \u0C2A\u0C02\u0C2A\u0C3F\u0C28\u0C3E \u0C38\u0C30\u0C3F\u0C2A\u0C4B\u0C24\u0C41\u0C02\u0C26\u0C3F.)</i>`,
-    );
-  } else {
-    const reviewUrl = `${siteOrigin()}/admin/moderation?id=${inserted?.id || ""}`;
-    await replyText(
-      chatId,
-      `\u2705 <b>\u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C41 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C2B\u0C4B\u0C1F\u0C4B\u0C32\u0C41 \u0C28\u0C2E\u0C4B\u0C26\u0C2F\u0C4D\u0C2F\u0C3E\u0C2F\u0C3F!</b>\n` +
-        `\u0C2A\u0C30\u0C3F\u0C36\u0C40\u0C32\u0C28 \u0C05\u0C28\u0C02\u0C24\u0C30\u0C02 \u0C2E\u0C28 \u0C05\u0C27\u0C3F\u0C15\u0C3E\u0C30\u0C3F\u0C15 \u0C35\u0C46\u0C2C\u0C4D\u200C\u0C38\u0C3E\u0C1F\u0C4D (\u0C28\u0C3E\u0C2F\u0C3F\u0C38\u0C2E\u0C3E\u0C16\u0C4D\u0C2F.org) \u0C32\u0C4B \u0C2A\u0C4D\u0C30\u0C26\u0C30\u0C4D\u0C36\u0C3F\u0C02\u0C1A\u0C2C\u0C21\u0C41\u0C24\u0C41\u0C02\u0C26\u0C3F. \u0C27\u0C28\u0C4D\u0C2F\u0C35\u0C3E\u0C26\u0C3E\u0C32\u0C41!`,
-      {
-        inline_keyboard: [[{ text: "\u{1F50E} Review / \u0C38\u0C2E\u0C40\u0C15\u0C4D\u0C37", url: reviewUrl }]],
-      },
-    );
+  const field = await insertFieldSubmission(admin, {
+    user_id: userId,
+    chat_id: chatKey,
+    image_url: photoUrl,
+    district: parsed.district || refined.district_slug || null,
+    mandal: parsed.mandal || refined.mandal_slug || null,
+    description: parsed.description || text,
+    status: "pending",
+    photo_file_unique_id: session.photo_file_unique_id,
+    telegram_message_id: String(message.message_id),
+    sender_name: name,
+    survey_submission_id: inserted?.id || null,
+    metadata: { from_session: true, session_id: session.id },
+  });
+
+  if (!field.id && !inserted?.id) {
+    await replyText(chatId, MSG.criticalServer);
+    return NextResponse.json({ ok: false, error: "follow_up_insert_failed" }, { status: 500 });
   }
 
+  await clearUploadSession(admin, session.id);
+  const recordId = (field.id || inserted?.id || "").slice(0, 8);
+  await replyText(chatId, MSG.success(recordId));
   return NextResponse.json({
     ok: true,
-    id: inserted?.id,
-    status,
-    confidence: refined.confidence,
+    follow_up: true,
+    id: field.id || inserted?.id,
   });
 }
 
@@ -785,16 +906,38 @@ export async function POST(req: Request) {
       return await handleOfficerLookup(admin, chatId, text);
     }
 
+    // /submit_proof — mark intent so the next photo is expected.
+    const cmdKey = text.split(/\s+/)[0]?.toLowerCase() || "";
+    if (
+      cmdKey === "/submit_proof" ||
+      cmdKey === "/proof" ||
+      cmdKey === "/photo"
+    ) {
+      await markSubmitProofIntent(
+        admin,
+        String(chatId),
+        message.from?.id ? String(message.from.id) : null,
+      );
+      await replyText(chatId, MSG.submitProofPrompt);
+      return NextResponse.json({ ok: true, command: cmdKey });
+    }
+
     if (text.startsWith("/") && (await handleDeskToolCommand(chatId, text))) {
       return NextResponse.json({ ok: true, command: text.split(/\s+/)[0] });
     }
 
-    if (message.photo && message.photo.length > 0) {
+    if (
+      (message.photo && message.photo.length > 0) ||
+      message.document?.file_id
+    ) {
       return await ingestPhoto(admin, message, chatId);
     }
 
-    // Follow-up text within 15 minutes links to the latest photo submission.
+    // Follow-up text: complete staged photo session, else legacy survey caption merge.
     if (text && !text.startsWith("/")) {
+      const staged = await completeStagedProof(admin, chatId, text, message);
+      if (staged) return staged;
+
       const { data: recentSub } = await admin
         .from("survey_submissions")
         .select("id, raw_caption")
@@ -819,29 +962,34 @@ export async function POST(req: Request) {
           .update(followUp)
           .eq("id", recentSub.id);
         if (followErr) {
-          console.error("follow-up caption update", followErr);
-          const msg = followErr.message || "";
+          console.error("[Bot:FollowUpCaption]", followErr);
           const slim = { ...followUp };
-          if (/reminder_sent/i.test(msg)) delete slim.reminder_sent;
-          if (/last_activity_at/i.test(msg)) delete slim.last_activity_at;
-          // Strip both optional columns if schema is older.
-          if (Object.keys(slim).length === Object.keys(followUp).length) {
-            delete slim.reminder_sent;
-            delete slim.last_activity_at;
-          }
+          delete slim.reminder_sent;
+          delete slim.last_activity_at;
           ({ error: followErr } = await admin
             .from("survey_submissions")
             .update(slim)
             .eq("id", recentSub.id));
-          if (followErr) {
-            console.error("follow-up caption update retry", followErr);
-          }
         }
+
+        const parsed = parseProofCaption(text);
+        await insertFieldSubmission(admin, {
+          user_id: message.from?.id ? String(message.from.id) : null,
+          chat_id: String(chatId),
+          image_url: null,
+          district: parsed.district,
+          mandal: parsed.mandal,
+          description: parsed.description || text,
+          status: "pending",
+          telegram_message_id: String(message.message_id),
+          sender_name: name,
+          survey_submission_id: recentSub.id,
+          metadata: { follow_up_text: true },
+        });
 
         await replyText(
           chatId,
-          `\u2705 <b>\u0C27\u0C28\u0C4D\u0C2F\u0C35\u0C3E\u0C26\u0C3E\u0C32\u0C41 ${escapeHtml(name)} \u0C17\u0C3E\u0C30\u0C41!</b>\n` +
-            `\u0C2E\u0C40\u0C30\u0C41 \u0C2A\u0C02\u0C2A\u0C3F\u0C28 \u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C41 \u0C2E\u0C41\u0C28\u0C41\u0C2A\u0C1F\u0C3F \u0C2B\u0C4B\u0C1F\u0C4B\u0C32\u0C15\u0C41 \u0C1C\u0C24\u0C1A\u0C47\u0C2F\u0C2C\u0C21\u0C4D\u0C21\u0C3E\u0C2F\u0C3F. \u0C2E\u0C3E \u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24\u0C32 \u0C2A\u0C30\u0C3F\u0C36\u0C40\u0C32\u0C28\u0C32\u0C4B\u0C15\u0C3F \u0C24\u0C40\u0C38\u0C41\u0C15\u0C4B\u0C2C\u0C21\u0C3F\u0C02\u0C26\u0C3F.`,
+          MSG.success(String(recentSub.id).slice(0, 8)),
         );
         return NextResponse.json({ ok: true, follow_up: true });
       }
@@ -852,7 +1000,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, ignored: "no_photo" });
   } catch (err) {
-    console.error("telegram webhook", err);
+    console.error("[Bot:WebhookCrash]", err);
+    try {
+      const chatId = update.message?.chat?.id;
+      if (chatId) await replyText(chatId, MSG.criticalServer);
+    } catch (replyErr) {
+      console.error("[Bot:CrashReplyFailed]", replyErr);
+    }
     // Return 500 so Telegram retries instead of silently dropping the update.
     return NextResponse.json(
       { ok: false, error: "internal_error" },
