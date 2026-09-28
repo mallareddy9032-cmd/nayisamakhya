@@ -3,7 +3,9 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 let adminCached: SupabaseClient | null = null;
 
 function resolveSupabaseUrl(): string | null {
-  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const raw =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    "https://pvhnwoukpccgeoqdsevm.supabase.co";
   if (!raw || raw.includes("YOUR_PROJECT")) return null;
   try {
     const parsed = new URL(raw);

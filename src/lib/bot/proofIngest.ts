@@ -100,6 +100,28 @@ type TelegramApiFn = (
   result?: Record<string, unknown>;
 } | null>;
 
+const DEFAULT_SUPABASE_URL = "https://pvhnwoukpccgeoqdsevm.supabase.co";
+
+/** Map Telegram/octet-stream responses to a bucket-allowed image MIME. */
+export function normalizeProofContentType(
+  contentType: string | null | undefined,
+  ext?: string,
+): string {
+  const raw = (contentType || "").split(";")[0].trim().toLowerCase();
+  const e = (ext || "").toLowerCase().replace(/^\./, "");
+
+  if (raw === "image/jpeg" || raw === "image/jpg") return "image/jpeg";
+  if (raw === "image/png") return "image/png";
+  if (raw === "image/webp") return "image/webp";
+  if (raw === "application/pdf") return "application/pdf";
+
+  // Telegram file CDN often returns application/octet-stream for photos.
+  if (e === "png") return "image/png";
+  if (e === "webp") return "image/webp";
+  if (e === "pdf") return "application/pdf";
+  return "image/jpeg";
+}
+
 /** Download binary from Telegram by file_id (used for deferred storage uploads). */
 export async function downloadTelegramFileById(opts: {
   botToken: string;
@@ -146,11 +168,22 @@ export async function downloadTelegramFileById(opts: {
   if (buffer.byteLength > MAX) return { error: "file_too_large" };
 
   let ext = hintExt;
-  const contentType =
+  const headerType =
     fileRes.headers.get("content-type") || hintType || "image/jpeg";
-  if (contentType.includes("png")) ext = "png";
-  else if (contentType.includes("webp")) ext = "webp";
-  else if (contentType.includes("pdf")) ext = "pdf";
+  if (headerType.includes("png") || hintExt === "png") ext = "png";
+  else if (headerType.includes("webp") || hintExt === "webp") ext = "webp";
+  else if (headerType.includes("pdf") || hintExt === "pdf") ext = "pdf";
+  else if (
+    headerType.includes("jpeg") ||
+    headerType.includes("jpg") ||
+    hintExt === "jpg" ||
+    hintExt === "jpeg"
+  ) {
+    ext = "jpg";
+  }
+
+  // Never pass application/octet-stream upstream — Storage buckets reject it.
+  const contentType = normalizeProofContentType(headerType, ext);
 
   return { buffer, contentType, fileUniqueId, fileId, ext };
 }
@@ -207,7 +240,9 @@ export type StorageUploadResult = {
 };
 
 function supabaseEnv(): { url: string; key: string } | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, "");
+  const url = (
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || DEFAULT_SUPABASE_URL
+  ).replace(/\/$/, "");
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key || url.includes("YOUR_PROJECT")) return null;
   return { url, key };
@@ -283,8 +318,18 @@ export async function uploadProofToStorage(
   const objectPath = `submissions/${opts.chatId}_${ts}_${unique}.${safeExt}`;
   const buckets = ["survey-photos", "desk_proofs"] as const;
   const bytes = new Uint8Array(opts.buffer);
-  const contentType = opts.contentType || "image/jpeg";
+  // Telegram CDN often returns application/octet-stream — bucket allowlists reject it.
+  const contentType = normalizeProofContentType(opts.contentType, safeExt);
   const errors: string[] = [];
+
+  console.info("[Bot:StorageAttempt]", {
+    bytes: bytes.byteLength,
+    contentType,
+    rawContentType: opts.contentType,
+    ext: safeExt,
+    supabaseHost: supabaseEnv()?.url?.replace(/^https?:\/\//, "").slice(0, 40),
+    hasServiceKey: Boolean(supabaseEnv()?.key),
+  });
 
   for (const bucket of buckets) {
     const rest = await uploadViaStorageRest(
