@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import {
+  ArrowRight,
   FileText,
+  MessageCircle,
   Send,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { CivicStalwarts } from "@/components/CivicStalwarts";
 import { CivicTimeline } from "@/components/CivicTimeline";
@@ -78,38 +79,36 @@ export default function HomePage() {
         />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-12">
           <div className="space-y-5 text-center lg:text-left">
-            <div className="inline-flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B45309]/25 bg-[#B45309]/10 px-3 py-1 font-telugu text-xs font-bold text-[#B45309]">
-                <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                రాష్ట్రవ్యాప్త కమ్యూనిటీ సాధికారత
-              </span>
-              <span className="inline-flex items-center rounded-full border border-[#1E293B]/15 bg-white px-3 py-1 font-telugu text-[11px] font-bold text-[#1E293B]">
-                BC-A సంక్షేమ హక్కులు
-              </span>
-              <span className="inline-flex items-center rounded-full border border-[#1E293B]/15 bg-white px-3 py-1 font-telugu text-[11px] font-bold text-[#1E293B]">
-                జి.ఓ. 23
-              </span>
-            </div>
+            <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#FDE68A] bg-[#FEF3C7]/70 px-3.5 py-1.5 font-telugu text-xs font-semibold tracking-wider text-[#B45309] shadow-sm">
+              🏛️ చారిత్రక వారసత్వం • చట్టబద్ధ రక్షణ • సమగ్ర సాధికారత
+            </span>
 
-            <h1 className="font-display-te text-[2rem] leading-[1.25] tracking-tight text-[#0F172A] sm:text-4xl md:text-5xl md:leading-[1.2]">
-              నాయి బ్రాహ్మణ, మంగలి &amp; బజంత్రి
+            <h1 className="font-display-te text-[2rem] font-bold leading-[1.25] tracking-tight text-[#0F172A] sm:text-4xl md:text-5xl md:leading-[1.2]">
+              ఆత్మగౌరవం • చట్టబద్ధ రక్షణ •
               <br />
-              <span className="text-[#B45309]">డిజిటల్ సేవా కేంద్రం</span>
+              <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-serif italic text-transparent">
+                ఆధునిక ప్రగతి
+              </span>
+              <span className="mt-1 block font-sans text-sm font-medium uppercase tracking-widest text-slate-500 lg:text-base">
+                Statewide Civic Protection &amp; Empowerment Network
+              </span>
             </h1>
 
-            <p className="mx-auto max-w-xl font-telugu text-sm leading-relaxed text-slate-600 md:text-base lg:mx-0">
-              అధికారులకు అధికారిక వినతిపత్రాల సమర్పణ, క్షేత్రస్థాయి సమస్యల
-              పరిష్కారం, మరియు మండల సమన్వయకర్తల అనుసంధానం కొరకు రూపొందించబడిన
-              అధీకృత వేదిక.
+            <p className="mx-auto mt-3 max-w-2xl font-telugu text-base font-normal leading-[1.8] text-slate-600 lg:mx-0 lg:text-lg">
+              శతాబ్దాల కళా-వైద్య వైభవాన్ని పునరుద్ధరిస్తూ.. 250 యూనిట్ల ఉచిత
+              విద్యుత్ (జీ.ఓ. 23), మున్సిపల్ షాపుల రక్షణ, విద్యా-స్కాలర్‌షిప్‌లు
+              మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు తెలంగాణలోని నాయీ
+              బ్రాహ్మణ, మంగలి, బజంత్రి సమాజాల ఏకైక ఆధీకృత వేదిక.
             </p>
 
             <div className="flex flex-col items-stretch justify-center gap-2.5 pt-1 sm:flex-row sm:items-center lg:justify-start">
               <Link
                 href="/representation"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#B45309] px-5 py-3 font-telugu text-sm font-bold text-white shadow-xs transition hover:bg-[#92400e]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-5 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_24px_rgb(180_83_9_/0.3)] transition-all duration-300 hover:brightness-110"
               >
                 <FileText className="h-4 w-4" aria-hidden />
                 వినతిపత్రం తయారు చేయండి
+                <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <a
                 href="https://wa.me/919032654111?text=%E0%B0%A8%E0%B0%AE%E0%B0%B8%E0%B1%8D%E0%B0%95%E0%B0%BE%E0%B0%B0%E0%B0%82%20%E0%B0%A8%E0%B0%BE%E0%B0%AF%E0%B0%BF%20%E0%B0%B8%E0%B0%AE%E0%B0%BE%E0%B0%96%E0%B1%8D%E0%B0%AF%20%E0%B0%A1%E0%B1%86%E0%B0%B8%E0%B1%8D%E0%B0%95%E0%B1%8D"
@@ -117,6 +116,7 @@ export default function HomePage() {
                 rel="noreferrer"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#128C7E]/40 bg-white px-5 py-3 font-telugu text-sm font-bold text-[#0E7A6E] shadow-xs transition hover:bg-emerald-50"
               >
+                <MessageCircle className="h-4 w-4" aria-hidden />
                 WhatsApp సహాయవాణి
               </a>
             </div>
