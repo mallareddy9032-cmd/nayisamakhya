@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { parseCaptionLocations } from "@/lib/moderation/parseCaption";
+import { getAllCommHubs } from "@/lib/comms/hubs";
 import {
-  formatHubsForTelegramHtml,
-  getAllCommHubs,
-} from "@/lib/comms/hubs";
+  formatRegionalHubsForTelegramHtml,
+  getRegionalCommunityHubs,
+} from "@/config/communityHubs";
 import {
   MSG,
   TG_FILE_PREFIX,
@@ -233,7 +234,7 @@ async function sendWelcomeMenu(chatId: number | string, senderName: string) {
           url: origin,
         },
         {
-          text: "\u{1F4E2} Hubs list",
+          text: "\u{1F30D} \u0C2A\u0C4D\u0C30\u0C3E\u0C02\u0C24\u0C40\u0C2F \u0C39\u0C2C\u0C4D\u0C32\u0C41",
           callback_data: "list_hubs",
         },
       ],
@@ -307,6 +308,20 @@ async function handleDeskToolCommand(
     return true;
   }
 
+  // Grassroots regional WhatsApp corridors — offload peer support from central desk.
+  if (key === "/groups" || key === "/join" || key === "/hubs") {
+    const hubs = getRegionalCommunityHubs();
+    await replyText(chatId, formatRegionalHubsForTelegramHtml(), {
+      inline_keyboard: hubs.map((hub) => [
+        {
+          text: `💬 ${hub.badgeTe}`,
+          url: hub.inviteUrl,
+        },
+      ]),
+    });
+    return true;
+  }
+
   if (key === "/submit_proof" || key === "/proof" || key === "/photo") {
     return false; // handled in POST with session mark
   }
@@ -332,7 +347,7 @@ async function handleCallbackQuery(
         `\u0C2E\u0C46\u0C38\u0C47\u0C1C\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F. \u0C2E\u0C3E \u0C2C\u0C43\u0C02\u0C26\u0C02 \u0C35\u0C46\u0C02\u0C1F\u0C28\u0C47 \u0C2A\u0C30\u0C3F\u0C36\u0C40\u0C32\u0C3F\u0C38\u0C4D\u0C24\u0C41\u0C02\u0C26\u0C3F.`,
     );
   } else if (cq.data === "list_hubs") {
-    await replyText(chatId, formatHubsForTelegramHtml());
+    await replyText(chatId, formatRegionalHubsForTelegramHtml());
   } else if (cq.data === "find_officer") {
     await replyText(
       chatId,

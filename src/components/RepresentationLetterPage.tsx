@@ -27,6 +27,7 @@ import {
   openCurrentPageExternally,
   shouldUsePdfFallback,
 } from "@/lib/twa/printPetitionPdf";
+import { CommunityHubsSection } from "@/components/CommunityHubsSection";
 
 type WizardStep = 1 | 2 | 3;
 
@@ -672,6 +673,17 @@ export function RepresentationLetterPage() {
                   <ArrowLeft className="h-3.5 w-3.5" />
                   అంశం మార్చండి
                 </button>
+              </div>
+
+              <div className="no-print mt-5 print:hidden">
+                <CommunityHubsSection
+                  highlightDistrict={districtSlug}
+                  pulseHubId={
+                    districtSlug === "suryapet" || districtSlug === "kodad"
+                      ? "south-telangana"
+                      : undefined
+                  }
+                />
               </div>
             </div>
           ) : null}

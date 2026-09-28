@@ -10,7 +10,7 @@ import {
   ArrowLeft,
   IdCard,
 } from "lucide-react";
-import { HubJoinLinks } from "@/components/comms/HubJoinLinks";
+import { CommunityHubsSection } from "@/components/CommunityHubsSection";
 import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 
 export default function CoordinatorCardPage() {
@@ -235,7 +235,14 @@ export default function CoordinatorCardPage() {
         </p>
 
         <div className="no-print w-full max-w-md print:hidden">
-          <HubJoinLinks districtHint={districtSlugHint} />
+          <CommunityHubsSection
+            highlightDistrict={districtSlugHint}
+            pulseHubId={
+              districtSlugHint === "suryapet" || districtSlugHint === "kodad"
+                ? "south-telangana"
+                : undefined
+            }
+          />
         </div>
       </main>
 
