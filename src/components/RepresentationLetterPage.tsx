@@ -277,7 +277,11 @@ export function RepresentationLetterPage() {
     : Boolean(selectedPresetId);
 
   return (
-    <div className="min-h-[100dvh] bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white print:bg-white print:text-black">
+    <div
+      translate="no"
+      lang="te"
+      className="min-h-[100dvh] w-full bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white print:bg-white print:text-black"
+    >
       <Script
         src="https://telegram.org/js/telegram-web-app.js"
         strategy="afterInteractive"
