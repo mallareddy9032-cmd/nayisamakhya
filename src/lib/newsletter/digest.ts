@@ -218,20 +218,80 @@ export function institutionalFallbackNotices(now = new Date()): DigestBulletin[]
   ];
 }
 
+/** Spec WhatsApp broadcast for a single bulletin. */
+export function buildBulletinWhatsAppText(b: DigestBulletin): string {
+  const goMatch = b.title.match(/G\.?O\.?\s*[\d.]+/i);
+  const goNumber =
+    goMatch?.[0] ||
+    (normalizeCategory(b.category) === "G.O. 23 Power"
+      ? "G.O. Ms. No. 23"
+      : b.category);
+  const date = (() => {
+    try {
+      return new Intl.DateTimeFormat("te-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(b.published_at || b.created_at));
+    } catch {
+      return (b.published_at || "").slice(0, 10);
+    }
+  })();
+
+  return [
+    "📢 *తెలంగాణ నాయీ సమాఖ్య - తాజా సంక్షేమ బులెటిన్* 🏛️",
+    "",
+    `🔹 *ముఖ్య సమాచారం:* ${b.title}`,
+    `📜 *ప్రభుత్వ ఉత్తర్వు:* ${goNumber}`,
+    `📅 *తేది:* ${date}`,
+    "",
+    "🔍 *కీలక అంశాలు:*",
+    `• ${b.summary_te}`,
+    "",
+    "📄 అధికారిక పత్రం మరియు పూర్తి వినతిపత్రాల కొరకు:",
+    `👉 ${NEWSLETTER_CANONICAL}`,
+    "",
+    "సహాయవాణి & సమన్వయం: +91 9032654111",
+    "నాయీ సమాఖ్య అధికారిక సమాచారం",
+  ].join("\n");
+}
+
 export function buildWhatsAppShareText(
   edition: FortnightEdition,
   top: DigestBulletin[],
 ): string {
   const lines = [
+    "📢 *తెలంగాణ నాయీ సమాఖ్య - తాజా సంక్షేమ బులెటిన్* 🏛️",
+    "",
     `📰 ${NEWSLETTER_TITLE_SHORT}`,
-    edition.label_te,
+    `*${edition.label_te}*`,
     "",
-    ...top.slice(0, 3).map(
-      (b, i) =>
-        `${i + 1}. ${b.title}\n${b.summary_te.slice(0, 140)}${b.summary_te.length > 140 ? "…" : ""}`,
-    ),
-    "",
+    ...top.slice(0, 3).flatMap((b, i) => [
+      `🔹 *${i + 1}. ${b.title}*`,
+      `• ${b.summary_te.slice(0, 160)}${b.summary_te.length > 160 ? "…" : ""}`,
+      "",
+    ]),
+    "📄 అధికారిక పత్రం మరియు పూర్తి వినతిపత్రాల కొరకు:",
     `👉 ${NEWSLETTER_CANONICAL}`,
+    "",
+    "సహాయవాణి & సమన్వయం: +91 9032654111",
+    "నాయీ సమాఖ్య అధికారిక సమాచారం",
   ];
   return lines.join("\n");
+}
+
+/** Top-3 gazette items for A4 wall poster (live or institutional fallback). */
+export function gazettePosterItems(
+  edition: FortnightEdition,
+  now = new Date(),
+): DigestBulletin[] {
+  const live = edition.bulletins.slice(0, 3);
+  if (live.length >= 3) return live;
+  const fallback = institutionalFallbackNotices(now);
+  const merged = [...live];
+  for (const f of fallback) {
+    if (merged.length >= 3) break;
+    if (!merged.some((b) => b.id === f.id)) merged.push(f);
+  }
+  return merged.slice(0, 3);
 }

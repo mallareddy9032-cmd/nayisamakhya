@@ -30,10 +30,15 @@ export const HEATMAP_TOKENS = {
   /** Tier fills (spec) */
   emerald: "#059669",
   gold: "#D97706",
+  /** Phase 4 mobile bar — under-represented */
+  rose: "#E11D48",
   slateMuted: "#94A3B8",
   stroke: "#334155",
   border: "#E2E8F0",
 } as const;
+
+/** Statewide mandal denominator for executive KPI header. */
+export const STATEWIDE_MANDAL_TARGET = 589;
 
 export type DistrictSaturation = {
   slug: string;
@@ -92,8 +97,85 @@ export function tierFill(tier: SaturationTier): string {
     case "active":
       return HEATMAP_TOKENS.gold;
     case "critical":
-      return HEATMAP_TOKENS.slateMuted;
+      return HEATMAP_TOKENS.rose;
   }
+}
+
+/** Live saturation bar fill for mobile corridor cards (Phase 4). */
+export function saturationBarFill(score: number): string {
+  if (score >= SATURATION_THRESHOLDS.high) return HEATMAP_TOKENS.emerald;
+  if (score >= SATURATION_THRESHOLDS.active) return HEATMAP_TOKENS.ceremonialGold;
+  return HEATMAP_TOKENS.rose;
+}
+
+export type ExecutiveSaturationKpis = {
+  mandalsReached: number;
+  mandalTarget: number;
+  stateAverageIndex: number;
+  priorityMandal: {
+    name_te: string;
+    name_en: string;
+    district_te: string;
+    slug: string;
+    index: number;
+  } | null;
+};
+
+/** Derive executive header KPIs from district saturation rows. */
+export function computeExecutiveSaturationKpis(
+  districts: DistrictSaturation[],
+  pilots: PilotCorridorKpi[] = [],
+): ExecutiveSaturationKpis {
+  const mandalsReached = districts.reduce((sum, d) => {
+    // Count mandals in districts that have any activity signal.
+    if (d.verified_uploads > 0 || d.total_representations > 0 || d.active_coordinators > 0) {
+      return sum + d.total_mandals;
+    }
+    return sum;
+  }, 0);
+
+  const avg =
+    districts.length === 0
+      ? 0
+      : Math.round(
+          districts.reduce((s, d) => s + d.index, 0) / districts.length,
+        );
+
+  // Priority action: lowest SI among pilot corridors, else lowest statewide with activity.
+  const pilotSorted = [...pilots].sort(
+    (a, b) => a.saturation_index - b.saturation_index,
+  );
+  let priority: ExecutiveSaturationKpis["priorityMandal"] = null;
+  if (pilotSorted[0]) {
+    const p = pilotSorted[0];
+    priority = {
+      name_te: p.name_te,
+      name_en: p.name_en,
+      district_te: p.name_te,
+      slug: p.district_slug,
+      index: p.saturation_index,
+    };
+  } else {
+    const lowest = [...districts]
+      .filter((d) => d.total_mandals > 0)
+      .sort((a, b) => a.index - b.index)[0];
+    if (lowest) {
+      priority = {
+        name_te: lowest.name_te,
+        name_en: lowest.name_en,
+        district_te: lowest.name_te,
+        slug: lowest.slug,
+        index: lowest.index,
+      };
+    }
+  }
+
+  return {
+    mandalsReached: Math.min(STATEWIDE_MANDAL_TARGET, mandalsReached || 0),
+    mandalTarget: STATEWIDE_MANDAL_TARGET,
+    stateAverageIndex: avg,
+    priorityMandal: priority,
+  };
 }
 
 /** Linear interpolate hex colors (6-digit). */

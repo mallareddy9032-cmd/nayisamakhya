@@ -7,8 +7,10 @@ import type { Topology, GeometryCollection } from "topojson-specification";
 import type { FeatureCollection, Geometry } from "geojson";
 import {
   HEATMAP_TOKENS,
+  computeExecutiveSaturationKpis,
   isSaturationSparse,
   mandalDensityFill,
+  saturationBarFill,
   saturationRampFill,
   shortDistrictLabel,
   slugFromGeoDistrictName,
@@ -68,47 +70,208 @@ function HeatMapSkeleton() {
   );
 }
 
+type CorridorFilter = "all" | "pilot" | "urban" | "deficit";
+
+const PILOT_SLUGS = new Set(["suryapet", "rangareddy"]);
+const URBAN_SLUGS = new Set([
+  "hyderabad",
+  "rangareddy",
+  "medchal-malkajgiri",
+  "sangareddy",
+]);
+
+/** Executive KPI strip — mandals reached / state avg / priority action. */
+function ExecutiveSaturationHeader({
+  districts,
+  pilots,
+  onSelect,
+}: {
+  districts: DistrictSaturation[];
+  pilots: PilotCorridorKpi[];
+  onSelect?: (slug: string | null) => void;
+}) {
+  const kpis = useMemo(
+    () => computeExecutiveSaturationKpis(districts, pilots),
+    [districts, pilots],
+  );
+
+  return (
+    <div
+      className="border-b px-4 py-3 sm:px-5"
+      style={{
+        borderColor: HEATMAP_TOKENS.border,
+        background: "linear-gradient(90deg, #F8FAFC, #FFFFFF 55%, rgb(5 150 105 / 0.04))",
+      }}
+    >
+      <p
+        className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em]"
+        style={{ color: HEATMAP_TOKENS.ceremonialGold }}
+      >
+        Executive Saturation Metrics
+      </p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+          <p className="font-telugu text-[10px] font-semibold text-slate-500">
+            మండలాలు చేరుకున్నవి / 589
+          </p>
+          <p
+            className="mt-0.5 text-xl font-bold tabular-nums"
+            style={{ color: HEATMAP_TOKENS.deepSlate }}
+          >
+            {kpis.mandalsReached}
+            <span className="text-sm font-semibold text-slate-400">
+              {" "}
+              / {kpis.mandalTarget}
+            </span>
+          </p>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+          <p className="font-telugu text-[10px] font-semibold text-slate-500">
+            రాష్ట్ర సగటు సంతృప్త సూచిక
+          </p>
+          <p
+            className="mt-0.5 text-xl font-bold tabular-nums"
+            style={{ color: saturationBarFill(kpis.stateAverageIndex) }}
+          >
+            {kpis.stateAverageIndex}
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled={!kpis.priorityMandal}
+          onClick={() =>
+            kpis.priorityMandal && onSelect?.(kpis.priorityMandal.slug)
+          }
+          className="rounded-lg border border-rose-200 bg-rose-50/80 px-3 py-2.5 text-left transition hover:border-rose-300 disabled:opacity-60"
+        >
+          <p className="font-telugu text-[10px] font-semibold text-rose-700">
+            ఈ వారం ప్రాధాన్యతా మండలం
+          </p>
+          <p className="mt-0.5 font-telugu text-sm font-bold text-rose-900">
+            {kpis.priorityMandal?.name_te || "—"}
+          </p>
+          {kpis.priorityMandal ? (
+            <p className="text-[10px] tabular-nums text-rose-700">
+              SI {kpis.priorityMandal.index} · {kpis.priorityMandal.name_en}
+            </p>
+          ) : null}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /** Mobile-first ranked corridor cards (replaces SVG choropleth below md). */
 function CivicCorridorCards({
   districts,
+  pilots,
   selectedSlug,
   onSelect,
 }: {
   districts: DistrictSaturation[];
+  pilots: PilotCorridorKpi[];
   selectedSlug?: string | null;
   onSelect?: (slug: string | null) => void;
 }) {
-  const ranked = useMemo(
-    () => [...districts].sort((a, b) => b.index - a.index),
-    [districts],
-  );
+  const [filter, setFilter] = useState<CorridorFilter>("all");
+
+  const ranked = useMemo(() => {
+    let rows = [...districts];
+    if (filter === "pilot") {
+      rows = rows.filter((d) => PILOT_SLUGS.has(d.slug));
+      // Prefer pilot KPI order when available.
+      const pilotOrder = pilots.map((p) => p.district_slug);
+      rows.sort((a, b) => {
+        const ia = pilotOrder.indexOf(a.slug);
+        const ib = pilotOrder.indexOf(b.slug);
+        if (ia >= 0 || ib >= 0) return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+        return b.index - a.index;
+      });
+    } else if (filter === "urban") {
+      rows = rows.filter((d) => URBAN_SLUGS.has(d.slug));
+      rows.sort((a, b) => b.index - a.index);
+    } else if (filter === "deficit") {
+      rows = rows.filter((d) => d.index < 30);
+      rows.sort((a, b) => a.index - b.index);
+    } else {
+      rows.sort((a, b) => b.index - a.index);
+    }
+    return rows;
+  }, [districts, pilots, filter]);
+
+  const tabs: { id: CorridorFilter; label: string }[] = [
+    { id: "all", label: "అన్నీ (All)" },
+    { id: "pilot", label: "పైలట్ కారిడార్లు (Suryapet/Kodad)" },
+    { id: "urban", label: "అర్బన్ (HYD/RR)" },
+    { id: "deficit", label: "హై డెఫిసిట్ (Action Needed)" },
+  ];
+
+  const pilotByDistrict = useMemo(() => {
+    const m = new Map<string, PilotCorridorKpi>();
+    for (const p of pilots) m.set(p.district_slug, p);
+    return m;
+  }, [pilots]);
 
   return (
-    <div className="block space-y-2.5 p-4 md:hidden" aria-label="Civic corridor cards">
-      <p
-        className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em]"
-        style={{ color: HEATMAP_TOKENS.ceremonialGold }}
-      >
-        Civic Corridor Rank · Tap to filter
-      </p>
+    <div className="block space-y-3 p-4 md:hidden" aria-label="కారిడార్ సంతృప్త సూచిక">
+      <div>
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+          style={{ color: HEATMAP_TOKENS.ceremonialGold }}
+        >
+          Mobile Saturation Feed
+        </p>
+        <h3
+          className="mt-0.5 font-telugu text-sm font-bold"
+          style={{ color: HEATMAP_TOKENS.deepSlate }}
+        >
+          కారిడార్ సంతృప్త సూచిక (Ranked Corridor Saturation Feed)
+        </h3>
+      </div>
+
+      <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {tabs.map((tab) => {
+          const active = filter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setFilter(tab.id)}
+              className="shrink-0 rounded-full border px-3 py-1.5 font-telugu text-[11px] font-semibold transition"
+              style={{
+                borderColor: active
+                  ? HEATMAP_TOKENS.ceremonialGold
+                  : HEATMAP_TOKENS.border,
+                background: active ? HEATMAP_TOKENS.ceremonialGold : "#FFFFFF",
+                color: active ? "#FFFFFF" : HEATMAP_TOKENS.deepSlate,
+              }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
       {ranked.map((row, i) => {
         const active = selectedSlug === row.slug;
+        const pilot = pilotByDistrict.get(row.slug);
+        const petitions = pilot?.petitions ?? row.total_representations;
+        const coordinators = row.active_coordinators;
+        const barColor = saturationBarFill(row.index);
+        const clusterLabel = pilot
+          ? `${row.name_te}${pilot.scope === "mandal" ? ` · ${pilot.name_te}` : ""}`
+          : row.name_te;
+
         return (
-          <button
+          <div
             key={row.slug}
-            type="button"
-            onClick={() =>
-              onSelect?.(selectedSlug === row.slug ? null : row.slug)
-            }
-            className="w-full rounded-xl border px-3.5 py-3 text-left transition-shadow"
+            className="rounded-xl border px-3.5 py-3"
             style={{
               borderColor: active
                 ? HEATMAP_TOKENS.ceremonialGold
                 : HEATMAP_TOKENS.border,
               background: active ? "rgb(180 83 9 / 0.06)" : "#FFFFFF",
-              boxShadow: active
-                ? "0 0 0 1px rgb(180 83 9 / 0.3)"
-                : undefined,
+              boxShadow: active ? "0 0 0 1px rgb(180 83 9 / 0.3)" : undefined,
             }}
           >
             <div className="flex items-start justify-between gap-2">
@@ -120,57 +283,73 @@ function CivicCorridorCards({
                   className="font-telugu text-sm font-bold leading-relaxed"
                   style={{ color: HEATMAP_TOKENS.deepSlate }}
                 >
-                  {row.name_te}
+                  {clusterLabel}
                 </p>
                 <p className="text-[11px] text-slate-500">{row.name_en}</p>
               </div>
               <span
                 className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums"
                 style={{
-                  background: `${tierFill(row.tier)}22`,
-                  color: tierFill(row.tier),
+                  background: `${barColor}22`,
+                  color: barColor,
                 }}
               >
-                SI {row.index}
+                {row.index}%
               </span>
             </div>
+
             <div className="mt-2.5">
               <div
-                className="h-2 overflow-hidden rounded-full"
+                className="h-2.5 overflow-hidden rounded-full"
                 style={{ background: "#E2E8F0" }}
+                role="meter"
+                aria-valuenow={row.index}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Saturation ${row.index}%`}
               >
                 <div
                   className="h-full rounded-full transition-[width] duration-300"
                   style={{
-                    width: `${Math.min(
-                      100,
-                      Math.max(
-                        8,
-                        row.index > 0
-                          ? row.index
-                          : (row.total_mandals / 45) * 100,
-                      ),
-                    )}%`,
-                    background:
-                      row.index > 0
-                        ? saturationRampFill(row.index)
-                        : mandalDensityFill(row.total_mandals, 10, 45),
+                    width: `${Math.min(100, Math.max(4, row.index))}%`,
+                    background: barColor,
                   }}
                 />
               </div>
-              <div className="mt-1.5 flex justify-between text-[10px] text-slate-500">
-                <span>{tierLabel(row.tier)}</span>
-                <span className="tabular-nums">
-                  {row.total_mandals} mandals · {row.verified_uploads} uploads
-                </span>
-              </div>
+              <p className="mt-1.5 font-telugu text-[11px] text-slate-600">
+                వినతిపత్రాలు (Petitions):{" "}
+                <strong className="tabular-nums">{petitions}</strong>
+                {" | "}
+                సమన్వయకర్తలు:{" "}
+                <strong className="tabular-nums">{coordinators}</strong>
+              </p>
             </div>
-          </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                onSelect?.(selectedSlug === row.slug ? null : row.slug)
+              }
+              className="mt-3 w-full rounded-lg border px-3 py-2 font-telugu text-xs font-bold transition"
+              style={{
+                borderColor: active
+                  ? HEATMAP_TOKENS.navy
+                  : HEATMAP_TOKENS.border,
+                background: active ? HEATMAP_TOKENS.navy : "#F8FAFC",
+                color: active ? "#FFFFFF" : HEATMAP_TOKENS.deepSlate,
+              }}
+            >
+              {active
+                ? "ఫిల్టర్ తొలగించు (Clear)"
+                : "డెస్క్ క్యూ ఫిల్టర్ (Filter Queue)"}
+            </button>
+          </div>
         );
       })}
+
       {ranked.length === 0 ? (
-        <p className="py-6 text-center text-xs text-slate-500">
-          No saturation data
+        <p className="py-6 text-center font-telugu text-xs text-slate-500">
+          ఈ ఫిల్టర్‌లో కారిడార్లు లేవు
         </p>
       ) : null}
     </div>
@@ -568,11 +747,18 @@ export function TelanganaHeatMap({
         onSelect={setSelectedSlug}
       />
 
+      <ExecutiveSaturationHeader
+        districts={districts}
+        pilots={pilotCorridors}
+        onSelect={setSelectedSlug}
+      />
+
       <div className="grid grid-cols-1 gap-0 lg:grid-cols-12">
         <div className="relative lg:col-span-7">
           {/* Mobile: ranked Civic Corridor Cards */}
           <CivicCorridorCards
             districts={districts}
+            pilots={pilotCorridors}
             selectedSlug={selectedSlug}
             onSelect={setSelectedSlug}
           />
