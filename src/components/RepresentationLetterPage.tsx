@@ -30,6 +30,13 @@ import {
   shouldUsePdfFallback,
 } from "@/lib/twa/printPetitionPdf";
 import { CommunityHubsSection } from "@/components/CommunityHubsSection";
+import { useLanguage } from "@/context/LanguageContext";
+import {
+  ui,
+  uiStep,
+  type RepUiLang,
+} from "@/lib/data/representationUiCopy";
+import { cn } from "@/lib/utils";
 
 type WizardStep = 1 | 2 | 3;
 
@@ -91,13 +98,9 @@ function matchDistrictFromQuery(raw: string) {
   );
 }
 
-const STEP_LABELS = [
-  "జిల్లా / మండలం",
-  "వినతి అంశం",
-  "ప్రివ్యూ & డౌన్‌లోడ్",
-] as const;
-
 export function RepresentationLetterPage() {
+  const { language, setLanguage } = useLanguage();
+  const lang = (language === "en" ? "en" : "te") as RepUiLang;
   const searchParams = useSearchParams();
   const initialMandal = searchParams.get("mandal") || "";
   const initialDistRaw =
@@ -341,58 +344,99 @@ export function RepresentationLetterPage() {
             <Link
               href="/"
               className="shrink-0 rounded-lg border border-civic-border p-1.5 text-slate-500 transition-colors hover:bg-civic-subtle hover:text-civic-ink"
+              aria-label="Back to home"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4 shrink-0 text-civic-bronze" />
-                <h1 className="truncate font-telugu text-base font-bold leading-relaxed text-civic-ink md:text-lg">
-                  అధికారిక వినతిపత్రం తయారీ కేంద్రం
+                <h1
+                  className={cn(
+                    "truncate text-base font-bold leading-relaxed text-civic-ink md:text-lg",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
+                >
+                  {ui(lang, "title")}
                 </h1>
               </div>
-              <p className="text-[11px] text-slate-500">
-                3-step Official Representation &amp; Citizen Petition
-              </p>
+              <p className="text-[11px] text-slate-500">{ui(lang, "subtitle")}</p>
             </div>
           </div>
 
-          {step === 3 ? (
-            <button
-              type="button"
-              onClick={() => void handlePrintOrPdf()}
-              disabled={pdfBusy}
-              className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-civic-bronze px-3 py-3 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover hover:shadow-md disabled:cursor-wait disabled:opacity-70 sm:px-4"
+          <div className="flex shrink-0 items-center gap-2">
+            <div
+              className="inline-flex rounded-lg border border-civic-border bg-civic-subtle p-0.5"
+              role="group"
+              aria-label="Language"
             >
-              {pdfBusy ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <Printer className="h-4 w-4" />
-              )}
-              <span className="hidden sm:inline">
-                {pdfBusy ? PDF_LOADING_TE : "ప్రింట్ / PDF సేవ్"}
-              </span>
-              <span className="sm:hidden">{pdfBusy ? "…" : "PDF"}</span>
-            </button>
-          ) : null}
+              <button
+                type="button"
+                onClick={() => setLanguage("te")}
+                className={cn(
+                  "min-h-10 rounded-md px-2.5 py-1.5 font-telugu text-[11px] font-bold",
+                  lang === "te"
+                    ? "bg-civic-bronze text-white"
+                    : "text-slate-600 hover:bg-white",
+                )}
+              >
+                తెలుగు
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={cn(
+                  "min-h-10 rounded-md px-2.5 py-1.5 text-[11px] font-bold",
+                  lang === "en"
+                    ? "bg-civic-bronze text-white"
+                    : "text-slate-600 hover:bg-white",
+                )}
+              >
+                English
+              </button>
+            </div>
+
+            {step === 3 ? (
+              <button
+                type="button"
+                onClick={() => void handlePrintOrPdf()}
+                disabled={pdfBusy}
+                className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-civic-bronze px-3 py-3 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover hover:shadow-md disabled:cursor-wait disabled:opacity-70 sm:px-4"
+              >
+                {pdfBusy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Printer className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {pdfBusy ? PDF_LOADING_TE : ui(lang, "printShort")}
+                </span>
+                <span className="sm:hidden">{pdfBusy ? "…" : "PDF"}</span>
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {/* Step indicator */}
         <div className="mx-auto flex max-w-6xl gap-1 px-4 pb-3">
-          {STEP_LABELS.map((label, i) => {
+          {([0, 1, 2] as const).map((i) => {
             const n = (i + 1) as WizardStep;
             const active = step === n;
             const done = step > n;
             return (
               <button
-                key={label}
+                key={i}
                 type="button"
                 onClick={() => {
-                  if (n < step || (n === 2 && canAdvanceStep1) || (n === 3 && canAdvanceStep1 && canAdvanceStep2)) {
+                  if (
+                    n < step ||
+                    (n === 2 && canAdvanceStep1) ||
+                    (n === 3 && canAdvanceStep1 && canAdvanceStep2)
+                  ) {
                     setStep(n);
                   }
                 }}
-                className={`flex flex-1 flex-col items-center gap-1 rounded-lg px-1 py-2 text-center transition-colors ${
+                className={`flex min-h-12 flex-1 flex-col items-center gap-1 rounded-lg px-1 py-2 text-center transition-colors ${
                   active
                     ? "bg-civic-bronze/10 text-civic-ink"
                     : done
@@ -409,8 +453,13 @@ export function RepresentationLetterPage() {
                 >
                   {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : n}
                 </span>
-                <span className="font-telugu text-[10px] font-semibold leading-snug sm:text-[11px]">
-                  {label}
+                <span
+                  className={cn(
+                    "text-[10px] font-semibold leading-snug sm:text-[11px]",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
+                >
+                  {uiStep(lang, i)}
                 </span>
               </button>
             );
@@ -453,19 +502,27 @@ export function RepresentationLetterPage() {
         >
           {step === 1 ? (
             <div className="rounded-2xl border border-civic-border bg-white p-5 shadow-xs">
-              <h2 className="mb-1 font-telugu text-sm font-bold leading-relaxed text-civic-ink">
-                స్టెప్ 1 — జిల్లా &amp; మండలం ఎంచుకోండి
+              <h2
+                className={cn(
+                  "mb-1 text-sm font-bold leading-relaxed text-civic-ink",
+                  lang === "te" ? "font-telugu" : "font-sans",
+                )}
+              >
+                {ui(lang, "step1Title")}
               </h2>
               <p className="mb-4 text-[11px] text-slate-500">
-                Deep-link:{" "}
-                <code className="rounded bg-slate-100 px-1">?dist=</code>{" "}
-                pre-selects your district.
+                {ui(lang, "step1Hint")}
               </p>
 
               <div className="space-y-3.5 text-xs">
                 <div>
-                  <label className="mb-1 block font-telugu font-medium leading-relaxed text-slate-600">
-                    జిల్లా (District)
+                  <label
+                    className={cn(
+                      "mb-1 block font-medium leading-relaxed text-slate-600",
+                      lang === "te" ? "font-telugu" : "font-sans",
+                    )}
+                  >
+                    {ui(lang, "district")}
                   </label>
                   <select
                     value={districtSlug}
@@ -485,8 +542,13 @@ export function RepresentationLetterPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block font-telugu font-medium leading-relaxed text-slate-600">
-                    మండలం (Mandal)
+                  <label
+                    className={cn(
+                      "mb-1 block font-medium leading-relaxed text-slate-600",
+                      lang === "te" ? "font-telugu" : "font-sans",
+                    )}
+                  >
+                    {ui(lang, "mandal")}
                   </label>
                   <select
                     value={effectiveMandalSlug}
@@ -507,8 +569,13 @@ export function RepresentationLetterPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block font-telugu font-medium leading-relaxed text-slate-600">
-                    గ్రామం / కాలనీ (Locality)
+                  <label
+                    className={cn(
+                      "mb-1 block font-medium leading-relaxed text-slate-600",
+                      lang === "te" ? "font-telugu" : "font-sans",
+                    )}
+                  >
+                    {ui(lang, "locality")}
                   </label>
                   <input
                     type="text"
@@ -519,8 +586,13 @@ export function RepresentationLetterPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block font-telugu font-medium leading-relaxed text-slate-600">
-                    సమర్పించాల్సిన అధికారి (To Authority)
+                  <label
+                    className={cn(
+                      "mb-1 block font-medium leading-relaxed text-slate-600",
+                      lang === "te" ? "font-telugu" : "font-sans",
+                    )}
+                  >
+                    {ui(lang, "authority")}
                   </label>
                   <select
                     value={recipientOfficer}
@@ -541,9 +613,12 @@ export function RepresentationLetterPage() {
                 type="button"
                 disabled={!canAdvanceStep1}
                 onClick={() => setStep(2)}
-                className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:opacity-50"
+                className={cn(
+                  "mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 text-sm font-bold text-white disabled:opacity-50",
+                  lang === "te" ? "font-telugu" : "font-sans",
+                )}
               >
-                తరువాత — వినతి అంశం
+                {ui(lang, "nextTopic")}
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -551,11 +626,21 @@ export function RepresentationLetterPage() {
 
           {step === 2 ? (
             <div className="rounded-2xl border border-civic-border bg-white p-5 shadow-xs">
-              <h2 className="mb-1 font-telugu text-sm font-bold leading-relaxed text-civic-ink">
-                స్టెప్ 2 — వినతి అంశం ఎంచుకోండి
+              <h2
+                className={cn(
+                  "mb-1 text-sm font-bold leading-relaxed text-civic-ink",
+                  lang === "te" ? "font-telugu" : "font-sans",
+                )}
+              >
+                {ui(lang, "step2Title")}
               </h2>
-              <p className="mb-4 font-telugu text-[11px] leading-relaxed text-slate-500">
-                నాలుగు సాధారణ అంశాల్లో ఒకటి ట్యాప్ చేయండి, లేదా మీ స్వంత వచనం రాయండి.
+              <p
+                className={cn(
+                  "mb-4 text-[11px] leading-relaxed text-slate-500",
+                  lang === "te" ? "font-telugu" : "font-sans",
+                )}
+              >
+                {ui(lang, "step2Hint")}
               </p>
 
               <div className="space-y-2" role="listbox" aria-label="Grievance presets">
@@ -590,14 +675,19 @@ export function RepresentationLetterPage() {
               </div>
 
               <div className="mt-4">
-                <label className="mb-1.5 flex items-center gap-2 font-telugu text-xs font-bold leading-relaxed text-civic-ink">
+                <label
+                  className={cn(
+                    "mb-1.5 flex items-center gap-2 text-xs font-bold leading-relaxed text-civic-ink",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
+                >
                   <input
                     type="checkbox"
                     checked={useCustom}
                     onChange={(e) => setUseCustom(e.target.checked)}
                     className="rounded border-slate-300 text-civic-bronze focus:ring-civic-bronze"
                   />
-                  అదనపు / స్వంత వచనం (Custom)
+                  {ui(lang, "customToggle")}
                 </label>
                 <textarea
                   value={customBody}
@@ -606,7 +696,7 @@ export function RepresentationLetterPage() {
                     if (e.target.value.trim()) setUseCustom(true);
                   }}
                   rows={4}
-                  placeholder="మీ వినతి వివరాలు ఇక్కడ రాయండి…"
+                  placeholder={ui(lang, "customPh")}
                   className="w-full rounded-lg border border-slate-300 bg-civic-paper p-3 font-telugu text-sm leading-relaxed text-civic-ink focus:border-civic-bronze focus:outline-none"
                 />
               </div>
@@ -615,18 +705,24 @@ export function RepresentationLetterPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3.5 font-telugu text-sm font-bold text-civic-ink"
+                  className={cn(
+                    "inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3.5 text-sm font-bold text-civic-ink",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  వెనక్కి
+                  {ui(lang, "back")}
                 </button>
                 <button
                   type="button"
                   disabled={!canAdvanceStep2}
                   onClick={() => setStep(3)}
-                  className="inline-flex min-h-12 flex-[1.4] items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:opacity-50"
+                  className={cn(
+                    "inline-flex min-h-12 flex-[1.4] items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 text-sm font-bold text-white disabled:opacity-50",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
                 >
-                  ప్రివ్యూ చూడండి
+                  {ui(lang, "preview")}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
@@ -635,13 +731,26 @@ export function RepresentationLetterPage() {
 
           {step === 3 ? (
             <div className="rounded-2xl border border-civic-border bg-white p-5 shadow-xs">
-              <h2 className="mb-3 font-telugu text-sm font-bold leading-relaxed text-civic-ink">
-                స్టెప్ 3 — వివరాలు &amp; డౌన్‌లోడ్
+              <h2
+                className={cn(
+                  "mb-3 text-sm font-bold leading-relaxed text-civic-ink",
+                  lang === "te" ? "font-telugu" : "font-sans",
+                )}
+              >
+                {ui(lang, "step3Title")}
               </h2>
+              <p className="mb-3 text-[10px] leading-relaxed text-slate-500">
+                {ui(lang, "letterNote")}
+              </p>
               <div className="space-y-3.5 text-xs">
                 <div>
-                  <label className="mb-1 block font-telugu font-medium leading-relaxed text-slate-600">
-                    దరఖాస్తుదారుని పేరు / సంఘం పేరు
+                  <label
+                    className={cn(
+                      "mb-1 block font-medium leading-relaxed text-slate-600",
+                      lang === "te" ? "font-telugu" : "font-sans",
+                    )}
+                  >
+                    {ui(lang, "applicant")}
                   </label>
                   <input
                     type="text"
@@ -651,8 +760,13 @@ export function RepresentationLetterPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block font-telugu font-medium leading-relaxed text-slate-600">
-                    సంప్రదింపు నంబర్ (Phone)
+                  <label
+                    className={cn(
+                      "mb-1 block font-medium leading-relaxed text-slate-600",
+                      lang === "te" ? "font-telugu" : "font-sans",
+                    )}
+                  >
+                    {ui(lang, "phone")}
                   </label>
                   <input
                     type="tel"
@@ -662,19 +776,24 @@ export function RepresentationLetterPage() {
                     className="w-full rounded-lg border border-slate-300 bg-civic-paper p-2.5 text-civic-ink focus:border-civic-bronze focus:outline-none"
                   />
                 </div>
-                <dl className="rounded-lg bg-civic-paper px-3 py-2.5 font-telugu text-[11px] leading-relaxed text-slate-600">
+                <dl
+                  className={cn(
+                    "rounded-lg bg-civic-paper px-3 py-2.5 text-[11px] leading-relaxed text-slate-600",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
+                >
                   <div className="flex justify-between gap-2">
-                    <dt>జిల్లా</dt>
+                    <dt>{ui(lang, "summaryDistrict")}</dt>
                     <dd className="font-semibold text-civic-ink">{district}</dd>
                   </div>
                   <div className="mt-1 flex justify-between gap-2">
-                    <dt>మండలం</dt>
+                    <dt>{ui(lang, "summaryMandal")}</dt>
                     <dd className="font-semibold text-civic-ink">{mandal}</dd>
                   </div>
                   <div className="mt-1 flex justify-between gap-2">
-                    <dt>అంశం</dt>
+                    <dt>{ui(lang, "summaryTopic")}</dt>
                     <dd className="max-w-[60%] text-right font-semibold text-civic-ink">
-                      {useCustom ? "స్వంత వచనం" : activePreset.title}
+                      {useCustom ? ui(lang, "customTopic") : activePreset.title}
                     </dd>
                   </div>
                 </dl>
@@ -685,22 +804,28 @@ export function RepresentationLetterPage() {
                   type="button"
                   onClick={() => void handlePrintOrPdf()}
                   disabled={pdfBusy}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 font-telugu text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"
+                  className={cn(
+                    "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-3.5 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
                 >
                   {pdfBusy ? (
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   ) : (
                     <Printer className="h-4 w-4" />
                   )}
-                  {pdfBusy ? PDF_LOADING_TE : "వినతిపత్రం ప్రింట్ / PDF సేవ్"}
+                  {pdfBusy ? PDF_LOADING_TE : ui(lang, "printPdf")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3 font-telugu text-xs font-bold text-civic-ink"
+                  className={cn(
+                    "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-3 text-xs font-bold text-civic-ink",
+                    lang === "te" ? "font-telugu" : "font-sans",
+                  )}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  అంశం మార్చండి
+                  {ui(lang, "changeTopic")}
                 </button>
               </div>
 
