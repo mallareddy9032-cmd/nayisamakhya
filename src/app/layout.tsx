@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Noto_Sans_Telugu, Plus_Jakarta_Sans } from "next/font/google";
+import { Noto_Sans_Telugu, Plus_Jakarta_Sans, Suranna } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import CivicFooter from "@/components/CivicFooter";
 import { InAppBrowserBanner } from "@/components/InAppBrowserBanner";
@@ -17,6 +17,13 @@ const telugu = Noto_Sans_Telugu({
   subsets: ["telugu"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-telugu",
+  display: "swap",
+});
+
+const displayTe = Suranna({
+  subsets: ["telugu", "latin"],
+  weight: "400",
+  variable: "--font-display-te",
   display: "swap",
 });
 
@@ -74,7 +81,7 @@ export default function RootLayout({
     <html
       lang="te"
       suppressHydrationWarning
-      className={`${sans.variable} ${telugu.variable} h-full`}
+      className={`${sans.variable} ${telugu.variable} ${displayTe.variable} h-full`}
     >
       <body className="flex min-h-[100dvh] flex-col justify-between bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white pb-[env(safe-area-inset-bottom,1rem)] pt-[env(safe-area-inset-top,0px)]">
         <a

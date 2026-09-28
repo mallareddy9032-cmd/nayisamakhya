@@ -13,6 +13,13 @@ const config = {
           "system-ui",
           "sans-serif",
         ],
+        "display-te": [
+          "var(--font-display-te)",
+          "Suranna",
+          "var(--font-telugu)",
+          "Noto Sans Telugu",
+          "serif",
+        ],
       },
       lineHeight: {
         telugu: "1.75",
