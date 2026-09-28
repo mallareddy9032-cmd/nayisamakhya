@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   Briefcase,
   CheckCircle2,
-  FileText,
   GraduationCap,
   IdCard,
-  Layers,
+  MapPin,
+  Phone,
   Scissors,
   ShieldCheck,
 } from "lucide-react";
@@ -17,128 +18,170 @@ import { cn } from "@/lib/utils";
 
 type PersonaId = "artisans" | "youth" | "leaders";
 
-type SolutionCard = {
-  title: string;
-  blurb: string;
-  href: string;
-  icon: typeof FileText;
-  cta: string;
-};
-
-const PERSONAS: {
+type PersonaContent = {
   id: PersonaId;
   label: string;
   icon: typeof Scissors;
-  summary: string;
+  highlight: string;
   bullets: string[];
-  cards: SolutionCard[];
-}[] = [
+  cta: string;
+  href: string;
+  spotlightTag: string;
+  imageSrc?: string;
+  imageAlt?: string;
+};
+
+const PERSONAS: PersonaContent[] = [
   {
     id: "artisans",
-    label: "సెలూన్ నిర్వాహకులు & కళాకారులు",
+    label: "సెలూన్ నిర్వాహకులు & శ్రామిక కళాకారులు",
     icon: Scissors,
-    summary:
-      "వృత్తి హక్కులు, షాప్ రక్షణ, ఉపకరణాల సహాయం — కళాకారులకు నేరుగా ఉపయోగపడే సేవలు.",
+    highlight:
+      "జీ.ఓ. 23 రక్షణ: 250 యూనిట్ల ఉచిత విద్యుత్ & కేటగిరీ మార్పు హక్కు",
     bullets: [
-      "G.O. 23 ఉచిత విద్యుత్ (250 యూనిట్లు)",
-      "మున్సిపల్ షాప్ రక్షణ",
-      "ఉపకరణాల రాయితీ",
+      "మున్సిపల్ & పంచాయతీ షాపుల కేటాయింపులో సంక్షేమ కోటా హక్కులు.",
+      "ట్రేడ్ లైసెన్స్ ఫీజుల వేధింపుల నుండి చట్టబద్ధమైన రక్షణ.",
+      "బ్యాంక్ లోన్లు మరియు ఆధునిక పరికరాల సబ్సిడీ ప్రాజెక్ట్ రిపోర్ట్స్.",
     ],
-    cards: [
-      {
-        title: "జి.ఓ. 23 విద్యుత్ వినతి",
-        blurb: "250 యూనిట్ల ఉచిత విద్యుత్ హక్కు కోసం అధికారిక డాకెట్.",
-        href: "/representation?subject=go23_free_power",
-        icon: FileText,
-        cta: "వినతిపత్రం",
-      },
-      {
-        title: "మున్సిపల్ షాప్ రక్షణ",
-        blurb: "షాప్ కేటాయింపు / రక్షణ కోసం ప్రీఫిల్డ్ అధికారిక లేఖ.",
-        href: "/representation?subject=modern_salon_space",
-        icon: ShieldCheck,
-        cta: "షాప్ వినతి",
-      },
-      {
-        title: "ఉపకరణాల రాయితీ",
-        blurb: "వృత్తి ఉపకరణాల సహాయం — క్షేత్ర ఫోటోలతో డాక్యుమెంట్.",
-        href: "/feed",
-        icon: Layers,
-        cta: "ఫీడ్ చూడండి",
-      },
-    ],
+    cta: "తక్షణ వినతిపత్రం డౌన్‌లోడ్ చేసుకోండి",
+    href: "/representation",
+    spotlightTag: "Verified Docket · జి.ఓ. 23",
+    imageSrc: "/home/persona-artisan-salon.png",
+    imageAlt: "ఆధునిక సెలూన్‌లో వృత్తి నిపుణుడు — Artisan in modern salon",
   },
   {
     id: "youth",
-    label: "విద్యార్థులు & యువత",
+    label: "యువత, విద్యార్థులు & మహిళలు",
     icon: GraduationCap,
-    summary:
-      "విదేశీ విద్యా నిధి, గురుకుల ప్రవేశాలు, పోటీ పరీక్షల మార్గదర్శకం — యువతకు మూడు ప్రధాన మార్గాలు.",
+    highlight:
+      "మహాత్మా జ్యోతిబా ఫూలే విదేశీ విద్యా నిధి: ₹20 లక్షల స్కాలర్‌షిప్ గైడెన్స్",
     bullets: [
-      "విదేశీ విద్యా నిధి (₹20 లక్షల గ్రాంట్)",
-      "గురుకుల ప్రవేశాలు",
-      "పోటీ పరీక్షల గైడెన్స్",
+      "BC గురుకుల పాఠశాలలు & రెసిడెన్షియల్ కాలేజీల ప్రవేశ పరీక్షల సమాచారం.",
+      "TSPSC గ్రూప్స్, పోలీస్ రిక్రూట్‌మెంట్ సిలబస్ & గైడెన్స్ మెటీరియల్.",
+      "మహిళలకు స్వయం ఉపాధి, బ్యూటీషియన్ & బ్రైడల్ స్టూడియో ఫండింగ్.",
     ],
-    cards: [
-      {
-        title: "విదేశీ విద్యా నిధి",
-        blurb: "₹20 లక్షల గ్రాంట్ కోసం ప్రీఫిల్డ్ విద్యా సంక్షేమ వినతి.",
-        href: "/representation?subject=community_welfare_funds",
-        icon: FileText,
-        cta: "వినతి ప్రారంభం",
-      },
-      {
-        title: "గురుకుల ప్రవేశాలు",
-        blurb: "గురుకుల / వసతి విద్యా అవకాశాల కోసం స్థానిక సమన్వయం.",
-        href: "/coordinator-card",
-        icon: IdCard,
-        cta: "నెట్‌వర్క్‌లో చేరండి",
-      },
-      {
-        title: "పోటీ పరీక్షల గైడెన్స్",
-        blurb: "గైడెన్స్ / శిక్షణ సమావేశాల క్షేత్ర నివేదికలు.",
-        href: "/feed",
-        icon: Layers,
-        cta: "ఫీడ్",
-      },
-    ],
+    cta: "విద్యా & స్కాలర్‌షిప్ సమాచారం",
+    href: "/feed",
+    spotlightTag: "Scholarship Success · ₹20 లక్షలు",
+    imageSrc: "/home/persona-youth-scholarship.png",
+    imageAlt: "విద్యా విజయం సాధించిన యువత — Graduating youth with scholarship pride",
   },
   {
     id: "leaders",
-    label: "ఉద్యోగులు & ప్రముఖులు",
+    label: "ఉద్యోగులు & నాయీ ప్రముఖులు",
     icon: Briefcase,
-    summary:
-      "సమన్వయకర్త గుర్తింపు, న్యాయ సహకారం, జిల్లా నెట్‌వర్క్ — నాయకత్వ భాగస్వామ్యం.",
+    highlight: "రాష్ట్రవ్యాప్త సమన్వయకర్తల నెట్‌వర్క్ & అధికారిక గుర్తింపు",
     bullets: [
-      "సమన్వయకర్త ఐడీ కార్డు",
-      "లీగల్ సెల్ మద్దతు",
-      "జిల్లా నెట్‌వర్క్",
+      "డిజిటల్ వెరిఫైడ్ ఐడీ కార్డుతో మండల స్థాయిలో అధికారిక ప్రాతినిధ్యం.",
+      "లీగల్ సెల్ మద్దతుతో కలెక్టరేట్, ఆర్డీవో ప్రజావాణిలో వినతుల దాఖలు.",
+      "సమాజ సంక్షేమం కోసం పాలసీ పరిశోధన మరియు బీసీ కమిషన్ డాక్యుమెంటేషన్.",
     ],
-    cards: [
-      {
-        title: "సమన్వయకర్త ఐడీ కార్డు",
-        blurb: "ప్రింట్-రెడీ సమన్వయకర్త ID — QRతో ధ్రువీకరణ.",
-        href: "/coordinator-card",
-        icon: IdCard,
-        cta: "కార్డు",
-      },
-      {
-        title: "లీగల్ సెల్ మద్దతు",
-        blurb: "అధికారులకు చట్టబద్ధమైన ఆధారాలతో వినతిపత్రం.",
-        href: "/representation",
-        icon: ShieldCheck,
-        cta: "లేఖ తయారు",
-      },
-      {
-        title: "జిల్లా నెట్‌వర్క్",
-        blurb: "33 జిల్లాల సమన్వయం — సేవా రుజువు ఫీడ్ ఆర్కైవ్.",
-        href: "/feed",
-        icon: Layers,
-        cta: "ఫీడ్",
-      },
-    ],
+    cta: "సమన్వయకర్త కార్డు పొందండి",
+    href: "/coordinator-card",
+    spotlightTag: "Official ID · QR Verified",
   },
 ];
+
+function SpotlightPanel({ persona }: { persona: PersonaContent }) {
+  if (persona.id === "leaders") {
+    return (
+      <div className="relative flex h-full min-h-[280px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] p-6 sm:min-h-[320px] sm:p-8">
+        <div
+          className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#B45309]/25 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-[#B45309]/15 blur-2xl"
+          aria-hidden
+        />
+
+        <div
+          className="relative z-[1] w-full max-w-[240px] rotate-[6deg] transition-transform duration-500 hover:rotate-[2deg]"
+          style={{
+            filter: "drop-shadow(0 24px 32px rgb(0 0 0 / 0.45))",
+          }}
+        >
+          <div className="overflow-hidden rounded-xl border border-[#EAD7B5] bg-white p-4 ring-1 ring-[#B45309]/30">
+            <div
+              className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#B45309] via-[#D97706] to-[#B45309]"
+              aria-hidden
+            />
+            <div className="flex items-start justify-between gap-2 pt-1">
+              <div>
+                <p className="flex items-center gap-1 font-telugu text-[11px] font-bold text-[#B45309]">
+                  <IdCard className="h-3.5 w-3.5" aria-hidden />
+                  నాయి సమాఖ్య
+                </p>
+                <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">
+                  Digital Coordinator ID
+                </p>
+              </div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-md border border-[#EAD7B5] bg-[#FBFBFA]">
+                <div className="grid h-8 w-8 grid-cols-3 gap-px" aria-hidden>
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className={`rounded-[1px] ${i % 2 === 0 ? "bg-[#0F172A]" : "bg-transparent"}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <p className="mt-3 font-display-te text-sm font-bold text-[#0F172A]">
+              మండల సమన్వయకర్త
+            </p>
+            <p className="mt-1 flex items-center gap-1 font-telugu text-[11px] text-slate-600">
+              <MapPin className="h-3 w-3 text-[#B45309]" aria-hidden />
+              కోదాడ · సూర్యాపేట
+            </p>
+            <div className="mt-3 flex items-center justify-between border-t border-[#EAD7B5] pt-2 text-[10px] text-slate-500">
+              <span className="inline-flex items-center gap-1 font-semibold text-[#0F172A]">
+                <Phone className="h-3 w-3 text-[#B45309]" aria-hidden />
+                +91 90326…
+              </span>
+              <span className="font-bold tracking-wide text-[#B45309]">
+                SECURE
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-4 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/40 bg-white/95 px-3 py-1.5 shadow-md backdrop-blur-sm">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
+          <span className="font-telugu text-[10px] font-bold text-[#1E293B]">
+            {persona.spotlightTag}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full min-h-[280px] overflow-hidden rounded-2xl bg-[#1E293B] sm:min-h-[320px]">
+      {persona.imageSrc ? (
+        <Image
+          key={persona.imageSrc}
+          src={persona.imageSrc}
+          alt={persona.imageAlt ?? persona.label}
+          fill
+          className="object-cover transition-all duration-300"
+          sizes="(max-width: 1024px) 100vw, 40vw"
+          priority={persona.id === "artisans"}
+        />
+      ) : null}
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/70 via-transparent to-transparent"
+        aria-hidden
+      />
+      <div className="absolute bottom-4 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/40 bg-white/95 px-3 py-1.5 shadow-md backdrop-blur-sm">
+        <ShieldCheck className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
+        <span className="font-telugu text-[10px] font-bold text-[#1E293B]">
+          {persona.spotlightTag}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function PersonaSwitcher() {
   const [active, setActive] = useState<PersonaId>("artisans");
@@ -146,33 +189,36 @@ export function PersonaSwitcher() {
 
   return (
     <section
-      className="border-b border-civic-border bg-white px-4 py-10 sm:py-12"
+      className="border-b border-civic-border bg-[#FBFBFA] px-4 py-12 sm:py-14"
       aria-labelledby="persona-switcher-heading"
     >
       <div className="mx-auto max-w-6xl">
-        <header className="mb-6 max-w-3xl">
-          <p className="font-telugu text-xs font-bold tracking-wide text-[#B45309]">
-            ప్రజా వ్యక్తిత్వ మార్గాలు
+        <header className="mb-8 max-w-3xl">
+          <p className="font-sans text-xs font-bold uppercase tracking-widest text-[#B45309]">
+            బహుముఖ సాధికారత • TARGETED COMMUNITY EMPOWERMENT
           </p>
           <h2
             id="persona-switcher-heading"
-            className="mt-1 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
+            className="mt-2 font-display-te text-2xl font-bold leading-snug tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
           >
-            ఈ వేదిక ఎవరి కోసం?{" "}
-            <span className="text-[#B45309]">•</span>{" "}
-            <span className="font-sans text-[0.85em] font-semibold tracking-tight text-slate-600 md:text-[0.72em]">
-              Who is this platform for?
-            </span>
+            ఎవరి కోసం ఈ వేదిక?
           </h2>
-          <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
-            మీ పాత్రను ఎంచుకుంటే — అనుకూల సేవలు వెంటనే కనిపిస్తాయి.
+          <p className="mt-2 font-display-te text-lg italic sm:text-xl md:text-2xl">
+            <span className="bg-gradient-to-r from-[#B45309] to-[#D97706] bg-clip-text font-serif text-transparent">
+              Who We Stand For & Empower
+            </span>
+          </p>
+          <p className="mt-3 max-w-2xl font-telugu text-sm leading-relaxed text-slate-600 md:text-base">
+            కులవృత్తి గౌరవం నుండి యువత భవిష్యత్ సాధికారత వరకు — ప్రతి వర్గానికి
+            చట్టబద్ధమైన తోడ్పాటు.
           </p>
         </header>
 
+        {/* Persona selector pills */}
         <div
           role="tablist"
           aria-label="Persona segments"
-          className="flex flex-col gap-2 rounded-2xl border border-[#EAD7B5] bg-gradient-to-r from-[#FFFDF9] via-[#FBF7ED] to-[#F5EFE0] p-1.5 sm:flex-row"
+          className="flex flex-col gap-2 rounded-2xl border border-[#EAD7B5] bg-[#FBFBFA] p-1.5 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8)] sm:flex-row sm:gap-1.5"
         >
           {PERSONAS.map((persona) => {
             const Icon = persona.icon;
@@ -183,13 +229,20 @@ export function PersonaSwitcher() {
                 type="button"
                 role="tab"
                 aria-selected={selected}
+                aria-controls={`persona-panel-${persona.id}`}
+                id={`persona-tab-${persona.id}`}
                 onClick={() => setActive(persona.id)}
                 className={cn(
-                  "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition sm:justify-start",
+                  "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-300 sm:justify-start",
                   selected
-                    ? "bg-[#1E293B] text-white shadow-xs"
-                    : "text-[#1E293B] hover:bg-white/80",
+                    ? "bg-[#1E293B] text-white shadow-[0_4px_14px_rgb(15_23_42_/0.2)]"
+                    : "text-[#0F172A] hover:bg-white",
                 )}
+                style={
+                  selected
+                    ? { boxShadow: "inset 0 0 0 1.5px #B45309, 0 4px 14px rgb(15 23 42 / 0.2)" }
+                    : undefined
+                }
               >
                 <Icon
                   className={cn(
@@ -206,56 +259,66 @@ export function PersonaSwitcher() {
           })}
         </div>
 
-        <div className="mt-4 rounded-xl border border-[#EAD7B5]/80 bg-[#FFFDF9] px-4 py-3">
-          <p className="font-telugu text-sm leading-relaxed text-slate-600">
-            {current.summary}
-          </p>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-3">
-            {current.bullets.map((bullet) => (
-              <li
-                key={bullet}
-                className="flex items-start gap-2 rounded-lg border border-[#EAD7B5]/60 bg-white/70 px-3 py-2"
-              >
-                <CheckCircle2
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#B45309]"
-                  aria-hidden
-                />
-                <span className="font-telugu text-xs font-bold leading-snug text-[#1E293B]">
-                  {bullet}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
+        {/* Asymmetric 2-column showcase */}
         <div
           role="tabpanel"
-          className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3"
+          id={`persona-panel-${current.id}`}
+          aria-labelledby={`persona-tab-${current.id}`}
+          className="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-12"
         >
-          {current.cards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <Link
-                key={`${current.id}-${card.href}-${card.title}`}
-                href={card.href}
-                className="group flex flex-col rounded-2xl border border-[#EAD7B5] bg-[#FBFBFA] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-[#B45309]/50 hover:bg-white hover:shadow-[0_12px_32px_rgb(15_23_42_/0.08)]"
-              >
-                <span className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#B45309]/20 bg-[#B45309]/10 text-[#B45309]">
-                  <Icon className="h-4 w-4" aria-hidden />
-                </span>
-                <h3 className="font-telugu text-sm font-bold text-[#1E293B]">
-                  {card.title}
-                </h3>
-                <p className="mt-1 flex-1 font-telugu text-xs leading-relaxed text-slate-600">
-                  {card.blurb}
-                </p>
-                <span className="mt-3 inline-flex items-center gap-1 font-telugu text-xs font-bold text-[#B45309]">
-                  {card.cta}
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            );
-          })}
+          <div
+            key={`copy-${current.id}`}
+            className="transition-all duration-300 lg:col-span-7"
+          >
+            <div className="rounded-2xl border border-[#EAD7B5] bg-gradient-to-r from-[#FFFDF9] via-[#FBF7ED] to-[#F5EFE0] px-4 py-3.5 shadow-[0_4px_16px_rgb(180_83_9_/0.06)] sm:px-5">
+              <p className="font-telugu text-sm font-bold leading-snug text-[#0F172A] sm:text-base">
+                {current.highlight}
+              </p>
+            </div>
+
+            <ul className="mt-5 space-y-3">
+              {current.bullets.map((bullet) => (
+                <li key={bullet} className="flex items-start gap-3">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#B45309]/30 bg-[#B45309]/10">
+                    <CheckCircle2
+                      className="h-3.5 w-3.5 text-[#B45309]"
+                      aria-hidden
+                    />
+                  </span>
+                  <span className="font-telugu text-sm leading-relaxed text-slate-600">
+                    {bullet}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href={current.href}
+              className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-5 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_24px_rgb(180_83_9_/0.3)] transition-all duration-300 hover:brightness-110 hover:shadow-[0_12px_32px_rgb(180_83_9_/0.4)] active:scale-[0.99] sm:w-auto"
+            >
+              {current.cta}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+
+          <div
+            key={`spot-${current.id}`}
+            className="transition-all duration-300 lg:col-span-5"
+          >
+            <div
+              className="rounded-2xl p-[3px]"
+              style={{
+                background:
+                  "linear-gradient(145deg, #B45309 0%, #EAD7B5 45%, #B45309 100%)",
+                boxShadow:
+                  "0 0 0 1.5px #B45309, 0 16px 40px rgb(15 23 42 / 0.12)",
+              }}
+            >
+              <div className="overflow-hidden rounded-[13px] bg-[#FBFBFA]">
+                <SpotlightPanel persona={current} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
