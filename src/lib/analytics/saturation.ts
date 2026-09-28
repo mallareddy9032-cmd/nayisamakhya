@@ -96,6 +96,80 @@ export function tierFill(tier: SaturationTier): string {
   }
 }
 
+/** Linear interpolate hex colors (6-digit). */
+function lerpHex(a: string, b: string, t: number): string {
+  const clamp = Math.max(0, Math.min(1, t));
+  const parse = (h: string) => [
+    parseInt(h.slice(1, 3), 16),
+    parseInt(h.slice(3, 5), 16),
+    parseInt(h.slice(5, 7), 16),
+  ] as const;
+  const [ar, ag, ab] = parse(a);
+  const [br, bg, bb] = parse(b);
+  const r = Math.round(ar + (br - ar) * clamp);
+  const g = Math.round(ag + (bg - ag) * clamp);
+  const bl = Math.round(ab + (bb - ab) * clamp);
+  return `#${[r, g, bl].map((n) => n.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * Continuous 0→100 saturation fill (slate → gold → emerald).
+ * Keeps the map lively even when most scores sit in one tier bucket.
+ */
+export function saturationRampFill(index: number): string {
+  const v = Math.max(0, Math.min(100, index));
+  if (v < 30) {
+    return lerpHex(HEATMAP_TOKENS.slateMuted, HEATMAP_TOKENS.gold, v / 30);
+  }
+  if (v < 70) {
+    return lerpHex(
+      HEATMAP_TOKENS.gold,
+      HEATMAP_TOKENS.emerald,
+      (v - 30) / 40,
+    );
+  }
+  return lerpHex(HEATMAP_TOKENS.emerald, "#047857", (v - 70) / 30);
+}
+
+/**
+ * Soft blue-slate density tint from mandal counts — used when SI is
+ * uniformly near-zero so the choropleth still shows real structure.
+ */
+export function mandalDensityFill(
+  mandals: number,
+  minMandals: number,
+  maxMandals: number,
+): string {
+  const span = Math.max(1, maxMandals - minMandals);
+  const t = Math.max(0, Math.min(1, (mandals - minMandals) / span));
+  // Cool slate → warm bronze hint (still institutional, not rainbow)
+  return lerpHex("#CBD5E1", "#94A3B8", t * 0.55 + 0.2);
+}
+
+/** True when the statewide index distribution is too flat to read as heat. */
+export function isSaturationSparse(districts: DistrictSaturation[]): boolean {
+  if (districts.length === 0) return true;
+  const max = Math.max(...districts.map((d) => d.index));
+  const sum = districts.reduce((acc, d) => acc + d.index, 0);
+  return max < 5 && sum < 15;
+}
+
+/** Compact English label for on-map annotation. */
+export function shortDistrictLabel(nameEn: string): string {
+  const map: Record<string, string> = {
+    "Bhadradri Kothagudem": "Bhadradri",
+    "Jayashankar Bhupalpally": "Bhupalpally",
+    "Jogulamba Gadwal": "Gadwal",
+    "Kumuram Bheem Asifabad": "Asifabad",
+    "Medchal-Malkajgiri": "Medchal",
+    "Rajanna Sircilla": "Sircilla",
+    "Yadadri Bhuvanagiri": "Yadadri",
+  };
+  if (map[nameEn]) return map[nameEn];
+  if (nameEn.length <= 12) return nameEn;
+  return `${nameEn.slice(0, 10)}…`;
+}
+
 /**
  * Saturation Score =
  * min(100, round(((verified_uploads * 1.5) + (active_coordinators * 3)) / total_mandals * 10))

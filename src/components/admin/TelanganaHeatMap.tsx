@@ -7,6 +7,10 @@ import type { Topology, GeometryCollection } from "topojson-specification";
 import type { FeatureCollection, Geometry } from "geojson";
 import {
   HEATMAP_TOKENS,
+  isSaturationSparse,
+  mandalDensityFill,
+  saturationRampFill,
+  shortDistrictLabel,
   slugFromGeoDistrictName,
   tierFill,
   tierLabel,
@@ -138,16 +142,26 @@ function CivicCorridorCards({
                 <div
                   className="h-full rounded-full transition-[width] duration-300"
                   style={{
-                    width: `${Math.min(100, row.index)}%`,
-                    background: tierFill(row.tier),
+                    width: `${Math.min(
+                      100,
+                      Math.max(
+                        8,
+                        row.index > 0
+                          ? row.index
+                          : (row.total_mandals / 45) * 100,
+                      ),
+                    )}%`,
+                    background:
+                      row.index > 0
+                        ? saturationRampFill(row.index)
+                        : mandalDensityFill(row.total_mandals, 10, 45),
                   }}
                 />
               </div>
               <div className="mt-1.5 flex justify-between text-[10px] text-slate-500">
                 <span>{tierLabel(row.tier)}</span>
                 <span className="tabular-nums">
-                  {row.verified_uploads} uploads · {row.active_coordinators}{" "}
-                  coords
+                  {row.total_mandals} mandals · {row.verified_uploads} uploads
                 </span>
               </div>
             </div>
@@ -376,9 +390,71 @@ export function TelanganaHeatMap({
       const d = path(f) || "";
       const sat = bySlug.get(slug);
       const tier: SaturationTier = sat?.tier || "critical";
-      return { slug, name, d, tier, sat };
+      const centroid = path.centroid(f) as [number, number];
+      const bounds = path.bounds(f) as [[number, number], [number, number]];
+      const width = bounds[1][0] - bounds[0][0];
+      const height = bounds[1][1] - bounds[0][1];
+      const area = path.area(f) || width * height;
+      return { slug, name, d, tier, sat, centroid, width, height, area };
     });
   }, [geo, bySlug]);
+
+  const sparse = useMemo(() => isSaturationSparse(districts), [districts]);
+
+  const mandalRange = useMemo(() => {
+    const counts = districts.map((d) => d.total_mandals);
+    return {
+      min: counts.length ? Math.min(...counts) : 0,
+      max: counts.length ? Math.max(...counts) : 1,
+    };
+  }, [districts]);
+
+  const districtFill = (sat: DistrictSaturation | undefined) => {
+    if (!sat) return HEATMAP_TOKENS.slateMuted;
+    if (sparse) {
+      return mandalDensityFill(sat.total_mandals, mandalRange.min, mandalRange.max);
+    }
+    return saturationRampFill(sat.index);
+  };
+
+  /** Greedy centroid labels — largest districts first; skip collisions / tiny polys. */
+  const labels = useMemo(() => {
+    const MIN_AREA = 900;
+    const PAD_X = 36;
+    const PAD_Y = 16;
+    const candidates = [...paths]
+      .filter((p) => p.sat && p.area >= MIN_AREA && Number.isFinite(p.centroid[0]))
+      .sort((a, b) => b.area - a.area);
+
+    const placed: {
+      slug: string;
+      x: number;
+      y: number;
+      name: string;
+      mandals: number;
+      index: number;
+      tiny: boolean;
+    }[] = [];
+
+    for (const p of candidates) {
+      const [x, y] = p.centroid;
+      if (x < 28 || x > 612 || y < 18 || y > 502) continue;
+      const clash = placed.some(
+        (q) => Math.abs(q.x - x) < PAD_X && Math.abs(q.y - y) < PAD_Y,
+      );
+      if (clash) continue;
+      placed.push({
+        slug: p.slug,
+        x,
+        y,
+        name: shortDistrictLabel(p.sat!.name_en),
+        mandals: p.sat!.total_mandals,
+        index: p.sat!.index,
+        tiny: p.area < 2200,
+      });
+    }
+    return placed;
+  }, [paths]);
 
   const tierCounts = useMemo(() => {
     const c: Record<SaturationTier, number> = {
@@ -435,8 +511,34 @@ export function TelanganaHeatMap({
             Score = min(100, round(((verified×1.5)+(coordinators×3))/mandals×10)).
             Click a district to filter the submission queue.
           </p>
+          {sparse ? (
+            <p
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium"
+              style={{
+                background: "rgb(180 83 9 / 0.1)",
+                color: HEATMAP_TOKENS.ceremonialGold,
+              }}
+            >
+              Saturation pending — map tint shows mandal density until field data loads.
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-2 text-[11px]">
+          {sparse ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium"
+              style={{ background: "#E2E8F0", color: HEATMAP_TOKENS.navy }}
+            >
+              <span
+                className="inline-block h-2.5 w-8 rounded-sm"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #CBD5E1, #94A3B8)",
+                }}
+              />
+              Mandal density
+            </span>
+          ) : null}
           {TIER_ORDER.map((tier) => (
             <span
               key={tier}
@@ -447,6 +549,7 @@ export function TelanganaHeatMap({
                   tier === "critical"
                     ? HEATMAP_TOKENS.navy
                     : tierFill(tier),
+                opacity: sparse ? 0.55 : 1,
               }}
             >
               <span
@@ -492,9 +595,20 @@ export function TelanganaHeatMap({
               <svg
                 viewBox="0 0 640 520"
                 role="img"
-                aria-label="Telangana district saturation choropleth"
+                aria-label="Telangana district saturation choropleth with district labels"
                 className="h-auto w-full"
               >
+                <defs>
+                  <filter id="heat-selected-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow
+                      dx="0"
+                      dy="1"
+                      stdDeviation="2.2"
+                      floodColor={HEATMAP_TOKENS.ceremonialGold}
+                      floodOpacity="0.45"
+                    />
+                  </filter>
+                </defs>
                 <rect
                   width="640"
                   height="520"
@@ -507,15 +621,18 @@ export function TelanganaHeatMap({
                     <path
                       key={p.slug}
                       d={p.d}
-                      fill={tierFill(p.tier)}
-                      fillOpacity={isFocus || isSelected ? 1 : 0.85}
+                      fill={districtFill(p.sat)}
+                      fillOpacity={isFocus || isSelected ? 1 : 0.92}
                       stroke={
-                        isSelected || isFocus
-                          ? HEATMAP_TOKENS.deepSlate
-                          : HEATMAP_TOKENS.stroke
+                        isSelected
+                          ? HEATMAP_TOKENS.ceremonialGold
+                          : isFocus
+                            ? HEATMAP_TOKENS.deepSlate
+                            : "#FFFFFF"
                       }
-                      strokeWidth={isSelected ? 2.2 : isFocus ? 1.6 : 0.7}
-                      className="cursor-pointer transition-[fill-opacity,stroke-width] duration-150"
+                      strokeWidth={isSelected ? 2.4 : isFocus ? 1.5 : 0.85}
+                      filter={isSelected ? "url(#heat-selected-glow)" : undefined}
+                      className="cursor-pointer transition-[fill-opacity,stroke-width,filter] duration-200"
                       onMouseEnter={(e) => {
                         setHoverSlug(p.slug);
                         if (p.sat) {
@@ -552,13 +669,69 @@ export function TelanganaHeatMap({
                     />
                   );
                 })}
+
+                {/* District name + mandal count at centroids (collision-aware) */}
+                {labels.map((lb) => {
+                  const isFocus =
+                    focus?.slug === lb.slug || selectedSlug === lb.slug;
+                  return (
+                    <g
+                      key={`label-${lb.slug}`}
+                      transform={`translate(${lb.x}, ${lb.y})`}
+                      pointerEvents="none"
+                      opacity={isFocus ? 1 : 0.92}
+                    >
+                      <rect
+                        x={-34}
+                        y={lb.tiny ? -8 : -12}
+                        width={68}
+                        height={lb.tiny ? 20 : 26}
+                        rx={3}
+                        fill="rgb(255 255 255 / 0.72)"
+                        stroke={
+                          isFocus
+                            ? HEATMAP_TOKENS.ceremonialGold
+                            : "rgb(15 23 42 / 0.08)"
+                        }
+                        strokeWidth={isFocus ? 1 : 0.5}
+                      />
+                      <text
+                        textAnchor="middle"
+                        y={lb.tiny ? 0 : -1}
+                        className="select-none"
+                        style={{
+                          fontSize: lb.tiny ? 7.5 : 8.5,
+                          fontWeight: 700,
+                          fill: HEATMAP_TOKENS.deepSlate,
+                          fontFamily: "var(--font-sans), system-ui, sans-serif",
+                        }}
+                      >
+                        {lb.name}
+                      </text>
+                      <text
+                        textAnchor="middle"
+                        y={lb.tiny ? 9 : 11}
+                        className="select-none"
+                        style={{
+                          fontSize: 7,
+                          fontWeight: 600,
+                          fill: "#475569",
+                          fontFamily: "var(--font-sans), system-ui, sans-serif",
+                        }}
+                      >
+                        {lb.mandals} mandals
+                        {!sparse ? ` · SI ${lb.index}` : ""}
+                      </text>
+                    </g>
+                  );
+                })}
               </svg>
 
               {tooltip ? (
                 <div
-                  className="pointer-events-none absolute z-10 max-w-[220px] rounded-lg border px-3 py-2 text-[11px] shadow-lg"
+                  className="pointer-events-none absolute z-10 max-w-[240px] rounded-lg border px-3 py-2 text-[11px] shadow-lg"
                   style={{
-                    left: Math.min(tooltip.x + 12, 420),
+                    left: Math.min(tooltip.x + 12, 400),
                     top: Math.max(8, tooltip.y - 8),
                     borderColor: HEATMAP_TOKENS.border,
                     background: "#FFFFFF",
@@ -570,6 +743,25 @@ export function TelanganaHeatMap({
                   </p>
                   <p className="text-slate-500">{tooltip.sat.name_en}</p>
                   <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                    <div>
+                      <dt className="text-[9px] uppercase text-slate-400">
+                        Mandals
+                      </dt>
+                      <dd className="font-semibold tabular-nums">
+                        {tooltip.sat.total_mandals}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-[9px] uppercase text-slate-400">
+                        Saturation
+                      </dt>
+                      <dd
+                        className="font-bold tabular-nums"
+                        style={{ color: saturationRampFill(tooltip.sat.index) }}
+                      >
+                        {tooltip.sat.index}
+                      </dd>
+                    </div>
                     <div>
                       <dt className="text-[9px] uppercase text-slate-400">
                         Representations
@@ -586,31 +778,14 @@ export function TelanganaHeatMap({
                         {tooltip.sat.active_coordinators}
                       </dd>
                     </div>
-                    <div>
-                      <dt className="text-[9px] uppercase text-slate-400">
-                        Verified uploads
-                      </dt>
-                      <dd className="font-semibold tabular-nums">
-                        {tooltip.sat.verified_uploads}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-[9px] uppercase text-slate-400">
-                        Saturation
-                      </dt>
-                      <dd
-                        className="font-bold tabular-nums"
-                        style={{ color: tierFill(tooltip.sat.tier) }}
-                      >
-                        {tooltip.sat.index}
-                      </dd>
-                    </div>
                   </dl>
                   <p
                     className="mt-1.5 text-[10px] font-semibold"
                     style={{ color: tierFill(tooltip.sat.tier) }}
                   >
-                    {tierLabel(tooltip.sat.tier)}
+                    {sparse
+                      ? "Mandal density view"
+                      : tierLabel(tooltip.sat.tier)}
                   </p>
                 </div>
               ) : null}
@@ -630,10 +805,10 @@ export function TelanganaHeatMap({
                   className="text-[10px] font-semibold uppercase tracking-wider"
                   style={{ color: HEATMAP_TOKENS.ceremonialGold }}
                 >
-                  {tierLabel(focus.tier)}
+                  {sparse ? "Mandal density · pending SI" : tierLabel(focus.tier)}
                 </p>
                 <h3
-                  className="mt-1 font-telugu text-lg font-semibold"
+                  className="mt-1 font-telugu text-lg font-semibold leading-relaxed"
                   style={{ color: HEATMAP_TOKENS.deepSlate }}
                 >
                   {focus.name_te}
@@ -654,10 +829,13 @@ export function TelanganaHeatMap({
                   Saturation Index
                 </p>
                 <p
-                  className="mt-1 text-3xl font-bold tabular-nums"
-                  style={{ color: tierFill(focus.tier) }}
+                  className="mt-1 text-3xl font-bold tabular-nums transition-colors duration-300"
+                  style={{ color: saturationRampFill(Math.max(focus.index, sparse ? 8 : 0)) }}
                 >
                   {focus.index}
+                </p>
+                <p className="mt-1 text-[11px] tabular-nums text-slate-500">
+                  {focus.total_mandals} mandals in this district
                 </p>
               </div>
 
