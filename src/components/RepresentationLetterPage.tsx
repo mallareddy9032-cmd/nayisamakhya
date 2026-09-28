@@ -469,11 +469,12 @@ export function RepresentationLetterPage() {
                       setDistrictSlug(e.target.value);
                       setMandalSlug("");
                     }}
-                    className="w-full rounded-lg border border-slate-300 bg-civic-paper p-3 font-telugu text-sm leading-relaxed text-civic-ink focus:border-civic-bronze focus:outline-none"
+                    aria-label="District"
+                    className="min-h-12 w-full appearance-auto rounded-lg border border-slate-300 bg-white p-3 font-sans text-sm leading-relaxed text-[#0F172A] focus:border-civic-bronze focus:outline-none"
                   >
                     {TELANGANA_DISTRICTS.map((d) => (
                       <option key={d.slug} value={d.slug}>
-                        {d.name_te} — {d.name_en}
+                        {d.name_en} — {d.name_te}
                       </option>
                     ))}
                   </select>
@@ -486,14 +487,15 @@ export function RepresentationLetterPage() {
                   <select
                     value={effectiveMandalSlug}
                     onChange={(e) => setMandalSlug(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-civic-paper p-3 font-telugu text-sm leading-relaxed text-civic-ink focus:border-civic-bronze focus:outline-none"
+                    aria-label="Mandal"
+                    className="min-h-12 w-full appearance-auto rounded-lg border border-slate-300 bg-white p-3 font-sans text-sm leading-relaxed text-[#0F172A] focus:border-civic-bronze focus:outline-none"
                   >
                     {mandals.length === 0 ? (
-                      <option value="">—</option>
+                      <option value="">Select mandal</option>
                     ) : (
                       mandals.map((m) => (
                         <option key={m.slug} value={m.slug}>
-                          {m.name_te} — {m.name_en}
+                          {m.name_en} — {m.name_te}
                         </option>
                       ))
                     )}
@@ -519,11 +521,12 @@ export function RepresentationLetterPage() {
                   <select
                     value={recipientOfficer}
                     onChange={(e) => setRecipientOfficer(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-civic-paper p-3 font-telugu text-sm leading-relaxed text-civic-ink focus:border-civic-bronze focus:outline-none"
+                    aria-label="Authority"
+                    className="min-h-12 w-full appearance-auto rounded-lg border border-slate-300 bg-white p-3 font-sans text-sm leading-relaxed text-[#0F172A] focus:border-civic-bronze focus:outline-none"
                   >
                     {AUTHORITIES.map((a) => (
                       <option key={a.id} value={a.title_te}>
-                        {a.title_te} ({a.title_en})
+                        {a.title_en} — {a.title_te}
                       </option>
                     ))}
                   </select>
