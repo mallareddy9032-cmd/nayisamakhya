@@ -1,127 +1,124 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 type Stalwart = {
   id: string;
-  name: string;
-  domain: string;
-  blurb: string;
+  nameTe: string;
+  nameEn: string;
+  domainTe: string;
+  domainEn: string;
+  blurbTe: string;
+  blurbEn: string;
   imageSrc: string;
-  /** High-contrast gold glyph for Navy monogram fallback. */
-  monogram: string;
 };
 
-/** Historical civic icons — ceremonial double-gold bezel portraits. */
 const STALWARTS: Stalwart[] = [
   {
     id: "dhanvantari",
-    name: "ధన్వంతరి",
-    domain: "ప్రాచీన ఆయుర్వేదం & శస్త్రచికిత్స",
-    blurb:
-      "వైద్య మూలపురుషుడు — సంప్రదాయ వైద్యం, ఆయుర్వేద ఆరోగ్య విజ్ఞాన ప్రదాత.",
-    imageSrc: "/stalwarts/dhanvantari.jpg",
-    monogram: "ధ",
+    nameTe: "ధన్వంతరి / వైద్య నారాయణ",
+    nameEn: "Lord Dhanvantari",
+    domainTe: "ప్రాచీన ఆయుర్వేదం & శస్త్రచికిత్స",
+    domainEn: "Divine Ayurveda & surgery",
+    blurbTe:
+      "అమృత కలశ ధారి — భారతీయ వైద్య విజ్ఞానం, శస్త్రచికిత్స మూలపురుషుడు.",
+    blurbEn: "Bearer of amrita — fountainhead of Indian healing sciences.",
+    imageSrc: "/stalwarts/dhanvantari.png",
   },
   {
     id: "charaka",
-    name: "చరక మహర్షి",
-    domain: "ఆయుర్వేద సంహిత & చికిత్సా శాస్త్రం",
-    blurb:
-      "చరక సంహిత కర్త — రోగ నిర్ధారణ, ఔషధ విజ్ఞానానికి శాశ్వత మార్గదర్శి.",
-    imageSrc: "/stalwarts/charaka.jpg",
-    monogram: "చ",
+    nameTe: "ఆచార్య చరక & సుశ్రుత",
+    nameEn: "Acharya Charaka & Sushruta",
+    domainTe: "సంహిత & శస్త్ర వైద్య శాస్త్రం",
+    domainEn: "Samhita & surgical science",
+    blurbTe:
+      "చరక సంహిత · సుశ్రుత శస్త్రవిద్య — వైద్య ధర్మానికి శాశ్వత మార్గదర్శకులు.",
+    blurbEn: "Foundational texts that shaped clinical and surgical tradition.",
+    imageSrc: "/stalwarts/charaka.png",
   },
   {
     id: "mahapadmananda",
-    name: "సమ్రాట్ మహాపద్మనంద",
-    domain: "నంద రాజవంశం & సామ్రాజ్య పాలన",
-    blurb:
+    nameTe: "సమ్రాట్ మహాపద్మనంద",
+    nameEn: "Emperor Mahapadmananda",
+    domainTe: "నంద రాజవంశం & సామ్రాజ్య పాలన",
+    domainEn: "Nanda dynasty & imperial rule",
+    blurbTe:
       "నంద సామ్రాజ్య ప్రాభవం — జనసంక్షేమం, వ్యవసాయం, పరిపాలనా వైభవం.",
-    imageSrc: "/stalwarts/mahapadmananda.jpg",
-    monogram: "మ",
+    blurbEn: "Imperial governance rooted in public welfare and strength.",
+    imageSrc: "/stalwarts/mahapadmananda.png",
   },
   {
     id: "karpoori-thakur",
-    name: "కర్పూరి ఠాకూర్",
-    domain: "సామాజిక న్యాయం & వెనుకబడిన వర్గాలు",
-    blurb:
-      "భారతరత్న — వృత్తి సమాజాలు, విద్యా & సంక్షేమ హక్కుల పోరాట యోధుడు.",
-    imageSrc: "/stalwarts/karpoori-thakur.jpg",
-    monogram: "క",
+    nameTe: "భారతరత్న కర్పూరి ఠాకూర్",
+    nameEn: "Bharat Ratna Karpoori Thakur",
+    domainTe: "సామాజిక న్యాయం & వెనుకబడిన వర్గాలు",
+    domainEn: "Social justice & backward classes",
+    blurbTe:
+      "వృత్తి సమాజాలు, విద్యా & సంక్షేమ హక్కులకై అహింసా పోరాట యోధుడు.",
+    blurbEn: "Champion of dignity for working and marginalized communities.",
+    imageSrc: "/stalwarts/karpoori-thakur.png",
   },
   {
     id: "veerappa-moily",
-    name: "ఎం. వీరప్ప మొయిలి",
-    domain: "న్యాయ సంస్కరణలు & పౌర హక్కులు",
-    blurb:
+    nameTe: "డా. ఎం. వీరప్ప మొయిలి",
+    nameEn: "Dr. M. Veerappa Moily",
+    domainTe: "న్యాయ సంస్కరణలు & పౌర హక్కులు",
+    domainEn: "Legal reform & civil rights",
+    blurbTe:
       "న్యాయ / పాలనా సంస్కరణలు — పౌర సేవలు, రాజ్యాంగ హక్కుల రక్షణకు తోడ్పాటు.",
-    imageSrc: "/stalwarts/veerappa-moily.jpg",
-    monogram: "వ",
+    blurbEn: "Statesman advancing justice reform and constitutional access.",
+    imageSrc: "/stalwarts/veerappa-moily.png",
   },
 ];
 
 function StalwartPortrait({
   name,
   imageSrc,
-  monogram,
 }: {
   name: string;
   imageSrc: string;
-  monogram: string;
 }) {
-  // Show Navy monogram until a real portrait loads; never flash a broken-image icon.
-  const [status, setStatus] = useState<"pending" | "loaded" | "failed">(
-    "pending",
-  );
-  const showMonogram = status !== "loaded";
+  const [failed, setFailed] = useState(false);
 
   return (
     <div
-      className="stalwart-bezel relative h-20 w-20 shrink-0"
+      className="stalwart-bezel relative h-[5.5rem] w-[5.5rem] shrink-0 sm:h-24 sm:w-24"
       aria-label={name}
     >
-      {/* Outer soft ring + ceremonial gold double-bezel */}
       <div
         className="absolute inset-0 rounded-full"
         style={{
           boxShadow:
-            "0 0 0 1.5px #FBFBFA, 0 0 0 3px #B45309, 0 0 0 5px rgb(180 83 9 / 0.28), 0 2px 10px rgb(15 23 42 / 0.14)",
+            "0 0 0 2px #FBFBFA, 0 0 0 4px #B45309, 0 0 0 6px rgb(180 83 9 / 0.3), 0 4px 14px rgb(15 23 42 / 0.16)",
         }}
         aria-hidden
       />
-      {/* Inner ceremonial gold bezel + navy fallback canvas */}
       <div
         className="relative h-full w-full overflow-hidden rounded-full bg-[#1E293B]"
         style={{
-          border: "1.5px solid #B45309",
+          border: "2px solid #B45309",
           boxShadow: "inset 0 0 0 1px rgb(251 251 250 / 0.35)",
         }}
       >
-        {showMonogram ? (
+        {!failed ? (
+          <Image
+            src={imageSrc}
+            alt={name}
+            width={192}
+            height={192}
+            className="h-full w-full object-cover"
+            sizes="96px"
+            onError={() => setFailed(true)}
+          />
+        ) : (
           <div
-            className="absolute inset-0 flex items-center justify-center bg-[#1E293B]"
+            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#1E293B] to-[#0F172A]"
             aria-hidden
           >
-            <span className="font-telugu text-2xl font-bold leading-none text-[#B45309]">
-              {monogram}
-            </span>
+            <span className="h-8 w-8 rounded-full border-2 border-[#B45309]/60 bg-[#B45309]/20" />
           </div>
-        ) : null}
-        {status !== "failed" ? (
-          // eslint-disable-next-line @next/next/no-img-element -- onError monogram fallback requires native img
-          <img
-            src={imageSrc}
-            alt=""
-            width={80}
-            height={80}
-            className={`h-full w-full object-cover transition-opacity duration-200 ${
-              status === "loaded" ? "opacity-100" : "opacity-0"
-            }`}
-            onLoad={() => setStatus("loaded")}
-            onError={() => setStatus("failed")}
-          />
-        ) : null}
+        )}
       </div>
     </div>
   );
@@ -133,20 +130,19 @@ export function CivicStalwarts() {
       className="civic-watermark border-t border-civic-border bg-civic-paper px-4 py-12"
       aria-labelledby="civic-stalwarts-heading"
     >
-      <div className="mx-auto max-w-6xl rounded-2xl border border-civic-border bg-white/95 p-5 shadow-xs sm:p-7">
-        <header className="mb-6 border-b border-civic-border pb-4">
+      <div className="mx-auto max-w-6xl rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white via-[#FFFDF9] to-[#FBF7ED] p-5 shadow-xs sm:p-7">
+        <header className="mb-6 border-b border-[#EAD7B5] pb-4">
           <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-civic-bronze">
             Civic Heritage
           </p>
           <h2
             id="civic-stalwarts-heading"
-            className="mt-1.5 font-telugu text-xl font-black tracking-tight text-civic-ink leading-[1.8] sm:text-2xl"
+            className="mt-1.5 font-display-te text-xl tracking-tight text-civic-ink leading-snug sm:text-2xl"
           >
             సమాజ మార్గదర్శకులు & విశిష్ట ప్రముఖులు
           </h2>
-          <p className="mt-1.5 font-telugu text-xs leading-relaxed text-slate-600">
-            ధన్వంతరి · చరక · మహాపద్మనంద · కర్పూరి ఠాకూర్ · వీరప్ప మొయిలి —
-            ఆత్మగౌరవ వారసత్వం.
+          <p className="mt-1 font-sans text-xs font-medium text-slate-500">
+            Community guides & distinguished luminaries
           </p>
         </header>
 
@@ -156,23 +152,33 @@ export function CivicStalwarts() {
               key={stalwart.id}
               className="w-[min(78vw,17.5rem)] shrink-0 snap-start lg:w-auto"
             >
-              <article className="flex h-full flex-col items-center gap-3 rounded-xl border border-civic-border bg-civic-paper/60 px-3.5 py-5 text-center sm:px-4">
+              <article className="flex h-full flex-col items-center gap-3 rounded-xl border border-[#EAD7B5] bg-white/80 px-3.5 py-5 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-4">
                 <StalwartPortrait
-                  name={stalwart.name}
+                  name={`${stalwart.nameTe} — ${stalwart.nameEn}`}
                   imageSrc={stalwart.imageSrc}
-                  monogram={stalwart.monogram}
                 />
 
-                <h3 className="font-telugu text-sm font-bold leading-[1.8] text-civic-ink">
-                  {stalwart.name}
+                <h3 className="font-telugu text-sm font-bold leading-[1.65] text-civic-ink">
+                  {stalwart.nameTe}
                 </h3>
+                <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
+                  {stalwart.nameEn}
+                </p>
 
-                <span className="inline-flex max-w-full items-center justify-center rounded-md border border-x-civic-bronze/40 border-y-civic-border bg-[#F8FAFC] px-2.5 py-1 font-telugu text-[11px] font-semibold leading-[1.8] text-civic-ink">
-                  {stalwart.domain}
+                <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2.5 py-1.5">
+                  <span className="font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
+                    {stalwart.domainTe}
+                  </span>
+                  <span className="font-sans text-[10px] text-slate-500">
+                    {stalwart.domainEn}
+                  </span>
                 </span>
 
-                <p className="font-telugu text-[12px] leading-[1.8] text-civic-navy/85 tabular-nums">
-                  {stalwart.blurb}
+                <p className="font-telugu text-[12px] leading-[1.75] text-civic-navy/90">
+                  {stalwart.blurbTe}
+                </p>
+                <p className="font-sans text-[11px] leading-relaxed text-slate-500">
+                  {stalwart.blurbEn}
                 </p>
               </article>
             </li>

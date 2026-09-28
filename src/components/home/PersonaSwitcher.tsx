@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Briefcase,
+  CheckCircle2,
   FileText,
   GraduationCap,
   IdCard,
@@ -29,6 +30,7 @@ const PERSONAS: {
   label: string;
   icon: typeof Scissors;
   summary: string;
+  bullets: string[];
   cards: SolutionCard[];
 }[] = [
   {
@@ -36,7 +38,12 @@ const PERSONAS: {
     label: "సెలూన్ నిర్వాహకులు & కళాకారులు",
     icon: Scissors,
     summary:
-      "G.O. 23 ఉచిత విద్యుత్, షాప్ రక్షణ, ఉపకరణాల రాయితీ — వృత్తి హక్కుల కోసం.",
+      "వృత్తి హక్కులు, షాప్ రక్షణ, ఉపకరణాల సహాయం — కళాకారులకు నేరుగా ఉపయోగపడే సేవలు.",
+    bullets: [
+      "G.O. 23 ఉచిత విద్యుత్ (250 యూనిట్లు)",
+      "మున్సిపల్ షాప్ రక్షణ",
+      "ఉపకరణాల రాయితీ",
+    ],
     cards: [
       {
         title: "జి.ఓ. 23 విద్యుత్ వినతి",
@@ -46,15 +53,15 @@ const PERSONAS: {
         cta: "వినతిపత్రం",
       },
       {
-        title: "సమన్వయకర్త గుర్తింపు",
-        blurb: "మండల స్థాయి డిజిటల్ కార్డు — QRతో ధ్రువీకరణ.",
-        href: "/coordinator-card",
-        icon: IdCard,
-        cta: "కార్డు",
+        title: "మున్సిపల్ షాప్ రక్షణ",
+        blurb: "షాప్ కేటాయింపు / రక్షణ కోసం ప్రీఫిల్డ్ అధికారిక లేఖ.",
+        href: "/representation?subject=modern_salon_space",
+        icon: ShieldCheck,
+        cta: "షాప్ వినతి",
       },
       {
-        title: "క్షేత్ర సమాచార ఫీడ్",
-        blurb: "షాపు / సమావేశ రికార్డులు — ధ్రువీకరించబడిన ఫీల్డ్ ఫోటోలు.",
+        title: "ఉపకరణాల రాయితీ",
+        blurb: "వృత్తి ఉపకరణాల సహాయం — క్షేత్ర ఫోటోలతో డాక్యుమెంట్.",
         href: "/feed",
         icon: Layers,
         cta: "ఫీడ్ చూడండి",
@@ -66,24 +73,29 @@ const PERSONAS: {
     label: "విద్యార్థులు & యువత",
     icon: GraduationCap,
     summary:
-      "విదేశీ విద్యా స్కాలర్‌షిప్ ₹20 లక్షలు, పోటీ పరీక్షల గైడెన్స్, ఆధునిక స్కిల్స్.",
+      "విదేశీ విద్యా నిధి, గురుకుల ప్రవేశాలు, పోటీ పరీక్షల మార్గదర్శకం — యువతకు మూడు ప్రధాన మార్గాలు.",
+    bullets: [
+      "విదేశీ విద్యా నిధి (₹20 లక్షల గ్రాంట్)",
+      "గురుకుల ప్రవేశాలు",
+      "పోటీ పరీక్షల గైడెన్స్",
+    ],
     cards: [
       {
-        title: "విద్యా / స్కాలర్‌షిప్ వినతి",
-        blurb: "BC-A విద్యా సంక్షేమం కోసం ప్రీఫిల్డ్ అధికారిక లేఖ.",
+        title: "విదేశీ విద్యా నిధి",
+        blurb: "₹20 లక్షల గ్రాంట్ కోసం ప్రీఫిల్డ్ విద్యా సంక్షేమ వినతి.",
         href: "/representation?subject=community_welfare_funds",
         icon: FileText,
         cta: "వినతి ప్రారంభం",
       },
       {
-        title: "యువ సమన్వయ నెట్‌వర్క్",
-        blurb: "మండల సమన్వయకర్త కార్డుతో స్థానిక నాయకత్వం.",
+        title: "గురుకుల ప్రవేశాలు",
+        blurb: "గురుకుల / వసతి విద్యా అవకాశాల కోసం స్థానిక సమన్వయం.",
         href: "/coordinator-card",
         icon: IdCard,
         cta: "నెట్‌వర్క్‌లో చేరండి",
       },
       {
-        title: "యువ చైతన్య ఫీడ్",
+        title: "పోటీ పరీక్షల గైడెన్స్",
         blurb: "గైడెన్స్ / శిక్షణ సమావేశాల క్షేత్ర నివేదికలు.",
         href: "/feed",
         icon: Layers,
@@ -96,25 +108,30 @@ const PERSONAS: {
     label: "ఉద్యోగులు & ప్రముఖులు",
     icon: Briefcase,
     summary:
-      "సమన్వయకర్త నెట్‌వర్క్, న్యాయ సహకారం, సమాజ సేవా భాగస్వామ్యం.",
+      "సమన్వయకర్త గుర్తింపు, న్యాయ సహకారం, జిల్లా నెట్‌వర్క్ — నాయకత్వ భాగస్వామ్యం.",
+    bullets: [
+      "సమన్వయకర్త ఐడీ కార్డు",
+      "లీగల్ సెల్ మద్దతు",
+      "జిల్లా నెట్‌వర్క్",
+    ],
     cards: [
       {
-        title: "న్యాయ / ప్రాతినిధ్య లేఖ",
+        title: "సమన్వయకర్త ఐడీ కార్డు",
+        blurb: "ప్రింట్-రెడీ సమన్వయకర్త ID — QRతో ధ్రువీకరణ.",
+        href: "/coordinator-card",
+        icon: IdCard,
+        cta: "కార్డు",
+      },
+      {
+        title: "లీగల్ సెల్ మద్దతు",
         blurb: "అధికారులకు చట్టబద్ధమైన ఆధారాలతో వినతిపత్రం.",
         href: "/representation",
         icon: ShieldCheck,
         cta: "లేఖ తయారు",
       },
       {
-        title: "అధికారిక క్రెడెన్షియల్",
-        blurb: "ప్రింట్-రెడీ సమన్వయకర్త ID — లామినేషన్ సిద్ధం.",
-        href: "/coordinator-card",
-        icon: IdCard,
-        cta: "కార్డు",
-      },
-      {
-        title: "సేవా రుజువు ఫీడ్",
-        blurb: "సంఘ కార్యక్రమాల ధ్రువీకృత ఫోటో ఆర్కైవ్.",
+        title: "జిల్లా నెట్‌వర్క్",
+        blurb: "33 జిల్లాల సమన్వయం — సేవా రుజువు ఫీడ్ ఆర్కైవ్.",
         href: "/feed",
         icon: Layers,
         cta: "ఫీడ్",
@@ -133,7 +150,7 @@ export function PersonaSwitcher() {
       aria-labelledby="persona-switcher-heading"
     >
       <div className="mx-auto max-w-6xl">
-        <header className="mb-6 max-w-2xl">
+        <header className="mb-6 max-w-3xl">
           <p className="font-telugu text-xs font-bold tracking-wide text-[#B45309]">
             ప్రజా వ్యక్తిత్వ మార్గాలు
           </p>
@@ -141,7 +158,11 @@ export function PersonaSwitcher() {
             id="persona-switcher-heading"
             className="mt-1 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
           >
-            ఎవరి కోసం ఈ వేదిక?
+            ఈ వేదిక ఎవరి కోసం?{" "}
+            <span className="text-[#B45309]">•</span>{" "}
+            <span className="font-sans text-[0.85em] font-semibold tracking-tight text-slate-600 md:text-[0.72em]">
+              Who is this platform for?
+            </span>
           </h2>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             మీ పాత్రను ఎంచుకుంటే — అనుకూల సేవలు వెంటనే కనిపిస్తాయి.
@@ -151,7 +172,7 @@ export function PersonaSwitcher() {
         <div
           role="tablist"
           aria-label="Persona segments"
-          className="flex flex-col gap-2 rounded-2xl border border-[#E2E8F0] bg-[#FBFBFA] p-1.5 sm:flex-row"
+          className="flex flex-col gap-2 rounded-2xl border border-[#EAD7B5] bg-gradient-to-r from-[#FFFDF9] via-[#FBF7ED] to-[#F5EFE0] p-1.5 sm:flex-row"
         >
           {PERSONAS.map((persona) => {
             const Icon = persona.icon;
@@ -167,13 +188,13 @@ export function PersonaSwitcher() {
                   "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition sm:justify-start",
                   selected
                     ? "bg-[#1E293B] text-white shadow-xs"
-                    : "text-[#1E293B] hover:bg-white",
+                    : "text-[#1E293B] hover:bg-white/80",
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0",
-                    selected ? "text-[#B45309]" : "text-[#B45309]",
+                    selected ? "text-[#FBBF24]" : "text-[#B45309]",
                   )}
                   aria-hidden
                 />
@@ -185,9 +206,27 @@ export function PersonaSwitcher() {
           })}
         </div>
 
-        <p className="mt-4 font-telugu text-sm leading-relaxed text-slate-600">
-          {current.summary}
-        </p>
+        <div className="mt-4 rounded-xl border border-[#EAD7B5]/80 bg-[#FFFDF9] px-4 py-3">
+          <p className="font-telugu text-sm leading-relaxed text-slate-600">
+            {current.summary}
+          </p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-3">
+            {current.bullets.map((bullet) => (
+              <li
+                key={bullet}
+                className="flex items-start gap-2 rounded-lg border border-[#EAD7B5]/60 bg-white/70 px-3 py-2"
+              >
+                <CheckCircle2
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#B45309]"
+                  aria-hidden
+                />
+                <span className="font-telugu text-xs font-bold leading-snug text-[#1E293B]">
+                  {bullet}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div
           role="tabpanel"
@@ -199,7 +238,7 @@ export function PersonaSwitcher() {
               <Link
                 key={`${current.id}-${card.href}-${card.title}`}
                 href={card.href}
-                className="group flex flex-col rounded-2xl border border-[#E2E8F0] bg-[#FBFBFA] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-[#B45309]/40 hover:bg-white hover:shadow-[0_12px_32px_rgb(15_23_42_/0.08)]"
+                className="group flex flex-col rounded-2xl border border-[#EAD7B5] bg-[#FBFBFA] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-[#B45309]/50 hover:bg-white hover:shadow-[0_12px_32px_rgb(15_23_42_/0.08)]"
               >
                 <span className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#B45309]/20 bg-[#B45309]/10 text-[#B45309]">
                   <Icon className="h-4 w-4" aria-hidden />

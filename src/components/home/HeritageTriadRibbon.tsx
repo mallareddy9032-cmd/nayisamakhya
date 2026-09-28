@@ -8,21 +8,24 @@ const PILLARS = [
     icon: Stethoscope,
     title: "వైద్య మూలాలు",
     titleEn: "Vaidya Heritage",
-    body: "ధన్వంతరి, చరక, సుశ్రుత మహర్షులు — భారతీయ వైద్య & శస్త్రచికిత్స ప్రదాతలు.",
+    bodyTe: "ధన్వంతరి & చరక మహర్షులు",
+    bodyEn: "Pioneers of Surgery & Ayurveda",
   },
   {
     id: "empire",
     icon: Crown,
     title: "సామ్రాజ్య పాలన",
     titleEn: "Imperial Lineage",
-    body: "సమ్రాట్ మహాపద్మనంద & మౌర్య వంశ ప్రాభవం — నంద రాజవంశం.",
+    bodyTe: "సమ్రాట్ మహాపద్మనంద",
+    bodyEn: "Nanda Dynasty & Imperial Governance",
   },
   {
     id: "nada",
     icon: Music2,
     title: "నాద బ్రహ్మ",
-    titleEn: "Classical Artistry",
-    body: "నాదస్వర సంగీత కళా వైభవం & ఉస్తాద్ బిస్మిల్లా ఖాన్ వారసత్వం.",
+    titleEn: "Nada Brahma",
+    bodyTe: "నాదస్వర శాస్త్రీయ వైభవం & ఉస్తాద్ బిస్మిల్లా ఖాన్ వారసత్వం",
+    bodyEn: "Classical shehnai lineage & artistic glory",
   },
 ] as const;
 
@@ -32,50 +35,68 @@ export function HeritageTriadRibbon() {
       className="px-4 pb-2 pt-2 sm:pb-3"
       aria-labelledby="heritage-triad-heading"
     >
-      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#FFFCF5_0%,#FBFBFA_55%,#F7F3EA_100%)] shadow-[0_6px_24px_rgb(15_23_42_/0.05)]">
+      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#EAD7B5] bg-gradient-to-r from-[#FFFDF9] via-[#FBF7ED] to-[#F5EFE0] shadow-[0_8px_28px_rgb(180_83_9_/0.08)]">
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.035]"
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage:
               "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
           }}
           aria-hidden
         />
-        <div className="relative border-b border-[#B45309]/20 px-4 py-3 text-center sm:px-6">
-          <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-[#B45309]">
+
+        <div className="relative border-b border-[#EAD7B5] px-4 py-4 text-center sm:px-6 sm:py-5">
+          <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-[#B45309]">
             Heritage Triad
           </p>
           <h2
             id="heritage-triad-heading"
-            className="mt-1 font-display-te text-base leading-snug text-[#1E293B] sm:text-lg"
+            className="mt-2 font-display-te text-lg leading-snug sm:text-xl md:text-2xl"
           >
-            వైద్యం మన మూలం • కళ మన శ్వాస • ఆత్మగౌరవం మన వారసత్వం
+            <span className="bg-gradient-to-r from-[#92400e] via-[#B45309] to-[#C2410C] bg-clip-text text-transparent">
+              వైద్యం మన మూలం • కళ మన శ్వాస • ఆత్మగౌరవం మన వారసత్వం
+            </span>
           </h2>
+          <p className="mt-2 font-display-te text-sm font-semibold leading-snug sm:text-base">
+            <span className="bg-gradient-to-r from-[#92400e] via-[#B45309] to-[#C2410C] bg-clip-text text-transparent">
+              Medicine is our source • Art is our breath • Self-respect is our
+              heritage
+            </span>
+          </p>
         </div>
 
-        <div className="relative grid grid-cols-1 divide-y divide-[#E2E8F0]/90 md:grid-cols-3 md:divide-x md:divide-y-0">
+        <div className="relative grid grid-cols-1 gap-3 p-3 sm:gap-4 sm:p-4 md:grid-cols-3">
           {PILLARS.map((pillar) => {
             const Icon = pillar.icon;
             return (
               <article
                 key={pillar.id}
-                className="flex flex-col gap-2 px-4 py-4 sm:px-5 sm:py-5"
+                className="flex flex-col gap-2.5 rounded-xl border border-[#EAD7B5] bg-gradient-to-b from-white/90 to-[#FFFDF9]/80 px-4 py-4 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8),0_4px_14px_rgb(180_83_9_/0.06)]"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#B45309]/35 bg-white text-[#B45309] shadow-xs">
+                  <span
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#B45309]"
+                    style={{
+                      boxShadow:
+                        "0 0 0 1.5px #FBFBFA, 0 0 0 3px #B45309, 0 0 0 4.5px rgb(180 83 9 / 0.25)",
+                    }}
+                  >
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
                   <div>
                     <h3 className="font-telugu text-sm font-bold text-[#1E293B]">
                       {pillar.title}
                     </h3>
-                    <p className="font-sans text-[10px] font-medium tracking-wide text-slate-500">
+                    <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
                       {pillar.titleEn}
                     </p>
                   </div>
                 </div>
-                <p className="font-telugu text-xs leading-relaxed text-slate-600">
-                  {pillar.body}
+                <p className="font-telugu text-xs font-semibold leading-relaxed text-[#0F172A]">
+                  {pillar.bodyTe}
+                </p>
+                <p className="font-sans text-[11px] leading-relaxed text-slate-600">
+                  {pillar.bodyEn}
                 </p>
               </article>
             );

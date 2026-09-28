@@ -51,7 +51,7 @@ export function ServiceActionCards() {
       aria-labelledby="three-click-services"
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mb-7 max-w-2xl">
+        <div className="mb-7 max-w-3xl">
           <p className="font-telugu text-xs font-bold tracking-wide text-[#B45309]">
             ప్రజా సేవా కేంద్రం
           </p>
@@ -59,7 +59,11 @@ export function ServiceActionCards() {
             id="three-click-services"
             className="mt-1 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
           >
-            3-క్లిక్ ప్రజా సేవలు
+            3-దశల ప్రజా సేవలు{" "}
+            <span className="text-[#B45309]">•</span>{" "}
+            <span className="font-sans text-[0.85em] font-semibold tracking-tight text-slate-600 md:text-[0.72em]">
+              3-Click Public Services
+            </span>
           </h2>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             వృత్తి గౌరవం కోసం అవసరమైన మూడు అధికారిక సాధనాలు — ఎంచుకుని ముందుకు
@@ -75,7 +79,7 @@ export function ServiceActionCards() {
               <Link
                 key={svc.id}
                 href={svc.href}
-                className="group flex flex-col rounded-2xl border border-[#E2E8F0] bg-[#FBFBFA] p-5 shadow-[0_1px_2px_rgb(15_23_42_/0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#B45309]/40 hover:bg-white hover:shadow-[0_16px_40px_rgb(15_23_42_/0.1)]"
+                className="group flex flex-col rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] p-5 shadow-[0_1px_2px_rgb(15_23_42_/0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#B45309]/50 hover:bg-white hover:shadow-[0_16px_40px_rgb(15_23_42_/0.1)]"
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#B45309]/20 bg-[#B45309]/10 text-[#B45309]">
@@ -94,7 +98,7 @@ export function ServiceActionCards() {
                   {svc.blurb}
                 </p>
 
-                <span className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#1E293B] px-4 py-2.5 font-telugu text-xs font-bold text-white transition-colors group-hover:bg-[#B45309]">
+                <span className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-2.5 font-telugu text-xs font-bold text-white shadow-xs transition-all group-hover:brightness-110 group-hover:shadow-[0_8px_20px_rgb(180_83_9_/0.35)]">
                   {svc.cta}
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </span>
