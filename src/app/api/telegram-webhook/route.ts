@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseClient";
 import { parseCaptionLocations } from "@/lib/moderation/parseCaption";
 import { getAllCommHubs } from "@/lib/comms/hubs";
@@ -7,6 +7,7 @@ import {
   getRegionalCommunityHubs,
 } from "@/config/communityHubs";
 import { dispatchDeskAudit } from "@/lib/bot/deskDispatch";
+import { parseDocketId } from "@/lib/representation/docket";
 import {
   MSG,
   TG_FILE_PREFIX,
@@ -338,6 +339,86 @@ async function handleDeskToolCommand(
   }
 
   return false;
+}
+
+/** `/verify NS-TG-…` — instant petition docket ticket metadata. */
+async function handleVerifyCommand(
+  admin: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  chatId: number | string,
+  text: string,
+): Promise<boolean> {
+  const parts = text.trim().split(/\s+/);
+  const key = parts[0]?.toLowerCase() || "";
+  if (key !== "/verify") return false;
+
+  const rawId = parts.slice(1).join(" ").trim();
+  if (!rawId) {
+    await replyText(
+      chatId,
+      `\u{1F50D} <b>టికెట్ వెరిఫై</b>\n\n` +
+        `వాడకం: <code>/verify NS-TG-SUR-2026-A1B2C3</code>\n` +
+        `వినతిపత్రం మీద ఉన్న REF / QR ఐడీని పంపండి.`,
+    );
+    return true;
+  }
+
+  const parsed = parseDocketId(rawId);
+  if (!parsed) {
+    await replyText(
+      chatId,
+      `\u26A0\uFE0F చెల్లని డాకెట్ ఐడీ: <code>${escapeHtml(rawId.slice(0, 64))}</code>\n` +
+        `ఫార్మాట్: <code>NS-TG-XXX-YYYY-HASH</code>`,
+    );
+    return true;
+  }
+
+  const { data, error } = await admin
+    .from("petition_dockets")
+    .select(
+      "docket_id, category_te, district_te, mandal_te, subject_te, applicant_name, issued_at",
+    )
+    .eq("docket_id", parsed.docketId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[Bot:VerifyLookup]", error);
+  }
+
+  const verifyUrl = `https://www.nayisamakhya.org/verify/${encodeURIComponent(parsed.docketId)}`;
+
+  if (!data) {
+    await replyText(
+      chatId,
+      `\u2705 ఫార్మాట్ చెల్లుబాటు: <code>${escapeHtml(parsed.docketId)}</code>\n` +
+        `\u274C డెస్క్ రికార్డు ఇంకా నమోదు కాలేదు / కనబడలేదు.\n\n` +
+        `<a href="${verifyUrl}">వెబ్ వెరిఫై పేజీ తెరవండి</a>`,
+      {
+        inline_keyboard: [
+          [{ text: "\u{1F50D} Verify page", url: verifyUrl }],
+        ],
+      },
+    );
+    return true;
+  }
+
+  const issued = data.issued_at
+    ? String(data.issued_at).slice(0, 10)
+    : "—";
+  await replyText(
+    chatId,
+    `\u2705 <b>టికెట్ రికార్డు కనబడింది</b>\n\n` +
+      `<b>REF:</b> <code>${escapeHtml(data.docket_id)}</code>\n` +
+      `<b>విభాగం:</b> ${escapeHtml(data.category_te || "—")}\n` +
+      `<b>జిల్లా / మండలం:</b> ${escapeHtml(data.district_te || "—")} / ${escapeHtml(data.mandal_te || "—")}\n` +
+      `<b>విషయం:</b> ${escapeHtml((data.subject_te || "—").slice(0, 180))}\n` +
+      `<b>దరఖాస్తుదారు:</b> ${escapeHtml(data.applicant_name || "—")}\n` +
+      `<b>జారీ తేదీ:</b> ${escapeHtml(issued)}\n\n` +
+      `<a href="${verifyUrl}">పూర్తి వెరిఫికేషన్ పేజీ</a>`,
+    {
+      inline_keyboard: [[{ text: "\u{1F50D} Open verify page", url: verifyUrl }]],
+    },
+  );
+  return true;
 }
 
 async function handleAdminReviewCallback(
@@ -1162,6 +1243,11 @@ export async function POST(req: Request) {
       return await handleOfficerLookup(admin, chatId, text);
     }
 
+    if (text.toLowerCase().startsWith("/verify")) {
+      await handleVerifyCommand(admin, chatId, text);
+      return NextResponse.json({ ok: true, command: "/verify" });
+    }
+
     // /submit_proof — mark intent so the next photo is expected.
     const cmdKey = text.split(/\s+/)[0]?.toLowerCase() || "";
     if (
@@ -1186,72 +1272,99 @@ export async function POST(req: Request) {
       (message.photo && message.photo.length > 0) ||
       message.document?.file_id
     ) {
-      return await ingestPhoto(admin, message, chatId);
+      // Ack Telegram immediately (200 OK) before heavy download/storage work.
+      // `after()` keeps the serverless invocation alive — stops timeout retries.
+      after(() => {
+        void ingestPhoto(admin, message, chatId).catch(async (err) => {
+          console.error("[Bot:DeferredIngest]", err);
+          try {
+            await replyText(chatId, MSG.criticalServer);
+          } catch (replyErr) {
+            console.error("[Bot:DeferredIngestReply]", replyErr);
+          }
+        });
+      });
+      return NextResponse.json({ ok: true, accepted: true, deferred: true });
     }
 
     // Follow-up text: complete staged photo session, else legacy survey caption merge.
+    // Defer so storage re-upload inside completeStagedProof cannot time out Telegram.
     if (text && !text.startsWith("/")) {
-      const staged = await completeStagedProof(admin, chatId, text, message);
-      if (staged) return staged;
+      after(() => {
+        void (async () => {
+          const staged = await completeStagedProof(admin, chatId, text, message);
+          if (staged) return;
 
-      const { data: recentSub } = await admin
-        .from("survey_submissions")
-        .select("id, raw_caption")
-        .eq("telegram_chat_id", String(chatId))
-        .gte("created_at", new Date(Date.now() - 15 * 60 * 1000).toISOString())
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (recentSub?.id) {
-        const updatedCaption = recentSub.raw_caption
-          ? `${recentSub.raw_caption}\n\n${text}`
-          : text;
-
-        const followUp: Record<string, unknown> = {
-          raw_caption: updatedCaption,
-          reminder_sent: true,
-          last_activity_at: new Date().toISOString(),
-        };
-        let { error: followErr } = await admin
-          .from("survey_submissions")
-          .update(followUp)
-          .eq("id", recentSub.id);
-        if (followErr) {
-          console.error("[Bot:FollowUpCaption]", followErr);
-          const slim = { ...followUp };
-          delete slim.reminder_sent;
-          delete slim.last_activity_at;
-          ({ error: followErr } = await admin
+          const { data: recentSub } = await admin
             .from("survey_submissions")
-            .update(slim)
-            .eq("id", recentSub.id));
-        }
+            .select("id, raw_caption")
+            .eq("telegram_chat_id", String(chatId))
+            .gte(
+              "created_at",
+              new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+            )
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        const parsed = parseProofCaption(text);
-        await insertFieldSubmission(admin, {
-          user_id: message.from?.id ? String(message.from.id) : null,
-          chat_id: String(chatId),
-          image_url: null,
-          district: parsed.district,
-          mandal: parsed.mandal,
-          description: parsed.description || text,
-          status: "pending",
-          telegram_message_id: String(message.message_id),
-          sender_name: name,
-          survey_submission_id: recentSub.id,
-          metadata: { follow_up_text: true },
+          if (recentSub?.id) {
+            const updatedCaption = recentSub.raw_caption
+              ? `${recentSub.raw_caption}\n\n${text}`
+              : text;
+
+            const followUp: Record<string, unknown> = {
+              raw_caption: updatedCaption,
+              reminder_sent: true,
+              last_activity_at: new Date().toISOString(),
+            };
+            let { error: followErr } = await admin
+              .from("survey_submissions")
+              .update(followUp)
+              .eq("id", recentSub.id);
+            if (followErr) {
+              console.error("[Bot:FollowUpCaption]", followErr);
+              const slim = { ...followUp };
+              delete slim.reminder_sent;
+              delete slim.last_activity_at;
+              ({ error: followErr } = await admin
+                .from("survey_submissions")
+                .update(slim)
+                .eq("id", recentSub.id));
+            }
+
+            const parsed = parseProofCaption(text);
+            await insertFieldSubmission(admin, {
+              user_id: message.from?.id ? String(message.from.id) : null,
+              chat_id: String(chatId),
+              image_url: null,
+              district: parsed.district,
+              mandal: parsed.mandal,
+              description: parsed.description || text,
+              status: "pending",
+              telegram_message_id: String(message.message_id),
+              sender_name: name,
+              survey_submission_id: recentSub.id,
+              metadata: { follow_up_text: true },
+            });
+
+            await replyText(
+              chatId,
+              MSG.success(String(recentSub.id).slice(0, 8)),
+            );
+            return;
+          }
+
+          await sendWelcomeMenu(chatId, name);
+        })().catch(async (err) => {
+          console.error("[Bot:DeferredFollowUp]", err);
+          try {
+            await replyText(chatId, MSG.criticalServer);
+          } catch (replyErr) {
+            console.error("[Bot:DeferredFollowUpReply]", replyErr);
+          }
         });
-
-        await replyText(
-          chatId,
-          MSG.success(String(recentSub.id).slice(0, 8)),
-        );
-        return NextResponse.json({ ok: true, follow_up: true });
-      }
-
-      await sendWelcomeMenu(chatId, name);
-      return NextResponse.json({ ok: true });
+      });
+      return NextResponse.json({ ok: true, accepted: true, deferred: true });
     }
 
     return NextResponse.json({ ok: true, ignored: "no_photo" });

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Check, Copy, MessageCircle, Send } from "lucide-react";
+import { Check, Copy, MessageCircle, Send, Share2 } from "lucide-react";
 import {
   ANNOUNCE_PAGE_URL,
   COMMUNITY_BLASTS,
@@ -14,6 +14,22 @@ import {
   type CommunityBlastId,
 } from "@/lib/data/communityAnnounce";
 import { LinkifiedText } from "@/components/LinkifiedText";
+
+/** Low-spec Android WhatsApp intents truncate past ~1.2k chars. */
+const SHARE_PAYLOAD_MAX = 1200;
+
+function clampSharePayload(text: string, max = SHARE_PAYLOAD_MAX): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= max) return trimmed;
+  const slice = trimmed.slice(0, max - 1);
+  const breakAt = Math.max(slice.lastIndexOf("\n"), slice.lastIndexOf(" "));
+  const cut = breakAt > max * 0.6 ? slice.slice(0, breakAt) : slice;
+  return `${cut.trimEnd()}…`;
+}
+
+function whatsappShareUrl(text: string): string {
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+}
 
 function NoticeButton({
   blast,
@@ -63,10 +79,16 @@ export function AnnounceHub({
 
   const [activeId, setActiveId] = useState<CommunityBlastId>(startingId);
   const [copied, setCopied] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const blast = getCommunityBlast(activeId);
-  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(blast.text)}`;
+  const shareText = useMemo(
+    () => clampSharePayload(blast.text),
+    [blast.text],
+  );
+  const whatsappHref = whatsappShareUrl(shareText);
   const isCoordinator = blast.audience === "coordinator";
+  const wasClamped = blast.text.trim().length > SHARE_PAYLOAD_MAX;
 
   const selectBlast = (id: CommunityBlastId) => {
     setActiveId(id);
@@ -80,12 +102,35 @@ export function AnnounceHub({
 
   const copyText = async () => {
     try {
-      await navigator.clipboard.writeText(blast.text);
+      await navigator.clipboard.writeText(shareText);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
       setCopied(false);
     }
+  };
+
+  const nativeShare = async () => {
+    if (sharing) return;
+    setSharing(true);
+    try {
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share({
+          title: blast.title_te,
+          text: shareText,
+          url: `${ANNOUNCE_PAGE_URL}?blast=${activeId}`,
+        });
+        return;
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+    } finally {
+      setSharing(false);
+    }
+    window.open(whatsappHref, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -102,29 +147,32 @@ export function AnnounceHub({
       <div className="relative mx-auto flex min-h-dvh max-w-2xl flex-col px-4 py-8 sm:px-6 sm:py-10">
         <header className="mb-6">
           <p className="font-telugu text-xs font-semibold tracking-wide text-civic-bronze">
-            {"\u0C28\u0C3E\u0C2F\u0C3F \u0C38\u0C2E\u0C3E\u0C16\u0C4D\u0C2F \u0C24\u0C46\u0C32\u0C02\u0C17\u0C3E\u0C23"}
+            {"నాయి సమాఖ్య తెలంగాణ"}
           </p>
           <h1 className="mt-2 font-telugu text-2xl font-bold leading-snug text-civic-navy sm:text-3xl">
-            {"\u0C35\u0C3E\u0C1F\u0C4D\u0C38\u0C3E\u0C2A\u0C4D \u0C38\u0C02\u0C26\u0C47\u0C36 \u0C15\u0C3F\u0C1F\u0C4D"}
+            {"వాట్సాప్ సందేశ కిట్"}
           </h1>
           <p className="mt-1 font-sans text-sm font-medium text-slate-600">
-            WhatsApp message kit (manual share)
+            WhatsApp message kit — native share + safe payload
           </p>
           <p className="mt-3 max-w-lg font-telugu text-sm leading-relaxed text-slate-600">
-            {"\u0C12\u0C15 \u0C28\u0C4B\u0C1F\u0C40\u0C38\u0C4D \u0C0E\u0C02\u0C1A\u0C41\u0C15\u0C4B\u0C02\u0C21\u0C3F \u2192 \u0C2A\u0C4D\u0C30\u0C3F\u0C35\u0C4D\u0C2F\u0C42 \u0C1A\u0C42\u0C21\u0C02\u0C21\u0C3F \u2192 WhatsApp\u0C32\u0C4B \u0C37\u0C47\u0C30\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F \u0C32\u0C47\u0C26\u0C3E \u0C15\u0C3E\u0C2A\u0C40 \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F. \u0C06\u0C1F\u0C4B \u0C2E\u0C3E\u0C38\u0C4D \u0C38\u0C02\u0C26\u0C47\u0C36\u0C02 \u0C32\u0C47\u0C26\u0C41 \u2014 \u0C2E\u0C40\u0C30\u0C41 \u0C07\u0C15\u0C4D\u0C15\u0C21 \u0C2A\u0C02\u0C2A\u0C41\u0C24\u0C3E\u0C30\u0C41."}
-          </p>
-          <p className="mt-1.5 font-sans text-xs leading-relaxed text-slate-500">
-            You copy or open WhatsApp and send yourself — no mass auto-send.
+            {
+              "ఒక నోటీస్ ఎంచుకోండి → Share నొక్కండి → WhatsApp/మొబైల్ షేర్. ఆటో మాస్ సందేశం లేదు."
+            }
           </p>
         </header>
 
-        <div className="no-print mb-5 space-y-5" role="tablist" aria-label="Message kit notices">
+        <div
+          className="no-print mb-5 space-y-5"
+          role="tablist"
+          aria-label="Message kit notices"
+        >
           <section aria-labelledby="public-notices-heading">
             <h2
               id="public-notices-heading"
               className="mb-2 font-telugu text-xs font-bold uppercase tracking-wider text-civic-navy"
             >
-              {"\u0C2A\u0C4D\u0C30\u0C1C\u0C3E \u0C37\u0C47\u0C30\u0C4D \u0C28\u0C4B\u0C1F\u0C40\u0C38\u0C41\u0C32\u0C41"}
+              {"ప్రజా షేర్ నోటీసులు"}
               <span className="ml-2 font-sans font-medium normal-case tracking-normal text-slate-500">
                 / Public share
               </span>
@@ -146,7 +194,7 @@ export function AnnounceHub({
               id="coordinator-notices-heading"
               className="mb-2 font-telugu text-xs font-bold uppercase tracking-wider text-civic-bronze"
             >
-              {"\u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24\u0C32\u0C15\u0C41 \u0C2E\u0C3E\u0C24\u0C4D\u0C30\u0C2E\u0C47"}
+              {"సమన్వయకర్తలకు మాత్రమే"}
               <span className="ml-2 font-sans font-medium normal-case tracking-normal text-slate-500">
                 / Coordinators only
               </span>
@@ -166,19 +214,38 @@ export function AnnounceHub({
 
         {isCoordinator ? (
           <p className="no-print mb-3 rounded-lg border border-civic-bronze/30 bg-civic-bronze/5 px-3 py-2 font-telugu text-xs text-civic-bronze">
-            {"\u0C08 \u0C38\u0C02\u0C26\u0C47\u0C36\u0C02 \u0C2E\u0C02\u0C21\u0C32 \u0C38\u0C2E\u0C28\u0C4D\u0C35\u0C2F\u0C15\u0C30\u0C4D\u0C24\u0C32 SOP \u2014 \u0C38\u0C3E\u0C27\u0C3E\u0C30\u0C23 \u0C35\u0C3E\u0C1F\u0C4D\u0C38\u0C3E\u0C2A\u0C4D \u0C17\u0C4D\u0C30\u0C42\u0C2A\u0C41\u0C32\u0C15\u0C41 \u0C15\u0C3E\u0C26\u0C41."}
+            {
+              "ఈ సందేశం మండల సమన్వయకర్తల SOP — సాధారణ వాట్సాప్ గ్రూపులకు కాదు."
+            }
+          </p>
+        ) : null}
+
+        {wasClamped ? (
+          <p className="no-print mb-3 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-telugu text-[11px] text-slate-600">
+            {
+              "షేర్ పేలోడ్ 1,200 అక్షరాలకు క్లాంప్ చేయబడింది — Android truncation నివారణ."
+            }
           </p>
         ) : null}
 
         <div className="no-print mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button
+            type="button"
+            disabled={sharing}
+            onClick={() => void nativeShare()}
+            className="tap inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#128C7E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0E7A6E] disabled:opacity-70 sm:flex-none sm:px-5"
+          >
+            <Share2 className="h-4 w-4" aria-hidden />
+            <span className="font-telugu">{"షేర్ చేయండి"}</span>
+          </button>
           <a
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="tap inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#128C7E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0E7A6E] sm:flex-none sm:px-5"
+            className="tap inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-[#128C7E]/40 bg-white px-4 py-3 text-sm font-semibold text-[#0E7A6E] transition hover:bg-emerald-50 sm:flex-none sm:px-5"
           >
             <MessageCircle className="h-4 w-4" aria-hidden />
-            Share on WhatsApp
+            WhatsApp
           </a>
           <button
             type="button"
@@ -210,11 +277,14 @@ export function AnnounceHub({
         >
           <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Preview
+            {wasClamped
+              ? ` (clamped ${shareText.length}/${SHARE_PAYLOAD_MAX})`
+              : ""}
           </p>
-          <LinkifiedText text={blast.text} />
+          <LinkifiedText text={shareText} />
         </article>
 
-        <footer className="mt-6 flex flex-col items-start gap-2 text-xs text-slate-500 no-print">
+        <footer className="no-print mt-6 flex flex-col items-start gap-2 text-xs text-slate-500">
           <p>
             Deep link:{" "}
             <Link
@@ -228,7 +298,7 @@ export function AnnounceHub({
             href="/"
             className="font-telugu text-slate-500 hover:text-civic-navy"
           >
-            {"\u2190"} {"\u0C2A\u0C4B\u0C30\u0C4D\u0C1F\u0C32\u0C4D\u0C15\u0C41 \u0C24\u0C3F\u0C30\u0C3F\u0C17\u0C3F"}
+            ← {"పోర్టల్‌కు తిరిగి"}
           </Link>
         </footer>
       </div>

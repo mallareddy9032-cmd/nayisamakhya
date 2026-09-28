@@ -26,11 +26,39 @@ interface FeedItem {
   mandals?: { id: string; name_en: string; name_te: string } | null;
 }
 
+type TopicFilter = "all" | "go23" | "welfare" | "local";
+
+const TOPIC_PILLS: { id: TopicFilter; label: string }[] = [
+  { id: "all", label: "అన్నీ" },
+  { id: "go23", label: "విద్యుత్ సబ్సిడీ (G.O. 23)" },
+  { id: "welfare", label: "సంక్షేమ పథకాలు" },
+  { id: "local", label: "స్థానిక ప్రకటనలు" },
+];
+
+const HELPLINE_WA =
+  "https://wa.me/919032654111?text=" +
+  encodeURIComponent(
+    "నమస్కారం, ఫీడ్ ఫిల్టర్‌లో రికార్డులు కనబడడం లేదు — సహాయం కావాలి.",
+  );
+
+const TOPIC_MATCHERS: Record<Exclude<TopicFilter, "all">, RegExp> = {
+  go23: /(?:g\.?\s*o\.?\s*23|జి\.?\s*ఓ\.?\s*23|విద్యుత్|సబ్సిడీ|మీటర్|యూనిట్)/i,
+  welfare: /(?:సంక్షేమ|పథక|భవన|స్థల|శిక్షణ|welfare|scheme|community hall)/i,
+  local: /(?:ప్రకటన|సమావేశ|మండల|గ్రామ|announce|meeting|local)/i,
+};
+
+function matchesTopic(item: FeedItem, topic: TopicFilter): boolean {
+  if (topic === "all") return true;
+  const hay = `${item.raw_caption || ""} ${item.panchayat_name || ""}`;
+  return TOPIC_MATCHERS[topic].test(hay);
+}
+
 export default function CivicFeedPage() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
   const [selectedMandal, setSelectedMandal] = useState<string>("all");
+  const [topic, setTopic] = useState<TopicFilter>("all");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -90,9 +118,13 @@ export default function CivicFeedPage() {
       if (selectedMandal !== "all" && item.mandals?.id !== selectedMandal) {
         return false;
       }
+      if (!matchesTopic(item, topic)) return false;
       return true;
     });
-  }, [items, selectedDistrict, selectedMandal]);
+  }, [items, selectedDistrict, selectedMandal, topic]);
+
+  const filtersActive =
+    selectedDistrict !== "all" || selectedMandal !== "all" || topic !== "all";
 
   return (
     <div className="min-h-screen bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
@@ -144,55 +176,84 @@ export default function CivicFeedPage() {
         </div>
       </header>
 
-      <section className="border-b border-civic-border bg-civic-subtle/80">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-slate-600">
-            <Filter className="h-3.5 w-3.5 text-civic-bronze" />
-            <span className="font-telugu">{"\u0c2a\u0c4d\u0c30\u0c3e\u0c02\u0c24\u0c02 \u0c35\u0c3e\u0c30\u0c40\u0c17\u0c3e \u0c2b\u0c3f\u0c32\u0c4d\u0c1f\u0c30\u0c4d:"}</span>
+      <section className="sticky top-[57px] z-20 border-b border-civic-border bg-[#FBFBFA]/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 text-xs">
+          <div
+            className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5"
+            role="tablist"
+            aria-label="Topic filters"
+          >
+            {TOPIC_PILLS.map((pill) => {
+              const active = topic === pill.id;
+              return (
+                <button
+                  key={pill.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTopic(pill.id)}
+                  className={
+                    active
+                      ? "shrink-0 rounded-full border border-[#0F172A] bg-[#0F172A] px-3.5 py-2 font-telugu text-[11px] font-bold text-white shadow-xs"
+                      : "shrink-0 rounded-full border border-slate-300 bg-white px-3.5 py-2 font-telugu text-[11px] font-semibold text-[#0F172A] shadow-xs transition hover:border-[#B45309]/50"
+                  }
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
           </div>
 
-          <select
-            value={selectedDistrict}
-            onChange={(e) => {
-              setSelectedDistrict(e.target.value);
-              setSelectedMandal("all");
-            }}
-            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-telugu text-civic-ink shadow-xs focus:border-civic-bronze focus:outline-none focus:ring-1 focus:ring-civic-bronze"
-          >
-            <option value="all">{"\u0c05\u0c28\u0c4d\u0c28\u0c3f \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e\u0c32\u0c41 (All Districts)"}</option>
-            {districts.map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 font-medium text-slate-600">
+              <Filter className="h-3.5 w-3.5 text-civic-bronze" />
+              <span className="font-telugu">{"ప్రాంత వారీగా ఫిల్టర్:"}</span>
+            </div>
 
-          <select
-            value={selectedMandal}
-            onChange={(e) => setSelectedMandal(e.target.value)}
-            disabled={mandals.length === 0}
-            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-telugu text-civic-ink shadow-xs focus:border-civic-bronze focus:outline-none focus:ring-1 focus:ring-civic-bronze disabled:opacity-50"
-          >
-            <option value="all">{"\u0c05\u0c28\u0c4d\u0c28\u0c3f \u0c2e\u0c02\u0c21\u0c32\u0c3e\u0c32\u0c41 (All Mandals)"}</option>
-            {mandals.map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
-
-          {(selectedDistrict !== "all" || selectedMandal !== "all") && (
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedDistrict("all");
+            <select
+              value={selectedDistrict}
+              onChange={(e) => {
+                setSelectedDistrict(e.target.value);
                 setSelectedMandal("all");
               }}
-              className="ml-auto font-telugu font-semibold text-civic-bronze hover:underline"
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-telugu text-civic-ink shadow-xs focus:border-civic-bronze focus:outline-none focus:ring-1 focus:ring-civic-bronze"
             >
-              {"\u0c30\u0c40\u0c38\u0c46\u0c1f\u0c4d \u0c1a\u0c47\u0c2f\u0c02\u0c21\u0c3f"}
-            </button>
-          )}
+              <option value="all">{"అన్ని జిల్లాలు (All Districts)"}</option>
+              {districts.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedMandal}
+              onChange={(e) => setSelectedMandal(e.target.value)}
+              disabled={mandals.length === 0}
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-telugu text-civic-ink shadow-xs focus:border-civic-bronze focus:outline-none focus:ring-1 focus:ring-civic-bronze disabled:opacity-50"
+            >
+              <option value="all">{"అన్ని మండలాలు (All Mandals)"}</option>
+              {mandals.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+
+            {filtersActive ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedDistrict("all");
+                  setSelectedMandal("all");
+                  setTopic("all");
+                }}
+                className="ml-auto font-telugu font-semibold text-civic-bronze hover:underline"
+              >
+                {"రీసెట్ చేయండి"}
+              </button>
+            ) : null}
+          </div>
         </div>
       </section>
 
@@ -222,151 +283,65 @@ export default function CivicFeedPage() {
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="mx-auto max-w-2xl space-y-6">
-            <div className="rounded-2xl border border-civic-border bg-white p-6 shadow-xs sm:p-8">
+            <div className="rounded-2xl border-2 border-[#0F172A] bg-[#0F172A] p-6 text-white shadow-lg sm:p-8">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                <span className="inline-flex rounded-xl border border-civic-bronze/20 bg-civic-bronze/10 p-2.5 text-civic-bronze">
+                <span className="inline-flex rounded-xl border border-[#B45309]/40 bg-[#B45309]/20 p-2.5 text-[#B45309]">
                   <ImageIcon className="h-6 w-6" />
                 </span>
                 <div>
-                  <p className="font-telugu text-base font-bold text-civic-ink">
-                    {
-                      "\u0c07\u0c02\u0c15\u0c3e \u0c27\u0c4d\u0c30\u0c41\u0c35\u0c40\u0c15\u0c30\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c3f\u0c28 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c28\u0c3f\u0c35\u0c47\u0c26\u0c3f\u0c15\u0c32\u0c41 \u0c32\u0c47\u0c35\u0c41"
-                    }
+                  <p className="font-telugu text-base font-bold text-white">
+                    {filtersActive
+                      ? "ఈ ఫిల్టర్‌కు సరిపోయే రికార్డులు లేవు"
+                      : "ఇంకా ధ్రువీకరించబడిన క్షేత్ర నివేదికలు లేవు"}
                   </p>
-                  <p className="mt-0.5 text-xs font-medium text-slate-500">
-                    No verified field photos published yet
+                  <p className="mt-0.5 text-xs font-medium text-slate-300">
+                    {filtersActive
+                      ? "No records match this filter — try అన్నీ or contact the helpline"
+                      : "No verified field photos published yet"}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-4 font-telugu text-sm leading-relaxed text-civic-navy">
-                {
-                  "\u0c07\u0c26\u0c3f \u0c2b\u0c40\u0c21\u0c4d\u0c32\u0c4b \u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d \u0c06\u0c2e\u0c4b\u0c26\u0c02 \u0c24\u0c30\u0c4d\u0c35\u0c3e\u0c24 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c2b\u0c4b\u0c1f\u0c4b\u0c32\u0c41 \u0c2e\u0c3e\u0c24\u0c4d\u0c30\u0c2e\u0c47 \u0c15\u0c28\u0c3f\u0c2a\u0c3f\u0c38\u0c4d\u0c24\u0c3e\u0c2f\u0c3f \u2014 \u0c37\u0c3e\u0c2a\u0c41\u0c32\u0c41, \u0c38\u0c2e\u0c3e\u0c35\u0c47\u0c36\u0c3e\u0c32\u0c41, \u0c38\u0c02\u0c18 \u0c15\u0c3e\u0c30\u0c4d\u0c2f\u0c15\u0c4d\u0c30\u0c2e\u0c3e\u0c32\u0c41."
-                }
+              <p className="mt-4 font-telugu text-sm leading-relaxed text-slate-200">
+                {filtersActive
+                  ? "ఫిల్టర్ మార్చండి లేదా సహాయవాణికి నేరుగా వాట్సాప్ చేయండి — డెస్క్ మీ ప్రాంత రికార్డు స్థితిని చెబుతుంది."
+                  : "ఇది ఫీడ్‌లో అడ్మిన్ ఆమోదం తర్వాత క్షేత్ర ఫోటోలు మాత్రమే కనిపిస్తాయి — షాపులు, సమావేశాలు, సంఘ కార్యక్రమాలు."}
               </p>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
-                This feed shows verified field photos after admin approval —
-                shops, meetings, and community activities across Telangana.
-              </p>
-
-              <ol className="mt-5 space-y-3 border-t border-civic-border pt-5">
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-navy font-telugu text-[11px] font-bold text-white">
-                    1
-                  </span>
-                  <div>
-                    <p className="font-telugu text-sm font-semibold text-civic-ink">
-                      {
-                        "\u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c2b\u0c4b\u0c1f\u0c4b \u0c24\u0c40\u0c2f\u0c02\u0c21\u0c3f"
-                      }
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Take a clear field photo (shop, meeting, or activity)
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-navy font-telugu text-[11px] font-bold text-white">
-                    2
-                  </span>
-                  <div>
-                    <p className="font-telugu text-sm font-semibold text-civic-ink">
-                      {
-                        "Telegram @NayiSamakhyaDeskBot \u0c15\u0c41 \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e / \u0c2e\u0c02\u0c21\u0c32\u0c02 / \u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c02 \u0c24\u0c4b \u0c2a\u0c02\u0c2a\u0c02\u0c21\u0c3f"
-                      }
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Send it to the desk bot with district, mandal, and village
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-navy font-telugu text-[11px] font-bold text-white">
-                    3
-                  </span>
-                  <div>
-                    <p className="font-telugu text-sm font-semibold text-civic-ink">
-                      {
-                        "\u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d \u0c27\u0c4d\u0c30\u0c41\u0c35\u0c40\u0c15\u0c30\u0c23\u0c15\u0c41 \u0c35\u0c47\u0c1a\u0c3f \u0c09\u0c02\u0c21\u0c02\u0c21\u0c3f"
-                      }
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Wait for admin verification — approved photos appear here
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-civic-bronze font-telugu text-[11px] font-bold text-white">
-                    4
-                  </span>
-                  <div>
-                    <p className="font-telugu text-sm font-semibold text-civic-ink">
-                      {
-                        "\u0c06\u0c2e\u0c4b\u0c26\u0c02 \u0c24\u0c30\u0c4d\u0c35\u0c3e\u0c24 \u0c2b\u0c40\u0c21\u0c4d\u0c32\u0c4b \u0c15\u0c28\u0c3f\u0c2a\u0c3f\u0c38\u0c4d\u0c24\u0c41\u0c02\u0c26\u0c3f"
-                      }
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Your entry is listed on this statewide civic feed
-                    </p>
-                  </div>
-                </li>
-              </ol>
 
               <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:items-center">
                 <a
-                  href="https://t.me/NayiSamakhyaDeskBot"
+                  href={HELPLINE_WA}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-civic-bronze px-4 py-2.5 font-telugu text-sm font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B45309] px-4 py-3 font-telugu text-sm font-bold text-white shadow-xs transition-all hover:bg-amber-800 sm:w-auto"
                 >
-                  {
-                    "Telegram \u0c2c\u0c3e\u0c1f\u0c4d \u0c24\u0c46\u0c30\u0c35\u0c02\u0c21\u0c3f"
-                  }
+                  {"సహాయవాణి WhatsApp (+91 9032654111)"}
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
-                <Link
-                  href="/representation"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-civic-border bg-white px-4 py-2.5 font-telugu text-sm font-semibold text-civic-ink shadow-xs transition-colors hover:bg-civic-subtle sm:w-auto"
-                >
-                  <FileText className="h-3.5 w-3.5 text-civic-bronze" />
-                  {
-                    "\u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02 \u0c24\u0c2f\u0c3e\u0c30\u0c40"
-                  }
-                </Link>
+                {filtersActive ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTopic("all");
+                      setSelectedDistrict("all");
+                      setSelectedMandal("all");
+                    }}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-3 font-telugu text-sm font-semibold text-white transition hover:bg-white/20 sm:w-auto"
+                  >
+                    {"అన్నీ చూపించు"}
+                  </button>
+                ) : (
+                  <a
+                    href="https://t.me/NayiSamakhyaDeskBot"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-3 font-telugu text-sm font-semibold text-white transition hover:bg-white/20 sm:w-auto"
+                  >
+                    {"Telegram బాట్ తెరవండి"}
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
               </div>
-            </div>
-
-            {/* Structure-only sample — clearly labeled, not fake approved data */}
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-civic-subtle/60 p-4 sm:p-5">
-              <p className="mb-3 font-telugu text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                {
-                  "\u0c28\u0c2e\u0c42\u0c28\u0c3e \u0c2a\u0c4d\u0c30\u0c40\u0c35\u0c4d\u0c2f\u0c42 / Sample preview"
-                }{" "}
-                — structure only, not approved data
-              </p>
-              <article className="overflow-hidden rounded-xl border border-civic-border bg-white opacity-80 shadow-xs">
-                <div className="relative flex aspect-video w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                  <ImageIcon className="h-10 w-10 text-slate-400" />
-                  <div className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-md border border-slate-300 bg-white/95 px-2.5 py-1 font-telugu text-[11px] font-semibold text-slate-500">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    {
-                      "\u0c28\u0c2e\u0c42\u0c28\u0c3e \u0c38\u0c40\u0c32\u0c4d"
-                    }
-                  </div>
-                </div>
-                <div className="space-y-2 p-4">
-                  <div className="flex items-center gap-1.5 font-telugu text-xs font-semibold text-civic-bronze/70">
-                    <MapPin className="h-3.5 w-3.5" />
-                    <span>
-                      {
-                        "\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c02, \u0c2e\u0c02\u0c21\u0c32\u0c02, \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e"
-                      }
-                    </span>
-                  </div>
-                  <div className="h-2.5 w-[80%] rounded bg-slate-200" />
-                  <div className="h-2.5 w-[60%] rounded bg-slate-100" />
-                </div>
-              </article>
             </div>
           </div>
         ) : (

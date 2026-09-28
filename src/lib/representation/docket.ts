@@ -67,12 +67,25 @@ export function toTeluguNumerals(value: string | number): string {
   return String(value).replace(/\d/g, (d) => TELUGU_DIGITS[Number(d)] ?? d);
 }
 
-/** e.g. 28 సెప్టెంబర్ 2026 (Arabic day/year kept for officer readability). */
+/**
+ * Strict Telugu administrative date — never uses client `toLocale*` / device locale.
+ * Always Asia/Kolkata calendar parts + hardcoded Telugu month names.
+ * Example: `28 సెప్టెంబర్, 2026`
+ */
 export function formatTeluguOfficialDate(date: Date = new Date()): string {
-  const day = date.getDate();
-  const month = TELUGU_MONTHS[date.getMonth()] || "";
-  const year = date.getFullYear();
-  return `${day} ${month} ${year}`;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  }).formatToParts(date);
+
+  const day = Number(parts.find((p) => p.type === "day")?.value || "1");
+  // Intl month is 1–12; TELUGU_MONTHS is 0-indexed.
+  const monthNum = Number(parts.find((p) => p.type === "month")?.value || "1");
+  const year = Number(parts.find((p) => p.type === "year")?.value || "2026");
+  const month = TELUGU_MONTHS[Math.max(0, Math.min(11, monthNum - 1))] || "";
+  return `${day} ${month}, ${year}`;
 }
 
 function shortHashFromSeed(seed: string): string {

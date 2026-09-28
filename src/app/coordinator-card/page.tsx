@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Printer,
@@ -13,18 +13,122 @@ import {
 import { CommunityHubsSection } from "@/components/CommunityHubsSection";
 import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 
+const STORAGE_KEY = "ns.coordinator-card.v1";
+
+type CardDraft = {
+  name: string;
+  role: string;
+  mandal: string;
+  district: string;
+  phone: string;
+};
+
+const DEFAULTS: CardDraft = {
+  name: "సమన్వయకర్త పేరు",
+  role: "మండల సమన్వయకర్త (Mandal Coordinator)",
+  mandal: "కోదాడ",
+  district: "సూర్యాపేట",
+  phone: "",
+};
+
+function readStoredDraft(): CardDraft {
+  if (typeof window === "undefined") return DEFAULTS;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULTS;
+    const parsed = JSON.parse(raw) as Partial<CardDraft>;
+    return {
+      name: typeof parsed.name === "string" ? parsed.name : DEFAULTS.name,
+      role: typeof parsed.role === "string" ? parsed.role : DEFAULTS.role,
+      mandal: typeof parsed.mandal === "string" ? parsed.mandal : DEFAULTS.mandal,
+      district:
+        typeof parsed.district === "string" ? parsed.district : DEFAULTS.district,
+      phone: typeof parsed.phone === "string" ? parsed.phone : DEFAULTS.phone,
+    };
+  } catch {
+    return DEFAULTS;
+  }
+}
+
+/** Fine-line civic guilloche — SVG pattern overlay to deter casual card tampering. */
+function GuillocheOverlay() {
+  return (
+    <svg
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.14]"
+      aria-hidden
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <pattern
+          id="ns-guilloche"
+          width="48"
+          height="48"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M0 24c8-16 16-16 24 0s16 16 24 0M0 0c8 16 16 16 24 0s16-16 24 0M0 48c8-16 16-16 24 0s16 16 24 0"
+            fill="none"
+            stroke="#0F172A"
+            strokeWidth="0.55"
+          />
+          <circle
+            cx="24"
+            cy="24"
+            r="10"
+            fill="none"
+            stroke="#B45309"
+            strokeWidth="0.4"
+            opacity="0.7"
+          />
+          <circle
+            cx="24"
+            cy="24"
+            r="4"
+            fill="none"
+            stroke="#0F172A"
+            strokeWidth="0.35"
+          />
+        </pattern>
+        <radialGradient id="ns-guilloche-fade" cx="50%" cy="40%" r="70%">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#ns-guilloche)" />
+      <rect width="100%" height="100%" fill="url(#ns-guilloche-fade)" />
+    </svg>
+  );
+}
+
 export default function CoordinatorCardPage() {
-  const [name, setName] = useState(
-    "\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c2a\u0c47\u0c30\u0c41",
-  );
-  const [role, setRole] = useState(
-    "\u0c2e\u0c02\u0c21\u0c32 \u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 (Mandal Coordinator)",
-  );
-  const [mandal, setMandal] = useState("\u0c15\u0c4b\u0c26\u0c3e\u0c21");
-  const [district, setDistrict] = useState(
-    "\u0c38\u0c42\u0c30\u0c4d\u0c2f\u0c3e\u0c2a\u0c47\u0c1f",
-  );
-  const [phone, setPhone] = useState("");
+  const [hydrated, setHydrated] = useState(false);
+  const [name, setName] = useState(DEFAULTS.name);
+  const [role, setRole] = useState(DEFAULTS.role);
+  const [mandal, setMandal] = useState(DEFAULTS.mandal);
+  const [district, setDistrict] = useState(DEFAULTS.district);
+  const [phone, setPhone] = useState(DEFAULTS.phone);
+
+  // Instant offline restore from localStorage (no network required).
+  useEffect(() => {
+    const draft = readStoredDraft();
+    setName(draft.name);
+    setRole(draft.role);
+    setMandal(draft.mandal);
+    setDistrict(draft.district);
+    setPhone(draft.phone);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      const payload: CardDraft = { name, role, mandal, district, phone };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      /* quota / private mode — card still works in-session */
+    }
+  }, [hydrated, name, role, mandal, district, phone]);
 
   const botUrl = useMemo(
     () =>
@@ -66,13 +170,11 @@ export default function CoordinatorCardPage() {
               <div className="flex items-center gap-1.5">
                 <IdCard className="h-4 w-4 shrink-0 text-civic-bronze" />
                 <h1 className="font-telugu text-base font-bold leading-snug text-civic-ink md:text-lg">
-                  {
-                    "\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"
-                  }
+                  {"సమన్వయకర్త డిజిటల్ కార్డు"}
                 </h1>
               </div>
               <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
-                Executive Civic ID — Print / Laminate Ready
+                Executive Civic ID — Offline-ready · Guilloche secured
               </p>
             </div>
           </div>
@@ -83,9 +185,7 @@ export default function CoordinatorCardPage() {
             className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-civic-bronze px-3.5 py-2.5 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover sm:w-auto sm:py-2"
           >
             <Printer className="h-4 w-4" />
-            {
-              "\u0c2a\u0c4d\u0c30\u0c3f\u0c02\u0c1f\u0c4d / PDF \u0c38\u0c47\u0c35\u0c4d"
-            }
+            {"ప్రింట్ / PDF సేవ్"}
           </button>
         </div>
       </header>
@@ -94,16 +194,16 @@ export default function CoordinatorCardPage() {
         <section className="no-print w-full rounded-2xl border border-civic-border bg-white p-5 shadow-xs print:hidden">
           <h2 className="mb-3 flex items-center gap-2 font-telugu text-sm font-bold text-civic-ink">
             <ShieldCheck className="h-4 w-4 text-civic-bronze" />
-            {
-              "\u0c35\u0c3f\u0c35\u0c30\u0c3e\u0c32\u0c41 \u0c28\u0c2e\u0c4b\u0c26\u0c41 \u0c1a\u0c47\u0c2f\u0c02\u0c21\u0c3f"
-            }
+            {"వివరాలు నమోదు చేయండి"}
           </h2>
+          <p className="mb-3 font-telugu text-[11px] text-slate-500">
+            {"ఈ వివరాలు మీ ఫోన్‌లో సేవ్ అవుతాయి — నెట్‌వర్క్ లేకున్నా కార్డు కనిపిస్తుంది."}
+          </p>
 
           <div className="space-y-3 text-xs">
             <div>
               <label className="mb-1 block font-telugu font-medium text-slate-600">
-                {"\u0c2a\u0c42\u0c30\u0c4d\u0c24\u0c3f \u0c2a\u0c47\u0c30\u0c41"}{" "}
-                (Full Name):
+                {"పూర్తి పేరు"} (Full Name):
               </label>
               <input
                 type="text"
@@ -115,10 +215,7 @@ export default function CoordinatorCardPage() {
 
             <div>
               <label className="mb-1 block font-telugu font-medium text-slate-600">
-                {
-                  "\u0c2c\u0c3e\u0c27\u0c4d\u0c2f\u0c24 / \u0c39\u0c4b\u0c26\u0c3e"
-                }{" "}
-                (Designation):
+                {"బాధ్యత / హోదా"} (Designation):
               </label>
               <input
                 type="text"
@@ -131,7 +228,7 @@ export default function CoordinatorCardPage() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="mb-1 block font-telugu font-medium text-slate-600">
-                  {"\u0c2e\u0c02\u0c21\u0c32\u0c02"} (Mandal):
+                  {"మండలం"} (Mandal):
                 </label>
                 <input
                   type="text"
@@ -142,7 +239,7 @@ export default function CoordinatorCardPage() {
               </div>
               <div>
                 <label className="mb-1 block font-telugu font-medium text-slate-600">
-                  {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e"} (District):
+                  {"జిల్లా"} (District):
                 </label>
                 <input
                   type="text"
@@ -155,10 +252,7 @@ export default function CoordinatorCardPage() {
 
             <div>
               <label className="mb-1 block font-telugu font-medium text-slate-600">
-                {
-                  "\u0c2e\u0c4a\u0c2c\u0c48\u0c32\u0c4d \u0c28\u0c02\u0c2c\u0c30\u0c4d"
-                }{" "}
-                (Mobile Phone):
+                {"మొబైల్ నంబర్"} (Mobile Phone):
               </label>
               <input
                 type="tel"
@@ -176,16 +270,15 @@ export default function CoordinatorCardPage() {
           id="coordinator-print-card"
           className="print-only-document print-document printable-card relative flex h-[220px] w-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-civic-border bg-white p-5 shadow-xl print:m-0 print:rounded-none print:border print:border-civic-ink print:shadow-none"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-civic-bronze" />
-          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-civic-bronze/10 blur-2xl" />
+          <GuillocheOverlay />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-1.5 bg-civic-bronze" />
+          <div className="pointer-events-none absolute -right-10 -top-10 z-[1] h-28 w-28 rounded-full bg-civic-bronze/10 blur-2xl" />
 
-          <div className="flex items-start justify-between gap-3">
+          <div className="relative z-[2] flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-1.5 font-telugu text-sm font-bold tracking-wide text-civic-bronze">
                 <ShieldCheck className="h-4 w-4" />
-                {
-                  "\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23"
-                }
+                {"నాయి సమాఖ్య తెలంగాణ"}
               </div>
               <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-widest text-slate-500">
                 Official Coordinator Desk
@@ -201,7 +294,7 @@ export default function CoordinatorCardPage() {
             </div>
           </div>
 
-          <div className="my-auto">
+          <div className="relative z-[2] my-auto">
             <h3 className="font-telugu text-base font-bold tracking-tight text-civic-ink">
               {name}
             </h3>
@@ -211,26 +304,25 @@ export default function CoordinatorCardPage() {
             <div className="mt-1.5 flex items-center gap-1 font-telugu text-[11px] text-civic-navy">
               <MapPin className="h-3 w-3 flex-shrink-0 text-slate-400" />
               <span>
-                {mandal} {"\u0c2e\u0c02\u0c21\u0c32\u0c02"}, {district}{" "}
-                {"\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e"}
+                {mandal} {"మండలం"}, {district} {"జిల్లా"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-civic-border pt-2 text-[10px] text-slate-500">
+          <div className="relative z-[2] flex items-center justify-between border-t border-civic-border pt-2 text-[10px] text-slate-500">
             <div className="flex items-center gap-1 font-semibold text-civic-ink">
               <Phone className="h-3 w-3 text-civic-bronze" />
               +91 {phone || "—"}
             </div>
             <span className="text-[9px] tracking-wide text-slate-500">
-              nayisamakhya.org
+              nayisamakhya.org · SECURE
             </span>
           </div>
         </div>
 
         <p className="no-print max-w-md text-center font-telugu text-[11px] leading-relaxed text-slate-500 print:hidden">
           {
-            "\u0c2a\u0c4d\u0c30\u0c3f\u0c02\u0c1f\u0c4d \u0c24\u0c40\u0c38\u0c41\u0c15\u0c41\u0c28\u0c4d\u0c28\u0c2a\u0c4d\u0c2a\u0c41\u0c21\u0c41 \u0c15\u0c47\u0c35\u0c32 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41 \u0c2e\u0c3e\u0c24\u0c4d\u0c30\u0c2e\u0c47 \u0c35\u0c3f\u0c2d\u0c1c\u0c28\u0c2a\u0c21\u0c41\u0c24\u0c41\u0c02\u0c26\u0c3f. QR \u0c38\u0c4d\u0c15\u0c3e\u0c28\u0c4d \u0c1a\u0c47\u0c38\u0c4d\u0c24\u0c47 \u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c2c\u0c3e\u0c1f\u0c4d\u0c15\u0c41 \u0c24\u0c46\u0c30\u0c41\u0c38\u0c4d\u0c24\u0c41\u0c02\u0c26\u0c3f."
+            "ప్రింట్ తీసుకున్నప్పుడు కేవలం కార్డు మాత్రమే విభజనపడుతుంది. QR స్కాన్ చేస్తే సేవా డెస్క్ బాట్‌కు తెరుస్తుంది. గిల్లోష్ ప్యాటర్న్ ట్యాంపరింగ్ నిరోధం కోసం."
           }
         </p>
 
