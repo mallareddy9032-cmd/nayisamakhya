@@ -431,8 +431,8 @@ function EpochCard({ era }: { era: TimelineEra }) {
 
           <p
             className={cn(
-              "font-telugu text-sm leading-[1.8] text-slate-600",
-              isContemporary ? "mt-1.5 line-clamp-2" : "mt-2.5 line-clamp-3",
+              "mt-2.5 font-telugu text-sm leading-[1.8] text-slate-600",
+              isContemporary && "line-clamp-3",
             )}
           >
             {era.summaryTe}

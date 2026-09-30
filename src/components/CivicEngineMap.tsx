@@ -301,154 +301,160 @@ function DesktopMap({
   const related = active?.related ?? [];
 
   return (
-    <div className="relative hidden min-h-[420px] lg:block">
-      <ConnectorLayer activeInput={activeId} related={related} />
+    <div className="relative hidden lg:block">
+      <div className="relative min-h-[420px]">
+        <ConnectorLayer activeInput={activeId} related={related} />
 
-      <div className="relative z-[1] grid grid-cols-[1fr_minmax(240px,300px)_1fr] items-center gap-4 xl:gap-6">
-        {/* Left inputs */}
-        <ul className="flex flex-col gap-3">
-          {INPUTS.map((node) => {
-            const Icon = node.icon;
-            const on = activeId === node.id;
-            return (
-              <li key={node.id}>
-                <button
-                  type="button"
-                  onMouseEnter={() => setActiveId(node.id)}
-                  onFocus={() => setActiveId(node.id)}
-                  onClick={() => setActiveId(node.id)}
-                  className={cn(
-                    "civic-focus-ring group flex w-full items-start gap-3 rounded-xl border bg-white/90 p-3 text-left shadow-xs transition-all duration-300",
-                    on
-                      ? "border-[#B45309] bg-[#FFFDF9] shadow-[0_0_0_3px_rgb(180_83_9_/0.2),0_12px_28px_rgb(15_23_42_/0.08)]"
-                      : "border-[#EAD7B5]/80 hover:border-[#B45309]/50",
-                  )}
-                  aria-pressed={on}
-                >
+        <div className="relative z-[1] grid grid-cols-[1fr_minmax(240px,300px)_1fr] items-center gap-4 xl:gap-6">
+          {/* Left inputs */}
+          <ul className="flex flex-col gap-3">
+            {INPUTS.map((node) => {
+              const Icon = node.icon;
+              const on = activeId === node.id;
+              return (
+                <li key={node.id}>
+                  <button
+                    type="button"
+                    onMouseEnter={() => setActiveId(node.id)}
+                    onFocus={() => setActiveId(node.id)}
+                    onClick={() => setActiveId(node.id)}
+                    className={cn(
+                      "civic-focus-ring group flex w-full items-start gap-3 rounded-xl border bg-white/90 p-3 text-left shadow-xs transition-all duration-300",
+                      on
+                        ? "border-[#B45309] bg-[#FFFDF9] shadow-[0_0_0_3px_rgb(180_83_9_/0.2),0_12px_28px_rgb(15_23_42_/0.08)]"
+                        : "border-[#EAD7B5]/80 hover:border-[#B45309]/50",
+                    )}
+                    aria-pressed={on}
+                  >
+                    <span
+                      className={cn(
+                        "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                        on
+                          ? "border-[#B45309]/40 bg-[#B45309]/15 text-[#B45309]"
+                          : "border-slate-200 bg-[#FBFBFA] text-[#1E293B] group-hover:text-[#B45309]",
+                      )}
+                    >
+                      <Icon className="h-[18px] w-[18px]" aria-hidden />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-telugu text-sm font-bold leading-snug text-[#1E293B]">
+                        {node.title}
+                      </span>
+                      <span className="mt-0.5 block font-telugu text-[11px] leading-relaxed text-slate-600">
+                        {node.blurb}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Center engine — wires terminate here; CTAs live below the graph */}
+          <div className="px-1">
+            <EngineCard lit={activeId != null} />
+          </div>
+
+          {/* Right outputs */}
+          <ul className="flex flex-col gap-3">
+            {OUTPUTS.map((out) => {
+              const Icon = out.icon;
+              const on = related.includes(out.id);
+              const resolvedHref =
+                out.id === "petition" &&
+                active &&
+                related.includes("petition") &&
+                active.ctaHref.startsWith("/representation")
+                  ? active.ctaHref
+                  : out.href;
+              const className = cn(
+                "civic-focus-ring group flex w-full items-start gap-3 rounded-xl border bg-white/90 p-3 text-left shadow-xs transition-all duration-300",
+                on
+                  ? "border-[#B45309] bg-[#FFFDF9] shadow-[0_0_0_3px_rgb(180_83_9_/0.2),0_12px_28px_rgb(15_23_42_/0.08)]"
+                  : "border-[#EAD7B5]/80 hover:border-[#B45309]/40",
+                activeId != null && !on && "opacity-45",
+              );
+              const body = (
+                <>
                   <span
                     className={cn(
                       "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors",
                       on
                         ? "border-[#B45309]/40 bg-[#B45309]/15 text-[#B45309]"
-                        : "border-slate-200 bg-[#FBFBFA] text-[#1E293B] group-hover:text-[#B45309]",
+                        : "border-slate-200 bg-[#FBFBFA] text-[#1E293B]",
                     )}
                   >
                     <Icon className="h-[18px] w-[18px]" aria-hidden />
                   </span>
-                  <span className="min-w-0">
-                    <span className="block font-telugu text-sm font-bold leading-snug text-[#1E293B]">
-                      {node.title}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="font-telugu text-sm font-bold leading-snug text-[#1E293B]">
+                        {out.title}
+                      </span>
+                      <ArrowRight
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0 transition-colors",
+                          on ? "text-[#B45309]" : "text-slate-400",
+                        )}
+                        aria-hidden
+                      />
                     </span>
                     <span className="mt-0.5 block font-telugu text-[11px] leading-relaxed text-slate-600">
-                      {node.blurb}
+                      {out.blurb}
                     </span>
                   </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                </>
+              );
 
-        {/* Center engine */}
-        <div className="px-1">
-          <EngineCard lit={activeId != null} />
-          {active ? (
-            <div className="mt-3 flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center">
-              <Link
-                href={active.ctaHref}
-                className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:brightness-110"
-              >
-                {active.ctaLabel}
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-              </Link>
-              {active.id === "districts" ? (
-                <Link
-                  href="/announce"
-                  className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#1E293B]/12 bg-white px-4 py-2.5 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
-                >
-                  మొబిలైజేషన్ అనౌన్స్
-                  <ArrowRight className="h-3 w-3" aria-hidden />
-                </Link>
-              ) : null}
-            </div>
-          ) : (
-            <p className="mt-3 text-center font-telugu text-[11px] text-slate-500">
-              ఎడమ విభాగం ఎంచుకుని రూటింగ్ చూడండి
-            </p>
-          )}
-        </div>
-
-        {/* Right outputs */}
-        <ul className="flex flex-col gap-3">
-          {OUTPUTS.map((out) => {
-            const Icon = out.icon;
-            const on = related.includes(out.id);
-            const resolvedHref =
-              out.id === "petition" &&
-              active &&
-              related.includes("petition") &&
-              active.ctaHref.startsWith("/representation")
-                ? active.ctaHref
-                : out.href;
-            const className = cn(
-              "civic-focus-ring group flex w-full items-start gap-3 rounded-xl border bg-white/90 p-3 text-left shadow-xs transition-all duration-300",
-              on
-                ? "border-[#B45309] bg-[#FFFDF9] shadow-[0_0_0_3px_rgb(180_83_9_/0.2),0_12px_28px_rgb(15_23_42_/0.08)]"
-                : "border-[#EAD7B5]/80 hover:border-[#B45309]/40",
-              activeId != null && !on && "opacity-45",
-            );
-            const body = (
-              <>
-                <span
-                  className={cn(
-                    "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors",
-                    on
-                      ? "border-[#B45309]/40 bg-[#B45309]/15 text-[#B45309]"
-                      : "border-slate-200 bg-[#FBFBFA] text-[#1E293B]",
+              return (
+                <li key={out.id}>
+                  {out.external ? (
+                    <a
+                      href={resolvedHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={className}
+                    >
+                      {body}
+                    </a>
+                  ) : (
+                    <Link href={resolvedHref} className={className}>
+                      {body}
+                    </Link>
                   )}
-                >
-                  <Icon className="h-[18px] w-[18px]" aria-hidden />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="font-telugu text-sm font-bold leading-snug text-[#1E293B]">
-                      {out.title}
-                    </span>
-                    <ArrowRight
-                      className={cn(
-                        "h-3.5 w-3.5 shrink-0 transition-colors",
-                        on ? "text-[#B45309]" : "text-slate-400",
-                      )}
-                      aria-hidden
-                    />
-                  </span>
-                  <span className="mt-0.5 block font-telugu text-[11px] leading-relaxed text-slate-600">
-                    {out.blurb}
-                  </span>
-                </span>
-              </>
-            );
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
 
-            return (
-              <li key={out.id}>
-                {out.external ? (
-                  <a
-                    href={resolvedHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={className}
-                  >
-                    {body}
-                  </a>
-                ) : (
-                  <Link href={resolvedHref} className={className}>
-                    {body}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+      {/* CTA band clear of SVG wires */}
+      <div className="relative z-[2] mt-5 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#EAD7B5]/80 bg-[#FBFBFA]/95 px-4 py-3.5 shadow-[0_8px_24px_rgb(15_23_42_/0.04)] backdrop-blur-sm">
+        {active ? (
+          <>
+            <Link
+              href={active.ctaHref}
+              className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-5 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:brightness-110"
+            >
+              {active.ctaLabel}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+            {active.id === "districts" ? (
+              <Link
+                href="/announce"
+                className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#1E293B]/12 bg-white px-4 py-2.5 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
+              >
+                మొబిలైజేషన్ అనౌన్స్
+                <ArrowRight className="h-3 w-3" aria-hidden />
+              </Link>
+            ) : null}
+          </>
+        ) : (
+          <p className="font-telugu text-[11px] text-slate-500">
+            ఎడమ విభాగం ఎంచుకుని రూటింగ్ చూడండి
+          </p>
+        )}
       </div>
     </div>
   );

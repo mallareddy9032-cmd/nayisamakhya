@@ -23,7 +23,7 @@ const PILLARS = [
     id: "nada",
     icon: Music2,
     title: "నాద బ్రహ్మ",
-    titleEn: "Nada Brahma",
+    titleEn: "Sacred Sound Tradition",
     bodyTe: "నాదస్వర శాస్త్రీయ వైభవం & ఉస్తాద్ బిస్మిల్లా ఖాన్ వారసత్వం",
     bodyEn: "Classical shehnai lineage & artistic glory",
   },
@@ -51,7 +51,7 @@ export function HeritageTriadRibbon() {
           </span>
           <h2
             id="heritage-triad-heading"
-            className="mt-3 font-display-te text-lg leading-snug sm:text-xl md:text-2xl"
+            className="mt-3 font-display-te text-lg font-normal leading-snug sm:text-xl md:text-2xl"
           >
             <span className="bg-gradient-to-r from-[#92400e] via-[#B45309] to-[#C2410C] bg-clip-text text-transparent">
               వైద్యం మన మూలం • కళ మన శ్వాస • ఆత్మగౌరవం మన వారసత్వం
@@ -62,13 +62,13 @@ export function HeritageTriadRibbon() {
           </p>
         </div>
 
-        <div className="relative grid grid-cols-1 gap-3 p-3 sm:gap-4 sm:p-4 md:grid-cols-3">
+        <div className="relative grid grid-cols-1 gap-3 p-3 sm:gap-4 sm:p-4 md:grid-cols-3 md:items-stretch">
           {PILLARS.map((pillar) => {
             const Icon = pillar.icon;
             return (
               <article
                 key={pillar.id}
-                className="flex flex-col gap-2.5 rounded-xl border border-[#EAD7B5] bg-gradient-to-b from-white/90 to-[#FFFDF9]/80 px-4 py-4 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8),0_4px_14px_rgb(180_83_9_/0.06)]"
+                className="flex h-full flex-col gap-2.5 rounded-xl border border-[#EAD7B5] bg-gradient-to-b from-white/90 to-[#FFFDF9]/80 px-4 py-4 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8),0_4px_14px_rgb(180_83_9_/0.06)]"
               >
                 <div className="flex items-center gap-2.5">
                   <span

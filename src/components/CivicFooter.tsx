@@ -119,11 +119,11 @@ export function CivicFooter() {
         </div>
 
         <div>
-          <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
+          <h3 className="mb-3 flex flex-wrap items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
             <Users className="h-3.5 w-3.5 text-civic-bronze" />
             {"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24\u0c32\u0c15\u0c41"}
-            <span className="ml-1 font-sans text-[10px] font-medium normal-case tracking-normal text-slate-500">
-              / For coordinators
+            <span className="font-sans text-[10px] font-semibold normal-case tracking-wide text-slate-500">
+              • COORDINATORS
             </span>
           </h3>
           <ul className="space-y-2.5 font-telugu text-[12px]">

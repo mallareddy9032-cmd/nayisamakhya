@@ -21,8 +21,7 @@ const STALWARTS: Stalwart[] = [
     nameEn: "Lord Dhanvantari",
     domainTe: "ప్రాచీన ఆయుర్వేదం & శస్త్రచికిత్స",
     domainEn: "Divine Ayurveda & surgery",
-    blurbTe:
-      "అమృత కలశ ధారి — భారతీయ వైద్య విజ్ఞానం, శస్త్రచికిత్స మూలపురుషుడు.",
+    blurbTe: "అమృత కలశ ధారి — భారతీయ వైద్య విజ్ఞాన మూలపురుషుడు.",
     blurbEn: "Bearer of amrita — fountainhead of Indian healing sciences.",
     imageSrc: "/stalwarts/dhanvantari.png",
   },
@@ -32,8 +31,7 @@ const STALWARTS: Stalwart[] = [
     nameEn: "Acharya Charaka & Sushruta",
     domainTe: "సంహిత & శస్త్ర వైద్య శాస్త్రం",
     domainEn: "Samhita & surgical science",
-    blurbTe:
-      "చరక సంహిత · సుశ్రుత శస్త్రవిద్య — వైద్య ధర్మానికి శాశ్వత మార్గదర్శకులు.",
+    blurbTe: "చరక సంహిత · సుశ్రుత శస్త్రవిద్య — వైద్య ధర్మ మార్గదర్శకులు.",
     blurbEn: "Foundational texts that shaped clinical and surgical tradition.",
     imageSrc: "/stalwarts/charaka.png",
   },
@@ -43,8 +41,7 @@ const STALWARTS: Stalwart[] = [
     nameEn: "Emperor Mahapadmananda",
     domainTe: "నంద రాజవంశం · సామ్రాజ్య వంశం",
     domainEn: "Nanda dynasty · Imperial Lineage",
-    blurbTe:
-      "నంద సామ్రాజ్య ప్రాభవం — జనసంక్షేమం, వ్యవసాయం, పరిపాలనా వైభవం.",
+    blurbTe: "నంద సామ్రాజ్య ప్రాభవం — జనసంక్షేమం, పరిపాలనా వైభవం.",
     blurbEn: "Imperial governance rooted in public welfare and strength.",
     imageSrc: "/stalwarts/mahapadmananda.png",
   },
@@ -54,8 +51,7 @@ const STALWARTS: Stalwart[] = [
     nameEn: "Bharat Ratna Karpoori Thakur",
     domainTe: "సామాజిక న్యాయం & వెనుకబడిన వర్గాలు",
     domainEn: "Social justice & backward classes",
-    blurbTe:
-      "వృత్తి సమాజాలు, విద్యా & సంక్షేమ హక్కులకై అహింసా పోరాట యోధుడు.",
+    blurbTe: "వృత్తి సమాజాలు, విద్యా & సంక్షేమ హక్కుల అహింసా యోధుడు.",
     blurbEn: "Champion of dignity for working and marginalized communities.",
     imageSrc: "/stalwarts/karpoori-thakur.png",
   },
@@ -65,8 +61,7 @@ const STALWARTS: Stalwart[] = [
     nameEn: "Dr. M. Veerappa Moily",
     domainTe: "న్యాయ సంస్కరణలు & పౌర హక్కులు",
     domainEn: "Legal reform & civil rights",
-    blurbTe:
-      "న్యాయ / పాలనా సంస్కరణలు — పౌర సేవలు, రాజ్యాంగ హక్కుల రక్షణకు తోడ్పాటు.",
+    blurbTe: "న్యాయ / పాలనా సంస్కరణలు — రాజ్యాంగ హక్కుల రక్షణ.",
     blurbEn: "Statesman advancing justice reform and constitutional access.",
     imageSrc: "/stalwarts/veerappa-moily.png",
   },
@@ -140,22 +135,22 @@ export function CivicStalwarts() {
           </span>
           <h2
             id="civic-stalwarts-heading"
-            className="mt-2.5 font-display-te text-xl tracking-tight text-civic-ink leading-snug sm:text-2xl"
+            className="mt-2.5 font-display-te text-xl font-normal leading-snug tracking-tight text-civic-ink sm:text-2xl"
           >
             సమాజ మార్గదర్శకులు & విశిష్ట ప్రముఖులు
           </h2>
           <p className="mt-1 font-sans text-xs font-medium text-slate-500">
-            Community guides & distinguished luminaries
+            Heritage guides across medicine, lineage & justice
           </p>
         </header>
 
-        <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x lg:grid lg:grid-cols-5 lg:gap-3 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
+        <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x lg:grid lg:grid-cols-5 lg:items-stretch lg:gap-3 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
           {STALWARTS.map((stalwart, index) => (
             <li
               key={stalwart.id}
-              className="w-[min(72vw,15.5rem)] shrink-0 snap-start lg:w-auto"
+              className="flex w-[min(72vw,15.5rem)] shrink-0 snap-start lg:w-auto"
             >
-              <article className="flex h-full flex-col justify-between gap-2 rounded-xl border border-[#EAD7B5] bg-white/80 px-3 py-4 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-3.5">
+              <article className="flex h-full w-full flex-col justify-between gap-2.5 rounded-xl border border-[#EAD7B5] bg-white/80 px-3 py-4 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-3.5">
                 <div className="flex flex-col items-center gap-2">
                   <StalwartPortrait
                     name={`${stalwart.nameTe} — ${stalwart.nameEn}`}
@@ -163,28 +158,30 @@ export function CivicStalwarts() {
                     priority={index < 2}
                   />
 
-                  <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
-                    {stalwart.nameTe}
-                  </h3>
-                  <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
-                    {stalwart.nameEn}
-                  </p>
+                  <div className="space-y-0.5 px-0.5">
+                    <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
+                      {stalwart.nameTe}
+                    </h3>
+                    <p className="font-sans text-[10px] font-medium tracking-wide text-[#B45309]">
+                      {stalwart.nameEn}
+                    </p>
+                  </div>
 
-                  <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2 py-1">
+                  <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2 py-1.5">
                     <span className="font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
                       {stalwart.domainTe}
                     </span>
-                    <span className="font-sans text-[10px] text-slate-500">
+                    <span className="font-sans text-[10px] leading-snug text-slate-500">
                       {stalwart.domainEn}
                     </span>
                   </span>
                 </div>
 
-                <div className="mt-1 space-y-1">
-                  <p className="line-clamp-2 font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
+                <div className="mt-auto space-y-1 border-t border-[#EAD7B5]/70 pt-2.5">
+                  <p className="font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
                     {stalwart.blurbTe}
                   </p>
-                  <p className="line-clamp-2 font-sans text-[11px] leading-relaxed text-slate-500">
+                  <p className="font-sans text-[11px] leading-relaxed text-slate-500">
                     {stalwart.blurbEn}
                   </p>
                 </div>

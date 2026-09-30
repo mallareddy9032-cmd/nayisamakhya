@@ -203,10 +203,8 @@ export function PersonaSwitcher() {
           >
             ఎవరి కోసం ఈ వేదిక?
           </h2>
-          <p className="mt-2 font-display-te text-lg not-italic sm:text-xl md:text-2xl">
-            <span className="bg-gradient-to-r from-[#B45309] to-[#D97706] bg-clip-text font-display-te text-transparent">
-              Who We Stand For & Empower
-            </span>
+          <p className="mt-2 font-sans text-sm font-medium tracking-wide text-slate-500 sm:text-base">
+            Legal support for every community segment
           </p>
           <p className="mt-3 max-w-2xl font-telugu text-sm leading-relaxed text-slate-600 md:text-base">
             కులవృత్తి గౌరవం నుండి యువత భవిష్యత్ సాధికారత వరకు — ప్రతి వర్గానికి

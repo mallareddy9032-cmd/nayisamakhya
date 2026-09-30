@@ -57,13 +57,10 @@ export function ServiceActionCards() {
           </span>
           <h2
             id="three-click-services"
-            className="mt-3 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
+            className="mt-3 font-display-te text-2xl font-normal leading-snug text-[#1E293B] md:text-3xl"
           >
             3-దశల ప్రజా సేవలు
           </h2>
-          <p className="mt-1 font-sans text-sm font-medium tracking-wide text-slate-500">
-            3-Click Public Services
-          </p>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             వృత్తి గౌరవం కోసం అవసరమైన మూడు అధికారిక సాధనాలు — ఎంచుకుని ముందుకు
             సాగండి.
