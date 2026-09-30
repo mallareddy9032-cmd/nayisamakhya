@@ -11,6 +11,9 @@ import type {
 import {
   GO23_FREE_UNITS,
   HELPLINE_WA,
+  LOAN_EMI_RATE_PA,
+  LOAN_EMI_TENURE_MONTHS,
+  LOAN_VARIABLE_COST_RATIO,
   SALON_HUB_ORDERS_KEY,
 } from "@/types/salon-hub";
 
@@ -143,20 +146,63 @@ export const PROCURE_CATALOG: ProcureLineItem[] = [
   },
 ];
 
+/** Capital checklist — default-all totals ₹1,30,000. */
 export const LOAN_EQUIPMENT: {
   id: LoanEquipmentId;
   nameTe: string;
+  nameEn: string;
   costInr: number;
 }[] = [
-  { id: "hydraulic_chair", nameTe: "హైడ్రాలిక్ చైర్", costInr: 35000 },
-  { id: "mirror_station", nameTe: "మిర్రర్ స్టేషన్", costInr: 18000 },
-  { id: "sterilizer", nameTe: "స్టెరిలైజర్ / UV బాక్స్", costInr: 8000 },
-  { id: "trimmer_set", nameTe: "ట్రిమ్మర్ సెట్ (2)", costInr: 12000 },
-  { id: "hair_dryer", nameTe: "హెయిర్ డ్రయ్యర్ + స్టైలింగ్", costInr: 10000 },
-  { id: "ac_15", nameTe: "ఏసీ 1.5 టన్", costInr: 45000 },
-  { id: "signage", nameTe: "సైనేజ్ & బ్రాండింగ్", costInr: 15000 },
-  { id: "water_heater", nameTe: "వాటర్ హీటర్", costInr: 12000 },
+  {
+    id: "hydraulic_chairs",
+    nameTe: "హైడ్రాలిక్ కుర్చీలు (Hydraulic Styling Chairs)",
+    nameEn: "Hydraulic Styling Chairs",
+    costInr: 35000,
+  },
+  {
+    id: "inverter_ac",
+    nameTe: "1-టన్ 5-స్టార్ ఇన్వర్టర్ ఏసీ (5-Star Inverter AC)",
+    nameEn: "5-Star Inverter AC (1 Ton)",
+    costInr: 32000,
+  },
+  {
+    id: "wash_station",
+    nameTe: "హెయిర్ వాష్ స్టేషన్ & బేసిన్ (Hair Wash Station)",
+    nameEn: "Hair Wash Station & Basin",
+    costInr: 18000,
+  },
+  {
+    id: "uv_tools",
+    nameTe: "ప్రొఫెషనల్ యువి స్టెరిలైజర్ & ట్రిమ్మర్లు (UV Sterilizer & Tools)",
+    nameEn: "UV Sterilizer & Professional Tools",
+    costInr: 15000,
+  },
+  {
+    id: "interior_wiring",
+    nameTe: "ఇంటీరియర్ డెకరేషన్ & విద్యుద్దీకరణ (Interior & Wiring)",
+    nameEn: "Interior Decoration & Wiring",
+    costInr: 30000,
+  },
 ];
+
+/** BC-A traditional trade sub-castes shown on the loans wizard. */
+export const LOAN_BC_A_SUBCASTES = [
+  { id: "nayi_brahmin", labelTe: "నాయి బ్రాహ్మణ (Nayi Brahmin)" },
+  { id: "mangali", labelTe: "మంగలి (Mangali)" },
+  { id: "bajantri", labelTe: "భజంత్రి (Bajantri)" },
+] as const;
+
+export function reducingBalanceEmi(
+  principalInr: number,
+  annualRate: number,
+  tenureMonths: number,
+): number {
+  if (principalInr <= 0 || tenureMonths <= 0) return 0;
+  const r = annualRate / 12;
+  if (r === 0) return Math.round(principalInr / tenureMonths);
+  const factor = Math.pow(1 + r, tenureMonths);
+  return Math.round((principalInr * r * factor) / (factor - 1));
+}
 
 export function formatInr(n: number): string {
   return new Intl.NumberFormat("en-IN", {
@@ -248,60 +294,99 @@ export function computeEnergyPlan(input: EnergyPlanInput): EnergyPlanResult {
   };
 }
 
+/**
+ * Bank DPR math (messages[2614]):
+ * - Project cost = sum of selected capital items (default ₹1.3L)
+ * - Margin money = 10%; bank loan = 90%
+ * - EMI = reducing-balance, 36 months @ 9.5% p.a.
+ * - NOI = Revenue − Rent/Expenses − (Revenue × 0.45 variable Cos)
+ * - DSCR = (monthly NOI × 12) / (EMI × 12); healthy when ≥ 1.5
+ *   (defaults ≈ 2.1× on ₹1.17L loan / ₹25k rev / ₹6k expenses)
+ */
 export function computeLoanDpr(input: LoanDprInput): LoanDprResult {
   const selected = LOAN_EQUIPMENT.filter((e) =>
     input.equipmentIds.includes(e.id),
   );
-  const equipmentSum = selected.reduce((s, e) => s + e.costInr, 0);
-  const revenueBand =
-    input.monthlyRevenueInr >= 80000
-      ? 300000
-      : input.monthlyRevenueInr >= 50000
-        ? 250000
-        : input.monthlyRevenueInr >= 30000
-          ? 200000
-          : 150000;
+  const capitalOutlayInr = selected.reduce((s, e) => s + e.costInr, 0);
+  const marginMoneyInr = Math.round(capitalOutlayInr * 0.1);
+  const bankLoanInr = capitalOutlayInr - marginMoneyInr;
 
-  const capitalOutlayInr = Math.min(
-    300000,
-    Math.max(150000, Math.round((equipmentSum + revenueBand) / 2 / 1000) * 1000),
+  const monthlyEmiInr = reducingBalanceEmi(
+    bankLoanInr,
+    LOAN_EMI_RATE_PA,
+    LOAN_EMI_TENURE_MONTHS,
   );
 
-  const bcCorpSubsidyInr = Math.round(capitalOutlayInr * 0.2);
-  const ownContributionInr = Math.round(capitalOutlayInr * 0.1);
-  const mudraLoanInr = capitalOutlayInr - bcCorpSubsidyInr - ownContributionInr;
+  const revenue = Math.max(0, input.monthlyRevenueInr);
+  const expenses = Math.max(0, input.monthlyExpensesInr);
+  const variableCost = revenue * LOAN_VARIABLE_COST_RATIO;
+  const monthlyNoi = Math.max(0, revenue - expenses - variableCost);
+  const annualNoiInr = Math.round(monthlyNoi * 12);
+  const annualDebtServiceInr = monthlyEmiInr * 12 || 1;
+  const dscr =
+    Math.round((annualNoiInr / annualDebtServiceInr) * 100) / 100;
 
-  // Flat 9% / 60 months approximation for dossier EMI
-  const monthlyRate = 0.09 / 12;
-  const n = 60;
-  const monthlyEmiInr =
-    mudraLoanInr > 0
-      ? Math.round(
-          (mudraLoanInr * monthlyRate * Math.pow(1 + monthlyRate, n)) /
-            (Math.pow(1 + monthlyRate, n) - 1),
-        )
-      : 0;
-
-  const annualOpsSurplus = Math.max(
-    0,
-    input.monthlyRevenueInr * 12 * 0.28 - monthlyEmiInr * 12 * 0.15,
-  );
-  const annualCashflowInr = Math.round(
-    input.monthlyRevenueInr * 12 * 0.35 - monthlyEmiInr * 12,
-  );
-  const debtService = monthlyEmiInr * 12 || 1;
-  const dscr = Math.round((annualOpsSurplus / debtService) * 100) / 100;
+  // 3-year projection: modest 8% revenue CAGR, expenses +5%/yr
+  const cashflows = [1, 2, 3].map((year) => {
+    const revFactor = Math.pow(1.08, year - 1);
+    const expFactor = Math.pow(1.05, year - 1);
+    const yearRevenue = Math.round(revenue * 12 * revFactor);
+    const yearExpenses = Math.round(expenses * 12 * expFactor);
+    const yearEmi = monthlyEmiInr * 12;
+    return {
+      year,
+      revenueInr: yearRevenue,
+      expensesInr: yearExpenses,
+      emiInr: yearEmi,
+      netInr: yearRevenue - yearExpenses - yearEmi,
+    };
+  });
 
   return {
     capitalOutlayInr,
-    ownContributionInr,
-    mudraLoanInr,
-    bcCorpSubsidyInr,
+    marginMoneyInr,
+    bankLoanInr,
     monthlyEmiInr,
-    annualCashflowInr,
-    dscr: Math.max(0.5, Math.min(3.5, dscr || 1.2)),
+    annualNoiInr,
+    annualDebtServiceInr,
+    cashflows,
+    dscr,
+    dscrHealthy: dscr >= 1.5,
+    interestRatePa: LOAN_EMI_RATE_PA,
+    tenureMonths: LOAN_EMI_TENURE_MONTHS,
     equipmentLines: selected,
   };
+}
+
+export function loanDeskWhatsAppUrl(args: {
+  applicantName: string;
+  phone: string;
+  subCasteTe: string;
+  districtNameTe: string;
+  mandalNameTe: string;
+  unitType: "modernize" | "new";
+  dpr: LoanDprResult;
+}): string {
+  const unitTe =
+    args.unitType === "modernize"
+      ? "ఉన్న సెలూన్ ఆధునికీకరణ"
+      : "కొత్త సెలూన్ ఏర్పాటు";
+  const text = [
+    "నమస్కారం, నాయీ సమాఖ్య డెస్క్ — బ్యాంక్ DPR / సబ్సిడీ గైడెన్స్ అవసరం.",
+    `పేరు: ${args.applicantName}`,
+    `వాట్సాప్: ${args.phone}`,
+    `ఉపకులం (BC-A): ${args.subCasteTe}`,
+    `ప్రాంతం: ${args.mandalNameTe}, ${args.districtNameTe}`,
+    `యూనిట్: ${unitTe}`,
+    `మూలధనం: ₹${args.dpr.capitalOutlayInr.toLocaleString("en-IN")}`,
+    `మార్జిన్ (10%): ₹${args.dpr.marginMoneyInr.toLocaleString("en-IN")}`,
+    `బ్యాంక్ రుణం (90%): ₹${args.dpr.bankLoanInr.toLocaleString("en-IN")}`,
+    `EMI (~36 నెలలు @ 9.5%): ₹${args.dpr.monthlyEmiInr.toLocaleString("en-IN")}/నెల`,
+    `DSCR: ${args.dpr.dscr.toFixed(2)}x`,
+    "పథకాలు: PM Vishwakarma / PMEGP / Telangana BC Co-Op Finance Corporation",
+    "దయచేసి బ్యాంక్ గైడెన్స్ అందించండి.",
+  ].join("\n");
+  return `https://wa.me/${HELPLINE_WA}?text=${encodeURIComponent(text)}`;
 }
 
 export function loadSalonHubOrders(): SalonHubOrder[] {

@@ -75,21 +75,22 @@ export type EnergyPlanResult = {
 };
 
 export type LoanEquipmentId =
-  | "hydraulic_chair"
-  | "mirror_station"
-  | "sterilizer"
-  | "trimmer_set"
-  | "hair_dryer"
-  | "ac_15"
-  | "signage"
-  | "water_heater";
+  | "hydraulic_chairs"
+  | "inverter_ac"
+  | "wash_station"
+  | "uv_tools"
+  | "interior_wiring";
+
+export type LoanUnitType = "modernize" | "new";
 
 export type LoanDprInput = {
   monthlyRevenueInr: number;
+  monthlyExpensesInr: number;
   equipmentIds: LoanEquipmentId[];
   applicantName: string;
   phone: string;
   subCaste: string;
+  unitType: LoanUnitType;
   districtSlug: string;
   districtNameTe: string;
   mandalSlug: string;
@@ -97,15 +98,44 @@ export type LoanDprInput = {
 };
 
 export type LoanDprResult = {
+  /** Sum of selected capital items (project cost). */
   capitalOutlayInr: number;
-  ownContributionInr: number;
-  mudraLoanInr: number;
-  bcCorpSubsidyInr: number;
+  /** Margin money — 10% of project cost (own contribution). */
+  marginMoneyInr: number;
+  /** Bank loan component — 90% of project cost. */
+  bankLoanInr: number;
+  /** Reducing-balance EMI, 36 months @ 9.5% p.a. */
   monthlyEmiInr: number;
-  annualCashflowInr: number;
+  /** Annual net operating income used in DSCR. */
+  annualNoiInr: number;
+  /** Annual debt service (EMI × 12). */
+  annualDebtServiceInr: number;
+  /** Projected 3-year cashflow rows (revenue − expenses − EMI). */
+  cashflows: Array<{
+    year: number;
+    revenueInr: number;
+    expensesInr: number;
+    emiInr: number;
+    netInr: number;
+  }>;
+  /** DSCR = annual NOI / annual debt service. Healthy when ≥ 1.5. */
   dscr: number;
-  equipmentLines: Array<{ id: LoanEquipmentId; nameTe: string; costInr: number }>;
+  dscrHealthy: boolean;
+  interestRatePa: number;
+  tenureMonths: number;
+  equipmentLines: Array<{
+    id: LoanEquipmentId;
+    nameTe: string;
+    nameEn: string;
+    costInr: number;
+  }>;
 };
+
+/** Standard reducing-balance EMI tenure / rate for salon DPR dossiers. */
+export const LOAN_EMI_TENURE_MONTHS = 36;
+export const LOAN_EMI_RATE_PA = 0.095;
+/** Variable Cos share of revenue used when estimating NOI for DSCR. */
+export const LOAN_VARIABLE_COST_RATIO = 0.45;
 
 export const SALON_HUB_ORDERS_KEY = "salon_hub_orders";
 

@@ -3,9 +3,9 @@ import { SalonHubChrome } from "@/components/salon-hub/SalonHubChrome";
 import { LoansClient } from "@/components/salon-hub/LoansClient";
 
 export const metadata: Metadata = {
-  title: "బ్యాంక్ డీపీఆర్ జనరేటర్ | Salon Loan DPR",
+  title: "సెలూన్ బ్యాంక్ లోన్ DPR జనరేటర్ | Mudra & BC Welfare DPR",
   description:
-    "Print-ready salon bank DPR — capital outlay, cashflows, DSCR, Mudra + BC Corporation subsidy narrative.",
+    "Print-ready salon bank DPR — capital outlay, 10% margin / 90% loan, EMI @ 9.5% × 36 mo, DSCR, PM Vishwakarma / PMEGP / BC Co-Op citation.",
   alternates: { canonical: "/salon-hub/loans" },
 };
 
@@ -13,7 +13,7 @@ export default function SalonHubLoansPage() {
   return (
     <div className="min-h-screen bg-[#FBFBFA]">
       <SalonHubChrome />
-      <div className="mx-auto max-w-3xl px-4 py-5 pb-28 print:max-w-none print:px-0 print:py-0 print:pb-0">
+      <div className="mx-auto max-w-3xl px-4 py-6 pb-28 print:max-w-none print:px-0 print:py-0 print:pb-0">
         <LoansClient />
       </div>
       <style
