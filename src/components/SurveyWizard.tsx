@@ -9,6 +9,7 @@ import {
   Send,
   RotateCcw,
 } from "lucide-react";
+import { isBlockedGramPanchayatName } from "@/lib/data/gramPanchayatNames";
 
 type GpOption = { id: string; nameTe: string; nameEn: string };
 
@@ -115,6 +116,17 @@ export function SurveyWizard({
   const [engagementType, setEngagementType] = useState("");
   const [pensionStatus, setPensionStatus] = useState("");
   const [members, setMembers] = useState<Member[]>([emptyMember()]);
+
+  const cleanGramPanchayats = useMemo(
+    () =>
+      gramPanchayats.filter(
+        (gp) =>
+          gp &&
+          (gp.nameEn || gp.nameTe) &&
+          !isBlockedGramPanchayatName(gp.nameEn || "", gp.nameTe || ""),
+      ),
+    [gramPanchayats],
+  );
 
   const branch = useMemo(() => {
     return OCCUPATIONS.find((o) => o.id === occupation)?.branch ?? "skip";
@@ -302,7 +314,7 @@ export function SurveyWizard({
             <span className="mb-1.5 block font-telugu text-sm font-medium text-[#18181B]">
               గ్రామ పంచాయతీ / వార్డు *
             </span>
-            {gramPanchayats.length > 0 ? (
+            {cleanGramPanchayats.length > 0 ? (
               <select
                 required
                 value={gramPanchayat}
@@ -310,7 +322,7 @@ export function SurveyWizard({
                 className={`${inputClass} font-telugu`}
               >
                 <option value="">ఎంచుకోండి…</option>
-                {gramPanchayats.map((gp) => (
+                {cleanGramPanchayats.map((gp) => (
                   <option key={gp.id} value={gp.nameTe}>
                     {gp.nameTe} ({gp.nameEn})
                   </option>

@@ -177,7 +177,9 @@ export function DistrictDirectoryClient({ district, urban, rural }: Props) {
                     <h2
                       className={`mt-2 text-lg font-semibold text-[#0F172A] ${te ? "font-telugu" : ""}`}
                     >
-                      {te ? entity.nameTe : entity.nameEn}
+                      {entity.nameTe && entity.nameEn && entity.nameTe !== entity.nameEn
+                        ? `${entity.nameTe} (${entity.nameEn})`
+                        : entity.nameTe || entity.nameEn}
                     </h2>
                     <p
                       className={`mt-1 text-xs text-slate-500 ${te ? "font-telugu" : ""}`}

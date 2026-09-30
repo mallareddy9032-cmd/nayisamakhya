@@ -33,34 +33,50 @@ type Props = {
   mandal: Mandal;
 };
 
+/** Coerce DB / seed numbers so UI never renders NaN or undefined. */
+function safeCount(n: unknown, fallback = 0): number {
+  const v = typeof n === "number" ? n : Number(n);
+  return Number.isFinite(v) ? v : fallback;
+}
+
+function safePct(n: unknown): number {
+  return Math.min(100, Math.max(0, safeCount(n, 0)));
+}
+
 export function MandalPortalView({ mandal: m }: Props) {
   const lang = useLanguageStore((s) => s.lang);
   const [gpQuery, setGpQuery] = useState("");
   const te = lang === "te";
 
+  const households = safeCount(m.summary.households);
+  const salons = safeCount(m.summary.salons);
+  const freePowerPct = safePct(m.summary.freePowerPct);
+  const bajantri = safeCount(m.summary.bajantri);
+  const surveyPct = safePct(m.summary.surveyPct);
+
   const metrics = [
     {
       id: "hh",
       label: te ? "మండలంలో మొత్తం కుటుంబాలు" : "Total households in mandal",
-      value: String(m.summary.households),
+      value: String(households),
     },
     {
       id: "salons",
       label: te ? "క్రియాశీల సెలూన్లు" : "Active salons",
-      value: `${m.summary.salons}`,
+      value: `${salons}`,
       meta: te
-        ? `(${m.summary.freePowerPct}% ఉచిత విద్యుత్ లబ్ధి)`
-        : `(${m.summary.freePowerPct}% free-power coverage)`,
+        ? `(${freePowerPct}% ఉచిత విద్యుత్ లబ్ధి)`
+        : `(${freePowerPct}% free-power coverage)`,
     },
     {
       id: "bajantri",
       label: te ? "నమోదైన భజంత్రి కళాకారులు" : "Registered Bajantri artistes",
-      value: String(m.summary.bajantri),
+      value: String(bajantri),
     },
     {
       id: "survey",
       label: te ? "సమగ్ర సర్వే పూర్తి" : "Comprehensive survey complete",
-      value: `${m.summary.surveyPct}%`,
+      value: `${surveyPct}%`,
     },
   ];
 
@@ -330,7 +346,10 @@ export function MandalPortalView({ mandal: m }: Props) {
                     : "No matching panchayats."}
               </li>
             ) : (
-              filtered.map((gp) => (
+              filtered.map((gp) => {
+                const gpHh = safeCount(gp.households);
+                const gpSurvey = safePct(gp.surveyPct);
+                return (
                 <li
                   key={gp.id}
                   className="flex min-h-12 flex-col justify-center rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
@@ -343,29 +362,30 @@ export function MandalPortalView({ mandal: m }: Props) {
                   <p
                     className={`mt-2 metric-tnum text-xs text-[#71717A] ${te ? "font-telugu" : ""}`}
                   >
-                    {gp.households.toLocaleString()}{" "}
+                    {gpHh.toLocaleString()}{" "}
                     {te ? "కుటుంబాలు" : "families"}
                     {" · "}
-                    {gp.surveyPct}%{" "}
+                    {gpSurvey}%{" "}
                     {te ? "సర్వే పూర్తి" : "survey complete"}
                   </p>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#F4F2EB]">
                     <div
                       className="h-full rounded-full bg-[#B45309]"
-                      style={{ width: `${Math.min(100, Math.max(0, gp.surveyPct))}%` }}
+                      style={{ width: `${gpSurvey}%` }}
                       role="progressbar"
-                      aria-valuenow={gp.surveyPct}
+                      aria-valuenow={gpSurvey}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label={
                         te
-                          ? `${formatGramPanchayatDisplay(gp.name, lang)} సర్వే ${gp.surveyPct}%`
-                          : `${formatGramPanchayatDisplay(gp.name, lang)} survey ${gp.surveyPct}%`
+                          ? `${formatGramPanchayatDisplay(gp.name, lang)} సర్వే ${gpSurvey}%`
+                          : `${formatGramPanchayatDisplay(gp.name, lang)} survey ${gpSurvey}%`
                       }
                     />
                   </div>
                 </li>
-              ))
+                );
+              })
             )}
           </ul>
         </section>

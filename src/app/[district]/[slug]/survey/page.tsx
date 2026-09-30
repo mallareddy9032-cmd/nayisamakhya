@@ -8,6 +8,7 @@ import {
   canonicalDistrictSlug,
   canonicalMandalSlug,
 } from "@/lib/data/locationAliases";
+import { isBlockedGramPanchayatName } from "@/lib/data/gramPanchayatNames";
 import { SurveyWizard } from "@/components/SurveyWizard";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,15 @@ type SurveyContext = {
   gramPanchayats: GpOption[];
 };
 
+function sanitizeGpOptions(gps: GpOption[]): GpOption[] {
+  return gps.filter(
+    (gp) =>
+      gp &&
+      (gp.nameEn || gp.nameTe) &&
+      !isBlockedGramPanchayatName(gp.nameEn || "", gp.nameTe || ""),
+  );
+}
+
 function fromStatic(district: string, mandal: string): SurveyContext | null {
   const rich = getMandal(district, mandal);
   if (rich) {
@@ -38,11 +48,13 @@ function fromStatic(district: string, mandal: string): SurveyContext | null {
       districtNameEn: rich.district.en,
       mandalNameTe: rich.mandal.te,
       mandalNameEn: rich.mandal.en,
-      gramPanchayats: rich.gramPanchayats.map((gp) => ({
-        id: gp.id,
-        nameTe: gp.name.te,
-        nameEn: gp.name.en,
-      })),
+      gramPanchayats: sanitizeGpOptions(
+        rich.gramPanchayats.map((gp) => ({
+          id: gp.id,
+          nameTe: gp.name.te,
+          nameEn: gp.name.en,
+        })),
+      ),
     };
   }
 
@@ -55,11 +67,13 @@ function fromStatic(district: string, mandal: string): SurveyContext | null {
     districtNameEn: stub.district.en,
     mandalNameTe: stub.mandal.te,
     mandalNameEn: stub.mandal.en,
-    gramPanchayats: stub.gramPanchayats.map((gp) => ({
-      id: gp.id,
-      nameTe: gp.name.te,
-      nameEn: gp.name.en,
-    })),
+    gramPanchayats: sanitizeGpOptions(
+      stub.gramPanchayats.map((gp) => ({
+        id: gp.id,
+        nameTe: gp.name.te,
+        nameEn: gp.name.en,
+      })),
+    ),
   };
 }
 
@@ -137,11 +151,13 @@ async function resolveSurveyContext(
         .eq("mandal_id", row.id)
         .order("name_en", { ascending: true });
       if (gpRows?.length) {
-        gps = gpRows.map((g) => ({
-          id: String(g.id),
-          nameTe: String(g.name_te || g.name_en || "GP"),
-          nameEn: String(g.name_en || g.name_te || "GP"),
-        }));
+        gps = sanitizeGpOptions(
+          gpRows.map((g) => ({
+            id: String(g.id),
+            nameTe: String(g.name_te || g.name_en || "GP"),
+            nameEn: String(g.name_en || g.name_te || "GP"),
+          })),
+        );
       }
     }
 
@@ -152,7 +168,7 @@ async function resolveSurveyContext(
       districtNameEn: districtRow?.name_en || dSlug,
       mandalNameTe: String(row.name_te || mSlug),
       mandalNameEn: String(row.name_en || mSlug),
-      gramPanchayats: gps,
+      gramPanchayats: sanitizeGpOptions(gps),
     };
   } catch {
     return fallback;
