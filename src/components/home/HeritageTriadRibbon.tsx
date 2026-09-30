@@ -1,6 +1,7 @@
 "use client";
 
 import { Crown, Music2, Stethoscope } from "lucide-react";
+import { SECTION_EYEBROWS } from "@/components/home/SectionHeading";
 
 const PILLARS = [
   {
@@ -47,7 +48,7 @@ export function HeritageTriadRibbon() {
 
         <div className="relative border-b border-[#EAD7B5] px-4 py-4 text-center sm:px-6 sm:py-5">
           <span className="civic-eyebrow-pill">
-            సాంస్కృతిక త్రివేణి • HERITAGE TRIAD
+            {SECTION_EYEBROWS.heritageTriad}
           </span>
           <h2
             id="heritage-triad-heading"

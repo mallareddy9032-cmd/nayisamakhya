@@ -429,18 +429,18 @@ function DesktopMap({
         </div>
       </div>
 
-      {/* CTA band clear of SVG wires — always two separate Links */}
-      <div className="relative z-[2] mt-5 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#EAD7B5]/80 bg-[#FBFBFA]/95 px-4 py-3.5 shadow-[0_8px_24px_rgb(15_23_42_/0.04)] backdrop-blur-sm">
+      {/* CTA band — separate amber petition + slate announce, never merged */}
+      <div className="relative z-[2] mt-5 flex flex-wrap items-center justify-center gap-3">
         <Link
           href={active?.ctaHref?.startsWith("/representation") ? active.ctaHref : "/representation"}
-          className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-5 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:brightness-110"
+          className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#B45309] px-5 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:bg-[#92400E]"
         >
           {active?.ctaLabel ?? "వినతిపత్రం తెరవండి"}
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
         <Link
           href="/announce"
-          className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#1E293B]/12 bg-white px-4 py-2.5 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
+          className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[#1E293B] px-4 py-2.5 font-telugu text-[11px] font-bold text-white transition hover:bg-[#0F172A]"
         >
           మొబిలైజేషన్ అనౌన్స్
           <ArrowRight className="h-3 w-3" aria-hidden />
@@ -620,14 +620,14 @@ function MobileJourney({
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/representation"
-            className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)]"
+            className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#B45309] px-4 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] hover:bg-[#92400E]"
           >
             వినతిపత్రం తెరవండి
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
           <Link
             href="/announce"
-            className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-[#1E293B]/15 bg-[#FBFBFA] px-4 py-3 font-telugu text-xs font-bold text-[#1E293B]"
+            className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#1E293B] px-4 py-3 font-telugu text-xs font-bold text-white hover:bg-[#0F172A]"
           >
             మొబిలైజేషన్ అనౌన్స్
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />

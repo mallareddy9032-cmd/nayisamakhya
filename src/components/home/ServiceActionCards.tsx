@@ -10,6 +10,7 @@ import {
   QrCode,
   Stamp,
 } from "lucide-react";
+import { SECTION_EYEBROWS } from "@/components/home/SectionHeading";
 
 const SERVICES = [
   {
@@ -53,7 +54,7 @@ export function ServiceActionCards() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-7 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            ప్రజా సేవలు • 3-CLICK DESK
+            {SECTION_EYEBROWS.threeClickTools}
           </span>
           <h2
             id="three-click-services"

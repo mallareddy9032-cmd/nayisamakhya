@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, MessageCircle, Phone } from "lucide-react";
+import { SECTION_EYEBROWS } from "@/components/home/SectionHeading";
 import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 
 const GRIEVANCES = [
@@ -47,7 +48,7 @@ export function QuickGrievanceWidget() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-5 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            తక్షణ వినతి డెస్క్ • 1-CLICK ASSISTANCE
+            {SECTION_EYEBROWS.oneClickDesk}
           </span>
           <h2
             id="quick-grievance-heading"

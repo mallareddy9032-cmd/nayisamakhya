@@ -83,7 +83,7 @@ export function CivicFooter() {
                 href="/feed"
                 className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                గెజిట్ &amp; జీవోలు (Gazette)
+                అధికారిక గెజిట్ &amp; జీవోలు (Gazette &amp; G.O.s)
               </Link>
             </li>
             <li>
@@ -114,12 +114,9 @@ export function CivicFooter() {
         </div>
 
         <div>
-          <h3 className="mb-3 flex flex-wrap items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
+          <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
             <Users className="h-3.5 w-3.5 text-civic-bronze" />
-            సమన్వయకర్తల విభాగం
-            <span className="font-sans text-[10px] font-semibold normal-case tracking-wide text-slate-500">
-              • FOR COORDINATORS
-            </span>
+            సమన్వయకర్తల విభాగం (For Coordinators)
           </h3>
           <ul className="space-y-2.5 font-telugu text-[12px]">
             <li>
@@ -207,6 +204,10 @@ export function CivicFooter() {
                 <Mail className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
                 {CONTACT_EMAIL}
               </a>
+              <span className="inline-flex min-h-10 items-center gap-2 font-telugu text-[12px] font-semibold text-civic-navy">
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-civic-bronze" aria-hidden />
+                సమన్వయ కేంద్రం: హైదరాబాద్, తెలంగాణ (State Coordination Hub, Telangana)
+              </span>
             </div>
             <nav
               className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-600"

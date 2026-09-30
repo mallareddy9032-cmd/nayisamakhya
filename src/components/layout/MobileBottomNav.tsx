@@ -65,8 +65,8 @@ export function MobileBottomNav() {
                 <span className="inline-flex items-center gap-0.5">
                   {tab.label}
                   {"badge" in tab && tab.badge ? (
-                    <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 text-[8px] font-bold uppercase tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
-                      New
+                    <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 font-telugu text-[8px] font-bold tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
+                      సర్వే (New)
                     </span>
                   ) : null}
                 </span>

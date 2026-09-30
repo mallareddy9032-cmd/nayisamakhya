@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { SECTION_EYEBROWS } from "@/components/home/SectionHeading";
 import {
   ArrowRight,
   Briefcase,
@@ -195,7 +196,7 @@ export function PersonaSwitcher() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-6 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            సమగ్ర సాధికారత • TARGETED PILLARS
+            {SECTION_EYEBROWS.empowermentPillars}
           </span>
           <h2
             id="persona-switcher-heading"

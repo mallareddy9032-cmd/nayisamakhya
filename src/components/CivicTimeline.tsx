@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { SECTION_EYEBROWS } from "@/components/home/SectionHeading";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -525,7 +526,7 @@ export function CivicTimeline() {
       <div className="mx-auto max-w-5xl">
         <header className="mb-5 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            చారిత్రక & చట్టబద్ధ ప్రస్థానం • HISTORICAL TIMELINE
+            {SECTION_EYEBROWS.civicTimeline}
           </span>
 
           <h2

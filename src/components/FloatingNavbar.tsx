@@ -28,11 +28,11 @@ function NewBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "ml-1.5 inline-flex items-center rounded-md border border-[#B45309]/35 bg-[#B45309]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.35)]",
+        "ml-1.5 inline-flex items-center rounded-md border border-[#B45309]/35 bg-[#B45309]/10 px-1.5 py-0.5 font-telugu text-[9px] font-bold tracking-wide text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.35)]",
         className,
       )}
     >
-      New
+      సర్వే (New)
     </span>
   );
 }

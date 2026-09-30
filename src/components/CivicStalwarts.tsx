@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { SECTION_EYEBROWS } from "@/components/home/SectionHeading";
 
 type Stalwart = {
   id: string;
@@ -131,7 +132,7 @@ export function CivicStalwarts() {
       <div className="mx-auto max-w-6xl rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white via-[#FFFDF9] to-[#FBF7ED] p-5 shadow-xs sm:p-6">
         <header className="mb-5 border-b border-[#EAD7B5] pb-3">
           <span className="civic-eyebrow-pill">
-            సమాజ మార్గదర్శకులు • LUMINARIES
+            {SECTION_EYEBROWS.luminaries}
           </span>
           <h2
             id="civic-stalwarts-heading"
@@ -158,33 +159,32 @@ export function CivicStalwarts() {
                     priority={index < 2}
                   />
 
-                  <div className="space-y-0.5 px-0.5">
+                  {/* Telugu name / role / description */}
+                  <div className="space-y-1.5 px-0.5">
                     <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
                       {stalwart.nameTe}
                     </h3>
-                    <p className="font-sans text-[10px] font-medium tracking-wide text-[#B45309]">
-                      {stalwart.nameEn}
+                    <p className="font-telugu text-[11px] font-semibold leading-snug text-[#B45309]">
+                      {stalwart.domainTe}
+                    </p>
+                    <p className="font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
+                      {stalwart.blurbTe}
                     </p>
                   </div>
-
-                  <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2 py-1.5">
-                    <span className="font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
-                      {stalwart.domainTe}
-                    </span>
-                    <span className="font-sans text-[10px] leading-snug text-slate-500">
-                      {stalwart.domainEn}
-                    </span>
-                  </span>
                 </div>
 
-                <div className="mt-auto space-y-1 border-t border-[#EAD7B5]/70 pt-2.5">
-                  <p className="font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
-                    {stalwart.blurbTe}
+                {/* English italic footer — separated from TE block */}
+                <footer className="mt-auto space-y-0.5 border-t border-[#EAD7B5]/70 pt-2.5 italic">
+                  <p className="font-sans text-[10px] font-medium tracking-wide text-[#B45309]">
+                    {stalwart.nameEn}
+                  </p>
+                  <p className="font-sans text-[10px] leading-snug text-slate-500">
+                    {stalwart.domainEn}
                   </p>
                   <p className="font-sans text-[11px] leading-relaxed text-slate-500">
                     {stalwart.blurbEn}
                   </p>
-                </div>
+                </footer>
               </article>
             </li>
           ))}

@@ -21,7 +21,7 @@ const NAV_LINKS = [
   { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
   { href: "/survey", label: "సమగ్ర సర్వే" },
   { href: "/representation", label: "వినతిపత్రం", icon: FileText },
-  { href: "/feed", label: "గెజిట్ & జీవోలు" },
+  { href: "/feed", label: "గెజిట్ & జీవోలు (Gazette)" },
 ] as const;
 
 /**
@@ -141,8 +141,8 @@ export function HomeMobileHeader() {
               className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
             >
               సమగ్ర సర్వే
-              <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 text-[8px] font-bold uppercase tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
-                New
+              <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 font-telugu text-[8px] font-bold tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
+                సర్వే (New)
               </span>
             </Link>
             <Link
@@ -156,7 +156,7 @@ export function HomeMobileHeader() {
               href="/feed"
               className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
             >
-              గెజిట్ &amp; జీవోలు
+              గెజిట్ &amp; జీవోలు (Gazette)
             </Link>
             <Link
               href="/survey"
