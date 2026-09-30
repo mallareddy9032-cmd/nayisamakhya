@@ -6,6 +6,7 @@ import { AccessibilityBar } from "@/components/AccessibilityBar";
 import { CivicChatbot } from "@/components/CivicChatbot";
 import { FloatingNavbar } from "@/components/FloatingNavbar";
 import { NewsMarquee } from "@/components/NewsMarquee";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 /** Public marketing chrome — omitted on /admin/* so desks stay full-bleed tools. */
 export function AppShell({ children }: { children: ReactNode }) {
@@ -23,6 +24,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/newsletter") ||
     pathname.startsWith("/twa");
 
+  const showBottomNav = !pathname.startsWith("/admin");
+
   if (isChromeFree) {
     // Light civic tools (/feed, /poster, /announce, …) sit on paper; admin desks keep slate.
     // Use <div> — tool pages own their own <main> landmark.
@@ -30,8 +33,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? "bg-slate-950"
       : "bg-civic-paper";
     return (
-      <div id="main-content" className={`flex-1 ${shellBg}`}>
+      <div
+        id="main-content"
+        className={`flex-1 overflow-x-hidden ${shellBg} ${showBottomNav ? "pb-24 md:pb-0" : ""}`}
+      >
         {children}
+        {showBottomNav ? <MobileBottomNav /> : null}
       </div>
     );
   }
@@ -47,11 +54,17 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="no-print">
         <NewsMarquee />
       </div>
-      <main id="main-content" className="flex-1">
+      <main
+        id="main-content"
+        className="flex-1 overflow-x-hidden pb-24 md:pb-0"
+      >
         {children}
       </main>
       <div className="no-print">
         <CivicChatbot />
+      </div>
+      <div className="no-print">
+        <MobileBottomNav />
       </div>
     </>
   );

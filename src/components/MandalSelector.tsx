@@ -22,10 +22,12 @@ type MandalRow = {
 };
 
 type Props = {
-  variant?: "compact" | "hero";
+  variant?: "compact" | "hero" | "sheet";
   /** Where Go navigates — portal hub or survey wizard */
   target?: "portal" | "survey";
   className?: string;
+  /** Fired after a successful navigation (sheet / compact close hooks). */
+  onNavigated?: () => void;
 };
 
 const selectBase =
@@ -35,6 +37,7 @@ export function MandalSelector({
   variant = "compact",
   target = "portal",
   className,
+  onNavigated,
 }: Props) {
   const router = useRouter();
   const { language } = useLanguage();
@@ -109,6 +112,7 @@ export function MandalSelector({
     if (!mandalSlug || isInvalidMandalSlug(mandalSlug)) {
       // District-only fallback — never navigate to /{district}/null
       router.push(`/${selectedDistrict.slug}`);
+      onNavigated?.();
       return;
     }
     setMandalPref(selectedDistrict.slug, mandalSlug);
@@ -117,6 +121,7 @@ export function MandalSelector({
         ? `/${selectedDistrict.slug}/${mandalSlug}/survey`
         : `/${selectedDistrict.slug}/${mandalSlug}`;
     router.push(path);
+    onNavigated?.();
   }
 
   const canGo = Boolean(selectedDistrict) && !loading;
@@ -124,26 +129,38 @@ export function MandalSelector({
   const label = (row: { name_te: string; name_en: string }) =>
     te ? `${row.name_te}` : row.name_en;
 
-  if (variant === "hero") {
+  if (variant === "hero" || variant === "sheet") {
+    const isSheet = variant === "sheet";
     return (
       <div
         className={cn(
-          "rounded-2xl border border-[#EBE8E0] bg-[#FBFBF9] p-4",
+          isSheet
+            ? "w-full"
+            : "rounded-2xl border border-[#EBE8E0] bg-[#FBFBF9] p-4",
           className,
         )}
       >
-        <p className={`mb-3 text-sm font-semibold text-[#18181B] ${te ? "font-telugu" : ""}`}>
-          {te
-            ? "మీ మండల సర్వేకు వెళ్లండి"
-            : "Jump to your mandal survey"}
-        </p>
+        {!isSheet ? (
+          <p
+            className={`mb-3 text-sm font-semibold text-[#18181B] ${te ? "font-telugu" : ""}`}
+          >
+            {te
+              ? "మీ మండల సర్వేకు వెళ్లండి"
+              : "Jump to your mandal survey"}
+          </p>
+        ) : null}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
           <select
             aria-label={te ? "జిల్లా" : "District"}
             value={districtId}
             disabled={loading || districts.length === 0}
             onChange={(e) => onDistrictChange(e.target.value)}
-            className={cn(selectBase, "flex-1 px-4 py-2.5 text-sm", te && "font-telugu")}
+            className={cn(
+              selectBase,
+              "w-full flex-1 px-4 py-2.5 text-sm",
+              isSheet && "min-h-12 rounded-xl",
+              te && "font-telugu",
+            )}
           >
             <option value="">జిల్లాను ఎంచుకోండి / Select District</option>
             {districts.map((d) => (
@@ -158,7 +175,12 @@ export function MandalSelector({
             value={mandalSlug}
             disabled={!districtId || filteredMandals.length === 0}
             onChange={(e) => setMandalSlug(e.target.value)}
-            className={cn(selectBase, "flex-1 px-4 py-2.5 text-sm", te && "font-telugu")}
+            className={cn(
+              selectBase,
+              "w-full flex-1 px-4 py-2.5 text-sm",
+              isSheet && "min-h-12 rounded-xl",
+              te && "font-telugu",
+            )}
           >
             <option value="">మండలాన్ని ఎంచుకోండి / Select Mandal</option>
             {filteredMandals.map((m) => (
@@ -172,7 +194,11 @@ export function MandalSelector({
             type="button"
             disabled={!canGo}
             onClick={go}
-            className="tap inline-flex min-h-[44px] items-center justify-center rounded-full bg-[#C2410C] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] disabled:cursor-not-allowed disabled:opacity-40"
+            className={cn(
+              "tap inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#C2410C] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto",
+              isSheet && "rounded-xl",
+              te && "font-telugu",
+            )}
           >
             వెళ్లు / Go →
           </button>
@@ -181,7 +207,7 @@ export function MandalSelector({
     );
   }
 
-  // compact — navbar
+  // compact — desktop navbar only (mobile uses sheet via parent)
   return (
     <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
       <select

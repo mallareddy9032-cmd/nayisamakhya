@@ -189,7 +189,7 @@ export function PersonaSwitcher() {
 
   return (
     <section
-      className="border-b border-civic-border bg-[#FBFBFA] px-4 py-10 sm:py-12"
+      className="border-b border-civic-border bg-[#FBFBFA] px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
       aria-labelledby="persona-switcher-heading"
     >
       <div className="mx-auto max-w-6xl">
@@ -214,11 +214,11 @@ export function PersonaSwitcher() {
           </p>
         </header>
 
-        {/* Persona selector pills */}
+        {/* Persona selector pills — horizontal scroll on mobile */}
         <div
           role="tablist"
           aria-label="Persona segments"
-          className="flex flex-col gap-2 rounded-2xl border border-[#EAD7B5] bg-[#FBFBFA] p-1.5 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8)] sm:flex-row sm:gap-1.5"
+          className="flex gap-2 overflow-x-auto overscroll-x-contain rounded-2xl border border-[#EAD7B5] bg-[#FBFBFA] p-1.5 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8)] [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x sm:gap-1.5 lg:overflow-visible [&::-webkit-scrollbar]:hidden"
         >
           {PERSONAS.map((persona) => {
             const Icon = persona.icon;
@@ -233,7 +233,7 @@ export function PersonaSwitcher() {
                 id={`persona-tab-${persona.id}`}
                 onClick={() => setActive(persona.id)}
                 className={cn(
-                  "civic-focus-ring flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-300 sm:justify-start",
+                  "civic-focus-ring flex min-h-11 min-w-[11rem] shrink-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-300 sm:min-w-0 sm:justify-start",
                   selected
                     ? "bg-[#1E293B] text-white shadow-[0_4px_14px_rgb(15_23_42_/0.2)]"
                     : "text-[#0F172A] hover:bg-white",

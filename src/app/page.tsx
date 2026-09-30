@@ -4,10 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   FileText,
-  MapPin,
   MessageCircle,
-  Send,
-  ShieldCheck,
 } from "lucide-react";
 import { CivicStalwarts } from "@/components/CivicStalwarts";
 import { CivicTimeline } from "@/components/CivicTimeline";
@@ -15,15 +12,15 @@ import { CivicMetricsTicker } from "@/components/home/CivicMetricsTicker";
 import { HeritageTriadRibbon } from "@/components/home/HeritageTriadRibbon";
 import { HeroArtisanShowcase } from "@/components/home/HeroArtisanShowcase";
 import { HomeJumpNav } from "@/components/home/HomeJumpNav";
-import { MobileStickyActions } from "@/components/home/MobileStickyActions";
+import { HomeMobileHeader } from "@/components/home/HomeMobileHeader";
 import { PersonaSwitcher } from "@/components/home/PersonaSwitcher";
 import { QuickGrievanceWidget } from "@/components/home/QuickGrievanceWidget";
 import { ServiceActionCards } from "@/components/home/ServiceActionCards";
 
 export default function HomePage() {
   return (
-    <div className="bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
-      <div className="border-b border-slate-700/50 bg-civic-navy px-4 py-1.5 text-center text-[11px] text-slate-200">
+    <div className="overflow-x-hidden bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
+      <div className="border-b border-slate-700/50 bg-civic-navy px-4 py-1.5 text-center text-[11px] text-slate-200 sm:px-6 lg:px-8">
         <span className="font-telugu">
           {
             "తెలంగాణ నాయి సమాఖ్య అధికారిక డిజిటల్ నెట్‌వర్క్ — 33 జిల్లాలు & 589 మండలాల సేవా వేదిక"
@@ -31,79 +28,25 @@ export default function HomePage() {
         </span>
       </div>
 
-      <header className="sticky top-0 z-30 border-b border-civic-border bg-white/95 shadow-xs backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="rounded-xl border border-civic-bronze/20 bg-civic-bronze/10 p-2 text-civic-bronze">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <span className="font-telugu text-base font-black tracking-tight text-civic-ink md:text-lg">
-                {"నాయి సమాఖ్య తెలంగాణ"}
-              </span>
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Official Civic Welfare Portal
-              </p>
-            </div>
-          </div>
+      <HomeMobileHeader />
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <Link
-              href="/districts"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
-            >
-              <MapPin className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              జిల్లాలు
-            </Link>
-            <Link
-              href="/history"
-              className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
-            >
-              చరిత్ర
-            </Link>
-            <Link
-              href="/newsletter"
-              className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
-            >
-              సమాచార పత్రిక
-            </Link>
-            <Link
-              href="/representation"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline md:inline-flex"
-            >
-              <FileText className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              వినతిపత్రం
-            </Link>
-            <a
-              href="https://t.me/NayiSamakhyaDeskBot"
-              target="_blank"
-              rel="noreferrer"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
-            >
-              <Send className="h-3.5 w-3.5" aria-hidden />
-              సేవా డెస్క్ బాట్
-            </a>
-          </div>
-        </div>
-      </header>
-
-      {/* Dignified artisanal hero — 2-col on desktop */}
+      {/* Dignified artisanal hero — stacked on mobile, 2-col on desktop */}
       <section
         id="home-hero"
-        className="relative scroll-mt-20 overflow-hidden border-b border-civic-border bg-gradient-to-b from-white via-[#FBFBFA] to-[#FBFBFA] px-4 pb-14 pt-10 sm:pb-16 sm:pt-12"
+        className="relative scroll-mt-20 overflow-x-hidden border-b border-civic-border bg-gradient-to-b from-white via-[#FBFBFA] to-[#FBFBFA] px-4 pb-14 pt-10 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8"
       >
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,_rgb(180_83_9_/0.08),_transparent_60%)]"
           aria-hidden
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-12">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
           <div className="space-y-5 text-center lg:text-left">
             <span className="civic-eyebrow-pill mb-1 shadow-sm">
-              🏛️ చారిత్రక వారసత్వం • చట్టబద్ధ రక్షణ • సమగ్ర సాధికారత
+              చారిత్రక వారసత్వం • చట్టబద్ధ రక్షణ • సమగ్ర సాధికారత
             </span>
 
             <div>
-              <h1 className="font-display-te text-[2rem] font-normal leading-[1.35] tracking-tight text-[#0F172A] sm:text-4xl sm:leading-[1.3] md:text-5xl md:leading-[1.28]">
+              <h1 className="font-display-te text-2xl font-normal leading-[1.35] tracking-tight text-[#0F172A] sm:text-4xl sm:leading-[1.3] lg:text-5xl lg:leading-[1.28]">
                 ఆత్మగౌరవం • చట్టబద్ధ రక్షణ •
                 <br />
                 <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-display-te not-italic text-transparent">
@@ -143,7 +86,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md pb-10 lg:max-w-none lg:pb-6">
+          {/* Artisan photo stacked below headline on mobile */}
+          <div className="relative mx-auto w-full max-w-md overflow-x-hidden pb-10 lg:max-w-none lg:pb-6">
             <HeroArtisanShowcase />
           </div>
         </div>
@@ -176,8 +120,6 @@ export default function HomePage() {
       <div id="stalwarts" className="scroll-mt-24">
         <CivicStalwarts />
       </div>
-
-      <MobileStickyActions />
     </div>
   );
 }

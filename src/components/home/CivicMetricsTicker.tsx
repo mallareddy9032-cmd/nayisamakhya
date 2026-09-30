@@ -131,7 +131,7 @@ export function CivicMetricsTicker() {
     <section
       ref={ref}
       aria-label="Civic metrics"
-      className="relative z-10 -mt-5 px-4 sm:-mt-6"
+      className="relative z-10 -mt-5 px-4 sm:-mt-6 sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#FBFBFA] shadow-[0_8px_30px_rgb(15_23_42_/0.06)]">
         <div className="flex items-center justify-center gap-2 border-b border-[#E2E8F0] bg-white/70 px-4 py-2">
@@ -143,11 +143,11 @@ export function CivicMetricsTicker() {
           <span className="h-0.5 w-6 rounded-full bg-[#B45309]" aria-hidden />
         </div>
 
-        <div className="grid grid-cols-2 divide-x divide-y divide-[#E2E8F0] md:grid-cols-4 md:divide-y-0">
+        <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-[#E2E8F0] lg:p-0">
           {METRICS.map((metric) => (
             <div
               key={metric.id}
-              className="flex flex-col items-center justify-center gap-1 px-3 py-4 text-center sm:px-4 sm:py-5"
+              className="flex flex-col items-center justify-center gap-1 rounded-xl border border-[#E2E8F0] bg-white/80 px-3 py-4 text-center sm:px-4 sm:py-5 lg:rounded-none lg:border-0 lg:bg-transparent"
             >
               <AnimatedFigure
                 metric={metric}

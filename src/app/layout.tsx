@@ -81,9 +81,9 @@ export default function RootLayout({
     <html
       lang="te"
       suppressHydrationWarning
-      className={`${sans.variable} ${telugu.variable} ${displayTe.variable} h-full`}
+      className={`${sans.variable} ${telugu.variable} ${displayTe.variable} h-full overflow-x-hidden`}
     >
-      <body className="flex min-h-[100dvh] flex-col justify-between bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white pb-[env(safe-area-inset-bottom,1rem)] pt-[env(safe-area-inset-top,0px)]">
+      <body className="flex min-h-[100dvh] flex-col justify-between overflow-x-hidden bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white pb-[env(safe-area-inset-bottom,1rem)] pt-[env(safe-area-inset-top,0px)]">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-white"
@@ -92,7 +92,7 @@ export default function RootLayout({
         </a>
         <LanguageProvider>
           <InAppBrowserBanner />
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden">
             <AppShell>{children}</AppShell>
           </div>
           <CivicFooter />

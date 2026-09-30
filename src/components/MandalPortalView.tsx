@@ -87,7 +87,7 @@ export function MandalPortalView({ mandal: m }: Props) {
   );
 
   return (
-    <div className="bg-[#FBFBF9]">
+    <div className="overflow-x-hidden bg-[#FBFBF9] pb-24 md:pb-0">
       {/* Localized civic hero */}
       <section className="relative overflow-hidden border-b border-[#EBE8E0]">
         <div
@@ -276,42 +276,44 @@ export function MandalPortalView({ mandal: m }: Props) {
 
         {/* GP explorer */}
         <section aria-labelledby="gp-heading">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C2410C]">
-                {te ? "పంచాయతీ ఎక్స్‌ప్లోరర్" : "Panchayat explorer"}
-              </p>
-              <h2
-                id="gp-heading"
-                className={`mt-1 text-xl font-bold text-[#18181B] ${te ? "font-telugu" : ""}`}
-              >
-                {te
-                  ? "గ్రామ పంచాయతీ & వార్డు ఎక్స్‌ప్లోరర్"
-                  : "Gram Panchayat & Ward Explorer"}
-              </h2>
+          <div className="sticky top-[52px] z-20 -mx-4 border-b border-[#EBE8E0] bg-[#FBFBFA]/95 px-4 py-3 backdrop-blur-md sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C2410C]">
+                  {te ? "పంచాయతీ ఎక్స్‌ప్లోరర్" : "Panchayat explorer"}
+                </p>
+                <h2
+                  id="gp-heading"
+                  className={`mt-1 text-xl font-bold text-[#18181B] ${te ? "font-telugu" : ""}`}
+                >
+                  {te
+                    ? "గ్రామ పంచాయతీ & వార్డు ఎక్స్‌ప్లోరర్"
+                    : "Gram Panchayat & Ward Explorer"}
+                </h2>
+              </div>
+              <label className="relative w-full sm:w-80">
+                <span className="sr-only">
+                  {te
+                    ? "పంచాయతీ లేదా వార్డు పేరును వెతకండి"
+                    : "Search panchayat or ward name"}
+                </span>
+                <Search
+                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717A]"
+                  aria-hidden
+                />
+                <input
+                  type="search"
+                  value={gpQuery}
+                  onChange={(e) => setGpQuery(e.target.value)}
+                  placeholder={
+                    te
+                      ? "పంచాయతీ లేదా వార్డు పేరును వెతకండి..."
+                      : "Search panchayat or ward name..."
+                  }
+                  className={`tap min-h-12 w-full rounded-xl border border-[#EBE8E0] bg-white py-2.5 pl-10 pr-4 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#C2410C]/40 focus:outline-none ${te ? "font-telugu" : ""}`}
+                />
+              </label>
             </div>
-            <label className="relative w-full sm:w-80">
-              <span className="sr-only">
-                {te
-                  ? "పంచాయతీ లేదా వార్డు పేరును వెతకండి"
-                  : "Search panchayat or ward name"}
-              </span>
-              <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717A]"
-                aria-hidden
-              />
-              <input
-                type="search"
-                value={gpQuery}
-                onChange={(e) => setGpQuery(e.target.value)}
-                placeholder={
-                  te
-                    ? "పంచాయతీ లేదా వార్డు పేరును వెతకండి..."
-                    : "Search panchayat or ward name..."
-                }
-                className={`tap w-full rounded-full border border-[#EBE8E0] bg-white py-2.5 pl-10 pr-4 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#C2410C]/40 focus:outline-none ${te ? "font-telugu" : ""}`}
-              />
-            </label>
           </div>
 
           <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -331,7 +333,7 @@ export function MandalPortalView({ mandal: m }: Props) {
               filtered.map((gp) => (
                 <li
                   key={gp.id}
-                  className="rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+                  className="flex min-h-12 flex-col justify-center rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <h3
                     className={`text-sm font-semibold leading-snug text-[#0F172A] ${te ? "font-telugu" : ""}`}

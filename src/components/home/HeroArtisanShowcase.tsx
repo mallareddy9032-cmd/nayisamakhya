@@ -6,19 +6,19 @@ import { IdCard, MapPin, Phone, ShieldCheck } from "lucide-react";
 
 export function HeroArtisanShowcase() {
   return (
-    <div className="relative mx-auto flex w-full max-w-md items-center justify-center lg:max-w-none">
+    <div className="relative mx-auto flex w-full max-w-full items-center justify-center overflow-x-hidden lg:max-w-none">
       {/* Soft atmosphere — reserved height to avoid CLS */}
       <div
-        className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-[#B45309]/15 blur-3xl"
+        className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 max-w-full rounded-full bg-[#B45309]/15 blur-3xl"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-[#1E293B]/10 blur-2xl"
+        className="pointer-events-none absolute -bottom-6 -left-6 h-32 w-32 max-w-full rounded-full bg-[#1E293B]/10 blur-2xl"
         aria-hidden
       />
 
-      {/* Ceremonial double-gold bezel portrait */}
-      <div className="relative z-[1] h-[280px] w-[280px] sm:h-[320px] sm:w-[320px]">
+      {/* Ceremonial double-gold bezel portrait — fluid mobile size */}
+      <div className="relative z-[1] mx-auto h-44 w-44 max-w-full sm:h-64 sm:w-64">
         <div
           className="absolute inset-0 rounded-full"
           style={{
@@ -37,8 +37,8 @@ export function HeroArtisanShowcase() {
             width={640}
             height={640}
             priority
-            className="h-full w-full object-cover"
-            sizes="(max-width: 640px) 280px, 320px"
+            className="h-full w-full max-w-full object-cover"
+            sizes="(max-width: 640px) 176px, 256px"
           />
         </div>
         <div className="absolute -bottom-2 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/30 bg-white px-3 py-1 shadow-md">
@@ -49,16 +49,16 @@ export function HeroArtisanShowcase() {
         </div>
       </div>
 
-      {/* Floating tilted Digital Coordinator Card */}
+      {/* Floating tilted Digital Coordinator Card — scale down on mobile */}
       <div
-        className="absolute -bottom-4 -right-1 z-[3] w-[200px] rotate-[7deg] transition-transform duration-500 hover:rotate-[3deg] sm:-right-2 sm:w-[220px] md:right-0"
+        className="absolute -bottom-4 -right-1 z-[3] w-[180px] origin-center scale-90 rotate-[7deg] transition-transform duration-500 hover:rotate-[3deg] sm:-right-2 sm:w-[220px] sm:scale-100 md:right-0"
         style={{
           filter: "drop-shadow(0 22px 28px rgb(15 23 42 / 0.28))",
         }}
       >
         <Link
           href="/coordinator-card"
-          className="block overflow-hidden rounded-xl border border-[#E2E8F0] bg-white p-3.5 ring-1 ring-[#B45309]/20"
+          className="block max-w-full overflow-hidden rounded-xl border border-[#E2E8F0] bg-white p-3.5 ring-1 ring-[#B45309]/20"
           aria-label="సమన్వయకర్త డిజిటల్ కార్డు ప్రివ్యూ"
         >
           <div className="absolute inset-x-0 top-0 h-1 bg-[#B45309]" aria-hidden />
@@ -73,10 +73,7 @@ export function HeroArtisanShowcase() {
               </p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-md border border-[#E2E8F0] bg-[#FBFBFA]">
-              <div
-                className="grid h-7 w-7 grid-cols-3 gap-px"
-                aria-hidden
-              >
+              <div className="grid h-7 w-7 grid-cols-3 gap-px" aria-hidden>
                 {Array.from({ length: 9 }).map((_, i) => (
                   <span
                     key={i}

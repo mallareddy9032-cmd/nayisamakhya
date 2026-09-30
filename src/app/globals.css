@@ -153,6 +153,26 @@ body {
   background: var(--canvas);
   color: var(--ink);
   font-size: calc(1rem * var(--font-scale));
+  overflow-x: hidden;
+}
+
+/* iOS home-indicator safe padding for sticky mobile bars */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 3D / floating cards must not force horizontal scroll at 360px */
+.perspective-card,
+[data-3d-card] {
+  max-width: 100%;
 }
 
 body {

@@ -6,6 +6,7 @@ import {
   ArrowDownToLine,
   ArrowRight,
   BookOpen,
+  ChevronDown,
   Gavel,
   Music2,
   ScrollText,
@@ -198,8 +199,8 @@ function MilestoneScrubber({
 
   return (
     <div className="relative">
-      {/* Desktop horizontal track */}
-      <div className="hidden md:block">
+      {/* Desktop horizontal track — lg+ */}
+      <div className="hidden lg:block">
         <div className="relative mx-auto max-w-4xl px-2 pt-2 pb-1">
           <div
             className="absolute left-8 right-8 top-[22px] h-[2px] overflow-hidden rounded-full bg-[#EAD7B5]"
@@ -278,46 +279,113 @@ function MilestoneScrubber({
           </ol>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Mobile swipeable pill strip */}
-      <div
-        className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x md:hidden [&::-webkit-scrollbar]:hidden"
-        role="tablist"
-        aria-label="Chronological civic milestones"
-      >
-        {eras.map((era) => {
-          const selected = era.id === activeId;
-          return (
+function MobileEraAccordion({
+  eras,
+  activeId,
+  onSelect,
+}: {
+  eras: TimelineEra[];
+  activeId: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="space-y-2 lg:hidden" role="list" aria-label="Civic timeline eras">
+      {eras.map((era) => {
+        const Icon = ICON_MAP[era.iconKey];
+        const open = era.id === activeId;
+        return (
+          <div
+            key={era.id}
+            role="listitem"
+            className={cn(
+              "overflow-hidden rounded-2xl border bg-white transition-colors",
+              open ? "border-[#B45309]/50 shadow-sm" : "border-[#EAD7B5]",
+            )}
+          >
             <button
-              key={era.id}
               type="button"
-              role="tab"
-              aria-selected={selected}
-              aria-controls="civic-epoch-panel"
-              id={`epoch-tab-mobile-${era.id}`}
+              aria-expanded={open}
               onClick={() => onSelect(era.id)}
-              className={cn(
-                "civic-focus-ring inline-flex min-h-11 shrink-0 flex-col items-start justify-center rounded-full border px-3.5 py-1.5 transition-all duration-300",
-                selected
-                  ? "border-[#B45309] bg-[#1E293B] text-white shadow-[0_0_0_1.5px_#B45309]"
-                  : "border-[#EAD7B5] bg-white text-[#0F172A] hover:border-[#B45309]/40",
-              )}
+              className="civic-focus-ring flex min-h-12 w-full items-center gap-3 px-3 py-3 text-left"
             >
-              <span className="font-telugu text-[11px] font-bold leading-none">
-                {era.scrubLabel}
-              </span>
               <span
                 className={cn(
-                  "mt-0.5 font-sans text-[9px] font-semibold uppercase tracking-wide",
-                  selected ? "text-[#FBBF24]" : "text-slate-500",
+                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                  open
+                    ? "bg-[#B45309] text-white"
+                    : "bg-[#B45309]/10 text-[#B45309]",
                 )}
+                aria-hidden
               >
-                {era.badgeEra}
+                <Icon className="h-4 w-4" />
               </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-telugu text-sm font-bold leading-snug text-[#0F172A]">
+                  {era.titleTe}
+                </span>
+                <span className="mt-0.5 block font-telugu text-[11px] font-semibold text-[#B45309]">
+                  {era.period} · {era.badgeEra}
+                </span>
+              </span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 shrink-0 text-slate-400 transition-transform",
+                  open && "rotate-180 text-[#B45309]",
+                )}
+                aria-hidden
+              />
             </button>
-          );
-        })}
-      </div>
+            {open ? (
+              <div className="border-t border-[#EAD7B5] bg-[#FFFDF9] px-3 pb-4 pt-3">
+                <p className="font-sans text-xs font-semibold tracking-wide text-[#B45309]">
+                  {era.titleEn}
+                </p>
+                <p className="mt-2 font-telugu text-sm leading-[1.75] text-slate-600">
+                  {era.summaryTe}
+                </p>
+                <ul className="mt-3 space-y-1.5">
+                  {era.bullets.map((bullet) => (
+                    <li key={bullet} className="flex items-start gap-2">
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B45309]"
+                        aria-hidden
+                      />
+                      <span className="font-telugu text-xs leading-relaxed text-[#1E293B]">
+                        {bullet}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {era.citations.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {era.citations.map((cite) => (
+                      <span
+                        key={cite}
+                        className="inline-flex max-w-full rounded-md border border-[#EAD7B5] bg-white/80 px-2 py-0.5 font-telugu text-[10px] font-semibold leading-snug text-slate-600"
+                      >
+                        [{cite}]
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {era.actionLink ? (
+                  <Link
+                    href={era.actionLink.href}
+                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-3 py-2 font-telugu text-xs font-bold text-white"
+                  >
+                    {era.actionLink.labelTe}
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -566,7 +634,7 @@ export function CivicTimeline() {
 
   return (
     <section
-      className="border-b border-civic-border bg-[#FBFBFA] px-4 py-10 sm:py-12"
+      className="overflow-x-hidden border-b border-civic-border bg-[#FBFBFA] px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
       aria-labelledby="civic-timeline-heading"
     >
       <div className="mx-auto max-w-5xl">
@@ -591,8 +659,15 @@ export function CivicTimeline() {
           </p>
         </header>
 
-        {/* Compact interactive viewport — scrubber + single card */}
-        <div className="flex flex-col gap-3 md:max-h-[560px] md:gap-4">
+        {/* <1024px: vertical accordion with readable era details */}
+        <MobileEraAccordion
+          eras={TIMELINE_ERAS}
+          activeId={activeId}
+          onSelect={selectEra}
+        />
+
+        {/* lg+: scrubber + single epoch card */}
+        <div className="hidden flex-col gap-3 lg:flex lg:max-h-[560px] lg:gap-4">
           <MilestoneScrubber
             eras={TIMELINE_ERAS}
             activeId={activeId}

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Landmark, Zap } from "lucide-react";
+import { useMemo, useState } from "react";
+import { FileText, Landmark, Search, Zap } from "lucide-react";
 import type { AdminEntity } from "@/data/telanganaGeo";
 import type { UrbanPortal } from "@/lib/data/urbanRepository";
 import { toEstablishmentListings } from "@/lib/data/establishments";
@@ -40,6 +41,19 @@ export function EntityUrbanDesk({ entity, portal }: Props) {
     en: entity.nameEn,
     te: entity.nameTe,
   });
+  const [wardQuery, setWardQuery] = useState("");
+
+  const filteredWards = useMemo(() => {
+    const q = wardQuery.trim().toLowerCase();
+    if (!q) return entity.subUnitsList;
+    const raw = wardQuery.trim();
+    return entity.subUnitsList.filter(
+      (ward) =>
+        ward.nameEn.toLowerCase().includes(q) ||
+        ward.nameTe.includes(raw) ||
+        String(ward.id).toLowerCase().includes(q),
+    );
+  }, [entity.subUnitsList, wardQuery]);
 
   const dockets = [
     {
@@ -69,12 +83,12 @@ export function EntityUrbanDesk({ entity, portal }: Props) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FBFBFA] text-[#0F172A]">
+    <div className="min-h-screen overflow-x-hidden bg-[#FBFBFA] pb-24 text-[#0F172A] md:pb-0">
       <section className="border-b border-[#E8E4DC] bg-gradient-to-b from-[#FFF8EF] to-[#FBFBFA]">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href={`/${entity.districtSlug}`}
-            className={`text-xs text-slate-500 hover:text-[#B45309] ${te ? "font-telugu" : ""}`}
+            className={`inline-flex min-h-12 items-center text-xs text-slate-500 hover:text-[#B45309] ${te ? "font-telugu" : ""}`}
           >
             {te
               ? `← ${entity.districtNameTe} డైరెక్టరీ`
@@ -105,7 +119,7 @@ export function EntityUrbanDesk({ entity, portal }: Props) {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:px-8">
         <div className="space-y-8">
           <section>
             <h2 className="font-telugu text-xl font-bold text-[#0F172A]">
@@ -114,50 +128,77 @@ export function EntityUrbanDesk({ entity, portal }: Props) {
             <p className="mt-1 text-sm text-slate-500">
               Three statutory action dockets → Municipal Commissioner desk
             </p>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {dockets.map((d) => (
                 <Link
                   key={d.id}
                   href={representationHref(d.id, entity)}
-                  className="tap flex h-full flex-col rounded-2xl border border-[#E8E4DC] bg-white p-4 shadow-sm transition-colors hover:border-[#B45309]/45 hover:bg-[#FFF8EF]"
+                  className="civic-focus-ring flex min-h-12 flex-col gap-2 rounded-2xl border border-[#EAD7B5] bg-white p-4 shadow-sm transition hover:border-[#B45309]/40 hover:shadow-md"
                 >
                   <d.icon className="h-5 w-5 text-[#B45309]" aria-hidden />
-                  <p className="font-telugu mt-3 text-sm font-semibold text-[#0F172A]">
-                    {d.titleTe}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">{d.titleEn}</p>
-                  <p className="font-telugu mt-3 text-[11px] leading-relaxed text-[#B45309]">
-                    {d.citeTe}
-                  </p>
+                  <span className="font-telugu text-sm font-bold text-[#0F172A]">
+                    {te ? d.titleTe : d.titleEn}
+                  </span>
+                  <span className="font-telugu text-[11px] leading-snug text-slate-500">
+                    {te ? d.citeTe : d.citeEn}
+                  </span>
                 </Link>
               ))}
             </div>
           </section>
 
           <section>
-            <div className="flex flex-wrap items-end justify-between gap-2">
-              <div>
-                <h2 className="font-telugu text-xl font-bold text-[#0F172A]">
-                  వార్డ్ ఎక్స్‌ప్లోరర్
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  WARD EXPLORER · {entity.subUnitsCount}{" "}
-                  {entity.subUnitsLabelTe}
-                </p>
+            <div className="sticky top-[52px] z-20 -mx-4 border-b border-[#E8E4DC] bg-[#FBFBFA]/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="font-telugu text-xl font-bold text-[#0F172A]">
+                    వార్డ్ ఎక్స్‌ప్లోరర్
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    WARD EXPLORER · {entity.subUnitsCount}{" "}
+                    {entity.subUnitsLabelTe}
+                  </p>
+                </div>
+                <label className="relative w-full sm:w-80">
+                  <span className="sr-only">
+                    {te ? "వార్డు పేరును వెతకండి" : "Search ward name"}
+                  </span>
+                  <Search
+                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    aria-hidden
+                  />
+                  <input
+                    type="search"
+                    value={wardQuery}
+                    onChange={(e) => setWardQuery(e.target.value)}
+                    placeholder={
+                      te ? "వార్డు పేరును వెతకండి..." : "Search ward name..."
+                    }
+                    className={`tap min-h-12 w-full rounded-xl border border-[#E8E4DC] bg-white py-2.5 pl-10 pr-4 text-sm text-[#0F172A] placeholder:text-slate-400 focus:border-[#B45309]/40 focus:outline-none ${te ? "font-telugu" : ""}`}
+                  />
+                </label>
               </div>
             </div>
-            <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-              {entity.subUnitsList.map((ward) => (
+            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredWards.length === 0 ? (
                 <li
-                  key={ward.id}
-                  className="rounded-xl border border-[#E8E4DC] bg-white px-3 py-2.5"
+                  className={`col-span-full rounded-2xl border border-dashed border-[#E8E4DC] bg-white p-6 text-center text-sm text-slate-500 ${te ? "font-telugu" : ""}`}
                 >
-                  <p className="font-telugu text-sm font-semibold text-[#0F172A]">
-                    {ward.nameTe}
-                  </p>
-                  <p className="text-[11px] text-slate-500">{ward.nameEn}</p>
+                  {te ? "సరిపోలిన వార్డులు లేవు." : "No matching wards."}
                 </li>
-              ))}
+              ) : (
+                filteredWards.map((ward) => (
+                  <li
+                    key={ward.id}
+                    className="flex min-h-12 flex-col justify-center rounded-xl border border-[#E8E4DC] bg-white px-3 py-3"
+                  >
+                    <p className="font-telugu text-sm font-semibold text-[#0F172A]">
+                      {ward.nameTe}
+                    </p>
+                    <p className="text-[11px] text-slate-500">{ward.nameEn}</p>
+                  </li>
+                ))
+              )}
             </ul>
           </section>
 
