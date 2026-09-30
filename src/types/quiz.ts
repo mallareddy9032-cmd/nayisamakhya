@@ -2,7 +2,7 @@
 
 export const QUIZ_STORAGE_KEY = "ns_legal_quiz_attempts_v1";
 export const QUIZ_SESSION_KEY = "ns_legal_quiz_session_v1";
-export const QUIZ_PASS_THRESHOLD = 8;
+export const QUIZ_PASS_THRESHOLD = 7;
 export const QUIZ_QUESTION_COUNT = 10;
 
 export type QuizRegistrant = {

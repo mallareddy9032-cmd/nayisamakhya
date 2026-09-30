@@ -21,7 +21,7 @@ type QuizCertificateProps = {
 
 /**
  * Printable A4 certificate — ధ్రువీకృత ప్రజా హక్కుల రక్షకుడు
- * Gold border, emblem, QR marker. Hidden unless score ≥ pass threshold.
+ * Gold border, emblem, QR marker. Issued when score ≥ QUIZ_PASS_THRESHOLD (7).
  */
 export function QuizCertificate({
   name,

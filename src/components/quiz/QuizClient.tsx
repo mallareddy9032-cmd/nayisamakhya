@@ -34,10 +34,11 @@ import {
   writeSession,
 } from "@/lib/quiz/store";
 import { QuizCertificate } from "@/components/quiz/QuizCertificate";
+import { QuizCertificatePreview } from "@/components/quiz/QuizCertificatePreview";
 import { cn } from "@/lib/utils";
 
 const inputClass =
-  "w-full min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#B45309]/50 focus:outline-none focus:ring-2 focus:ring-[#B45309]/15";
+  "w-full min-h-[52px] rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#B45309]/50 focus:outline-none focus:ring-2 focus:ring-[#B45309]/15 disabled:bg-[#F8F7F4] disabled:text-[#94A3B8]";
 
 const labelClass =
   "mb-1.5 block font-telugu text-sm font-medium text-[#0F172A]";
@@ -195,144 +196,189 @@ export function QuizClient() {
 
   if (step === "register") {
     return (
-      <section className="space-y-5">
-        <div className="rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] px-4 py-5 sm:px-5">
-          <p className="inline-flex items-center gap-1.5 rounded-full border border-[#B45309]/30 bg-[#B45309]/10 px-2.5 py-1 font-telugu text-[11px] font-bold text-[#B45309]">
-            <Scale className="h-3.5 w-3.5" aria-hidden />
-            Competition 3 · 10 ప్రశ్నలు
-          </p>
-          <h2 className="mt-3 font-display-te text-xl font-normal leading-snug text-[#0F172A] sm:text-2xl">
-            చట్ట హక్కుల అన్వేషి
-          </h2>
-          <p className="mt-2 font-telugu text-sm leading-relaxed text-[#475569]">
-            జీ.ఓ. 23, మున్సిపాలిటీల చట్టం 2019, బీసీ సంక్షేమం, సమూహ వారసత్వం —
-            10 ప్రశ్నలు.{" "}
-            <span className="font-bold text-[#B45309]">
-              {QUIZ_PASS_THRESHOLD}+
-            </span>{" "}
-            స్కోర్ వస్తే «ధ్రువీకృత ప్రజా హక్కుల రక్షకుడు» సర్టిఫికేట్.
-          </p>
-        </div>
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-12">
+        {/* LEFT — rules + registration */}
+        <aside className="lg:col-span-5">
+          <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+            <section className="rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] px-4 py-4">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-[#B45309]/30 bg-[#B45309]/10 px-3 py-1 font-telugu text-xs font-semibold text-[#B45309]">
+                <Scale className="h-3.5 w-3.5" aria-hidden />
+                క్విజ్ నిబంధనలు (Quiz Rules)
+              </p>
+              <ul className="mt-3 space-y-2 font-telugu text-sm leading-relaxed text-[#334155]">
+                <li>
+                  • మొత్తం{" "}
+                  <strong className="text-[#B45309]">10 ప్రశ్నలు</strong> —
+                  జీ.ఓ. 23, మున్సిపల్ చట్టం, బీసీ సంక్షేమం, వారసత్వం.
+                </li>
+                <li>
+                  • ప్రతి జవాబు తర్వాత చట్టపరమైన వివరణ కనిపిస్తుంది.
+                </li>
+                <li>
+                  •{" "}
+                  <strong className="text-[#B45309]">
+                    {QUIZ_PASS_THRESHOLD}+ స్కోర్
+                  </strong>{" "}
+                  వస్తే «ధ్రువీకృత ప్రజా హక్కుల రక్షకుడు» A4 సర్టిఫికేట్.
+                </li>
+                <li>• స్కోర్ &amp; సర్టిఫికేట్ ఈ పరికరంలో సేవ్ అవుతాయి.</li>
+              </ul>
+            </section>
 
-        <form
-          onSubmit={onRegister}
-          className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5"
-          noValidate
-        >
-          <div>
-            <label htmlFor="quiz-name" className={labelClass}>
-              పూర్తి పేరు
-            </label>
-            <input
-              id="quiz-name"
-              type="text"
-              autoComplete="name"
-              value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
-              className={inputClass}
-              placeholder="మీ పేరు"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="quiz-phone" className={labelClass}>
-              వాట్సాప్ నంబర్ (10 అంకెలు)
-            </label>
-            <input
-              id="quiz-phone"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel"
-              maxLength={10}
-              value={form.phone}
-              onChange={(e) =>
-                setField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
-              }
-              className={inputClass}
-              placeholder="9XXXXXXXXX"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="quiz-district" className={labelClass}>
-              జిల్లా
-            </label>
-            <select
-              id="quiz-district"
-              value={form.district}
-              onChange={(e) => setField("district", e.target.value)}
-              className={inputClass}
-              required
+            <form
+              onSubmit={onRegister}
+              className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm"
+              noValidate
             >
-              <option value="">జిల్లా ఎంచుకోండి</option>
-              {districts.map((d) => (
-                <option key={d.slug} value={d.slug}>
-                  {d.nameTe} ({d.nameEn})
-                </option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#B45309]">
+                  <Scale className="h-3 w-3" aria-hidden />
+                  Competition 3 · Registration
+                </p>
+                <h2 className="mt-1 font-display-te text-xl font-normal text-slate-900">
+                  క్విజ్ నమోదు ఫారం
+                </h2>
+                <p className="mt-1 text-sm text-[#64748B]">
+                  Register to begin the Civic Rights Awareness Quiz
+                </p>
+              </div>
 
+              <div>
+                <label htmlFor="quiz-name" className={labelClass}>
+                  పూర్తి పేరు (Full Name)
+                </label>
+                <input
+                  id="quiz-name"
+                  type="text"
+                  autoComplete="name"
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
+                  className={inputClass}
+                  placeholder="ఉదా: రాములు నాయి"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="quiz-phone" className={labelClass}>
+                  వాట్సాప్ నంబర్ (10 అంకెలు)
+                </label>
+                <input
+                  id="quiz-phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  maxLength={10}
+                  value={form.phone}
+                  onChange={(e) =>
+                    setField(
+                      "phone",
+                      e.target.value.replace(/\D/g, "").slice(0, 10),
+                    )
+                  }
+                  className={inputClass}
+                  placeholder="9876543210"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="quiz-district" className={labelClass}>
+                  జిల్లా (District)
+                </label>
+                <select
+                  id="quiz-district"
+                  value={form.district}
+                  onChange={(e) => setField("district", e.target.value)}
+                  className={inputClass}
+                  required
+                >
+                  <option value="">జిల్లా ఎంచుకోండి</option>
+                  {districts.map((d) => (
+                    <option key={d.slug} value={d.slug}>
+                      {d.nameTe} · {d.nameEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="quiz-mandal" className={labelClass}>
+                  మండలం / ULB (Mandal)
+                </label>
+                <select
+                  id="quiz-mandal"
+                  value={form.mandal}
+                  onChange={(e) => setField("mandal", e.target.value)}
+                  className={inputClass}
+                  disabled={!form.district}
+                  required
+                >
+                  <option value="">మండలం ఎంచుకోండి</option>
+                  {mandals.map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.nameTe} · {m.nameEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {error ? (
+                <p
+                  role="alert"
+                  className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 font-telugu text-sm text-amber-900"
+                >
+                  {error}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="tap flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#B45309] px-4 font-telugu text-base font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.28)] transition hover:bg-[#92400E] disabled:opacity-60"
+              >
+                {submitting ? (
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                ) : (
+                  <Scale className="h-5 w-5" aria-hidden />
+                )}
+                క్విజ్ ప్రారంభించండి (Start Quiz) ➔
+              </button>
+            </form>
+          </div>
+        </aside>
+
+        {/* RIGHT — certificate preview */}
+        <section className="space-y-4 lg:col-span-7">
           <div>
-            <label htmlFor="quiz-mandal" className={labelClass}>
-              మండలం
-            </label>
-            <select
-              id="quiz-mandal"
-              value={form.mandal}
-              onChange={(e) => setField("mandal", e.target.value)}
-              className={inputClass}
-              disabled={!form.district}
-              required
-            >
-              <option value="">మండలం ఎంచుకోండి</option>
-              {mandals.map((m) => (
-                <option key={m.slug} value={m.slug}>
-                  {m.nameTe} ({m.nameEn})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {error ? (
-            <p
-              role="alert"
-              className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 font-telugu text-sm text-amber-900"
-            >
-              {error}
+            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#B45309]">
+              <Award className="h-3 w-3" aria-hidden />
+              Certificate Preview
             </p>
-          ) : null}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="tap flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#B45309] px-4 font-telugu text-base font-bold text-white shadow-[0_0_16px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] disabled:opacity-60"
-          >
-            {submitting ? (
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            ) : (
-              <Scale className="h-5 w-5" aria-hidden />
-            )}
-            క్విజ్ ప్రారంభించండి
-          </button>
-        </form>
-      </section>
+            <h2 className="mt-1 font-display-te text-xl font-normal text-slate-900">
+              సర్టిఫికేట్ మునుజూపు
+            </h2>
+            <p className="mt-1 text-sm text-[#64748B]">
+              Score {QUIZ_PASS_THRESHOLD}+/10 to unlock your printable A4 certificate
+            </p>
+          </div>
+          <QuizCertificatePreview />
+        </section>
+      </div>
     );
   }
 
   if (step === "quiz") {
     const isCorrect = selected === question.correctIndex;
     return (
-      <section className="space-y-4">
+      <section className="mx-auto max-w-2xl space-y-4">
         <div className="no-print rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="font-telugu text-xs font-bold text-[#B45309]">
-              ప్రశ్న {question.id}
+            <p className="font-telugu text-sm font-bold text-[#B45309]">
+              ప్రశ్న {qIndex + 1} / {total}
             </p>
             <p className="font-mono text-xs font-semibold text-[#64748B]">
-              {qIndex + 1}/{total}
+              {progressPct}%
             </p>
           </div>
 
@@ -350,7 +396,7 @@ export function QuizClient() {
             />
           </div>
 
-          <h2 className="font-display-te text-lg font-normal leading-snug text-[#0F172A] sm:text-xl">
+          <h2 className="font-display-te text-lg font-normal leading-snug text-slate-900 sm:text-xl">
             {question.questionTe}
           </h2>
           <p className="mt-1.5 text-xs leading-relaxed text-[#64748B]">
@@ -478,7 +524,7 @@ export function QuizClient() {
   const advocacyHref = advocacyWhatsAppHref(attempt.district);
 
   return (
-    <section className="space-y-5">
+    <section className="mx-auto max-w-3xl space-y-5">
       <div className="no-print rounded-2xl border border-[#E2E8F0] bg-white px-4 py-5 text-center sm:px-5">
         <Trophy
           className={cn(
@@ -487,7 +533,7 @@ export function QuizClient() {
           )}
           aria-hidden
         />
-        <h2 className="mt-3 font-display-te text-2xl font-normal text-[#0F172A]">
+        <h2 className="mt-3 font-display-te text-2xl font-normal text-slate-900">
           మీ స్కోర్: {attempt.score}/{attempt.total}
         </h2>
         <p className="mt-2 font-telugu text-sm text-[#475569]">
@@ -513,7 +559,7 @@ export function QuizClient() {
             <button
               type="button"
               onClick={onPrint}
-              className="tap inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl border border-[#B45309]/40 bg-[#B45309]/10 px-4 font-telugu text-sm font-bold text-[#B45309]"
+              className="tap inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-xl border border-[#B45309]/40 bg-[#B45309]/10 px-4 font-telugu text-sm font-bold text-[#B45309]"
             >
               <Printer className="h-4 w-4" aria-hidden />
               Print / Save A4
@@ -523,7 +569,7 @@ export function QuizClient() {
                 href={shareHref}
                 target="_blank"
                 rel="noreferrer"
-                className="tap inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#0E7A6E] px-4 font-telugu text-sm font-bold text-white"
+                className="tap inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#0E7A6E] px-4 font-telugu text-sm font-bold text-white"
               >
                 <Share2 className="h-4 w-4" aria-hidden />
                 WhatsApp షేర్
@@ -540,52 +586,60 @@ export function QuizClient() {
           <button
             type="button"
             onClick={onRetry}
-            className="tap mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[#0F172A] px-4 font-telugu text-sm font-bold text-white"
+            className="tap mt-3 inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#0F172A] px-4 font-telugu text-sm font-bold text-white"
           >
             మళ్లీ ప్రయత్నించండి
           </button>
         </div>
       )}
 
-      {/* Legal Advocacy Cell CTA — always */}
-      <aside className="no-print rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] px-4 py-5 sm:px-5">
+      {/* Legal Advocacy Cell CTA — always; emphasize for high scorers */}
+      <aside
+        className={cn(
+          "no-print rounded-2xl border px-4 py-5 sm:px-5",
+          passed
+            ? "border-[#B45309]/40 bg-gradient-to-b from-[#FFFDF8] to-[#FBF7EF] shadow-[0_12px_32px_rgba(180,83,9,0.12)]"
+            : "border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9]",
+        )}
+      >
         <p className="inline-flex items-center gap-1.5 font-telugu text-xs font-bold uppercase tracking-wide text-[#B45309]">
           <Award className="h-3.5 w-3.5" aria-hidden />
           Legal Advocacy Cell
         </p>
-        <h3 className="mt-2 font-display-te text-lg font-normal text-[#0F172A]">
+        <h3 className="mt-2 font-display-te text-lg font-normal text-slate-900">
           హక్కుల రక్షణకు తదుపరి అడుగు
         </h3>
         <p className="mt-1.5 font-telugu text-sm leading-relaxed text-[#475569]">
-          జీ.ఓ. 23 అమలు, ట్రేడ్ లైసెన్స్, స్థల కేటాయింపు — లీగల్ అడ్వకసీ సెల్ /
-          సమన్వయకర్త డెస్క్ సహాయం పొందండి.
+          {passed
+            ? "మీరు సర్టిఫైడ్ — జీ.ఓ. 23 అమలు, ట్రేడ్ లైసెన్స్, స్థల కేటాయింపు కోసం లీగల్ అడ్వకసీ సెల్‌ను WhatsAppలో సంప్రదించండి."
+            : "జీ.ఓ. 23 అమలు, ట్రేడ్ లైసెన్స్, స్థల కేటాయింపు — లీగల్ అడ్వకసీ సెల్ / సమన్వయకర్త డెస్క్ సహాయం పొందండి."}
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <a
             href={advocacyHref}
             target="_blank"
             rel="noreferrer"
-            className="tap inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0E7A6E] px-4 font-telugu text-sm font-bold text-white"
+            className="tap inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#0E7A6E] px-4 font-telugu text-sm font-bold text-white"
           >
             <MessageCircle className="h-4 w-4" aria-hidden />
-            WhatsApp హెల్ప్‌లైన్
+            WhatsApp Legal Advocacy Cell
           </a>
           <Link
             href="/sprint"
-            className="tap inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 font-telugu text-sm font-bold text-amber-900"
+            className="tap inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 font-telugu text-sm font-bold text-amber-900"
           >
             <Trophy className="h-4 w-4" aria-hidden />
             సేవా సారథి ఛాలెంజ్
           </Link>
           <Link
             href="/coordinator-card"
-            className="tap inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 font-telugu text-sm font-bold text-[#0F172A]"
+            className="tap inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 font-telugu text-sm font-bold text-[#0F172A]"
           >
             కోఆర్డినేటర్ కార్డు
           </Link>
           <Link
             href="/representation"
-            className="tap inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 font-telugu text-sm font-bold text-[#0F172A]"
+            className="tap inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 font-telugu text-sm font-bold text-[#0F172A]"
           >
             వినతిపత్రం
           </Link>
