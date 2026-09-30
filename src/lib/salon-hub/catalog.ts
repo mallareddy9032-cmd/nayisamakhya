@@ -172,29 +172,79 @@ export function isDemandWindowOpen(now = new Date()): boolean {
 }
 
 export function computeEnergyPlan(input: EnergyPlanInput): EnergyPlanResult {
-  const area = Math.min(400, Math.max(80, input.areaSqft));
-  const hours = Math.min(14, Math.max(6, input.hours));
-  const chairs = Math.min(6, Math.max(1, input.chairs));
+  /*
+   * G.O. Ms. No. 23 Safe-AC & Energy Planner — documented daily kWh model.
+   *
+   * Legacy Pillar-2 sketch used `area * hours * 0.18`, which yields multi-thousand
+   * monthly units for a typical salon and is not usable against the 250-unit meter.
+   * We keep the spirit of that factor but refine it to a 1-ton 5-star inverter model:
+   *
+   *   AC (if checked):
+   *     acHours × 0.90 kWh/hr × (areaSqft / 120)
+   *     — 0.90 ≈ mid-band 1T 5-star inverter draw at 24–25°C;
+   *       area/120 scales lightly vs a reference 120 sq ft booth.
+   *     Equivalent "legacy factor" form: area × acHours × 0.0075
+   *       (since 0.90/120 = 0.0075 ≪ 0.18).
+   *
+   *   BLDC fans & DC LEDs (if checked):
+   *     1.2 kWh/day × (hours / 9)  — scales with operating day vs 9-hr reference.
+   *     If unchecked: 2.4 × (hours / 9) (conventional fans/lights penalty).
+   *
+   *   Cordless clippers (if checked):
+   *     0.8 kWh/day × (0.7 + chairs × 0.15)  — chairs scale base load lightly.
+   *     If unchecked: chairs × 0.45 (mains trimmers draw more).
+   *
+   *   Steamer / UV (if checked): +0.75 kWh/day (mid of 0.5–1.0 band).
+   *
+   *   Chair misc base (outlets, tips): chairs × 0.12 kWh/day.
+   *
+   *   Monthly units = daily × 30. Green zone when monthly ≤ 250 (G.O. 23).
+   */
+  const area = Math.min(300, Math.max(60, input.areaSqft));
+  const hours = Math.min(14, Math.max(4, input.hours));
+  const acHours = Math.min(10, Math.max(0, input.acHours));
+  const chairs = Math.min(5, Math.max(1, input.chairs));
 
-  const acDaily = input.acOn ? area * hours * 0.18 : 0;
-  const lightsDaily = 1.2;
-  const trimmersDaily = chairs * 0.8;
-  const dailyUnits = acDaily + lightsDaily + trimmersDaily;
+  const acDaily = input.acOn ? acHours * 0.9 * (area / 120) : 0;
+  const lightsDaily = input.bldcOn
+    ? 1.2 * (hours / 9)
+    : 2.4 * (hours / 9);
+  const trimmersDaily = input.clippersOn
+    ? 0.8 * (0.7 + chairs * 0.15)
+    : chairs * 0.45;
+  const steamerDaily = input.steamerOn ? 0.75 : 0;
+  const chairBaseDaily = chairs * 0.12;
+
+  const dailyUnits =
+    acDaily + lightsDaily + trimmersDaily + steamerDaily + chairBaseDaily;
   const monthlyUnits = dailyUnits * 30;
   const withinQuota = monthlyUnits <= GO23_FREE_UNITS;
+  const overageUnits = Math.max(0, monthlyUnits - GO23_FREE_UNITS);
+
+  const badgeTe = withinQuota
+    ? "✅ 100% సేఫ్ జోన్ (జీవో 23 రక్షణలో ఉంది)"
+    : `⚠️ హెచ్చరిక! 250 యూనిట్లు దాటింది (+${overageUnits.toFixed(1)} యూనిట్లు అదనం)`;
+
+  const billTe = withinQuota ? "₹0 (పూర్తి ఉచితం)" : "కమర్షియల్ స్లాబ్ ప్రమాదం";
 
   const recommendationTe = withinQuota
-    ? "మీ వినియోగం జీ.ఓ. 23 ఉచిత కోటా (250 యూనిట్లు) లోపలే ఉంది. గ్రీన్ సెలూన్ సర్టిఫికేట్ ప్రింట్ చేసుకోండి."
-    : "మీ అంచనా 250 యూనిట్లు దాటింది. ఏసీ గంటలు తగ్గించండి, LED లైట్లు వాడండి, ట్రిమ్మర్ స్టాండ్‌బైని ఆపండి — కోటా లోపలికి తీసుకురండి.";
+    ? "మీ విద్యుత్ వినియోగం జీవో 23 నిబంధనల ప్రకారం 250 యూనిట్లలోపే ఉంది. విద్యుత్ అధికారులు కమర్షియల్ కేటగిరీ కింద మార్చలేరు."
+    : "ఏసీని 24°C లేదా 25°C వద్ద నడపండి, లేదా రోజుకు 1 గంట వినియోగం తగ్గిస్తే మళ్లీ ఉచిత విద్యుత్ స్లాబ్‌లోకి వస్తారు.";
 
   return {
     acDaily,
     lightsDaily,
     trimmersDaily,
+    steamerDaily,
+    chairBaseDaily,
     dailyUnits,
+    totalUnits: monthlyUnits,
     monthlyUnits,
     withinQuota,
+    overageUnits,
     recommendationTe,
+    badgeTe,
+    billTe,
   };
 }
 

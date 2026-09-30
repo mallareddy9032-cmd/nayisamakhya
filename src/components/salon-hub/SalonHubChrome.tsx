@@ -11,18 +11,19 @@ const TABS: { href: string; label: string; exact?: boolean }[] = [
   { href: "/salon-hub/loans", label: "🏦 బ్యాంక్ DPR" },
 ];
 
-/** Shared salon-hub chrome: home + breadcrumb + status + segment tabs. No page titles. */
+/** Shared salon-hub chrome: home/hub back + breadcrumb + status + segment tabs. No page titles. */
 export function SalonHubChrome() {
   const pathname = usePathname() || "";
+  const onHubHome = pathname === "/salon-hub";
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-[#E2E8F0] bg-[#FBFBFA]/95 backdrop-blur-md print:hidden">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
         <Link
-          href="/"
+          href={onHubHome ? "/" : "/salon-hub"}
           className="tap inline-flex min-h-12 items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 font-telugu text-sm font-semibold text-[#0F172A] hover:border-[#B45309]/40 hover:text-[#B45309]"
         >
-          ← హోమ్ (Home)
+          {onHubHome ? "← హోమ్ (Home)" : "← సెలూన్ హబ్ (Back to Hub)"}
         </Link>
 
         <nav

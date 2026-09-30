@@ -5,19 +5,27 @@ import type { EnergyPlanResult } from "@/types/salon-hub";
 import { GO23_FREE_UNITS } from "@/types/salon-hub";
 
 export function EnergyCertificate({
-  ownerName,
+  salonName,
   plan,
   area,
   hours,
+  acHours,
   chairs,
   acOn,
+  bldcOn,
+  clippersOn,
+  steamerOn,
 }: {
-  ownerName: string;
+  salonName: string;
   plan: EnergyPlanResult;
   area: number;
   hours: number;
+  acHours: number;
   chairs: number;
   acOn: boolean;
+  bldcOn: boolean;
+  clippersOn: boolean;
+  steamerOn: boolean;
 }) {
   const dateTe = new Date().toLocaleDateString("te-IN", {
     day: "numeric",
@@ -25,11 +33,20 @@ export function EnergyCertificate({
     year: "numeric",
   });
 
+  const kit = [
+    acOn ? "5-Star Inverter AC (1T)" : null,
+    bldcOn ? "BLDC Fans & DC LEDs" : null,
+    clippersOn ? "Cordless Clippers" : null,
+    steamerOn ? "Steamer / UV" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <article
       id="salon-energy-certificate"
       className="relative mx-auto hidden w-full max-w-[210mm] overflow-hidden rounded-2xl border-[3px] border-emerald-700 bg-gradient-to-b from-[#F0FDF4] via-white to-[#ECFDF5] p-6 print:block print:max-w-none print:rounded-none print:border-[4px] print:border-emerald-800 print:bg-white print:p-10 print:shadow-none sm:p-8"
-      aria-label="గ్రీన్ సెలూన్ ఎనర్జీ సర్టిఫికేట్"
+      aria-label="గ్రీన్ సెలూన్ లోడ్ సర్టిఫికేట్"
     >
       <div
         className="pointer-events-none absolute inset-2 rounded-xl border border-emerald-700/30 print:inset-3"
@@ -44,10 +61,10 @@ export function EnergyCertificate({
           Nayi Samakhya · G.O. Ms. No. 23
         </p>
         <h2 className="font-display-te text-xl font-normal leading-snug text-[#0F172A] sm:text-2xl">
-          గ్రీన్ సెలూన్ ఎనర్జీ సర్టిఫికేట్
+          గ్రీన్ సెలూన్ లోడ్ సర్టిఫికేట్
         </h2>
         <p className="font-telugu text-xs text-[#64748B]">
-          Green Salon Energy Certificate · A4
+          Green Salon Load Certificate · A4 · Safe-AC Declaration
         </p>
       </header>
 
@@ -58,10 +75,10 @@ export function EnergyCertificate({
       </div>
 
       <p className="relative text-center font-telugu text-sm text-[#475569]">
-        ఇది ధృవీకరిస్తుంది —
+        ఇది ధృవీకరిస్తుంది — తెలంగాణ ప్రభుత్వం G.O. Ms. No. 23 ప్రకారం
       </p>
       <p className="relative mt-2 text-center font-display-te text-2xl font-normal text-[#0F172A]">
-        {ownerName}
+        {salonName}
       </p>
 
       <dl className="relative mt-6 grid grid-cols-2 gap-3 font-telugu text-sm text-[#0F172A]">
@@ -73,15 +90,17 @@ export function EnergyCertificate({
         </div>
         <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
           <dt className="text-[10px] uppercase tracking-wide text-[#64748B]">
-            గంటలు / రోజు
+            పని వేళలు / రోజు
           </dt>
-          <dd className="font-bold">{hours}</dd>
+          <dd className="font-bold">{hours} గం</dd>
         </div>
         <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
           <dt className="text-[10px] uppercase tracking-wide text-[#64748B]">
-            ఏసీ
+            ఏసీ గంటలు
           </dt>
-          <dd className="font-bold">{acOn ? "ఉంది" : "లేదు"}</dd>
+          <dd className="font-bold">
+            {acOn ? `${acHours} గం` : "లేదు"}
+          </dd>
         </div>
         <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
           <dt className="text-[10px] uppercase tracking-wide text-[#64748B]">
@@ -91,16 +110,27 @@ export function EnergyCertificate({
         </div>
       </dl>
 
+      {kit ? (
+        <p className="relative mt-4 text-center font-telugu text-xs text-[#64748B]">
+          సామర్థ్య కిట్: {kit}
+        </p>
+      ) : null}
+
       <p className="relative mt-6 text-center font-telugu text-base text-[#0F172A]">
-        నెలవారీ అంచనా వినియోగం:{" "}
+        అంచనా కనెక్టెడ్ లోడ్ (నెలవారీ):{" "}
         <strong>{plan.monthlyUnits.toFixed(1)}</strong> యూనిట్లు
       </p>
       <p className="relative mt-1 text-center font-telugu text-sm text-emerald-900">
         జీ.ఓ. 23 ఉచిత కోటా: {GO23_FREE_UNITS} యూనిట్లు ·{" "}
-        {plan.withinQuota ? "కోటా లోపల (గ్రీన్)" : "కోటా దాటింది — సిఫార్సు చూడండి"}
+        {plan.withinQuota
+          ? "కోటా లోపల — సమ్మతి ధృవీకరణ (Compliant)"
+          : "కోటా దాటింది — సిఫార్సు చూడండి"}
       </p>
 
-      <p className="relative mt-6 text-center font-telugu text-xs leading-relaxed text-[#64748B]">
+      <p className="relative mt-4 text-center font-telugu text-sm font-semibold text-[#0F172A]">
+        {plan.badgeTe}
+      </p>
+      <p className="relative mt-2 text-center font-telugu text-xs leading-relaxed text-[#64748B]">
         {plan.recommendationTe}
       </p>
 

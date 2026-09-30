@@ -3,9 +3,9 @@ import { SalonHubChrome } from "@/components/salon-hub/SalonHubChrome";
 import { EnergyClient } from "@/components/salon-hub/EnergyClient";
 
 export const metadata: Metadata = {
-  title: "జీ.ఓ. 23 ఎనర్జీ ప్లానర్ | Green Salon Energy",
+  title: "సెలూన్ విద్యుత్ & ఏసీ లోడ్ ప్లానర్ | G.O. 23 Safe-AC",
   description:
-    "G.O. 23 energy planner — estimate salon units, stay within 250 free units, print Green Salon Energy Certificate.",
+    "G.O. Ms. No. 23 Safe-AC & Energy Planner — estimate salon units, stay within 250 free units, print Green Salon Load Certificate.",
   alternates: { canonical: "/salon-hub/energy" },
 };
 
@@ -13,7 +13,7 @@ export default function SalonHubEnergyPage() {
   return (
     <div className="min-h-screen bg-[#FBFBFA]">
       <SalonHubChrome />
-      <div className="mx-auto max-w-3xl px-4 py-5 pb-28 print:max-w-none print:px-0 print:py-0 print:pb-0">
+      <div className="mx-auto max-w-6xl px-4 py-6 pb-28 print:max-w-none print:px-0 print:py-0 print:pb-0">
         <EnergyClient />
       </div>
       <style

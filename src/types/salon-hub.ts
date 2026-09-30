@@ -39,20 +39,39 @@ export type SalonHubOrder = {
 };
 
 export type EnergyPlanInput = {
+  /** Shop floor area in sq ft (60–300). */
   areaSqft: number;
+  /** Daily operating hours (4–14). */
   hours: number;
-  acOn: boolean;
+  /** Peak inverter AC run-hours per day (0–10). */
+  acHours: number;
+  /** Workstations / chairs (1–5). */
   chairs: number;
+  /** 5-Star Inverter AC (1 Ton) in use. */
+  acOn: boolean;
+  /** BLDC fans & DC LEDs. */
+  bldcOn: boolean;
+  /** Professional cordless clippers & trimmers. */
+  clippersOn: boolean;
+  /** Towel steamer / UV sterilizer. */
+  steamerOn: boolean;
 };
 
 export type EnergyPlanResult = {
   acDaily: number;
   lightsDaily: number;
   trimmersDaily: number;
+  steamerDaily: number;
+  chairBaseDaily: number;
   dailyUnits: number;
+  /** Alias used by gauge copy — same as monthlyUnits. */
+  totalUnits: number;
   monthlyUnits: number;
   withinQuota: boolean;
+  overageUnits: number;
   recommendationTe: string;
+  badgeTe: string;
+  billTe: string;
 };
 
 export type LoanEquipmentId =
