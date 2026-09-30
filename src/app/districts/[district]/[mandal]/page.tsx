@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { TELANGANA_DISTRICTS } from "@/data/telanganaGeo";
+import { placeJsonLd } from "@/lib/seo/jsonLd";
+import { absoluteUrl } from "@/lib/seo/site";
 
 type Props = {
   params: Promise<{ district: string; mandal: string }>;
@@ -24,12 +27,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!district || !mandal) {
     return { title: "Mandal desk not found | Nayi Samakhya" };
   }
+  const path = `/districts/${district.slug}/${mandal.slug}`;
   return {
     title: `${mandal.nameTe} నాయీ సమాఖ్య అధికారిక సేవా డెస్క్ | ${mandal.nameEn}`,
     description: `${mandal.nameTe}, ${district.nameTe} — ధృవీకృత సమన్వయకర్త, 1-క్లిక్ వినతిపత్రం, WhatsApp డెస్క్.`,
+    alternates: { canonical: absoluteUrl(path) },
     openGraph: {
       title: `${mandal.nameEn} Service Desk — Nayi Samakhya`,
-      url: `/districts/${district.slug}/${mandal.slug}`,
+      url: path,
     },
   };
 }
@@ -42,6 +47,8 @@ export default async function MandalDeskPage({ params }: Props) {
   const mandal = district.mandals.find((m) => m.slug === mSlug);
   if (!mandal) notFound();
 
+  const path = `/districts/${district.slug}/${mandal.slug}`;
+  const districtPath = `/districts/${district.slug}`;
   const prefilledPetitionUrl = `/representation?district=${encodeURIComponent(district.nameEn)}&mandal=${encodeURIComponent(mandal.nameEn)}&dist=${encodeURIComponent(district.slug)}`;
   const prefilledCoordinatorUrl = `/coordinator-card?district=${encodeURIComponent(district.nameTe)}&zone=${encodeURIComponent(mandal.nameTe)}&mandal=${encodeURIComponent(mandal.nameTe)}`;
   const waPrefill = encodeURIComponent(
@@ -50,6 +57,15 @@ export default async function MandalDeskPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] px-4 py-10 text-[#0F172A] sm:px-6 lg:px-8">
+      <JsonLd
+        data={placeJsonLd({
+          nameEn: mandal.nameEn,
+          nameTe: mandal.nameTe,
+          path,
+          districtNameEn: district.nameEn,
+          districtPath,
+        })}
+      />
       <div className="mx-auto max-w-4xl">
         <nav
           aria-label="Breadcrumb"

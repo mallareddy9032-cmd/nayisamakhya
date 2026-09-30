@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { TELANGANA_DISTRICTS } from "@/data/telanganaGeo";
+import { administrativeAreaJsonLd } from "@/lib/seo/jsonLd";
+import { absoluteUrl } from "@/lib/seo/site";
 
 type Props = {
   params: Promise<{ district: string }>;
@@ -17,12 +20,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!district) {
     return { title: "District not found | Nayi Samakhya" };
   }
+  const path = `/districts/${district.slug}`;
   return {
     title: `${district.nameTe} జిల్లా (${district.nameEn}) | NayiSamakhya`,
     description: `${district.nameTe} — ${district.mandals.length} మండలాలు, HQ ${district.headquarters}. నాయి సమాఖ్య జిల్లా సమన్వయ డెస్క్.`,
+    alternates: { canonical: absoluteUrl(path) },
     openGraph: {
       title: `${district.nameEn} District Desk — Nayi Samakhya`,
-      url: `/districts/${district.slug}`,
+      url: path,
     },
   };
 }
@@ -32,8 +37,18 @@ export default async function DistrictDetailPage({ params }: Props) {
   const district = TELANGANA_DISTRICTS[slug];
   if (!district) notFound();
 
+  const path = `/districts/${district.slug}`;
+
   return (
     <div className="min-h-screen bg-[#FBFBFA] px-4 py-10 text-[#0F172A] sm:px-6 lg:px-8">
+      <JsonLd
+        data={administrativeAreaJsonLd({
+          nameEn: `${district.nameEn} District`,
+          nameTe: `${district.nameTe} జిల్లా`,
+          path,
+          containedInName: "Telangana",
+        })}
+      />
       <div className="mx-auto max-w-6xl">
         <nav
           aria-label="Breadcrumb"

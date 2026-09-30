@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "తెలంగాణ జిల్లా & మండల సేవా నెట్‌వర్క్ | NayiSamakhya",
   description:
     "తెలంగాణలోని 33 జిల్లాలు మరియు 589 మండలాల అధికారిక సంక్షేమ మరియు వినతుల సమన్వయ డెస్క్.",
+  alternates: { canonical: "https://www.nayisamakhya.org/districts" },
   openGraph: {
     title: "తెలంగాణ జిల్లా & మండల సేవా నెట్‌వర్క్ | NayiSamakhya",
     description:

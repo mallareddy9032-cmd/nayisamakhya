@@ -5,6 +5,12 @@ import { AppShell } from "@/components/AppShell";
 import CivicFooter from "@/components/CivicFooter";
 import { InAppBrowserBanner } from "@/components/InAppBrowserBanner";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo/jsonLd";
+import { SITE_ORIGIN } from "@/lib/seo/site";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -43,11 +49,21 @@ const ogImage = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.nayisamakhya.org"),
-  title,
+  metadataBase: new URL(SITE_ORIGIN),
+  title: {
+    default: title,
+    template: "%s | Nayi Samakhya",
+  },
   description,
   applicationName: "Nayi Samakhya",
   manifest: "/manifest.webmanifest",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     type: "website",
     siteName: "Nayi Samakhya",
@@ -84,6 +100,7 @@ export default function RootLayout({
       className={`${sans.variable} ${telugu.variable} ${displayTe.variable} h-full overflow-x-hidden`}
     >
       <body className="flex min-h-[100dvh] flex-col justify-between overflow-x-hidden bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white pb-[env(safe-area-inset-bottom,1rem)] pt-[env(safe-area-inset-top,0px)]">
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:text-white"
