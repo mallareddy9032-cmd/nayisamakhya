@@ -1,232 +1,123 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowRight,
-  Building2,
-  ChevronRight,
-  FileText,
-  MapPin,
-  MessageCircle,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
-import {
-  districtDeskMetrics,
-  districtStaticParams,
-  getGeoDistrict,
-  listUrbanPlaces,
-} from "@/data/telanganaGeo";
+import { TELANGANA_DISTRICTS } from "@/data/telanganaGeo";
 
 type Props = {
   params: Promise<{ district: string }>;
 };
 
 export function generateStaticParams() {
-  return districtStaticParams();
+  return Object.keys(TELANGANA_DISTRICTS).map((district) => ({ district }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { district: slug } = await params;
-  const d = getGeoDistrict(slug);
-  if (!d) {
+  const district = TELANGANA_DISTRICTS[slug];
+  if (!district) {
     return { title: "District not found | Nayi Samakhya" };
   }
   return {
-    title: `${d.nameTe} జిల్లా సేవా డెస్క్ | ${d.nameEn} | Nayi Samakhya`,
-    description: `${d.nameTe} — ${d.mandals.length} మండలాలు, HQ ${d.headquarters}. నాయి సమాఖ్య జిల్లా సమన్వయ డెస్క్.`,
+    title: `${district.nameTe} జిల్లా (${district.nameEn}) | NayiSamakhya`,
+    description: `${district.nameTe} — ${district.mandals.length} మండలాలు, HQ ${district.headquarters}. నాయి సమాఖ్య జిల్లా సమన్వయ డెస్క్.`,
     openGraph: {
-      title: `${d.nameEn} District Desk — Nayi Samakhya`,
-      url: `/districts/${d.slug}`,
+      title: `${district.nameEn} District Desk — Nayi Samakhya`,
+      url: `/districts/${district.slug}`,
     },
   };
 }
 
-export default async function DistrictDeskPage({ params }: Props) {
+export default async function DistrictDetailPage({ params }: Props) {
   const { district: slug } = await params;
-  const district = getGeoDistrict(slug);
+  const district = TELANGANA_DISTRICTS[slug];
   if (!district) notFound();
 
-  const metrics = districtDeskMetrics(district.slug);
-  const towns = listUrbanPlaces(district);
-  const petitionHref = `/representation?dist=${encodeURIComponent(district.slug)}`;
-
   return (
-    <div className="min-h-screen bg-[#FBFBFA] text-[#0F172A] antialiased">
-      <header className="border-b border-[#E2E8F0] bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <div className="min-h-screen bg-[#FBFBFA] px-4 py-10 text-[#0F172A] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <nav
+          aria-label="Breadcrumb"
+          className="font-telugu mb-6 flex items-center gap-2 text-xs text-slate-500"
+        >
+          <Link
+            href="/"
+            className="civic-focus-ring rounded px-0.5 hover:text-[#B45309]"
+          >
+            హోమ్
+          </Link>
+          <span aria-hidden>/</span>
           <Link
             href="/districts"
-            className="civic-focus-ring flex min-h-11 items-center gap-2 rounded-xl px-1"
+            className="civic-focus-ring rounded px-0.5 hover:text-[#B45309]"
           >
-            <span className="rounded-xl border border-[#B45309]/20 bg-[#B45309]/10 p-2 text-[#B45309]">
-              <ShieldCheck className="h-5 w-5" aria-hidden />
-            </span>
-            <span className="font-telugu text-sm font-bold text-[#0F172A]">
-              జిల్లా డైరెక్టరీ
-            </span>
+            జిల్లాలు
           </Link>
-          <nav
-            aria-label="Breadcrumb"
-            className="font-sans flex flex-wrap items-center gap-1 text-xs text-slate-500"
-          >
-            <Link href="/" className="civic-focus-ring rounded px-1 hover:text-[#B45309]">
-              Home
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-            <Link
-              href="/districts"
-              className="civic-focus-ring rounded px-1 hover:text-[#B45309]"
-            >
-              Districts
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-            <span className="font-semibold text-[#0F172A]">{district.nameEn}</span>
-          </nav>
-        </div>
-      </header>
+          <span aria-hidden>/</span>
+          <span className="font-semibold text-slate-900">{district.nameTe}</span>
+        </nav>
 
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
-        <div className="mb-8 grid gap-6 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-7">
-            <span className="civic-eyebrow-pill mb-3">District Coordination Desk</span>
-            <h1 className="font-display-te text-[1.75rem] font-normal leading-[1.35] text-[#0F172A] sm:text-3xl md:text-4xl">
-              {district.nameTe}
+        <div className="mb-10 flex flex-col items-start justify-between gap-6 rounded-3xl border border-[#EAD7B5] bg-gradient-to-r from-[#FFFDF9] via-[#FAF6ED] to-[#F5EFE0] p-6 shadow-sm sm:p-8 md:flex-row md:items-center">
+          <div>
+            <span className="inline-flex rounded-full bg-[#FEF3C7] px-3 py-1 font-sans text-xs font-semibold uppercase tracking-wider text-[#B45309]">
+              {district.zone} • పరిపాలనా డెస్క్
+            </span>
+            <h1 className="font-display-te mt-2 text-3xl font-normal leading-[1.3] text-[#0F172A] sm:text-4xl">
+              {district.nameTe} జిల్లా
             </h1>
             <p className="font-sans mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">
-              {district.nameEn} District · {district.zone} · HQ{" "}
-              {district.headquarters}
+              {district.nameEn}
             </p>
-            <p className="font-telugu mt-3 flex items-center gap-1.5 text-sm text-slate-600">
-              <MapPin className="h-4 w-4 text-[#B45309]" aria-hidden />
-              జిల్లా కేంద్రం: {district.headquarters}
+            <p className="font-telugu mt-2 text-sm text-slate-600">
+              హెడ్‌క్వార్టర్స్: {district.headquarters} | మొత్తం మండలాలు:{" "}
+              {district.mandals.length}
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 lg:col-span-5 lg:justify-end">
-            <Link
-              href={petitionHref}
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-4 py-2.5 font-telugu text-sm font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.28)]"
-            >
-              <FileText className="h-4 w-4" aria-hidden />
-              జిల్లా వినతిపత్రం
-            </Link>
+          <div className="flex flex-wrap gap-3">
             <a
               href={district.whatsappCorridorUrl}
               target="_blank"
-              rel="noreferrer"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#EAD7B5] bg-white px-4 py-2.5 font-telugu text-sm font-semibold text-[#1E293B] hover:border-[#B45309]/40"
+              rel="noopener noreferrer"
+              className="civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1E293B] px-4 py-2.5 font-telugu text-xs font-medium text-white transition-colors hover:bg-[#0F172A]"
             >
-              <MessageCircle className="h-4 w-4 text-[#B45309]" aria-hidden />
-              WhatsApp కారిడార్
+              జిల్లా వాట్సాప్ కారిడార్
             </a>
+            <Link
+              href={`/representation?dist=${encodeURIComponent(district.slug)}`}
+              className="civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-4 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.28)]"
+            >
+              జిల్లా వినతిపత్రం
+            </Link>
           </div>
         </div>
 
-        <section
-          aria-label="District metrics"
-          className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-4"
-        >
-          {[
-            {
-              label: "మండలాలు",
-              value: district.mandals.length,
-              icon: MapPin,
-            },
-            {
-              label: "ఓపెన్ పిటిషన్లు",
-              value: metrics.openPetitions,
-              icon: FileText,
-            },
-            {
-              label: "G.O. 23 క్లెయిమ్స్",
-              value: metrics.go23Claims,
-              icon: ShieldCheck,
-            },
-            {
-              label: "సమన్వయకర్తలు",
-              value: metrics.verifiedCoordinators,
-              icon: Users,
-            },
-          ].map((m) => (
-            <div
-              key={m.label}
-              className="rounded-2xl border border-[#EAD7B5]/80 bg-gradient-to-br from-[#FFFDF9] to-[#F5EFE0] p-4"
+        <h2 className="font-display-te mb-4 text-xl font-normal text-[#0F172A]">
+          {district.nameTe} పరిధిలోని మండలాలు &amp; మున్సిపాలిటీలు
+        </h2>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {district.mandals.map((mandal) => (
+            <Link
+              key={mandal.slug}
+              href={`/districts/${district.slug}/${mandal.slug}`}
+              className="civic-focus-ring group block rounded-xl border border-[#E2E8F0] bg-white p-4 transition-all hover:border-[#B45309] hover:shadow-sm"
             >
-              <m.icon className="mb-2 h-4 w-4 text-[#B45309]" aria-hidden />
-              <p className="font-sans text-2xl font-bold tabular-nums text-[#0F172A]">
-                {m.value}
-              </p>
-              <p className="font-telugu mt-0.5 text-xs text-slate-600">{m.label}</p>
-            </div>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="rounded bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] uppercase text-slate-400">
+                  {mandal.type}
+                </span>
+                <span className="text-xs text-[#B45309] opacity-0 transition-opacity group-hover:opacity-100">
+                  →
+                </span>
+              </div>
+              <h3 className="font-telugu font-bold text-slate-900 transition-colors group-hover:text-[#B45309]">
+                {mandal.nameTe}
+              </h3>
+              <p className="font-sans text-xs text-slate-500">{mandal.nameEn}</p>
+            </Link>
           ))}
-        </section>
-
-        {towns.length > 0 ? (
-          <section className="mb-10" aria-labelledby="towns-heading">
-            <h2
-              id="towns-heading"
-              className="font-display-te mb-3 text-xl font-normal text-[#0F172A]"
-            >
-              ప్రధాన పట్టణాలు &amp; మున్సిపాలిటీలు
-            </h2>
-            <ul className="flex flex-wrap gap-2">
-              {towns.map((t) => (
-                <li key={t.slug}>
-                  <Link
-                    href={`/districts/${district.slug}/${t.slug}`}
-                    className="civic-focus-ring inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3 py-1.5 font-telugu text-xs text-slate-700 hover:border-[#B45309]/40"
-                  >
-                    <Building2 className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
-                    {t.nameTe}
-                    <span className="font-sans text-[10px] uppercase text-slate-400">
-                      {t.type}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        <section aria-labelledby="mandals-heading">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
-            <h2
-              id="mandals-heading"
-              className="font-display-te text-xl font-normal text-[#0F172A] md:text-2xl"
-            >
-              {district.mandals.length} మండల సేవా డెస్కులు
-            </h2>
-            <p className="font-sans text-xs font-medium uppercase tracking-wider text-slate-500">
-              Mandal desks
-            </p>
-          </div>
-          <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-            {district.mandals.map((m) => (
-              <li key={m.slug}>
-                <Link
-                  href={`/districts/${district.slug}/${m.slug}`}
-                  className="civic-focus-ring group flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#EAD7B5]/70 bg-white px-4 py-3 transition hover:border-[#B45309]/45 hover:bg-[#FFFDF9]"
-                >
-                  <span className="min-w-0">
-                    <span className="font-telugu block truncate text-sm font-semibold text-[#0F172A]">
-                      {m.nameTe}
-                    </span>
-                    <span className="font-sans block truncate text-[11px] text-slate-500">
-                      {m.nameEn}
-                      {m.type !== "mandal" ? ` · ${m.type}` : ""}
-                    </span>
-                  </span>
-                  <ArrowRight
-                    className="h-4 w-4 shrink-0 text-[#B45309] transition group-hover:translate-x-0.5"
-                    aria-hidden
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </main>
+        </div>
+      </div>
     </div>
   );
 }
