@@ -146,7 +146,7 @@ export function mapSurveyToCsvRow(survey: SurveyWithRef): StatewideCsvRow {
   };
 }
 
-/** Best-effort reel → same column set; G.O. / grievance / caste / family empty. */
+/** Best-effort reel → same column set; caption maps to Immediate Grievance. */
 export function mapReelToCsvRow(reel: ReelSubmission): StatewideCsvRow {
   const { district, mandal } = resolvePlaceName(
     reel.districtSlug || "",
@@ -162,7 +162,7 @@ export function mapReelToCsvRow(reel: ReelSubmission): StatewideCsvRow {
     Mandal: mandal,
     "Family Members Count": "",
     "G.O. 23 Status": "",
-    "Immediate Grievance": "",
+    "Immediate Grievance": cell(reel.caption),
     "Matrimonial Candidate (Yes/No)": "No",
     "Ref Code": "",
   };

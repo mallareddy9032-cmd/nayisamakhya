@@ -6,6 +6,7 @@ import {
   Clapperboard,
   ExternalLink,
   Film,
+  Heart,
   Loader2,
   MessageCircle,
   Share2,
@@ -20,6 +21,7 @@ import {
 } from "@/types/reels";
 import {
   districtOptions,
+  incrementLocalLikes,
   incrementLocalShares,
   isValidVideoUrl,
   mandalOptions,
@@ -42,7 +44,7 @@ type FormState = {
   mandalSlug: string;
   category: ReelCategory | "";
   videoUrl: string;
-  title: string;
+  caption: string;
 };
 
 type GalleryFilter = "all" | ReelCategory;
@@ -63,7 +65,7 @@ export function ReelsClient() {
     mandalSlug: "",
     category: "",
     videoUrl: "",
-    title: "",
+    caption: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -75,6 +77,7 @@ export function ReelsClient() {
   const [galleryError, setGalleryError] = useState("");
   const [filter, setFilter] = useState<GalleryFilter>("all");
   const [sharingId, setSharingId] = useState<string | null>(null);
+  const [likedIds, setLikedIds] = useState<Set<string>>(() => new Set());
 
   const districts = useMemo(() => districtOptions(), []);
   const mandals = useMemo(
@@ -129,7 +132,7 @@ export function ReelsClient() {
 
     const creatorName = form.creatorName.trim();
     const phone = form.phone.replace(/\D/g, "");
-    const title = form.title.trim();
+    const caption = form.caption.trim();
     const videoUrl = form.videoUrl.trim();
 
     if (creatorName.length < 2) {
@@ -148,8 +151,8 @@ export function ReelsClient() {
       setError("విభాగం ఎంచుకోండి");
       return;
     }
-    if (title.length < 3) {
-      setError("శీర్షిక కనీసం 3 అక్షరాలు");
+    if (caption.length < 3) {
+      setError("క్యాప్షన్ కనీసం 3 అక్షరాలు");
       return;
     }
     if (!isValidVideoUrl(videoUrl)) {
@@ -171,7 +174,7 @@ export function ReelsClient() {
           mandalSlug: form.mandalSlug,
           category: form.category,
           videoUrl,
-          title,
+          caption,
         }),
       });
       const data = (await res.json()) as {
@@ -199,8 +202,9 @@ export function ReelsClient() {
           mandalSlug: form.mandalSlug,
           category: form.category,
           videoUrl,
-          title,
+          caption,
           sharesCount: 0,
+          likesCount: 0,
           status: "pending",
         };
         setMockNote(true);
@@ -219,7 +223,7 @@ export function ReelsClient() {
         mandalSlug: "",
         category: "",
         videoUrl: "",
-        title: "",
+        caption: "",
       });
     } catch {
       const next: ReelSubmission = {
@@ -231,8 +235,9 @@ export function ReelsClient() {
         mandalSlug: form.mandalSlug,
         category: form.category as ReelCategory,
         videoUrl,
-        title,
+        caption,
         sharesCount: 0,
+        likesCount: 0,
         status: "pending",
       };
       upsertLocalReel(next);
@@ -270,6 +275,25 @@ export function ReelsClient() {
     } finally {
       setSharingId(null);
     }
+  }
+
+  function onLike(reel: ReelSubmission) {
+    if (likedIds.has(reel.id)) return;
+    const local = incrementLocalLikes(reel.id);
+    const nextCount = local
+      ? local.likesCount
+      : (reel.likesCount || 0) + 1;
+    setGallery((prev) =>
+      prev.map((r) =>
+        r.id === reel.id ? { ...r, likesCount: nextCount } : r,
+      ),
+    );
+    if (local) {
+      upsertLocalReel(local);
+    } else {
+      upsertLocalReel({ ...reel, likesCount: nextCount });
+    }
+    setLikedIds((prev) => new Set(prev).add(reel.id));
   }
 
   return (
@@ -312,7 +336,7 @@ export function ReelsClient() {
                 సమర్పణ విజయవంతం
               </p>
               <p className="mt-1 font-telugu text-sm text-[#334155]">
-                “{success.title}” సమీక్షలో ఉంది. ఆమోదం తర్వాత గ్యాలరీలో
+                “{success.caption}” సమీక్షలో ఉంది. ఆమోదం తర్వాత గ్యాలరీలో
                 కనిపిస్తుంది.
               </p>
               {mockNote ? (
@@ -443,14 +467,14 @@ export function ReelsClient() {
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="reel-title">
-            శీర్షిక · Title
+          <label className={labelClass} htmlFor="reel-caption">
+            క్యాప్షన్ · Caption
           </label>
           <input
-            id="reel-title"
+            id="reel-caption"
             className={inputClass}
-            value={form.title}
-            onChange={(e) => setField("title", e.target.value)}
+            value={form.caption}
+            onChange={(e) => setField("caption", e.target.value)}
             placeholder="ఉదా: మా ఊరి నాదస్వరం"
             required
           />
@@ -501,7 +525,7 @@ export function ReelsClient() {
                 className="rounded-xl border border-[#E2E8F0] bg-white px-3 py-3"
               >
                 <p className="font-telugu text-sm font-semibold text-[#0F172A]">
-                  {r.title}
+                  {r.caption}
                 </p>
                 <p className="mt-0.5 text-xs text-[#64748B]">
                   {reelCategoryLabel(r.category)} · pending
@@ -602,14 +626,15 @@ export function ReelsClient() {
                       </span>
                     ) : null}
                     <h3 className="mt-1 font-display-te text-lg font-normal leading-snug text-[#0F172A]">
-                      {reel.title}
+                      {reel.caption}
                     </h3>
                     <p className="mt-1 font-telugu text-sm text-[#475569]">
                       {reel.creatorName} ·{" "}
                       {placeLabel(reel.districtSlug, reel.mandalSlug)}
                     </p>
                     <p className="mt-0.5 text-xs text-[#64748B]">
-                      {reelCategoryLabel(reel.category)} · {reel.sharesCount}{" "}
+                      {reelCategoryLabel(reel.category)} ·{" "}
+                      {reel.likesCount || 0} likes · {reel.sharesCount || 0}{" "}
                       shares
                     </p>
                   </div>
@@ -624,6 +649,24 @@ export function ReelsClient() {
                     <ExternalLink className="h-3.5 w-3.5" />
                     వీడియో చూడండి
                   </a>
+                  <button
+                    type="button"
+                    onClick={() => onLike(reel)}
+                    disabled={likedIds.has(reel.id)}
+                    aria-pressed={likedIds.has(reel.id)}
+                    className={`tap inline-flex min-h-11 items-center gap-1.5 rounded-xl border px-3 py-2 font-telugu text-xs font-bold transition disabled:opacity-70 ${
+                      likedIds.has(reel.id)
+                        ? "border-[#B45309]/50 bg-[#B45309]/10 text-[#B45309]"
+                        : "border-[#E2E8F0] bg-[#FBFBFA] text-[#0F172A] hover:border-[#B45309]/40"
+                    }`}
+                  >
+                    <Heart
+                      className={`h-3.5 w-3.5 ${
+                        likedIds.has(reel.id) ? "fill-current" : ""
+                      }`}
+                    />
+                    లైక్ · {reel.likesCount || 0}
+                  </button>
                   <button
                     type="button"
                     onClick={() => void onShare(reel)}

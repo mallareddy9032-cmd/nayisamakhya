@@ -50,17 +50,19 @@ export function coerceReel(
   if (!isReelCategory(category)) return null;
   const phone = String(raw.phone || "").replace(/\D/g, "");
   const videoUrl = String(raw.videoUrl || raw.video_url || "").trim();
-  const title = String(raw.title || "").trim();
+  // Migrate legacy `title` → `caption` for older reels_db rows
+  const caption = String(raw.caption || raw.title || "").trim();
   const creatorName = String(
     raw.creatorName || raw.creator_name || "",
   ).trim();
-  if (!creatorName || !videoUrl || !title) return null;
+  if (!creatorName || !videoUrl || !caption) return null;
   const statusRaw = String(raw.status || "pending");
   const status =
     statusRaw === "approved" || statusRaw === "featured"
       ? statusRaw
       : "pending";
   const sharesCount = Number(raw.sharesCount ?? raw.shares_count ?? 0);
+  const likesCount = Number(raw.likesCount ?? raw.likes_count ?? 0);
   return {
     id: String(raw.id || uid()),
     createdAt: String(
@@ -80,8 +82,9 @@ export function coerceReel(
       .toLowerCase(),
     category: category as ReelCategory,
     videoUrl,
-    title,
+    caption,
     sharesCount: Number.isFinite(sharesCount) ? sharesCount : 0,
+    likesCount: Number.isFinite(likesCount) ? likesCount : 0,
     status,
   };
 }
@@ -138,6 +141,20 @@ export function incrementLocalShares(id: string): ReelSubmission | null {
   return updated;
 }
 
+/** Local-only like bump (gallery UX). Persists into reels_db when present. */
+export function incrementLocalLikes(id: string): ReelSubmission | null {
+  const list = readLocalReels();
+  const idx = list.findIndex((r) => r.id === id);
+  if (idx < 0) return null;
+  const updated: ReelSubmission = {
+    ...list[idx]!,
+    likesCount: (list[idx]!.likesCount || 0) + 1,
+  };
+  list[idx] = updated;
+  writeLocalReels(list);
+  return updated;
+}
+
 export function districtOptions() {
   return listGeoDistricts()
     .slice()
@@ -167,9 +184,12 @@ export function mapDbRow(row: Record<string, unknown>): ReelSubmission {
     category: String(row.category || ""),
     videoUrl: String(row.video_url || ""),
     video_url: String(row.video_url || ""),
+    caption: String(row.caption || row.title || ""),
     title: String(row.title || ""),
     sharesCount: Number(row.shares_count ?? 0),
     shares_count: Number(row.shares_count ?? 0),
+    likesCount: Number(row.likes_count ?? 0),
+    likes_count: Number(row.likes_count ?? 0),
     status: String(row.status || "pending"),
   } as Partial<ReelSubmission> & Record<string, unknown>);
   if (coerced) return coerced;
@@ -184,7 +204,7 @@ export function buildReelWhatsAppMessage(reel: ReelSubmission): string {
   const link = entryShareUrl(reel.id);
   return (
     `🎬 *నాయీ సమాఖ్య — మన కళ · మన ఆత్మగౌరవం*\n\n` +
-    `*${reel.title}*\n` +
+    `*${reel.caption}*\n` +
     `నిర్మాత: ${reel.creatorName}\n\n` +
     `60-సెకన్ల రీల్ చూడండి:\n${reel.videoUrl}\n\n` +
     `👉 కాంటెస్ట్ గ్యాలరీ:\n${link}\n\n` +

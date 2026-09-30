@@ -21,6 +21,8 @@ type SubmitBody = {
   mandalSlug?: string;
   category?: string;
   videoUrl?: string;
+  caption?: string;
+  /** @deprecated legacy clients — coerced to caption */
   title?: string;
 };
 
@@ -77,8 +79,9 @@ async function insertReel(
       mandal_slug: reel.mandalSlug,
       category: reel.category,
       video_url: reel.videoUrl,
-      title: reel.title,
+      caption: reel.caption,
       shares_count: reel.sharesCount,
+      likes_count: reel.likesCount,
       status: reel.status,
     });
 
@@ -128,7 +131,7 @@ export async function POST(req: Request) {
       .toLowerCase();
     const categoryRaw = String(body.category || "").trim();
     const videoUrl = String(body.videoUrl || "").trim();
-    const title = String(body.title || "").trim();
+    const caption = String(body.caption || body.title || "").trim();
 
     if (!creatorName || creatorName.length < 2) {
       return NextResponse.json(
@@ -154,9 +157,9 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    if (!title || title.length < 3) {
+    if (!caption || caption.length < 3) {
       return NextResponse.json(
-        { success: false, error: "Title is required (min 3 characters)" },
+        { success: false, error: "Caption is required (min 3 characters)" },
         { status: 400 },
       );
     }
@@ -180,8 +183,9 @@ export async function POST(req: Request) {
       mandalSlug,
       category: categoryRaw,
       videoUrl,
-      title,
+      caption,
       sharesCount: 0,
+      likesCount: 0,
       status: "pending",
     };
 

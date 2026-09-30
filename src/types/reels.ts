@@ -8,9 +8,10 @@ export interface ReelSubmission {
   districtSlug: string;
   mandalSlug: string;
   category: ReelCategory;
-  videoUrl: string; // Instagram Reel, YouTube Shorts, or Google Drive
-  title: string;
+  videoUrl: string; // Instagram Reel, YouTube Shorts, or Drive link
+  caption: string;
   sharesCount: number;
+  likesCount: number;
   status: 'pending' | 'approved' | 'featured';
 }
 

@@ -1,5 +1,6 @@
 -- Reels / Mana Kala contest (మన కళ - మన ఆత్మగౌరవం) — Competition 2
 -- Run in Supabase SQL editor after 015_volunteers.sql
+-- Schema v2: `caption` (was `title`); `likes_count` default 0
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -13,11 +14,33 @@ CREATE TABLE IF NOT EXISTS reels (
   category VARCHAR NOT NULL
     CHECK (category IN ('salon_craft', 'nadaswaram_music', 'youth_education')),
   video_url TEXT NOT NULL,
-  title VARCHAR NOT NULL,
+  caption VARCHAR NOT NULL,
   shares_count INTEGER NOT NULL DEFAULT 0,
+  likes_count INTEGER NOT NULL DEFAULT 0,
   status VARCHAR NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending', 'approved', 'featured'))
 );
+
+-- Idempotent upgrades for environments that already applied the title-based 016
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'reels' AND column_name = 'title'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'reels' AND column_name = 'caption'
+  ) THEN
+    ALTER TABLE reels RENAME COLUMN title TO caption;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'reels' AND column_name = 'likes_count'
+  ) THEN
+    ALTER TABLE reels ADD COLUMN likes_count INTEGER NOT NULL DEFAULT 0;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_reels_status_category
   ON reels(status, category);
