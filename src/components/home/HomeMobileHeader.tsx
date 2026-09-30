@@ -21,6 +21,7 @@ const NAV_LINKS = [
   { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
   { href: "/survey", label: "సమగ్ర సర్వే" },
   { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
+  { href: "/reels", label: "🎬 మన కళ రీల్స్" },
   { href: "/representation", label: "వినతిపత్రం", icon: FileText },
   { href: "/feed", label: "గెజిట్ & జీవోలు (Gazette)" },
 ] as const;
@@ -155,10 +156,16 @@ export function HomeMobileHeader() {
             </Link>
             <Link
               href="/sprint"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 font-telugu text-[11px] font-bold text-amber-800 shadow-[0_0_8px_rgba(245,158,11,0.25)] transition hover:bg-amber-500/25 xl:inline-flex"
+              className="civic-focus-ring hidden min-h-11 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 font-telugu text-[11px] font-bold text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.25)] transition hover:bg-amber-500/25 xl:inline-flex"
             >
               <span aria-hidden>🏆</span>
               సేవా సారథి ఛాలెంజ్
+            </Link>
+            <Link
+              href="/reels"
+              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2 font-telugu text-[11px] font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
+            >
+              మన కళ
             </Link>
             <Link
               href="/representation"

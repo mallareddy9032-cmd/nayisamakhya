@@ -1,0 +1,57 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, Clapperboard } from "lucide-react";
+import { ReelsClient } from "@/components/reels/ReelsClient";
+
+export const metadata: Metadata = {
+  title: "మన కళ - మన ఆత్మగౌరవం | 60-Second Reel Contest",
+  description:
+    "Nayi Samakhya Competition 2 — submit a 60-second mobile reel on salon craft, nadaswaram music, or youth education. Community pride storytelling contest.",
+  alternates: { canonical: "/reels" },
+};
+
+export default function ReelsPage() {
+  return (
+    <div className="min-h-screen bg-[#FBFBFA]">
+      <header className="sticky top-0 z-40 border-b border-[#E2E8F0] bg-[#FBFBFA]/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
+          <Link
+            href="/"
+            className="tap inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F4F4F2]"
+            aria-label="Back to home"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#B45309]">
+              <Clapperboard className="h-3 w-3" aria-hidden />
+              Competition 2
+            </p>
+            <h1 className="font-display-te text-base font-normal leading-snug text-[#0F172A] sm:text-lg">
+              <span className="text-[#B45309]">మన కళ</span>
+              <span className="text-[#0F172A]"> — మన ఆత్మగౌరవం</span>
+            </h1>
+            <p className="truncate text-[11px] text-[#64748B]">
+              60-Second Mobile Reel &amp; Storytelling
+            </p>
+          </div>
+          <Link
+            href="/sprint"
+            className="tap hidden shrink-0 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 font-telugu text-[10px] font-bold text-amber-800 sm:inline-flex"
+          >
+            సేవా సారథి
+          </Link>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-lg px-4 py-5 pb-28">
+        <p className="mb-5 rounded-xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] px-4 py-3 font-telugu text-sm leading-relaxed text-[#0F172A]">
+          మన సంప్రదాయ కళలు — సెలూన్, నాదస్వరం, యువ విద్యా — 60-సెకన్ల రీల్‌లో
+          చూపించి{" "}
+          <span className="font-bold text-[#B45309]">ఆత్మగౌరవం</span> పంచుకోండి.
+        </p>
+        <ReelsClient />
+      </div>
+    </div>
+  );
+}

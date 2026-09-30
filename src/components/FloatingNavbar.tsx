@@ -59,6 +59,28 @@ function SprintPill({
   );
 }
 
+/** Secondary contest link — kept quieter than సేవా సారథి pill. */
+function ReelsLink({
+  className,
+  onClick,
+}: {
+  className?: string;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href="/reels"
+      onClick={onClick}
+      className={cn(
+        "tap inline-flex items-center gap-1 px-2 py-1.5 font-telugu text-[11px] font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline",
+        className,
+      )}
+    >
+      మన కళ
+    </Link>
+  );
+}
+
 export function FloatingNavbar() {
   const { language, setLanguage, t } = useLanguage();
   const bumpFont = useAccessibilityStore((s) => s.bumpFont);
@@ -105,6 +127,7 @@ export function FloatingNavbar() {
 
           <div className="flex shrink-0 items-center gap-1.5">
             <SprintPill className="max-w-[9.5rem] truncate px-2 text-[10px] sm:max-w-none" />
+            <ReelsLink className="hidden sm:inline-flex" />
             <button
               type="button"
               onClick={() => setLanguage(language === "te" ? "en" : "te")}
@@ -163,6 +186,7 @@ export function FloatingNavbar() {
 
           <div className="flex items-center gap-2">
             <SprintPill className="hidden md:inline-flex" />
+            <ReelsLink className="hidden lg:inline-flex" />
             <button
               type="button"
               onClick={() => setLanguage(language === "te" ? "en" : "te")}
@@ -238,9 +262,13 @@ export function FloatingNavbar() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-3">
-              <div className="mb-3">
+              <div className="mb-3 space-y-2">
                 <SprintPill
                   className="w-full justify-center py-2.5 text-sm"
+                  onClick={() => setOpen(false)}
+                />
+                <ReelsLink
+                  className="w-full justify-center rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-sm"
                   onClick={() => setOpen(false)}
                 />
               </div>

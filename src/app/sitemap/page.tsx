@@ -69,6 +69,18 @@ export default function SitemapPage() {
                   : "WhatsApp mobilization dispatcher"}
               </Link>
             </li>
+            <li>
+              <Link href="/sprint" className="hover:text-[#C2410C]">
+                {te ? "మండల సేవా సారథి ఛాలెంజ్" : "Mandal Seva Sarathi challenge"}
+              </Link>
+            </li>
+            <li>
+              <Link href="/reels" className="hover:text-[#C2410C]">
+                {te
+                  ? "మన కళ - మన ఆత్మగౌరవం (రీల్స్)"
+                  : "Mana Kala reel contest"}
+              </Link>
+            </li>
           </ul>
         </div>
 
