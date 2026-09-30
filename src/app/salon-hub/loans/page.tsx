@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function SalonHubLoansPage() {
   return (
     <div className="min-h-screen bg-[#FBFBFA]">
-      <SalonHubChrome
-        title="బ్యాంక్ డీపీఆర్"
-        subtitle="Mudra + BC Corp subsidy dossier"
-      />
+      <SalonHubChrome />
       <div className="mx-auto max-w-3xl px-4 py-5 pb-28 print:max-w-none print:px-0 print:py-0 print:pb-0">
         <LoansClient />
       </div>

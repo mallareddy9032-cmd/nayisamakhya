@@ -2,56 +2,61 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, Scissors } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS: { href: string; label: string; exact?: boolean }[] = [
-  { href: "/salon-hub", label: "హబ్", exact: true },
-  { href: "/salon-hub/procure", label: "ఇండెంట్" },
-  { href: "/salon-hub/energy", label: "ఎనర్జీ" },
-  { href: "/salon-hub/loans", label: "డీపీఆర్" },
+  { href: "/salon-hub", label: "🏠 హబ్ హోమ్", exact: true },
+  { href: "/salon-hub/procure", label: "📦 సమూహ కొనుగోళ్లు" },
+  { href: "/salon-hub/energy", label: "⚡ జీవో 23 విద్యుత్" },
+  { href: "/salon-hub/loans", label: "🏦 బ్యాంక్ DPR" },
 ];
 
-export function SalonHubChrome({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+/** Shared salon-hub chrome: home + breadcrumb + status + segment tabs. No page titles. */
+export function SalonHubChrome() {
   const pathname = usePathname() || "";
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-[#E2E8F0] bg-[#FBFBFA]/95 backdrop-blur-md print:hidden">
-      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
         <Link
           href="/"
-          className="tap inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F4F4F2]"
-          aria-label="Back to home"
+          className="tap inline-flex min-h-12 items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 font-telugu text-sm font-semibold text-[#0F172A] hover:border-[#B45309]/40 hover:text-[#B45309]"
         >
-          <ArrowLeft className="h-5 w-5" />
+          ← హోమ్ (Home)
         </Link>
-        <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#B45309]">
-            <Scissors className="h-3 w-3" aria-hidden />
-            Salon Studio Hub
-          </p>
-          <h1 className="truncate font-display-te text-base font-normal leading-snug text-[#0F172A] sm:text-lg">
-            <span className="text-[#B45309]">{title}</span>
-          </h1>
-          {subtitle ? (
-            <p className="truncate text-[11px] text-[#64748B]">{subtitle}</p>
-          ) : null}
-        </div>
-        <Link
-          href="/salon-hub"
-          className="tap hidden shrink-0 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1 font-telugu text-[10px] font-bold text-[#B45309] sm:inline-flex"
+
+        <nav
+          className="min-w-0 flex-1 font-telugu text-sm text-[#64748B]"
+          aria-label="Breadcrumb"
         >
-          సెలూన్ హబ్
-        </Link>
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li>
+              <Link href="/" className="hover:text-[#B45309]">
+                హోమ్
+              </Link>
+            </li>
+            <li aria-hidden className="text-[#CBD5E1]">
+              /
+            </li>
+            <li className="font-semibold text-[#0F172A]">
+              <Link href="/salon-hub" className="hover:text-[#B45309]">
+                సెలూన్ స్టూడియో హబ్
+              </Link>
+            </li>
+          </ol>
+        </nav>
+
+        <p className="inline-flex min-h-12 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 font-telugu text-xs font-semibold text-emerald-800 sm:text-sm">
+          <span
+            className="inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-500"
+            aria-hidden
+          />
+          <span>🟢 589 మండలాలు కవర్ చేయబడ్డాయి</span>
+        </p>
       </div>
+
       <nav
-        className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-4 pb-2"
+        className="mx-auto flex max-w-6xl justify-center gap-1.5 overflow-x-auto px-4 pb-3"
         aria-label="Salon hub sections"
       >
         {TABS.map((tab) => {
@@ -63,7 +68,7 @@ export function SalonHubChrome({
               key={tab.href}
               href={tab.href}
               className={cn(
-                "tap inline-flex min-h-9 shrink-0 items-center rounded-full px-3 font-telugu text-[11px] font-bold transition",
+                "tap inline-flex min-h-12 shrink-0 items-center rounded-full px-4 font-telugu text-xs font-semibold transition sm:text-sm",
                 active
                   ? "bg-[#0F172A] text-white"
                   : "border border-[#E2E8F0] bg-white text-[#0F172A] hover:border-[#B45309]/40 hover:text-[#B45309]",

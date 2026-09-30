@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function SalonHubEnergyPage() {
   return (
     <div className="min-h-screen bg-[#FBFBFA]">
-      <SalonHubChrome
-        title="జీ.ఓ. 23 ఎనర్జీ ప్లానర్"
-        subtitle="250 units free power planner"
-      />
+      <SalonHubChrome />
       <div className="mx-auto max-w-3xl px-4 py-5 pb-28 print:max-w-none print:px-0 print:py-0 print:pb-0">
         <EnergyClient />
       </div>

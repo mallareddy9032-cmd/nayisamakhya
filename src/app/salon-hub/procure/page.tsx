@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function SalonHubProcurePage() {
   return (
     <div className="min-h-screen bg-[#FBFBFA]">
-      <SalonHubChrome
-        title="సమూహ ఇండెంట్"
-        subtitle="Group procure · Mandal hub COD/UPI"
-      />
+      <SalonHubChrome />
       <div className="mx-auto max-w-3xl px-4 py-5 pb-28">
         <ProcureClient />
       </div>
