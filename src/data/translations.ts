@@ -21,6 +21,10 @@ export const translations = {
     te: "\u0c35\u0c3f\u0c28\u0c24\u0c3f \u0c2a\u0c24\u0c4d\u0c30\u0c02",
     en: "Representation",
   },
+  navSurvey: {
+    te: "సర్వే",
+    en: "Survey",
+  },
   navNewsletter: {
     te: "సమాచార పత్రిక (Newsletter)",
     en: "Newsletter",

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/client";
+import type { SurveySubmission } from "@/types/survey";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +14,8 @@ type MemberPayload = {
 };
 
 type SurveyBody = {
+  schema?: string;
+  submission?: SurveySubmission;
   districtSlug?: string;
   mandalSlug?: string;
   gramPanchayat?: string;
@@ -37,6 +40,62 @@ function buildReferenceId(districtSlug: string, mandalSlug: string) {
   return `#${abbr(districtSlug, 4)}-${abbr(mandalSlug, 2)}-${seq}`;
 }
 
+function isStatewide(body: SurveyBody): body is SurveyBody & {
+  submission: SurveySubmission;
+} {
+  return body.schema === "statewide_v1" && Boolean(body.submission);
+}
+
+function validateStatewide(s: SurveySubmission): string | null {
+  if (!s.fullName?.trim() || !/^\d{10}$/.test(String(s.phone || "").replace(/\D/g, ""))) {
+    return "Full name and 10-digit phone are required";
+  }
+  if (!s.districtSlug || !s.mandalSlug || !s.wardOrPanchayat?.trim()) {
+    return "District, mandal/ULB, and ward/panchayat are required";
+  }
+  if (!s.subCaste || !s.primaryProfession || !s.go23Status) {
+    return "Sub-caste, profession, and G.O. 23 status are required";
+  }
+  if (!s.declarationAccepted) {
+    return "Declaration must be accepted";
+  }
+  if (!Array.isArray(s.welfareReceived) || s.welfareReceived.length === 0) {
+    return "Select at least one welfare option";
+  }
+  return null;
+}
+
+async function tryPersist(row: {
+  referenceId: string;
+  districtSlug: string;
+  mandalSlug: string;
+  gramPanchayat: string;
+  headName: string;
+  whatsapp: string;
+  communityWing: string;
+  occupation: string;
+  payload: unknown;
+}): Promise<boolean> {
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return false;
+    const { error } = await supabase.from("surveys").insert({
+      reference_id: row.referenceId,
+      district_slug: row.districtSlug,
+      mandal_slug: row.mandalSlug,
+      gram_panchayat: row.gramPanchayat,
+      head_name: row.headName,
+      whatsapp: row.whatsapp,
+      community_wing: row.communityWing,
+      occupation: row.occupation,
+      payload: row.payload,
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     let body: SurveyBody;
@@ -49,6 +108,51 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── Statewide v1 schema ──────────────────────────────────────────────
+    if (isStatewide(body)) {
+      const submission = body.submission;
+      const invalid = validateStatewide(submission);
+      if (invalid) {
+        return NextResponse.json(
+          { success: false, error: invalid },
+          { status: 400 },
+        );
+      }
+
+      const phone = String(submission.phone).replace(/\D/g, "");
+      const referenceId = buildReferenceId(
+        submission.districtSlug,
+        submission.mandalSlug,
+      );
+      const payload = {
+        schema: "statewide_v1",
+        ...submission,
+        phone,
+        submittedAt: new Date().toISOString(),
+      };
+
+      const persisted = await tryPersist({
+        referenceId,
+        districtSlug: submission.districtSlug,
+        mandalSlug: submission.mandalSlug,
+        gramPanchayat: submission.wardOrPanchayat,
+        headName: submission.fullName.trim(),
+        whatsapp: phone,
+        communityWing: submission.subCaste,
+        occupation: submission.primaryProfession,
+        payload,
+      });
+
+      // Mock-ok when Supabase is down — client also mirrors to localStorage
+      return NextResponse.json({
+        success: true,
+        referenceId,
+        persisted,
+        mock: !persisted,
+      });
+    }
+
+    // ── Legacy mandal field-census schema ────────────────────────────────
     const districtSlug = String(body.districtSlug || "").trim();
     const mandalSlug = String(body.mandalSlug || "").trim();
     const headName = String(body.headName || "").trim();
@@ -93,26 +197,17 @@ export async function POST(req: Request) {
       submittedAt: new Date().toISOString(),
     };
 
-    let persisted = false;
-    try {
-      const supabase = getSupabase();
-      if (supabase) {
-        const { error } = await supabase.from("surveys").insert({
-          reference_id: referenceId,
-          district_slug: districtSlug,
-          mandal_slug: mandalSlug,
-          gram_panchayat: gramPanchayat,
-          head_name: headName,
-          whatsapp,
-          community_wing: communityWing,
-          occupation,
-          payload,
-        });
-        persisted = !error;
-      }
-    } catch {
-      persisted = false;
-    }
+    const persisted = await tryPersist({
+      referenceId,
+      districtSlug,
+      mandalSlug,
+      gramPanchayat,
+      headName,
+      whatsapp,
+      communityWing,
+      occupation,
+      payload,
+    });
 
     if (!persisted) {
       return NextResponse.json(

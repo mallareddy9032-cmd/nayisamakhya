@@ -6,13 +6,11 @@ import { Home, MapPinned, ClipboardList, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { Phone, X } from "lucide-react";
 import { t } from "@/lib/i18n/dictionary";
-import { useLanguageStore, useMandalPrefStore } from "@/lib/store/preferences";
+import { useLanguageStore } from "@/lib/store/preferences";
 
 export function BottomNav() {
   const pathname = usePathname();
   const lang = useLanguageStore((s) => s.lang);
-  const districtSlug = useMandalPrefStore((s) => s.districtSlug);
-  const mandalSlug = useMandalPrefStore((s) => s.mandalSlug);
   const [sosOpen, setSosOpen] = useState(false);
 
   const tabs = [
@@ -20,7 +18,7 @@ export function BottomNav() {
     { id: "mandal", href: "/mandals", icon: MapPinned, labelKey: "mandal" as const },
     {
       id: "survey",
-      href: `/${districtSlug}/${mandalSlug}/survey`,
+      href: "/survey",
       icon: ClipboardList,
       labelKey: "survey" as const,
     },
@@ -42,7 +40,7 @@ export function BottomNav() {
                     (/^\/[^/]+\/[^/]+$/.test(pathname) &&
                       !pathname.endsWith("/survey"))
                   : tab.id === "survey"
-                    ? pathname.endsWith("/survey")
+                    ? pathname === "/survey" || pathname.endsWith("/survey")
                     : false;
             const Icon = tab.icon;
             return (

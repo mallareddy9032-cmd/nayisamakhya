@@ -15,6 +15,13 @@ const TABS = [
     external: false,
   },
   {
+    id: "survey",
+    href: "/survey",
+    label: "సర్వే",
+    emoji: "📋",
+    external: false,
+  },
+  {
     id: "card",
     href: "/coordinator-card",
     label: "నా కార్డు",
@@ -44,7 +51,7 @@ export function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 block border-t border-slate-200 bg-white/95 px-4 py-2 shadow-lg backdrop-blur-md pb-safe md:hidden"
       aria-label="Mobile quick actions"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-3 gap-1">
+      <ul className="mx-auto grid max-w-lg grid-cols-4 gap-1">
         {TABS.map((tab) => {
           const active =
             !tab.external &&

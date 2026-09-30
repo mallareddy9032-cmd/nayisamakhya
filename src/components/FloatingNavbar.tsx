@@ -21,6 +21,7 @@ const navKeys = [
   { href: "/verticals/livelihood", key: "navLivelihood" as const },
   { href: "/verticals/bajantri", key: "navBajantri" as const },
   { href: "/representation", key: "navRepresentation" as const },
+  { href: "/survey", key: "navSurvey" as const },
   { href: "/newsletter", key: "navNewsletter" as const },
   { href: "/verticals/matrimonial", key: "navMatrimonial" as const },
   { href: "/verticals/gallery", key: "navGallery" as const },
