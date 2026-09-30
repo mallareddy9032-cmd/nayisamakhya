@@ -43,27 +43,34 @@ export default function HomePage() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
           <div className="space-y-5 text-center lg:text-left">
             <span className="civic-eyebrow-pill mb-1 shadow-sm">
-              చారిత్రక వారసత్వం • చట్టబద్ధ రక్షణ • సమగ్ర సాధికారత
+              చట్టబద్ధ రక్షణ • సంక్షేమ సాధికారత
             </span>
 
             <div>
-              <h1 className="font-display-te text-2xl font-normal leading-[1.35] tracking-tight text-[#0F172A] sm:text-4xl sm:leading-[1.3] lg:text-5xl lg:leading-[1.28]">
-                ఆత్మగౌరవం • చట్టబద్ధ రక్షణ •
-                <br />
-                <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-display-te not-italic text-transparent">
-                  ఆధునిక ప్రగతి
+              <h1 className="tracking-tight">
+                <span className="block font-display-te text-[28px] font-normal leading-[36px] text-[#0F172A] sm:text-[36px] sm:leading-[44px] lg:text-[42px] lg:leading-[52px]">
+                  ఆత్మగౌరవం • చట్టబద్ధ రక్షణ
+                </span>
+                <span className="mt-1 block font-display-te text-[24px] font-normal italic leading-[32px] text-[#B45309] sm:text-[28px] sm:leading-[36px] lg:text-[34px] lg:leading-[44px]">
+                  ఆధునిక ప్రగతి{" "}
+                  <span className="font-sans text-[0.55em] font-medium not-italic tracking-wide text-[#B45309]/80">
+                    (Self-Respect &amp; Progress)
+                  </span>
                 </span>
               </h1>
-              <p className="mt-2 font-sans text-sm font-medium uppercase tracking-widest text-slate-500 lg:text-base">
-                Statewide Civic Protection &amp; Empowerment Network
-              </p>
             </div>
 
-            <p className="mx-auto mt-3 max-w-2xl font-telugu text-base font-normal leading-[1.8] text-slate-600 lg:mx-0 lg:text-lg">
-              శతాబ్దాల కళా-వైద్య వైభవాన్ని పునరుద్ధరిస్తూ — 250 యూనిట్ల ఉచిత
-              విద్యుత్ (జీ.ఓ. 23), మున్సిపల్ షాపుల రక్షణ, విద్యా-స్కాలర్‌షిప్‌లు
-              మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు తెలంగాణలోని నాయీ
-              బ్రాహ్మణ, మంగలి, బజంత్రి సమాజాల ఏకైక ఆధీకృత వేదిక.
+            <p className="mx-auto mt-3 max-w-2xl font-telugu text-base font-normal leading-relaxed text-slate-600 sm:text-lg lg:mx-0">
+              శతాబ్దాల కళా-వైద్య వైభవాన్ని పునరుద్ధరిస్తూ —{" "}
+              <strong className="font-bold text-[#0F172A]">
+                జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్
+              </strong>{" "}
+              మరియు{" "}
+              <strong className="font-bold text-[#0F172A]">
+                మున్సిపల్ షాపుల హక్కులు
+              </strong>
+              , విద్యా-స్కాలర్‌షిప్‌లు మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు
+              తెలంగాణలోని నాయీ బ్రాహ్మణ, మంగలి, బజంత్రి సమాజాల ఏకైక ఆధీకృత వేదిక.
             </p>
 
             <div className="flex flex-col items-stretch justify-center gap-2.5 pt-1 sm:flex-row sm:items-center lg:justify-start">

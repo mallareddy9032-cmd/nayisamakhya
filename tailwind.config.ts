@@ -49,6 +49,9 @@ const config = {
       animation: {
         marquee: "marquee 38s linear infinite",
         "chat-pulse": "chat-pulse 2s ease-out infinite",
+        float: "float 4s ease-in-out infinite",
+        "float-card": "float-card 4s ease-in-out infinite",
+        "shadow-bloom": "shadow-bloom 4s ease-in-out infinite",
       },
       keyframes: {
         marquee: {
@@ -58,6 +61,24 @@ const config = {
         "chat-pulse": {
           "0%, 100%": { boxShadow: "0 0 0 0 rgb(194 65 12 / 0.45)" },
           "70%": { boxShadow: "0 0 0 14px rgb(194 65 12 / 0)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(-4px)" },
+          "50%": { transform: "translateY(4px)" },
+        },
+        "float-card": {
+          "0%, 100%": { transform: "translateY(3px)" },
+          "50%": { transform: "translateY(-3px)" },
+        },
+        "shadow-bloom": {
+          "0%, 100%": {
+            boxShadow:
+              "0 10px 24px rgb(15 23 42 / 0.12), 0 0 0 1px rgb(180 83 9 / 0.12)",
+          },
+          "50%": {
+            boxShadow:
+              "0 16px 36px rgb(15 23 42 / 0.18), 0 0 28px rgb(180 83 9 / 0.18)",
+          },
         },
       },
     },

@@ -140,6 +140,12 @@ html.contrast-high {
   .motion-safe-ping {
     animation: none !important;
   }
+
+  .animate-float,
+  .animate-float-card,
+  .animate-shadow-bloom {
+    animation: none !important;
+  }
 }
 
 /* Homepage micro-system: lineage eyebrow + bronze focus ring */

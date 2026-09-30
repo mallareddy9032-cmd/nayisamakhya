@@ -1,10 +1,126 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { IdCard, MapPin, Phone, ShieldCheck } from "lucide-react";
 
+type CommunityFigure = {
+  id: string;
+  src: string;
+  alt: string;
+  monogram: string;
+  label: string;
+  labelEn: string;
+};
+
+const FIGURES: CommunityFigure[] = [
+  {
+    id: "salon",
+    src: "/home/persona-artisan-salon.png",
+    alt: "ఆధునిక సెలూన్ స్టైలిస్ట్ — Modern salon stylist",
+    monogram: "సె",
+    label: "సెలూన్ స్టైలిస్ట్",
+    labelEn: "Modern Salon",
+  },
+  {
+    id: "nadaswaram",
+    src: "/home/artisan-craftsman-portrait.png",
+    alt: "సాంప్రదాయ నాదస్వరం కళాకారుడు — Traditional nadaswaram artist",
+    monogram: "నా",
+    label: "నాదస్వరం కళాకారుడు",
+    labelEn: "Nadaswaram",
+  },
+  {
+    id: "youth",
+    src: "/home/persona-youth-scholarship.png",
+    alt: "విద్యార్థి / యువ నిపుణుడు — Student and young professional",
+    monogram: "యు",
+    label: "యువ నిపుణుడు",
+    labelEn: "Young Professional",
+  },
+];
+
+function PortraitRing({
+  figure,
+  size,
+  priority = false,
+  className = "",
+}: {
+  figure: CommunityFigure;
+  size: "sm" | "lg";
+  priority?: boolean;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const dim = size === "lg" ? "h-40 w-40 sm:h-56 sm:w-56" : "h-16 w-16 sm:h-20 sm:w-20";
+  const px = size === "lg" ? 640 : 160;
+
+  return (
+    <div className={`relative ${dim} ${className}`}>
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          boxShadow:
+            size === "lg"
+              ? "0 0 0 3px #FBFBFA, 0 0 0 5px #B45309, 0 0 0 9px rgb(180 83 9 / 0.25), 0 18px 40px rgb(15 23 42 / 0.18)"
+              : "0 0 0 2px #FBFBFA, 0 0 0 3px #B45309, 0 8px 18px rgb(15 23 42 / 0.14)",
+        }}
+        aria-hidden
+      />
+      <div
+        className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#1E293B]"
+        style={{ border: size === "lg" ? "2px solid #B45309" : "1.5px solid #B45309" }}
+      >
+        {failed ? (
+          <span
+            className={`font-display-te font-normal text-[#FDE68A] ${
+              size === "lg" ? "text-3xl sm:text-4xl" : "text-base sm:text-lg"
+            }`}
+            aria-hidden
+          >
+            {figure.monogram}
+          </span>
+        ) : (
+          <Image
+            src={figure.src}
+            alt={figure.alt}
+            width={px}
+            height={px}
+            priority={priority}
+            className="h-full w-full max-w-full object-cover"
+            sizes={
+              size === "lg"
+                ? "(max-width: 640px) 160px, 224px"
+                : "(max-width: 640px) 64px, 80px"
+            }
+            onError={() => setFailed(true)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function HeroArtisanShowcase() {
+  const [active, setActive] = useState(1);
+
+  useEffect(() => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    const id = window.setInterval(() => {
+      setActive((i) => (i + 1) % FIGURES.length);
+    }, 5200);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const primary = FIGURES[active]!;
+  const left = FIGURES[(active + FIGURES.length - 1) % FIGURES.length]!;
+  const right = FIGURES[(active + 1) % FIGURES.length]!;
+
   return (
     <div className="relative mx-auto flex w-full max-w-full flex-col items-center justify-center overflow-visible px-2 lg:max-w-none">
       <div
@@ -16,43 +132,61 @@ export function HeroArtisanShowcase() {
         aria-hidden
       />
 
-      {/* Ceremonial double-gold bezel portrait */}
-      <div className="relative z-[1] mx-auto h-40 w-40 sm:h-56 sm:w-56">
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            boxShadow:
-              "0 0 0 3px #FBFBFA, 0 0 0 5px #B45309, 0 0 0 9px rgb(180 83 9 / 0.25), 0 18px 40px rgb(15 23 42 / 0.18)",
-          }}
-          aria-hidden
-        />
-        <div
-          className="relative h-full w-full overflow-hidden rounded-full bg-[#1E293B]"
-          style={{ border: "2px solid #B45309" }}
-        >
-          <Image
-            src="/home/artisan-craftsman-portrait.png"
-            alt="నాయి వృత్తిదారుని గౌరవ చిత్రం — Traditional artisan craftsman"
-            width={640}
-            height={640}
-            priority
-            className="h-full w-full max-w-full object-cover"
-            sizes="(max-width: 640px) 160px, 224px"
-          />
+      {/* Community figures — side satellites + rotating primary */}
+      <div className="relative z-[1] flex w-full items-end justify-center gap-1 sm:gap-2">
+        <div className="mb-6 motion-safe:animate-float motion-safe:[animation-delay:-1.2s] sm:mb-8">
+          <PortraitRing figure={left} size="sm" />
+          <p className="mt-1.5 max-w-[4.5rem] truncate text-center font-sans text-[8px] font-semibold text-slate-500 sm:max-w-[5rem] sm:text-[9px]">
+            {left.labelEn}
+          </p>
         </div>
-        <div className="absolute -bottom-2 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/30 bg-white px-3 py-1 shadow-md">
-          <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
-          <span className="font-telugu text-[10px] font-bold text-[#1E293B]">
-            BC-A · వృత్తి గౌరవం
-          </span>
+
+        <div className="relative mx-1 motion-safe:animate-float sm:mx-2">
+          <PortraitRing figure={primary} size="lg" priority />
+          <div className="absolute -bottom-2 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/30 bg-white px-3 py-1 shadow-md">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
+            <span className="font-telugu text-[10px] font-bold text-[#1E293B]">
+              BC-A · {primary.label}
+            </span>
+          </div>
+        </div>
+
+        <div className="mb-6 motion-safe:animate-float motion-safe:[animation-delay:-2.4s] sm:mb-8">
+          <PortraitRing figure={right} size="sm" />
+          <p className="mt-1.5 max-w-[4.5rem] truncate text-center font-sans text-[8px] font-semibold text-slate-500 sm:max-w-[5rem] sm:text-[9px]">
+            {right.labelEn}
+          </p>
         </div>
       </div>
 
-      {/* Coordinator card — overlaps portrait, no phone clip */}
-      <div className="relative z-10 mx-auto mt-[-24px] w-auto max-w-[280px]">
+      {/* Figure dots */}
+      <div
+        className="relative z-[2] mt-4 flex items-center justify-center gap-1.5"
+        role="tablist"
+        aria-label="Community figures"
+      >
+        {FIGURES.map((fig, i) => (
+          <button
+            key={fig.id}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            aria-label={fig.labelEn}
+            onClick={() => setActive(i)}
+            className={`h-1.5 rounded-full transition-all ${
+              i === active
+                ? "w-5 bg-[#B45309]"
+                : "w-1.5 bg-slate-300 hover:bg-slate-400"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Coordinator card — counter-phase float + shadow bloom */}
+      <div className="relative z-10 mx-auto mt-3 w-auto max-w-[280px] motion-safe:animate-float-card">
         <Link
           href="/coordinator-card"
-          className="block rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs shadow-lg ring-1 ring-[#B45309]/20"
+          className="block rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs ring-1 ring-[#B45309]/20 motion-safe:animate-shadow-bloom"
           aria-label="సమన్వయకర్త డిజిటల్ కార్డు ప్రివ్యూ"
         >
           <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-[#B45309]" aria-hidden />
@@ -84,6 +218,15 @@ export function HeroArtisanShowcase() {
             <MapPin className="h-3 w-3 shrink-0 text-[#B45309]" aria-hidden />
             కోదాడ · సూర్యాపేట
           </p>
+
+          {/* Live indicator pill */}
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1">
+            <span className="live-pulse-dot" aria-hidden />
+            <span className="font-telugu text-[9px] font-bold tracking-wide text-emerald-800">
+              589 మండలాలు యాక్టివ్
+            </span>
+          </div>
+
           <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#E2E8F0] pt-1.5 text-[9px] text-slate-500">
             <span className="inline-flex min-w-0 items-center gap-1 font-semibold text-[#0F172A]">
               <Phone className="h-2.5 w-2.5 shrink-0 text-[#B45309]" aria-hidden />

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,6 +13,18 @@ import {
   MapPin,
   Mail,
   Phone,
+  Home,
+  ScrollText,
+  Newspaper,
+  ClipboardList,
+  Landmark,
+  BookOpen,
+  Image as ImageIcon,
+  MessageCircle,
+  IdCard,
+  Bot,
+  LayoutGrid,
+  ChevronRight,
 } from "lucide-react";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
@@ -19,8 +32,57 @@ const WA_HELP = "https://wa.me/919032654111";
 const HELPLINE_DISPLAY = "+91 9032654111";
 const CONTACT_EMAIL = "contact@nayisamakhya.org";
 
-const linkClass =
-  "civic-focus-ring text-sm leading-relaxed text-slate-700 transition-colors hover:text-amber-700";
+function FooterNavLink({
+  href,
+  children,
+  icon: Icon,
+  external = false,
+}: {
+  href: string;
+  children: ReactNode;
+  icon: typeof Home;
+  external?: boolean;
+}) {
+  const className =
+    "civic-focus-ring group inline-flex items-center gap-1.5 text-sm leading-relaxed text-slate-700 transition-colors hover:text-amber-700";
+
+  const content = (
+    <>
+      <Icon
+        className="h-3.5 w-3.5 shrink-0 text-slate-400 transition-colors group-hover:text-amber-700"
+        aria-hidden
+      />
+      <span className="transition-transform duration-200 group-hover:translate-x-1">
+        {children}
+      </span>
+      {external ? (
+        <ExternalLink className="h-3 w-3 text-slate-400" aria-hidden />
+      ) : (
+        <ChevronRight
+          className="h-3 w-3 text-slate-300 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
+          aria-hidden
+        />
+      )}
+    </>
+  );
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={className}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {content}
+    </Link>
+  );
+}
+
+const contactPillClass =
+  "civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3.5 py-2 text-xs text-slate-700 shadow-xs transition-colors hover:border-amber-300 hover:bg-amber-50/60 hover:text-amber-800";
 
 export function CivicFooter() {
   const pathname = usePathname() || "";
@@ -69,34 +131,34 @@ export function CivicFooter() {
             </h3>
             <ul className="space-y-2 font-telugu">
               <li>
-                <Link href="/" className={linkClass}>
+                <FooterNavLink href="/" icon={Home}>
                   Home
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/representation" className={linkClass}>
+                <FooterNavLink href="/representation" icon={ScrollText}>
                   Petition
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/feed" className={linkClass}>
+                <FooterNavLink href="/feed" icon={Newspaper}>
                   Gazette
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/survey" className={linkClass}>
+                <FooterNavLink href="/survey" icon={ClipboardList}>
                   Survey
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/districts" className={linkClass}>
+                <FooterNavLink href="/districts" icon={Landmark}>
                   Districts
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/history" className={linkClass}>
+                <FooterNavLink href="/history" icon={BookOpen}>
                   History
-                </Link>
+                </FooterNavLink>
               </li>
             </ul>
           </div>
@@ -105,23 +167,23 @@ export function CivicFooter() {
           <div>
             <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5 font-telugu text-xs font-bold tracking-wider text-civic-ink">
               <Users className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              సమన్వయకర్తల విభాగం • COORDINATORS
+              సమన్వయకర్తల వేదిక • FOR COORDINATORS
             </h3>
             <ul className="space-y-2 font-telugu">
               <li>
-                <Link href="/poster" className={linkClass}>
+                <FooterNavLink href="/poster" icon={ImageIcon}>
                   Wall Poster
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/announce" className={linkClass}>
+                <FooterNavLink href="/announce" icon={MessageCircle}>
                   WhatsApp Mobilization
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/coordinator-card" className={linkClass}>
+                <FooterNavLink href="/coordinator-card" icon={IdCard}>
                   Coordinator Card
-                </Link>
+                </FooterNavLink>
               </li>
             </ul>
           </div>
@@ -134,57 +196,45 @@ export function CivicFooter() {
             </h3>
             <ul className="space-y-2 font-telugu">
               <li>
-                <a
-                  href={TELEGRAM_BOT_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`${linkClass} inline-flex items-center gap-1.5`}
-                >
+                <FooterNavLink href={TELEGRAM_BOT_URL} icon={Bot} external>
                   Telegram Bot
-                  <ExternalLink className="h-3 w-3 text-slate-400" aria-hidden />
-                </a>
+                </FooterNavLink>
               </li>
               <li>
-                <Link href="/twa" className={linkClass}>
+                <FooterNavLink href="/twa" icon={LayoutGrid}>
                   Mini App Hub
-                </Link>
+                </FooterNavLink>
               </li>
               <li>
-                <Link
-                  href="/admin/moderation"
-                  className={`${linkClass} inline-flex items-center gap-1.5`}
-                >
-                  <Lock className="h-3 w-3 text-slate-400" aria-hidden />
+                <FooterNavLink href="/admin/moderation" icon={Lock}>
                   Moderation Desk
-                </Link>
+                </FooterNavLink>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom bar — same container */}
+        {/* Bottom bar — contact pills + legal */}
         <div className="mt-8 border-t border-slate-200/70 pt-6 text-xs text-slate-500">
-          <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
               <a
                 href={WA_HELP}
                 target="_blank"
                 rel="noreferrer"
-                className="civic-focus-ring inline-flex items-center gap-1.5 transition-colors hover:text-amber-700"
+                className={contactPillClass}
               >
                 <Phone className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-                WhatsApp helpline {HELPLINE_DISPLAY}
+                <span className="font-medium">WhatsApp helpline</span>
+                <span className="text-slate-500">{HELPLINE_DISPLAY}</span>
               </a>
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="civic-focus-ring inline-flex items-center gap-1.5 transition-colors hover:text-amber-700"
-              >
+              <a href={`mailto:${CONTACT_EMAIL}`} className={contactPillClass}>
                 <Mail className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-                {CONTACT_EMAIL}
+                <span className="font-medium">{CONTACT_EMAIL}</span>
               </a>
-              <span className="inline-flex items-center gap-1.5">
+              <span className={`${contactPillClass} cursor-default hover:border-slate-200 hover:bg-white/80 hover:text-slate-700`}>
                 <MapPin className="h-3.5 w-3.5 shrink-0 text-civic-bronze" aria-hidden />
-                Hub: Hyderabad
+                <span className="font-medium">HQ Hyderabad</span>
               </span>
             </div>
 
