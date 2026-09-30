@@ -8,25 +8,34 @@ import {
   Landmark,
   MapPin,
   Menu,
+  Send,
   X,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAccessibilityStore } from "@/lib/store/accessibility";
 import { MandalSelector } from "@/components/MandalSelector";
+import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 import { cn } from "@/lib/utils";
 
-const navKeys = [
-  { href: "/verticals/welfare", key: "navWelfare" as const },
-  { href: "/verticals/education", key: "navEducation" as const },
-  { href: "/verticals/livelihood", key: "navLivelihood" as const },
-  { href: "/verticals/bajantri", key: "navBajantri" as const },
-  { href: "/representation", key: "navRepresentation" as const },
-  { href: "/survey", key: "navSurvey" as const },
-  { href: "/newsletter", key: "navNewsletter" as const },
-  { href: "/verticals/matrimonial", key: "navMatrimonial" as const },
-  { href: "/verticals/gallery", key: "navGallery" as const },
-  { href: "/verticals/go-library", key: "navGoLibrary" as const },
+const primaryNav = [
+  { href: "/districts", key: "navDistricts" as const, badge: false },
+  { href: "/survey", key: "navSurvey" as const, badge: true },
+  { href: "/representation", key: "navRepresentation" as const, badge: false },
+  { href: "/feed", key: "navGazette" as const, badge: false },
 ];
+
+function NewBadge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "ml-1.5 inline-flex items-center rounded-md border border-[#B45309]/35 bg-[#B45309]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.35)]",
+        className,
+      )}
+    >
+      New
+    </span>
+  );
+}
 
 export function FloatingNavbar() {
   const { language, setLanguage, t } = useLanguage();
@@ -62,42 +71,25 @@ export function FloatingNavbar() {
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 text-[#B45309]">
               <Landmark className="h-4 w-4" aria-hidden />
             </span>
-            <span className="truncate font-telugu text-sm font-bold tracking-tight text-[#0F172A]">
-              నాయీ సమాఖ్య
+            <span className="min-w-0 truncate">
+              <span className="block truncate font-display-te text-sm font-normal tracking-tight text-[#0F172A]">
+                నాయీ సమాఖ్య
+              </span>
+              <span className="block truncate text-[9px] uppercase tracking-[0.12em] text-muted">
+                Nayi Samakhya
+              </span>
             </span>
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5">
-            <div
-              className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5"
-              role="group"
+            <button
+              type="button"
+              onClick={() => setLanguage(language === "te" ? "en" : "te")}
+              className="tap inline-flex h-9 items-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 px-2.5 font-telugu text-[11px] font-bold text-[#B45309]"
               aria-label="Language"
             >
-              <button
-                type="button"
-                onClick={() => setLanguage("te")}
-                className={cn(
-                  "tap inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 font-telugu text-[11px] font-bold",
-                  language === "te"
-                    ? "bg-[#B45309] text-white"
-                    : "text-slate-600",
-                )}
-              >
-                తె
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                className={cn(
-                  "tap inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-[11px] font-bold",
-                  language === "en"
-                    ? "bg-[#B45309] text-white"
-                    : "text-slate-600",
-                )}
-              >
-                EN
-              </button>
-            </div>
+              {language === "te" ? "తెలుగు" : "English"}
+            </button>
             <button
               type="button"
               className="tap inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-white text-ink"
@@ -118,13 +110,11 @@ export function FloatingNavbar() {
               <Landmark className="h-5 w-5" aria-hidden />
             </span>
             <span className="min-w-0">
-              <span
-                className={`block truncate text-sm font-bold tracking-tight text-ink sm:text-base ${language === "te" ? "font-telugu" : ""}`}
-              >
-                {t("brandName")}
+              <span className="block truncate font-display-te text-sm font-normal tracking-tight text-ink sm:text-base">
+                నాయీ సమాఖ్య తెలంగాణ
               </span>
               <span className="hidden text-[10px] uppercase tracking-[0.14em] text-muted sm:block">
-                {t("brandSub")}
+                Nayi Samakhya
               </span>
             </span>
           </Link>
@@ -133,22 +123,50 @@ export function FloatingNavbar() {
             className="hidden items-center gap-0.5 lg:flex"
             aria-label="Primary"
           >
-            {navKeys.map((link) => (
+            {primaryNav.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-lg px-2.5 py-2 text-[12px] font-medium text-ink transition-colors hover:bg-[#F4F2EB]",
+                  "inline-flex items-center rounded-lg px-2.5 py-2 text-[12px] font-medium text-ink transition-colors hover:bg-[#F4F2EB]",
                   language === "te" ? "font-telugu" : "",
                 )}
               >
                 {t(link.key)}
+                {link.badge ? <NewBadge /> : null}
               </Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-2">
-            <div className="hidden md:block">
+            <button
+              type="button"
+              onClick={() => setLanguage(language === "te" ? "en" : "te")}
+              className="tap hidden h-9 items-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 px-3 font-telugu text-[11px] font-bold text-[#B45309] md:inline-flex"
+              aria-label="Language"
+            >
+              {language === "te" ? "తెలుగు" : "English"}
+            </button>
+
+            <a
+              href={TELEGRAM_BOT_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="tap hidden h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-[#0F172A] hover:bg-warm lg:inline-flex"
+              aria-label="Telegram desk bot"
+              title="@NayiSamakhyaDeskBot"
+            >
+              <Send className="h-4 w-4" aria-hidden />
+            </a>
+
+            <Link
+              href="/survey"
+              className="tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-3.5 py-2.5 font-telugu text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex"
+            >
+              సర్వే ప్రారంభించండి ➔
+            </Link>
+
+            <div className="hidden md:block lg:hidden">
               <MandalSelector variant="compact" target="portal" />
             </div>
             <button
@@ -197,7 +215,7 @@ export function FloatingNavbar() {
 
             <div className="flex-1 overflow-y-auto px-3 py-3">
               <ul className="space-y-1">
-                {navKeys.map((link) => (
+                {primaryNav.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
@@ -207,7 +225,10 @@ export function FloatingNavbar() {
                         language === "te" ? "font-telugu" : "",
                       )}
                     >
-                      {t(link.key)}
+                      <span className="inline-flex items-center">
+                        {t(link.key)}
+                        {link.badge ? <NewBadge /> : null}
+                      </span>
                       <ChevronDown
                         className="h-4 w-4 -rotate-90 text-muted"
                         aria-hidden
@@ -216,6 +237,25 @@ export function FloatingNavbar() {
                   </li>
                 ))}
               </ul>
+
+              <Link
+                href="/survey"
+                onClick={() => setOpen(false)}
+                className="tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-3 font-telugu text-sm font-bold text-white"
+              >
+                సర్వే ప్రారంభించండి ➔
+              </Link>
+
+              <a
+                href={TELEGRAM_BOT_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setOpen(false)}
+                className="tap mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 font-telugu text-sm font-semibold text-ink"
+              >
+                <Send className="h-4 w-4 text-[#B45309]" aria-hidden />
+                Telegram డెస్క్
+              </a>
 
               <div className="mt-4 rounded-2xl border border-line bg-[#FBFBFA] p-3">
                 <p className="mb-2 font-telugu text-[11px] font-bold uppercase tracking-wide text-muted">

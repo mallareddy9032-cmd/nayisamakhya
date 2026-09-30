@@ -4,42 +4,36 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const WA_HELP = "https://wa.me/919032654111";
-
 const TABS = [
+  {
+    id: "districts",
+    href: "/districts",
+    label: "జిల్లాలు",
+    emoji: "🗺️",
+  },
+  {
+    id: "survey",
+    href: "/survey",
+    label: "సమగ్ర సర్వే",
+    emoji: "📋",
+    badge: true,
+  },
   {
     id: "representation",
     href: "/representation",
     label: "వినతిపత్రం",
     emoji: "📄",
-    external: false,
   },
   {
-    id: "survey",
-    href: "/survey",
-    label: "సర్వే",
-    emoji: "📋",
-    external: false,
-  },
-  {
-    id: "card",
-    href: "/coordinator-card",
-    label: "నా కార్డు",
-    emoji: "🪪",
-    external: false,
-  },
-  {
-    id: "help",
-    href: WA_HELP,
-    label: "సహాయం",
-    emoji: "💬",
-    external: true,
+    id: "feed",
+    href: "/feed",
+    label: "గెజిట్",
+    emoji: "📰",
   },
 ] as const;
 
 /**
- * Portal sticky mobile bottom bar — single coherent CTA strip.
- * Replaces home-only MobileStickyActions on small screens.
+ * Portal sticky mobile bottom bar — mirrors primary civic nav.
  */
 export function MobileBottomNav() {
   const pathname = usePathname() || "";
@@ -54,32 +48,13 @@ export function MobileBottomNav() {
       <ul className="mx-auto grid max-w-lg grid-cols-4 gap-1">
         {TABS.map((tab) => {
           const active =
-            !tab.external &&
-            (pathname === tab.href || pathname.startsWith(`${tab.href}/`));
+            pathname === tab.href || pathname.startsWith(`${tab.href}/`);
           const className = cn(
-            "tap civic-focus-ring flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 font-telugu text-[11px] font-bold transition-colors",
+            "tap civic-focus-ring relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 font-telugu text-[11px] font-bold transition-colors",
             active
               ? "bg-[#B45309]/10 text-[#B45309]"
               : "text-[#0F172A] hover:bg-[#FBFBFA]",
           );
-
-          if (tab.external) {
-            return (
-              <li key={tab.id}>
-                <a
-                  href={tab.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={className}
-                >
-                  <span aria-hidden className="text-base leading-none">
-                    {tab.emoji}
-                  </span>
-                  <span>{tab.label}</span>
-                </a>
-              </li>
-            );
-          }
 
           return (
             <li key={tab.id}>
@@ -87,7 +62,14 @@ export function MobileBottomNav() {
                 <span aria-hidden className="text-base leading-none">
                   {tab.emoji}
                 </span>
-                <span>{tab.label}</span>
+                <span className="inline-flex items-center gap-0.5">
+                  {tab.label}
+                  {"badge" in tab && tab.badge ? (
+                    <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 text-[8px] font-bold uppercase tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
+                      New
+                    </span>
+                  ) : null}
+                </span>
               </Link>
             </li>
           );

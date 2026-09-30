@@ -3,11 +3,11 @@ import type { Lang } from "@/lib/types";
 export type TranslationKey = keyof typeof translations;
 
 export const translations = {
-  brandName: { te: "నాయీ సమాఖ్య", en: "Nayi Samakhya" },
-  brandSub: { te: "ప్రజా సమాఖ్య", en: "Praja Samakhya" },
+  brandName: { te: "నాయీ సమాఖ్య తెలంగాణ", en: "Nayi Samakhya" },
+  brandSub: { te: "Nayi Samakhya", en: "Telangana Civic Portal" },
   helpline: {
-    te: "హెల్ప్‌లైన్: 1800-NAYI-SEVA | టెలిగ్రామ్ అలర్ట్స్",
-    en: "Helpline: 1800-NAYI-SEVA | Telegram Alerts",
+    te: "హెల్ప్‌లైన్: +91 9032654111 | టెలిగ్రామ్ అలర్ట్స్",
+    en: "Helpline: +91 9032654111 | Telegram Alerts",
   },
   contrast: { te: "కాంట్రాస్ట్", en: "Contrast" },
   navWelfare: { te: "సంక్షేమం", en: "Welfare" },
@@ -17,17 +17,29 @@ export const translations = {
   navMatrimonial: { te: "వివాహ సేవ", en: "Matrimonial" },
   navGallery: { te: "గ్యాలరీ", en: "Gallery" },
   navGoLibrary: { te: "G.O. లైబ్రరీ", en: "G.O. Library" },
+  navDistricts: {
+    te: "జిల్లాల సమాచారం",
+    en: "Districts",
+  },
   navRepresentation: {
-    te: "\u0c35\u0c3f\u0c28\u0c24\u0c3f \u0c2a\u0c24\u0c4d\u0c30\u0c02",
-    en: "Representation",
+    te: "వినతిపత్రం",
+    en: "Petition",
   },
   navSurvey: {
-    te: "సర్వే",
+    te: "సమగ్ర సర్వే",
     en: "Survey",
   },
+  navGazette: {
+    te: "గెజిట్ & జీవోలు",
+    en: "Gazette",
+  },
   navNewsletter: {
-    te: "సమాచార పత్రిక (Newsletter)",
-    en: "Newsletter",
+    te: "గెజిట్ & జీవోలు",
+    en: "Gazette",
+  },
+  navCtaSurvey: {
+    te: "సర్వే ప్రారంభించండి ➔",
+    en: "Start Survey ➔",
   },
   goMandal: { te: "మండలానికి వెళ్ళండి", en: "Go to mandal" },
   go: { te: "వెళ్ళు", en: "Go" },

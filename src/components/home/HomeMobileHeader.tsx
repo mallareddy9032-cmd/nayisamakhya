@@ -18,12 +18,10 @@ import { MandalSelector } from "@/components/MandalSelector";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { href: "/districts", label: "జిల్లాలు", icon: MapPin },
+  { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
+  { href: "/survey", label: "సమగ్ర సర్వే" },
   { href: "/representation", label: "వినతిపత్రం", icon: FileText },
-  { href: "/newsletter", label: "సమాచార పత్రిక" },
-  { href: "/coordinator-card", label: "నా కార్డు" },
-  { href: "/feed", label: "సమాచార ఫీడ్" },
-  { href: "/announce", label: "ప్రకటనలు" },
+  { href: "/feed", label: "గెజిట్ & జీవోలు" },
 ] as const;
 
 /**
@@ -136,13 +134,16 @@ export function HomeMobileHeader() {
               className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
             >
               <MapPin className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              జిల్లాలు
+              జిల్లాల సమాచారం
             </Link>
             <Link
-              href="/newsletter"
-              className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
+              href="/survey"
+              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
             >
-              సమాచార పత్రిక
+              సమగ్ర సర్వే
+              <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 text-[8px] font-bold uppercase tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
+                New
+              </span>
             </Link>
             <Link
               href="/representation"
@@ -151,14 +152,27 @@ export function HomeMobileHeader() {
               <FileText className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
               వినతిపత్రం
             </Link>
+            <Link
+              href="/feed"
+              className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
+            >
+              గెజిట్ &amp; జీవోలు
+            </Link>
+            <Link
+              href="/survey"
+              className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
+            >
+              సర్వే ప్రారంభించండి ➔
+            </Link>
             <a
               href="https://t.me/NayiSamakhyaDeskBot"
               target="_blank"
               rel="noreferrer"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
+              className="civic-focus-ring inline-flex min-h-11 w-11 items-center justify-center rounded-xl border border-civic-border bg-white text-civic-ink transition hover:bg-civic-subtle"
+              aria-label="Telegram desk bot"
+              title="@NayiSamakhyaDeskBot"
             >
               <Send className="h-3.5 w-3.5" aria-hidden />
-              సేవా డెస్క్ బాట్
             </a>
           </div>
         </div>

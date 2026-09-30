@@ -10,7 +10,14 @@ import {
   Lock,
   Send,
   MapPin,
+  Mail,
+  Phone,
 } from "lucide-react";
+import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
+
+const WA_HELP = "https://wa.me/919032654111";
+const HELPLINE_DISPLAY = "+91 9032654111";
+const CONTACT_EMAIL = "contact@nayisamakhya.org";
 
 export function CivicFooter() {
   const pathname = usePathname() || "";
@@ -34,85 +41,73 @@ export function CivicFooter() {
             <span className="rounded-lg border border-civic-bronze/20 bg-civic-bronze/10 p-1.5 text-civic-bronze">
               <ShieldCheck className="h-4 w-4" />
             </span>
-            <span className="font-telugu text-sm font-bold text-civic-ink">
-              {"\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23"}
+            <span className="font-display-te text-sm font-normal text-civic-ink">
+              నాయి సమాఖ్య తెలంగాణ
             </span>
           </div>
           <p className="font-telugu text-[11px] leading-relaxed text-slate-500">
-            {"\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c30\u0c3e\u0c37\u0c4d\u0c1f\u0c4d\u0c30\u0c35\u0c4d\u0c2f\u0c3e\u0c2a\u0c4d\u0c24\u0c02\u0c17\u0c3e \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02, \u0c2a\u0c4d\u0c30\u0c1c\u0c3e \u0c2a\u0c4d\u0c30\u0c3e\u0c24\u0c3f\u0c28\u0c3f\u0c27\u0c4d\u0c2f\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30\u0c38\u0c4d\u0c25\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c38\u0c4d\u0c2f\u0c32 \u0c2a\u0c30\u0c3f\u0c37\u0c4d\u0c15\u0c3e\u0c30\u0c02 \u0c15\u0c4a\u0c30\u0c15\u0c41 \u0c30\u0c42\u0c2a\u0c4a\u0c02\u0c26\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c3f\u0c28 \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c35\u0c47\u0c26\u0c3f\u0c15."}
+            తెలంగాణ రాష్ట్రవ్యాప్తంగా నాయి బ్రాహ్మణ, మంగలి &amp; బజంత్రి కమ్యూనిటీ
+            సంక్షేమం, ప్రజా ప్రాతినిధ్యం మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు
+            రూపొందించబడిన అధికారిక వేదిక.
           </p>
           <div className="flex items-center gap-1.5 pt-1 font-telugu text-[11px] text-slate-500">
             <MapPin className="h-3.5 w-3.5 text-civic-bronze" />
-            <span>{"33 \u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e\u0c32\u0c41 \u2022 589 \u0c2e\u0c02\u0c21\u0c32\u0c3e\u0c32\u0c41"}</span>
+            <span>33 జిల్లాలు • 589 మండలాలు</span>
           </div>
         </div>
 
         <div>
           <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
             <FileText className="h-3.5 w-3.5 text-civic-bronze" />
-            {"\u0c2a\u0c4d\u0c30\u0c1c\u0c3e \u0c38\u0c47\u0c35\u0c32\u0c41 & \u0c35\u0c3f\u0c28\u0c24\u0c41\u0c32\u0c41"}
+            ప్రజా సేవలు &amp; వినతులు
           </h3>
           <ul className="space-y-2.5 font-telugu text-[12px]">
             <li>
               <Link
                 href="/"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"\u0c2a\u0c4d\u0c30\u0c27\u0c3e\u0c28 \u0c2a\u0c4b\u0c30\u0c4d\u0c1f\u0c32\u0c4d (Home)"}</span>
-                <span className="font-sans text-[10px] text-slate-400">/</span>
+                ప్రధాన పోర్టల్ (Home)
               </Link>
             </li>
             <li>
               <Link
                 href="/representation"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"\u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c24\u0c2f\u0c3e\u0c30\u0c40"}</span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /representation
-                </span>
+                చట్టబద్ధ వినతిపత్రం (Legal Petition)
               </Link>
             </li>
             <li>
               <Link
                 href="/feed"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"\u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c38\u0c2e\u0c40\u0c15\u0c4d\u0c37 & \u0c38\u0c2e\u0c38\u0c4d\u0c2f\u0c32 \u0c2b\u0c40\u0c21\u0c4d"}</span>
-                <span className="font-sans text-[10px] text-slate-400">/feed</span>
+                గెజిట్ &amp; జీవోలు (Gazette)
               </Link>
             </li>
             <li>
               <Link
-                href="/newsletter"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                href="/survey"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>సమాచార పత్రిక (Newsletter)</span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /newsletter
-                </span>
+                సమగ్ర సర్వే (Survey)
               </Link>
             </li>
             <li>
               <Link
                 href="/districts"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>జిల్లా &amp; మండల డైరెక్టరీ</span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /districts
-                </span>
+                జిల్లాల సమాచారం (Districts)
               </Link>
             </li>
             <li>
               <Link
                 href="/history"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>చారిత్రక పరిణామ క్రమం (History)</span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /history
-                </span>
+                చారిత్రక ప్రస్థానం (Heritage &amp; History)
               </Link>
             </li>
           </ul>
@@ -121,41 +116,34 @@ export function CivicFooter() {
         <div>
           <h3 className="mb-3 flex flex-wrap items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
             <Users className="h-3.5 w-3.5 text-civic-bronze" />
-            {"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24\u0c32\u0c15\u0c41"}
+            సమన్వయకర్తల విభాగం
             <span className="font-sans text-[10px] font-semibold normal-case tracking-wide text-slate-500">
-              • COORDINATORS
+              • FOR COORDINATORS
             </span>
           </h3>
           <ul className="space-y-2.5 font-telugu text-[12px]">
             <li>
               <Link
                 href="/poster"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"\u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c2a\u0c4b\u0c38\u0c4d\u0c1f\u0c30\u0c4d (QR / A4)"}</span>
-                <span className="font-sans text-[10px] text-slate-400">/poster</span>
+                సెలూన్ వాల్ పోస్టర్ (Wall Poster)
               </Link>
             </li>
             <li>
               <Link
                 href="/announce"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>
-                  {"WhatsApp \u0c2e\u0c4a\u0c2c\u0c3f\u0c32\u0c48\u0c1c\u0c47\u0c37\u0c28\u0c4d"}
-                </span>
-                <span className="font-sans text-[10px] text-slate-400">/announce</span>
+                WhatsApp మొబిలైజేషన్
               </Link>
             </li>
             <li>
               <Link
                 href="/coordinator-card"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"}</span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /coordinator-card
-                </span>
+                సమన్వయకర్త కార్డు
               </Link>
             </li>
           </ul>
@@ -164,57 +152,108 @@ export function CivicFooter() {
         <div>
           <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-1 font-telugu text-xs font-bold uppercase tracking-wider text-civic-ink">
             <Send className="h-3.5 w-3.5 text-civic-bronze" />
-            {"\u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d & \u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d"}
+            సేవా డెస్క్ &amp; అడ్మిన్
           </h3>
           <ul className="space-y-2.5 font-telugu text-[12px]">
             <li>
               <a
-                href="https://t.me/NayiSamakhyaDeskBot"
+                href={TELEGRAM_BOT_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center justify-between font-semibold text-civic-ink hover:text-civic-bronze"
               >
-                <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d \u0c2c\u0c3e\u0c1f\u0c4d (@NayiSamakhyaDeskBot)"}</span>
+                <span>టెలిగ్రామ్ బాట్ (@NayiSamakhyaDeskBot)</span>
                 <ExternalLink className="h-3 w-3 text-slate-400" />
               </a>
             </li>
             <li>
               <Link
                 href="/twa"
-                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d Mini App \u0c39\u0c2c\u0c4d"}</span>
-                <span className="font-sans text-[10px] text-slate-400">/twa</span>
+                టెలిగ్రామ్ Mini App హబ్
               </Link>
             </li>
             <li>
               <Link
                 href="/admin/desk"
-                className="flex items-center justify-between text-slate-600 hover:text-civic-bronze"
+                className="flex items-center gap-1 text-slate-600 hover:text-civic-bronze"
               >
-                <span className="flex items-center gap-1">
-                  <Lock className="h-3 w-3 text-slate-400" />
-                  {"\u0c05\u0c21\u0c4d\u0c2e\u0c3f\u0c28\u0c4d \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d & \u0c05\u0c28\u0c32\u0c3f\u0c1f\u0c3f\u0c15\u0c4d\u0c38\u0c4d"}
-                </span>
-                <span className="font-sans text-[10px] text-slate-400">
-                  /admin/desk
-                </span>
+                <Lock className="h-3 w-3 text-slate-400" />
+                అడ్మిన్ డెస్క్ &amp; అనలిటిక్స్
               </Link>
             </li>
           </ul>
         </div>
       </div>
 
-      <div className="border-t border-civic-border bg-slate-50 px-4 py-4">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 text-[11px] text-slate-500 sm:flex-row">
-          <p className="font-telugu">
-            © {year} {"\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23. \u0c38\u0c30\u0c4d\u0c35 \u0c39\u0c15\u0c4d\u0c15\u0c41\u0c32\u0c41 \u0c2a\u0c4d\u0c30\u0c24\u0c4d\u0c2f\u0c47\u0c15\u0c3f\u0c02\u0c1a\u0c2c\u0c21\u0c4d\u0c21\u0c3e\u0c2f\u0c3f."}
+      <div className="border-t border-civic-border bg-[#F4F2EB] px-4 py-5">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-5">
+              <a
+                href={WA_HELP}
+                target="_blank"
+                rel="noreferrer"
+                className="civic-focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg font-telugu text-[12px] font-semibold text-civic-navy hover:text-civic-bronze"
+              >
+                <Phone className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
+                Helpline {HELPLINE_DISPLAY}
+              </a>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="civic-focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg font-sans text-[12px] font-semibold text-civic-navy hover:text-civic-bronze"
+              >
+                <Mail className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
+                {CONTACT_EMAIL}
+              </a>
+            </div>
+            <nav
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-600"
+              aria-label="Legal"
+            >
+              <Link
+                href="/policies/privacy"
+                className="civic-focus-ring rounded hover:text-civic-bronze"
+              >
+                Privacy
+              </Link>
+              <span className="text-slate-300" aria-hidden>
+                |
+              </span>
+              <Link
+                href="/policies/terms"
+                className="civic-focus-ring rounded hover:text-civic-bronze"
+              >
+                Terms
+              </Link>
+              <span className="text-slate-300" aria-hidden>
+                |
+              </span>
+              <Link
+                href="/admin/moderation"
+                className="civic-focus-ring inline-flex items-center gap-1 rounded hover:text-civic-bronze"
+              >
+                <Lock className="h-3 w-3 text-slate-400" aria-hidden />
+                Admin Moderation Desk
+              </Link>
+            </nav>
+          </div>
+
+          <p className="font-telugu text-[11px] leading-relaxed text-slate-500">
+            G.O. Ms. No. 23 &amp; Telangana Municipalities Act 2019 Civic Portal
           </p>
-          <div className="flex items-center gap-3">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <span className="font-sans font-medium text-slate-600">
-              nayisamakhya.org
-            </span>
+
+          <div className="flex flex-col items-start justify-between gap-2 border-t border-civic-border/80 pt-3 text-[11px] text-slate-500 sm:flex-row sm:items-center">
+            <p className="font-telugu">
+              © {year} నాయి సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.
+            </p>
+            <div className="flex items-center gap-3">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="font-sans font-medium text-slate-600">
+                nayisamakhya.org
+              </span>
+            </div>
           </div>
         </div>
       </div>
