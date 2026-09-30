@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Printer,
   MapPin,
@@ -101,7 +102,8 @@ function GuillocheOverlay() {
   );
 }
 
-export default function CoordinatorCardPage() {
+export function CoordinatorCardClient() {
+  const searchParams = useSearchParams();
   const [hydrated, setHydrated] = useState(false);
   const [name, setName] = useState(DEFAULTS.name);
   const [role, setRole] = useState(DEFAULTS.role);
@@ -110,15 +112,22 @@ export default function CoordinatorCardPage() {
   const [phone, setPhone] = useState(DEFAULTS.phone);
 
   // Instant offline restore from localStorage (no network required).
+  // URL ?district=&zone=/&mandal= from geo desks win on first paint after hydrate.
   useEffect(() => {
     const draft = readStoredDraft();
+    const qDistrict = searchParams.get("district")?.trim() || "";
+    const qMandal =
+      searchParams.get("mandal")?.trim() ||
+      searchParams.get("zone")?.trim() ||
+      "";
+
     setName(draft.name);
     setRole(draft.role);
-    setMandal(draft.mandal);
-    setDistrict(draft.district);
     setPhone(draft.phone);
+    setDistrict(qDistrict || draft.district);
+    setMandal(qMandal || draft.mandal);
     setHydrated(true);
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -359,5 +368,19 @@ export default function CoordinatorCardPage() {
         }}
       />
     </div>
+  );
+}
+
+export default function CoordinatorCardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-civic-paper font-telugu text-sm text-slate-500">
+          కార్డు లోడ్ అవుతోంది…
+        </div>
+      }
+    >
+      <CoordinatorCardClient />
+    </Suspense>
   );
 }

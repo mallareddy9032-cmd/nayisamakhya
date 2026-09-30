@@ -1,41 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  BadgeCheck,
-  ChevronRight,
-  FileText,
-  MessageCircle,
-  Phone,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
-import {
-  getGeoDistrict,
-  getGeoMandal,
-  mandalCoordinatorBadge,
-  mandalDeskMetrics,
-  mandalStaticParams,
-} from "@/data/telanganaGeo";
+import { TELANGANA_DISTRICTS } from "@/data/telanganaGeo";
 
 type Props = {
   params: Promise<{ district: string; mandal: string }>;
 };
 
 export function generateStaticParams() {
-  return mandalStaticParams();
+  const paths: { district: string; mandal: string }[] = [];
+  Object.values(TELANGANA_DISTRICTS).forEach((dist) => {
+    dist.mandals.forEach((m) => {
+      paths.push({ district: dist.slug, mandal: m.slug });
+    });
+  });
+  return paths;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { district: dSlug, mandal: mSlug } = await params;
-  const district = getGeoDistrict(dSlug);
-  const mandal = getGeoMandal(dSlug, mSlug);
+  const district = TELANGANA_DISTRICTS[dSlug];
+  const mandal = district?.mandals.find((m) => m.slug === mSlug);
   if (!district || !mandal) {
     return { title: "Mandal desk not found | Nayi Samakhya" };
   }
   return {
     title: `${mandal.nameTe} నాయీ సమాఖ్య అధికారిక సేవా డెస్క్ | ${mandal.nameEn}`,
-    description: `${mandal.nameTe}, ${district.nameTe} — ధృవీకృత సమన్వయకర్త, 1-క్లిక్ వినతిపత్రం, WhatsApp కారిడార్.`,
+    description: `${mandal.nameTe}, ${district.nameTe} — ధృవీకృత సమన్వయకర్త, 1-క్లిక్ వినతిపత్రం, WhatsApp డెస్క్.`,
     openGraph: {
       title: `${mandal.nameEn} Service Desk — Nayi Samakhya`,
       url: `/districts/${district.slug}/${mandal.slug}`,
@@ -45,204 +36,137 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MandalDeskPage({ params }: Props) {
   const { district: dSlug, mandal: mSlug } = await params;
-  const district = getGeoDistrict(dSlug);
-  const mandal = getGeoMandal(dSlug, mSlug);
-  if (!district || !mandal) notFound();
+  const district = TELANGANA_DISTRICTS[dSlug];
+  if (!district) notFound();
 
-  const badge = mandalCoordinatorBadge(district, mandal);
-  const metrics = mandalDeskMetrics(district.slug, mandal.slug);
-  const placeKindTe =
-    mandal.type === "corporation"
-      ? "కార్పొరేషన్"
-      : mandal.type === "municipality"
-        ? "పట్టణం"
-        : "మండలం";
+  const mandal = district.mandals.find((m) => m.slug === mSlug);
+  if (!mandal) notFound();
 
-  const petitionHref = `/representation?dist=${encodeURIComponent(district.slug)}&mandal=${encodeURIComponent(mandal.slug)}`;
-  const waHref = district.whatsappCorridorUrl;
+  const prefilledPetitionUrl = `/representation?district=${encodeURIComponent(district.nameEn)}&mandal=${encodeURIComponent(mandal.nameEn)}&dist=${encodeURIComponent(district.slug)}`;
+  const prefilledCoordinatorUrl = `/coordinator-card?district=${encodeURIComponent(district.nameTe)}&zone=${encodeURIComponent(mandal.nameTe)}&mandal=${encodeURIComponent(mandal.nameTe)}`;
+  const waPrefill = encodeURIComponent(
+    `Hello NayiSamakhya Desk — ${mandal.nameEn}, ${district.nameEn}`,
+  );
 
   return (
-    <div className="min-h-screen bg-[#FBFBFA] text-[#0F172A] antialiased">
-      <header className="border-b border-[#E2E8F0] bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl px-4 py-3">
-          <nav
-            aria-label="Breadcrumb"
-            className="font-sans flex flex-wrap items-center gap-1 text-xs text-slate-500"
+    <div className="min-h-screen bg-[#FBFBFA] px-4 py-10 text-[#0F172A] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
+        <nav
+          aria-label="Breadcrumb"
+          className="font-telugu mb-6 flex flex-wrap items-center gap-2 text-xs text-slate-500"
+        >
+          <Link
+            href="/"
+            className="civic-focus-ring rounded px-0.5 hover:text-[#B45309]"
           >
-            <Link href="/" className="civic-focus-ring rounded px-1 hover:text-[#B45309]">
-              Home
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-            <Link
-              href="/districts"
-              className="civic-focus-ring rounded px-1 hover:text-[#B45309]"
-            >
-              Districts
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-            <Link
-              href={`/districts/${district.slug}`}
-              className="civic-focus-ring rounded px-1 hover:text-[#B45309]"
-            >
-              {district.nameEn}
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-            <span className="font-semibold text-[#0F172A]">{mandal.nameEn}</span>
-          </nav>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
-        <div className="mb-8 max-w-3xl">
-          <span className="civic-eyebrow-pill mb-3">
-            {placeKindTe} Official Service Desk
-          </span>
-          <h1 className="font-display-te text-[1.55rem] font-normal leading-[1.35] text-[#0F172A] sm:text-3xl md:text-[2.15rem] md:leading-[1.3]">
-            {mandal.nameTe} నాయీ సమాఖ్య అధికారిక సేవా డెస్క్
-          </h1>
-          <p className="font-sans mt-2 text-sm font-medium uppercase tracking-widest text-slate-500">
-            {mandal.nameEn} · {district.nameEn} District
-          </p>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* Coordinator badge */}
-          <section
-            aria-labelledby="coord-heading"
-            className="lg:col-span-5 rounded-2xl border border-[#EAD7B5] bg-gradient-to-br from-[#FFFDF9] via-[#FAF6ED] to-[#F5EFE0] p-5 shadow-sm"
+            హోమ్
+          </Link>
+          <span aria-hidden>/</span>
+          <Link
+            href="/districts"
+            className="civic-focus-ring rounded px-0.5 hover:text-[#B45309]"
           >
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <h2
-                id="coord-heading"
-                className="font-telugu text-sm font-bold text-[#1E293B]"
-              >
-                ధృవీకృత సమన్వయకర్త
-              </h2>
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
-                <BadgeCheck className="h-3 w-3" aria-hidden />
-                Verified
-              </span>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-[#B45309] bg-white shadow-[0_0_0_3px_#FEF3C7]">
-                <ShieldCheck className="h-6 w-6 text-[#B45309]" aria-hidden />
-              </span>
-              <div className="min-w-0">
-                <p className="font-telugu text-base font-bold text-[#0F172A]">
-                  {badge.nameTe}
-                </p>
-                <p className="font-sans text-xs text-slate-500">{badge.nameEn}</p>
-                <p className="font-telugu mt-1 text-xs text-[#B45309]">
-                  {badge.roleTe}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-xl border border-[#EAD7B5]/80 bg-white/80 px-3 py-2.5">
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Coordinator ID
-              </p>
-              <p className="font-sans mt-0.5 text-sm font-bold tracking-wide text-[#1E293B]">
-                {badge.id}
-              </p>
-            </div>
-
-            <a
-              href={`tel:+${badge.phoneE164}`}
-              className="civic-focus-ring mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#EAD7B5] bg-white px-4 font-telugu text-sm font-semibold text-[#1E293B] hover:border-[#B45309]/40"
-            >
-              <Phone className="h-4 w-4 text-[#B45309]" aria-hidden />
-              {badge.phoneDisplay}
-            </a>
-          </section>
-
-          {/* Actions + status */}
-          <div className="lg:col-span-7 space-y-4">
-            <section
-              aria-labelledby="actions-heading"
-              className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm"
-            >
-              <h2
-                id="actions-heading"
-                className="font-telugu mb-3 text-sm font-bold text-[#1E293B]"
-              >
-                తక్షణ సేవా చర్యలు
-              </h2>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href={petitionHref}
-                  className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-4 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_24px_rgb(180_83_9_/0.3)]"
-                >
-                  <FileText className="h-4 w-4" aria-hidden />
-                  1-Click వినతిపత్రం
-                </Link>
-                <a
-                  href={waHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-[#EAD7B5] bg-[#FFFDF9] px-4 py-3 font-telugu text-sm font-semibold text-[#1E293B] hover:border-[#B45309]/45"
-                >
-                  <MessageCircle className="h-4 w-4 text-[#B45309]" aria-hidden />
-                  WhatsApp కారిడార్
-                </a>
-              </div>
-              <p className="font-telugu mt-3 text-[11px] leading-relaxed text-slate-500">
-                వినతిపత్రం జిల్లా ({district.nameTe}) &amp; {placeKindTe} (
-                {mandal.nameTe}) తో ప్రీ-ఫిల్ అవుతుంది.
-              </p>
-            </section>
-
-            <section
-              aria-labelledby="status-heading"
-              className="rounded-2xl border border-[#EAD7B5]/80 bg-gradient-to-r from-[#FFFDF9] via-[#FAF6ED] to-[#F5EFE0] p-5"
-            >
-              <h2
-                id="status-heading"
-                className="font-telugu mb-3 flex items-center gap-1.5 text-sm font-bold text-[#1E293B]"
-              >
-                <Sparkles className="h-4 w-4 text-[#B45309]" aria-hidden />
-                స్థానిక స్థితి సూచిక
-              </h2>
-              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <li className="rounded-xl border border-white/80 bg-white/70 px-3 py-3">
-                  <p className="font-sans text-xl font-bold tabular-nums text-[#0F172A]">
-                    {metrics.activeSalons}
-                  </p>
-                  <p className="font-telugu text-[11px] text-slate-600">
-                    Active Salons
-                  </p>
-                </li>
-                <li className="rounded-xl border border-white/80 bg-white/70 px-3 py-3">
-                  <p className="font-sans text-xl font-bold tabular-nums text-[#0F172A]">
-                    {metrics.go23Claims}
-                  </p>
-                  <p className="font-telugu text-[11px] text-slate-600">
-                    G.O. 23 claims
-                  </p>
-                </li>
-                <li className="rounded-xl border border-white/80 bg-white/70 px-3 py-3 sm:col-span-1 col-span-2">
-                  <p className="font-sans text-xl font-bold tabular-nums text-[#0F172A]">
-                    {metrics.openPetitions}
-                  </p>
-                  <p className="font-telugu text-[11px] text-slate-600">
-                    Open petitions
-                  </p>
-                </li>
-              </ul>
-            </section>
-          </div>
-        </div>
-
-        <p className="font-telugu mt-8 text-center text-xs text-slate-500">
+            జిల్లాలు
+          </Link>
+          <span aria-hidden>/</span>
           <Link
             href={`/districts/${district.slug}`}
-            className="civic-focus-ring text-[#B45309] underline-offset-2 hover:underline"
+            className="civic-focus-ring rounded px-0.5 hover:text-[#B45309]"
           >
-            ← {district.nameTe} జిల్లా అన్ని మండలాలు
+            {district.nameTe}
           </Link>
-        </p>
-      </main>
+          <span aria-hidden>/</span>
+          <span className="font-semibold text-slate-900">{mandal.nameTe}</span>
+        </nav>
+
+        <div className="mb-8 rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-sm sm:p-10">
+          <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-6 sm:flex-row">
+            <div>
+              <span className="inline-flex rounded-full bg-[#FEF3C7] px-3 py-1 font-sans text-xs font-semibold uppercase tracking-wider text-[#B45309]">
+                అధికారిక క్షేత్రస్థాయి సేవా డెస్క్
+              </span>
+              <h1 className="font-display-te mt-2 text-3xl font-normal leading-[1.3] text-[#0F172A] sm:text-4xl">
+                {mandal.nameTe}
+              </h1>
+              <p className="font-sans mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">
+                {mandal.nameEn}
+              </p>
+              <p className="font-telugu mt-1 text-sm text-slate-600">
+                {district.nameTe} జిల్లా • {district.zone}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[#EAD7B5] bg-[#FAF6ED] px-4 py-2 text-center">
+              <span className="font-mono text-[10px] uppercase text-slate-500">
+                శాసన వర్గీకరణ
+              </span>
+              <p className="font-sans text-sm font-bold capitalize text-[#B45309]">
+                {mandal.type}
+              </p>
+            </div>
+          </div>
+
+          <div className="my-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="flex flex-col justify-between rounded-2xl border border-[#EAD7B5] bg-[#FFFDF9] p-6">
+              <div>
+                <span className="font-mono text-xs font-semibold text-[#B45309]">
+                  చట్టబద్ధ రక్షణ (G.O. 23)
+                </span>
+                <h3 className="font-display-te mt-1 text-lg font-normal text-[#0F172A]">
+                  {mandal.nameTe} వినతిపత్రం తయారీ
+                </h3>
+                <p className="font-telugu mt-2 text-xs leading-relaxed text-slate-600">
+                  {mandal.nameTe} తాసిల్దార్ / విద్యుత్ ఏడీఈ గారికి 250 యూనిట్ల
+                  ఉచిత విద్యుత్ &amp; కేటగిరీ మార్పు కొరకు ప్రీ-ఫిల్డ్ పత్రం
+                  డౌన్‌లోడ్ చేసుకోండి.
+                </p>
+              </div>
+              <Link
+                href={prefilledPetitionUrl}
+                className="civic-focus-ring mt-6 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#B45309] to-[#D97706] px-4 py-2.5 font-telugu text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-95"
+              >
+                తక్షణ వినతిపత్రం తయారుచేసుకోండి →
+              </Link>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-6">
+              <div>
+                <span className="font-mono text-xs font-semibold text-slate-500">
+                  సమన్వయ వేదిక
+                </span>
+                <h3 className="font-display-te mt-1 text-lg font-normal text-[#0F172A]">
+                  మండల సమన్వయకర్త కార్డు
+                </h3>
+                <p className="font-telugu mt-2 text-xs leading-relaxed text-slate-600">
+                  {mandal.nameTe} పరిధిలో అధికారిక సేవల పర్యవేక్షణ కొరకు మీ
+                  డిజిటల్ సమన్వయకర్త ఐడీ కార్డును పొందండి.
+                </p>
+              </div>
+              <Link
+                href={prefilledCoordinatorUrl}
+                className="civic-focus-ring mt-6 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[#1E293B] px-4 py-2.5 font-telugu text-xs font-semibold text-white transition-colors hover:bg-[#0F172A]"
+              >
+                సమన్వయకర్త కార్డు తీసుకోండి →
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-between gap-3 rounded-2xl bg-[#F1F5F9] p-4 sm:flex-row">
+            <span className="font-telugu text-xs font-medium text-slate-700">
+              {mandal.nameTe} స్థానిక సమస్యల కోసం మండల కోఆర్డినేటర్ సహాయం
+              కావాలా?
+            </span>
+            <a
+              href={`https://wa.me/919032654111?text=${waPrefill}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="civic-focus-ring font-telugu text-xs font-bold text-[#15803D] hover:underline"
+            >
+              డైరెక్ట్ వాట్సాప్ డెస్క్ చాట్ (+91 9032654111)
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
