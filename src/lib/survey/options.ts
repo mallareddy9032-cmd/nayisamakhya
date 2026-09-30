@@ -1,7 +1,10 @@
 import type {
   AreaType,
   Go23Status,
+  MemberEducation,
+  MemberOccupation,
   Profession,
+  RelationType,
   ShopTenancy,
   SubCaste,
 } from "@/types/survey";
@@ -114,11 +117,65 @@ export const DESIRED_ACTION_OPTIONS: {
   },
 ];
 
+export const RELATION_OPTIONS: { id: RelationType; label: Bilingual }[] = [
+  { id: "self", label: { te: "స్వయం · Self", en: "Self" } },
+  { id: "spouse", label: { te: "జీవిత భాగస్వామి", en: "Spouse" } },
+  { id: "son", label: { te: "కుమారుడు", en: "Son" } },
+  { id: "daughter", label: { te: "కుమార్తె", en: "Daughter" } },
+  { id: "father", label: { te: "తండ్రి", en: "Father" } },
+  { id: "mother", label: { te: "తల్లి", en: "Mother" } },
+  { id: "other", label: { te: "ఇతరం", en: "Other" } },
+];
+
+export const MEMBER_GENDER_OPTIONS: {
+  id: "male" | "female" | "other";
+  label: Bilingual;
+}[] = [
+  { id: "male", label: { te: "పురుషుడు", en: "Male" } },
+  { id: "female", label: { te: "స్త్రీ", en: "Female" } },
+  { id: "other", label: { te: "ఇతరం", en: "Other" } },
+];
+
+export const MEMBER_MARITAL_OPTIONS: {
+  id: "unmarried" | "married" | "divorced" | "widowed";
+  label: Bilingual;
+}[] = [
+  { id: "unmarried", label: { te: "అవివాహిత", en: "Unmarried" } },
+  { id: "married", label: { te: "వివాహిత", en: "Married" } },
+  { id: "divorced", label: { te: "విడాకులు", en: "Divorced" } },
+  { id: "widowed", label: { te: "వితంతువు", en: "Widowed" } },
+];
+
+export const MEMBER_EDUCATION_OPTIONS: {
+  id: MemberEducation;
+  label: Bilingual;
+}[] = [
+  { id: "school", label: { te: "పాఠశాల", en: "School" } },
+  { id: "inter_diploma", label: { te: "ఇంటర్ / డిప్లొమా", en: "Inter / Diploma" } },
+  { id: "graduate", label: { te: "గ్రాడ్యుయేట్", en: "Graduate" } },
+  { id: "post_graduate", label: { te: "పోస్ట్ గ్రాడ్యుయేట్", en: "Post Graduate" } },
+  { id: "none", label: { te: "లేదు", en: "None" } },
+];
+
+export const MEMBER_OCCUPATION_OPTIONS: {
+  id: MemberOccupation;
+  label: Bilingual;
+}[] = [
+  { id: "student", label: { te: "విద్యార్థి", en: "Student" } },
+  { id: "hair_stylist", label: { te: "హెయిర్ స్టైలిస్ట్", en: "Hair Stylist" } },
+  { id: "private_job", label: { te: "ప్రైవేట్ ఉద్యోగం", en: "Private Job" } },
+  { id: "govt_job", label: { te: "ప్రభుత్వ ఉద్యోగం", en: "Govt Job" } },
+  { id: "homemaker", label: { te: "గృహిణి", en: "Homemaker" } },
+  { id: "unemployed", label: { te: "నిరుద్యోగి", en: "Unemployed" } },
+  { id: "other", label: { te: "ఇతరం", en: "Other" } },
+];
+
 export const SURVEY_STEPS: { id: number; te: string; en: string }[] = [
   { id: 1, te: "గుర్తింపు & స్థానం", en: "Identity & Location" },
-  { id: 2, te: "జీవనోపాధి", en: "Livelihood" },
-  { id: 3, te: "సంక్షేమం & G.O. 23", en: "Welfare & G.O. 23" },
-  { id: 4, te: "ఫిర్యాదు & సమర్పణ", en: "Grievance & Submit" },
+  { id: 2, te: "కుటుంబ సభ్యులు", en: "Family Members" },
+  { id: 3, te: "జీవనోపాధి", en: "Livelihood" },
+  { id: 4, te: "సంక్షేమం & G.O. 23", en: "Welfare & G.O. 23" },
+  { id: 5, te: "ఫిర్యాదు & సమర్పణ", en: "Grievance & Submit" },
 ];
 
 export function needsMonthlyRent(tenancy: ShopTenancy): boolean {

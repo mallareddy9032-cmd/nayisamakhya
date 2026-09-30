@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/client";
+import {
+  validateFamilyMembers,
+  withDerivedMatrimonial,
+} from "@/lib/survey/familyMembers";
 import type { SurveySubmission } from "@/types/survey";
 
 export const runtime = "nodejs";
@@ -62,6 +66,8 @@ function validateStatewide(s: SurveySubmission): string | null {
   if (!Array.isArray(s.welfareReceived) || s.welfareReceived.length === 0) {
     return "Select at least one welfare option";
   }
+  const familyErr = validateFamilyMembers(s.familyMembers || []);
+  if (familyErr) return familyErr;
   return null;
 }
 
@@ -110,7 +116,10 @@ export async function POST(req: Request) {
 
     // ── Statewide v1 schema ──────────────────────────────────────────────
     if (isStatewide(body)) {
-      const submission = body.submission;
+      const submission = withDerivedMatrimonial({
+        ...body.submission,
+        familyMembers: body.submission.familyMembers || [],
+      });
       const invalid = validateStatewide(submission);
       if (invalid) {
         return NextResponse.json(
@@ -128,6 +137,7 @@ export async function POST(req: Request) {
         schema: "statewide_v1",
         ...submission,
         phone,
+        familyMembers: submission.familyMembers,
         submittedAt: new Date().toISOString(),
       };
 

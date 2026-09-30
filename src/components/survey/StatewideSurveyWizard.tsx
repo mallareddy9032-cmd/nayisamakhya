@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
   Loader2,
   AlertTriangle,
+  Plus,
   RotateCcw,
   Send,
 } from "lucide-react";
+import { FamilyMemberCard } from "@/components/survey/FamilyMemberCard";
 import { SurveyProgress } from "@/components/survey/SurveyProgress";
 import {
   formatSubUnitLabel,
@@ -15,6 +17,12 @@ import {
   surveyEntitiesForDistrict,
   surveySubUnits,
 } from "@/lib/survey/geoCascade";
+import {
+  hasMatrimonialInFamily,
+  validateFamilyMembers,
+  withDerivedMatrimonial,
+  deriveMatrimonialFromFamily,
+} from "@/lib/survey/familyMembers";
 import {
   AREA_TYPE_OPTIONS,
   DESIRED_ACTION_OPTIONS,
@@ -28,8 +36,8 @@ import {
 } from "@/lib/survey/options";
 import type {
   AreaType,
+  FamilyMember,
   Go23Status,
-  MatrimonialProfile,
   Profession,
   ShopTenancy,
   SubCaste,
@@ -51,20 +59,17 @@ function uid(): string {
   return `sv-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function emptyMatrimonial(): MatrimonialProfile {
+function emptyMember(relation: FamilyMember["relation"] = "other"): FamilyMember {
   return {
-    candidateName: "",
-    gender: "groom",
-    dob: "",
-    height: "",
+    id: uid(),
+    fullName: "",
+    relation,
+    gender: "male",
+    age: "",
     maritalStatus: "unmarried",
-    gothram: "",
-    education: "",
-    occupation: "",
-    workingLocation: "",
-    annualIncome: "",
-    guardianPhone: "",
-    verifiedOnly: true,
+    education: "school",
+    occupation: "other",
+    isMatrimonialCandidate: false,
   };
 }
 
@@ -78,8 +83,7 @@ type FormState = {
   wardOrPanchayat: string;
   totalFamilyMembers: string;
   studentsCount: string;
-  hasMatrimonialCandidate: boolean;
-  matrimonialData: MatrimonialProfile;
+  familyMembers: FamilyMember[];
   primaryProfession: Profession | "";
   shopTenancy: ShopTenancy | "";
   monthlyRent: string;
@@ -103,8 +107,7 @@ function initialForm(): FormState {
     wardOrPanchayat: "",
     totalFamilyMembers: "1",
     studentsCount: "0",
-    hasMatrimonialCandidate: false,
-    matrimonialData: emptyMatrimonial(),
+    familyMembers: [emptyMember("self")],
     primaryProfession: "",
     shopTenancy: "",
     monthlyRent: "",
@@ -146,20 +149,87 @@ export function StatewideSurveyWizard() {
   );
 
   const subUnits = useMemo(
-    () =>
-      surveySubUnits(form.districtSlug, form.mandalSlug, form.areaType),
+    () => surveySubUnits(form.districtSlug, form.mandalSlug, form.areaType),
     [form.districtSlug, form.mandalSlug, form.areaType],
   );
+
+  // Seed self member name from household head when entering roster step
+  useEffect(() => {
+    if (step !== 2) return;
+    setForm((prev) => {
+      const members = [...prev.familyMembers];
+      const selfIdx = members.findIndex((m) => m.relation === "self");
+      if (selfIdx < 0) return prev;
+      if (members[selfIdx].fullName.trim()) return prev;
+      if (!prev.fullName.trim()) return prev;
+      members[selfIdx] = { ...members[selfIdx], fullName: prev.fullName.trim() };
+      return { ...prev, familyMembers: members };
+    });
+  }, [step]);
 
   function patch(partial: Partial<FormState>) {
     setForm((prev) => ({ ...prev, ...partial }));
   }
 
-  function patchMatrimonial(partial: Partial<MatrimonialProfile>) {
+  function updateMember(id: string, next: FamilyMember) {
     setForm((prev) => ({
       ...prev,
-      matrimonialData: { ...prev.matrimonialData, ...partial },
+      familyMembers: prev.familyMembers.map((m) => (m.id === id ? next : m)),
     }));
+  }
+
+  function removeMember(id: string) {
+    setForm((prev) => {
+      if (prev.familyMembers.length <= 1) return prev;
+      const next = prev.familyMembers.filter((m) => m.id !== id);
+      // Ensure at least one self remains
+      if (!next.some((m) => m.relation === "self") && next[0]) {
+        next[0] = { ...next[0], relation: "self" };
+      }
+      return {
+        ...prev,
+        familyMembers: next,
+        totalFamilyMembers: String(next.length),
+      };
+    });
+  }
+
+  function addMember() {
+    setForm((prev) => {
+      const next = [...prev.familyMembers, emptyMember("other")];
+      return {
+        ...prev,
+        familyMembers: next,
+        totalFamilyMembers: String(next.length),
+      };
+    });
+  }
+
+  function syncRosterToCount() {
+    const target = Math.max(1, Math.min(40, Number(form.totalFamilyMembers) || 1));
+    setForm((prev) => {
+      let members = [...prev.familyMembers];
+      while (members.length < target) {
+        members.push(emptyMember(members.length === 0 ? "self" : "other"));
+      }
+      if (members.length > target) {
+        // Keep self; trim from end preferring non-self
+        const self = members.find((m) => m.relation === "self");
+        const others = members.filter((m) => m.relation !== "self");
+        const keptOthers = others.slice(0, Math.max(0, target - 1));
+        members = self
+          ? [self, ...keptOthers].slice(0, target)
+          : members.slice(0, target);
+        if (members[0] && members[0].relation !== "self") {
+          members[0] = { ...members[0], relation: "self" };
+        }
+      }
+      return {
+        ...prev,
+        familyMembers: members,
+        totalFamilyMembers: String(members.length),
+      };
+    });
   }
 
   function toggleWelfare(id: string) {
@@ -171,22 +241,6 @@ export function StatewideSurveyWizard() {
       else next = next.filter((x) => x !== "none");
       return { ...prev, welfareReceived: next };
     });
-  }
-
-  function matrimonialValid(): boolean {
-    if (!form.hasMatrimonialCandidate) return true;
-    const m = form.matrimonialData;
-    const phoneOk = /^\d{10}$/.test(m.guardianPhone.replace(/\D/g, ""));
-    return Boolean(
-      m.candidateName.trim() &&
-        m.dob &&
-        m.height.trim() &&
-        m.gothram.trim() &&
-        m.education.trim() &&
-        m.occupation.trim() &&
-        m.workingLocation.trim() &&
-        phoneOk,
-    );
   }
 
   function canStep1(): boolean {
@@ -204,12 +258,15 @@ export function StatewideSurveyWizard() {
         family >= 1 &&
         Number.isFinite(students) &&
         students >= 0 &&
-        students <= family &&
-        matrimonialValid(),
+        students <= family,
     );
   }
 
   function canStep2(): boolean {
+    return validateFamilyMembers(form.familyMembers) === null;
+  }
+
+  function canStep3(): boolean {
     if (!form.primaryProfession || !form.shopTenancy || !form.tradeLicenseStatus) {
       return false;
     }
@@ -220,11 +277,11 @@ export function StatewideSurveyWizard() {
     return true;
   }
 
-  function canStep3(): boolean {
+  function canStep4(): boolean {
     return Boolean(form.go23Status && form.welfareReceived.length > 0);
   }
 
-  function canStep4(): boolean {
+  function canStep5(): boolean {
     return Boolean(
       form.immediateGrievance.trim().length >= 8 &&
         form.desiredAction &&
@@ -236,7 +293,21 @@ export function StatewideSurveyWizard() {
     const id = uid();
     const timestamp = new Date().toISOString();
     const rentNeeded = needsMonthlyRent(form.shopTenancy as ShopTenancy);
-    return {
+    const familyMembers: FamilyMember[] = form.familyMembers.map((m) => ({
+      ...m,
+      fullName: m.fullName.trim(),
+      age: m.age === "" ? "" : Number(m.age),
+      height: m.isMatrimonialCandidate ? (m.height || "").trim() : undefined,
+      gothram: m.isMatrimonialCandidate ? (m.gothram || "").trim() : undefined,
+      workingLocation: m.isMatrimonialCandidate
+        ? (m.workingLocation || "").trim() || undefined
+        : undefined,
+      guardianPhone: m.isMatrimonialCandidate
+        ? (m.guardianPhone || "").replace(/\D/g, "")
+        : undefined,
+    }));
+
+    const base: SurveySubmission = {
       id,
       timestamp,
       fullName: form.fullName.trim(),
@@ -246,21 +317,16 @@ export function StatewideSurveyWizard() {
       areaType: form.areaType,
       mandalSlug: form.mandalSlug,
       wardOrPanchayat: form.wardOrPanchayat.trim(),
-      totalFamilyMembers: Number(form.totalFamilyMembers),
+      totalFamilyMembers: familyMembers.length,
       studentsCount: Number(form.studentsCount),
-      hasMatrimonialCandidate: form.hasMatrimonialCandidate,
-      matrimonialData: form.hasMatrimonialCandidate
-        ? {
-            ...form.matrimonialData,
-            candidateName: form.matrimonialData.candidateName.trim(),
-            guardianPhone: form.matrimonialData.guardianPhone.replace(/\D/g, ""),
-            annualIncome: form.matrimonialData.annualIncome?.trim() || undefined,
-          }
-        : undefined,
+      familyMembers,
+      hasMatrimonialCandidate: hasMatrimonialInFamily(familyMembers),
+      matrimonialData: deriveMatrimonialFromFamily(familyMembers),
       primaryProfession: form.primaryProfession as Profession,
       shopTenancy: form.shopTenancy as ShopTenancy,
       monthlyRent: rentNeeded ? Number(form.monthlyRent) : undefined,
-      tradeLicenseStatus: form.tradeLicenseStatus as SurveySubmission["tradeLicenseStatus"],
+      tradeLicenseStatus:
+        form.tradeLicenseStatus as SurveySubmission["tradeLicenseStatus"],
       uscno: form.uscno.trim() || undefined,
       go23Status: form.go23Status as Go23Status,
       welfareReceived: form.welfareReceived,
@@ -268,10 +334,11 @@ export function StatewideSurveyWizard() {
       desiredAction: form.desiredAction as SurveySubmission["desiredAction"],
       declarationAccepted: form.declarationAccepted,
     };
+    return withDerivedMatrimonial(base);
   }
 
   async function onSubmit() {
-    if (!canStep4() || submitting) return;
+    if (!canStep5() || submitting) return;
     setSubmitting(true);
     setError("");
     const submission = buildSubmission();
@@ -283,7 +350,6 @@ export function StatewideSurveyWizard() {
         body: JSON.stringify({
           schema: "statewide_v1",
           submission,
-          // Legacy field aliases for existing surveys table mapping
           districtSlug: submission.districtSlug,
           mandalSlug: submission.mandalSlug,
           gramPanchayat: submission.wardOrPanchayat,
@@ -310,7 +376,6 @@ export function StatewideSurveyWizard() {
         return;
       }
 
-      // Server unavailable — local mock fallback
       persistLocal(submission);
       const localRef = `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
       setReferenceId(data.referenceId || localRef);
@@ -359,7 +424,8 @@ export function StatewideSurveyWizard() {
           {mockFallback ? (
             <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs text-amber-900">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-              Saved locally as mock fallback (Supabase unavailable). Your device holds a copy until the desk syncs.
+              Saved locally as mock fallback (Supabase unavailable). Your device
+              holds a copy until the desk syncs.
             </p>
           ) : null}
 
@@ -386,16 +452,23 @@ export function StatewideSurveyWizard() {
     );
   }
 
+  const familyHint =
+    Number(form.totalFamilyMembers) !== form.familyMembers.length
+      ? `Count says ${form.totalFamilyMembers}; roster has ${form.familyMembers.length}`
+      : null;
+
   return (
     <div className="space-y-4">
-      <SurveyProgress step={step} />
+      <SurveyProgress step={step} total={5} />
 
       {step === 1 ? (
         <form
           className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm"
           onSubmit={(e) => {
             e.preventDefault();
-            if (canStep1()) setStep(2);
+            if (!canStep1()) return;
+            syncRosterToCount();
+            setStep(2);
           }}
         >
           <div>
@@ -542,11 +615,6 @@ export function StatewideSurveyWizard() {
                 </option>
               ))}
             </select>
-            {form.districtSlug && entities.length === 0 ? (
-              <p className="mt-1.5 text-xs text-amber-800">
-                No entities listed for this district yet — try the other area type.
-              </p>
-            ) : null}
           </label>
 
           <label className="block">
@@ -613,173 +681,95 @@ export function StatewideSurveyWizard() {
             </label>
           </div>
 
-          <label className="flex min-h-[48px] cursor-pointer items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#FBFBFA] px-4">
-            <input
-              type="checkbox"
-              checked={form.hasMatrimonialCandidate}
-              onChange={(e) =>
-                patch({
-                  hasMatrimonialCandidate: e.target.checked,
-                  matrimonialData: e.target.checked
-                    ? form.matrimonialData
-                    : emptyMatrimonial(),
-                })
-              }
-              className="h-4 w-4 accent-[#B45309]"
-            />
-            <span className="font-telugu text-sm text-[#0F172A]">
-              వివాహ అభ్యర్థి ఉన్నారు · Matrimonial candidate in household
-            </span>
-          </label>
-
-          {form.hasMatrimonialCandidate ? (
-            <div className="space-y-3 rounded-xl border border-[#B45309]/25 bg-[#B45309]/5 p-4">
-              <p className="font-telugu text-xs font-semibold text-[#B45309]">
-                వివాహ ప్రొఫైల్ · Matrimonial profile
-              </p>
-              <input
-                required
-                value={form.matrimonialData.candidateName}
-                onChange={(e) =>
-                  patchMatrimonial({ candidateName: e.target.value })
-                }
-                placeholder="అభ్యర్థి పేరు · Candidate name *"
-                className={`${inputClass} font-telugu`}
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={form.matrimonialData.gender}
-                  onChange={(e) =>
-                    patchMatrimonial({
-                      gender: e.target.value as MatrimonialProfile["gender"],
-                    })
-                  }
-                  className={inputClass}
-                >
-                  <option value="groom">వరుడు · Groom</option>
-                  <option value="bride">వధువు · Bride</option>
-                </select>
-                <select
-                  value={form.matrimonialData.maritalStatus}
-                  onChange={(e) =>
-                    patchMatrimonial({
-                      maritalStatus: e.target
-                        .value as MatrimonialProfile["maritalStatus"],
-                    })
-                  }
-                  className={inputClass}
-                >
-                  <option value="unmarried">అవివాహిత · Unmarried</option>
-                  <option value="divorced">విడాకులు · Divorced</option>
-                  <option value="widowed">వితంతువు · Widowed</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  required
-                  type="date"
-                  value={form.matrimonialData.dob}
-                  onChange={(e) => patchMatrimonial({ dob: e.target.value })}
-                  className={inputClass}
-                />
-                <input
-                  required
-                  value={form.matrimonialData.height}
-                  onChange={(e) => patchMatrimonial({ height: e.target.value })}
-                  placeholder="ఎత్తు · Height *"
-                  className={inputClass}
-                />
-              </div>
-              <input
-                required
-                value={form.matrimonialData.gothram}
-                onChange={(e) => patchMatrimonial({ gothram: e.target.value })}
-                placeholder="గోత్రం · Gothram *"
-                className={`${inputClass} font-telugu`}
-              />
-              <input
-                required
-                value={form.matrimonialData.education}
-                onChange={(e) =>
-                  patchMatrimonial({ education: e.target.value })
-                }
-                placeholder="విద్య · Education *"
-                className={`${inputClass} font-telugu`}
-              />
-              <input
-                required
-                value={form.matrimonialData.occupation}
-                onChange={(e) =>
-                  patchMatrimonial({ occupation: e.target.value })
-                }
-                placeholder="వృత్తి · Occupation *"
-                className={`${inputClass} font-telugu`}
-              />
-              <input
-                required
-                value={form.matrimonialData.workingLocation}
-                onChange={(e) =>
-                  patchMatrimonial({ workingLocation: e.target.value })
-                }
-                placeholder="పని స్థలం · Working location *"
-                className={`${inputClass} font-telugu`}
-              />
-              <input
-                value={form.matrimonialData.annualIncome || ""}
-                onChange={(e) =>
-                  patchMatrimonial({ annualIncome: e.target.value })
-                }
-                placeholder="వార్షిక ఆదాయం (ఐచ్ఛికం)"
-                className={inputClass}
-              />
-              <input
-                required
-                type="tel"
-                inputMode="numeric"
-                maxLength={10}
-                value={form.matrimonialData.guardianPhone}
-                onChange={(e) =>
-                  patchMatrimonial({
-                    guardianPhone: e.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 10),
-                  })
-                }
-                placeholder="సంరక్షక ఫోన్ · Guardian phone *"
-                className={inputClass}
-              />
-              <label className="flex min-h-[44px] items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={form.matrimonialData.verifiedOnly}
-                  onChange={(e) =>
-                    patchMatrimonial({ verifiedOnly: e.target.checked })
-                  }
-                  className="h-4 w-4 accent-[#B45309]"
-                />
-                <span className="font-telugu text-sm text-[#0F172A]">
-                  ధృవీకరించిన ప్రొఫైల్‌లు మాత్రమే · Verified matches only
-                </span>
-              </label>
-            </div>
-          ) : null}
-
           <button
             type="submit"
             disabled={!canStep1()}
             className="tap inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#B45309] px-5 text-sm font-semibold text-white hover:bg-[#92400E] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            తదుపరి → Livelihood
+            తదుపరి → Family
           </button>
         </form>
       ) : null}
 
       {step === 2 ? (
+        <div className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+          <div>
+            <h2 className="font-display-te text-xl font-normal leading-snug text-[#0F172A]">
+              కుటుంబ సభ్యులు
+            </h2>
+            <p className="mt-0.5 text-xs text-[#64748B]">
+              Family roster · {form.familyMembers.length} member
+              {form.familyMembers.length === 1 ? "" : "s"}
+            </p>
+          </div>
+
+          {familyHint ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              {familyHint}. Use Add / Remove to align, or continue with the
+              roster as source of truth.
+            </p>
+          ) : null}
+
+          <div className="space-y-3">
+            {form.familyMembers.map((member, idx) => (
+              <FamilyMemberCard
+                key={member.id}
+                member={member}
+                index={idx}
+                canRemove={form.familyMembers.length > 1}
+                onChange={(next) => updateMember(member.id, next)}
+                onRemove={() => removeMember(member.id)}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={addMember}
+            className="tap inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border-2 border-dashed border-[#B45309]/40 bg-[#B45309]/5 font-telugu text-sm font-bold text-[#B45309] hover:bg-[#B45309]/10"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+            + సభ్యుడిని జతచేయండి · Add member
+          </button>
+
+          {validateFamilyMembers(form.familyMembers) ? (
+            <p className="text-xs text-[#64748B]">
+              {validateFamilyMembers(form.familyMembers)}
+            </p>
+          ) : null}
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="tap inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-[#E2E8F0] bg-white font-telugu text-sm font-semibold text-[#0F172A]"
+            >
+              ← వెనుకకు
+            </button>
+            <button
+              type="button"
+              disabled={!canStep2()}
+              onClick={() => {
+                if (!canStep2()) return;
+                patch({
+                  totalFamilyMembers: String(form.familyMembers.length),
+                });
+                setStep(3);
+              }}
+              className="tap inline-flex min-h-[48px] flex-[1.4] items-center justify-center rounded-full bg-[#B45309] px-5 text-sm font-semibold text-white disabled:opacity-40"
+            >
+              తదుపరి → Livelihood
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {step === 3 ? (
         <form
           className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm"
           onSubmit={(e) => {
             e.preventDefault();
-            if (canStep2()) setStep(3);
+            if (canStep3()) setStep(4);
           }}
         >
           <div>
@@ -869,14 +859,14 @@ export function StatewideSurveyWizard() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setStep(1)}
+              onClick={() => setStep(2)}
               className="tap inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-[#E2E8F0] bg-white font-telugu text-sm font-semibold text-[#0F172A]"
             >
               ← వెనుకకు
             </button>
             <button
               type="submit"
-              disabled={!canStep2()}
+              disabled={!canStep3()}
               className="tap inline-flex min-h-[48px] flex-[1.4] items-center justify-center rounded-full bg-[#B45309] px-5 text-sm font-semibold text-white disabled:opacity-40"
             >
               తదుపరి → Welfare
@@ -885,12 +875,12 @@ export function StatewideSurveyWizard() {
         </form>
       ) : null}
 
-      {step === 3 ? (
+      {step === 4 ? (
         <form
           className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm"
           onSubmit={(e) => {
             e.preventDefault();
-            if (canStep3()) setStep(4);
+            if (canStep4()) setStep(5);
           }}
         >
           <div>
@@ -963,14 +953,14 @@ export function StatewideSurveyWizard() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setStep(2)}
+              onClick={() => setStep(3)}
               className="tap inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-[#E2E8F0] bg-white font-telugu text-sm font-semibold text-[#0F172A]"
             >
               ← వెనుకకు
             </button>
             <button
               type="submit"
-              disabled={!canStep3()}
+              disabled={!canStep4()}
               className="tap inline-flex min-h-[48px] flex-[1.4] items-center justify-center rounded-full bg-[#B45309] px-5 text-sm font-semibold text-white disabled:opacity-40"
             >
               తదుపరి → Submit
@@ -979,7 +969,7 @@ export function StatewideSurveyWizard() {
         </form>
       ) : null}
 
-      {step === 4 ? (
+      {step === 5 ? (
         <div className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
           <div>
             <h2 className="font-display-te text-xl font-normal leading-snug text-[#0F172A]">
@@ -1005,7 +995,9 @@ export function StatewideSurveyWizard() {
           </label>
 
           <fieldset>
-            <legend className={labelClass}>కోరుకున్న చర్య · Desired action *</legend>
+            <legend className={labelClass}>
+              కోరుకున్న చర్య · Desired action *
+            </legend>
             <div className="space-y-2">
               {DESIRED_ACTION_OPTIONS.map((opt) => (
                 <label
@@ -1062,7 +1054,7 @@ export function StatewideSurveyWizard() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setStep(3)}
+              onClick={() => setStep(4)}
               disabled={submitting}
               className="tap inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-[#E2E8F0] bg-white font-telugu text-sm font-semibold text-[#0F172A] disabled:opacity-40"
             >
@@ -1071,7 +1063,7 @@ export function StatewideSurveyWizard() {
             <button
               type="button"
               onClick={onSubmit}
-              disabled={!canStep4() || submitting}
+              disabled={!canStep5() || submitting}
               className="tap inline-flex min-h-[48px] flex-[1.6] items-center justify-center gap-2 rounded-full bg-[#B45309] px-5 text-sm font-semibold text-white disabled:opacity-40"
             >
               {submitting ? (

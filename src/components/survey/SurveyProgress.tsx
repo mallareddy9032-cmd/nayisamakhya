@@ -7,7 +7,7 @@ type Props = {
   total?: number;
 };
 
-export function SurveyProgress({ step, total = 4 }: Props) {
+export function SurveyProgress({ step, total = 5 }: Props) {
   const pct = Math.min(100, Math.round((step / total) * 100));
   const meta = SURVEY_STEPS.find((s) => s.id === step);
 

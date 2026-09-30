@@ -29,6 +29,48 @@ export type Go23Status =
   | "not_applied"
   | "na";
 
+export type RelationType =
+  | "self"
+  | "spouse"
+  | "son"
+  | "daughter"
+  | "father"
+  | "mother"
+  | "other";
+
+export type MemberEducation =
+  | "school"
+  | "inter_diploma"
+  | "graduate"
+  | "post_graduate"
+  | "none";
+
+export type MemberOccupation =
+  | "student"
+  | "hair_stylist"
+  | "private_job"
+  | "govt_job"
+  | "homemaker"
+  | "unemployed"
+  | "other";
+
+export interface FamilyMember {
+  id: string;
+  fullName: string;
+  relation: RelationType;
+  gender: "male" | "female" | "other";
+  age: number | "";
+  maritalStatus: "unmarried" | "married" | "divorced" | "widowed";
+  education: MemberEducation;
+  occupation: MemberOccupation;
+  isMatrimonialCandidate: boolean;
+  height?: string;
+  gothram?: string;
+  workingLocation?: string;
+  guardianPhone?: string;
+}
+
+/** Legacy single-candidate shape — derived from familyMembers for API compat. */
 export interface MatrimonialProfile {
   candidateName: string;
   gender: "groom" | "bride";
@@ -56,7 +98,11 @@ export interface SurveySubmission {
   wardOrPanchayat: string;
   totalFamilyMembers: number;
   studentsCount: number;
+  /** Source of truth for household roster + matrimonial flags. */
+  familyMembers: FamilyMember[];
+  /** Derived from familyMembers — kept for backward-compatible readers. */
   hasMatrimonialCandidate: boolean;
+  /** Derived from first matrimonial family member when present. */
   matrimonialData?: MatrimonialProfile;
   primaryProfession: Profession;
   shopTenancy: ShopTenancy;
