@@ -6,6 +6,7 @@ import {
   FileText,
   MessageCircle,
 } from "lucide-react";
+import { CivicEngineMap } from "@/components/CivicEngineMap";
 import { CivicStalwarts } from "@/components/CivicStalwarts";
 import { CivicTimeline } from "@/components/CivicTimeline";
 import { CivicMetricsTicker } from "@/components/home/CivicMetricsTicker";
@@ -94,6 +95,8 @@ export default function HomePage() {
       </section>
 
       <CivicMetricsTicker />
+
+      <CivicEngineMap />
 
       <HomeJumpNav />
 
