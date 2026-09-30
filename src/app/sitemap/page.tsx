@@ -62,6 +62,13 @@ export default function SitemapPage() {
                 {te ? "చారిత్రక పరిణామ క్రమం" : "Historical trajectory"}
               </Link>
             </li>
+            <li>
+              <Link href="/announce" className="hover:text-[#C2410C]">
+                {te
+                  ? "వాట్సాప్ మొబిలైజేషన్ డిస్పాచర్"
+                  : "WhatsApp mobilization dispatcher"}
+              </Link>
+            </li>
           </ul>
         </div>
 

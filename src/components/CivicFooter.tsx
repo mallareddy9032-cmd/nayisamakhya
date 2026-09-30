@@ -141,7 +141,9 @@ export function CivicFooter() {
                 href="/announce"
                 className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
-                <span>{"WhatsApp \u0c38\u0c02\u0c26\u0c47\u0c36 \u0c15\u0c3f\u0c1f\u0c4d"}</span>
+                <span>
+                  {"WhatsApp \u0c2e\u0c4a\u0c2c\u0c3f\u0c32\u0c48\u0c1c\u0c47\u0c37\u0c28\u0c4d"}
+                </span>
                 <span className="font-sans text-[10px] text-slate-400">/announce</span>
               </Link>
             </li>
