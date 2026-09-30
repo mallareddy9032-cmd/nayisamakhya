@@ -53,7 +53,7 @@ export function ServiceActionCards() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-7 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            ప్రజా సేవా కేంద్రం • 3-CLICK PUBLIC SERVICES
+            ప్రజా సేవలు • 3-CLICK DESK
           </span>
           <h2
             id="three-click-services"

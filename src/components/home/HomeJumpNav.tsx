@@ -15,8 +15,10 @@ export function HomeJumpNav() {
       aria-label="On this page"
       className="mx-auto max-w-6xl px-4 pb-2 pt-4 sm:pt-5"
     >
-      <p className="mb-2 text-center font-sans text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-        On this page • ఈ పేజీలో
+      <p className="mb-2 text-center">
+        <span className="civic-eyebrow-pill">
+          ఈ పేజీలో ముఖ్య విభాగాలు • Quick Nav
+        </span>
       </p>
       <ul className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center sm:overflow-visible">
         {JUMPS.map((j) => (

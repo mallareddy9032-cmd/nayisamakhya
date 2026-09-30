@@ -110,18 +110,18 @@ const ENGINE_BADGES = [
   "Legal cell docketing",
 ] as const;
 
-/** Desktop bezier midpoints — viewBox 1000×420, left col ~140, center ~500, right ~860 */
+/** Desktop bezier midpoints — viewBox 1000×420, left ~220 → center 500 → right ~780 */
 const IN_PATHS: Record<string, string> = {
-  vocation: "M 220 72 C 320 72, 380 160, 430 210",
-  youth: "M 220 162 C 320 162, 380 190, 430 210",
-  arts: "M 220 252 C 320 252, 380 230, 430 210",
-  districts: "M 220 342 C 320 342, 380 260, 430 210",
+  vocation: "M 220 72 C 330 72, 400 150, 470 210",
+  youth: "M 220 162 C 330 162, 410 190, 470 210",
+  arts: "M 220 252 C 330 252, 410 230, 470 210",
+  districts: "M 220 342 C 330 342, 400 270, 470 210",
 };
 
 const OUT_PATHS: Record<OutputId, string> = {
-  petition: "M 570 210 C 640 210, 700 90, 780 90",
-  card: "M 570 210 C 640 210, 700 210, 780 210",
-  whatsapp: "M 570 210 C 640 210, 700 330, 780 330",
+  petition: "M 530 210 C 620 210, 700 90, 780 90",
+  card: "M 530 210 C 620 210, 700 210, 780 210",
+  whatsapp: "M 530 210 C 620 210, 700 330, 780 330",
 };
 
 function TelemetryRing({ active }: { active: boolean }) {
@@ -353,7 +353,7 @@ function DesktopMap({
         <div className="px-1">
           <EngineCard lit={activeId != null} />
           {active ? (
-            <div className="mt-3 space-y-2 text-center">
+            <div className="mt-3 flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center">
               <Link
                 href={active.ctaHref}
                 className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:brightness-110"
@@ -362,15 +362,13 @@ function DesktopMap({
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
               </Link>
               {active.id === "districts" ? (
-                <div>
-                  <Link
-                    href="/announce"
-                    className="civic-focus-ring inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg border border-[#1E293B]/12 bg-white px-3 py-2 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
-                  >
-                    మొబిలైజేషన్ అనౌన్స్
-                    <ArrowRight className="h-3 w-3" aria-hidden />
-                  </Link>
-                </div>
+                <Link
+                  href="/announce"
+                  className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#1E293B]/12 bg-white px-4 py-2.5 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
+                >
+                  మొబిలైజేషన్ అనౌన్స్
+                  <ArrowRight className="h-3 w-3" aria-hidden />
+                </Link>
               ) : null}
             </div>
           ) : (
@@ -613,23 +611,25 @@ function MobileJourney({
           })}
         </ul>
 
-        <Link
-          href={active.ctaHref}
-          className="civic-focus-ring mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)]"
-        >
-          {active.ctaLabel}
-          <ArrowRight className="h-4 w-4" aria-hidden />
-        </Link>
-
-        {active.id === "districts" ? (
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/announce"
-            className="civic-focus-ring mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#1E293B]/15 bg-[#FBFBFA] px-4 py-2.5 font-telugu text-xs font-bold text-[#1E293B]"
+            href={active.ctaHref}
+            className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)]"
           >
-            మొబిలైజేషన్ అనౌన్స్
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            {active.ctaLabel}
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-        ) : null}
+
+          {active.id === "districts" ? (
+            <Link
+              href="/announce"
+              className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-[#1E293B]/15 bg-[#FBFBFA] px-4 py-3 font-telugu text-xs font-bold text-[#1E293B]"
+            >
+              మొబిలైజేషన్ అనౌన్స్
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -652,7 +652,7 @@ export function CivicEngineMap() {
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-6 max-w-3xl lg:mb-8">
           <span className="civic-eyebrow-pill">
-            Civic Routing Graph · INPUTS → ENGINE → OUTPUTS
+            సేవా ప్రవాహం • CIVIC ENGINE
           </span>
           <h2
             id="civic-engine-heading"

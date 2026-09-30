@@ -195,7 +195,7 @@ export function PersonaSwitcher() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-6 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            బహుముఖ సాధికారత • TARGETED COMMUNITY EMPOWERMENT
+            సమగ్ర సాధికారత • TARGETED PILLARS
           </span>
           <h2
             id="persona-switcher-heading"

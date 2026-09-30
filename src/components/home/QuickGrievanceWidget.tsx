@@ -47,7 +47,7 @@ export function QuickGrievanceWidget() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-5 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            Instant Grievance Finder • 1-CLICK DESK
+            తక్షణ వినతి డెస్క్ • 1-CLICK ASSISTANCE
           </span>
           <h2
             id="quick-grievance-heading"

@@ -47,7 +47,7 @@ export function HeritageTriadRibbon() {
 
         <div className="relative border-b border-[#EAD7B5] px-4 py-4 text-center sm:px-6 sm:py-5">
           <span className="civic-eyebrow-pill">
-            Heritage Triad • వారసత్వ త్రయం
+            సాంస్కృతిక త్రివేణి • HERITAGE TRIAD
           </span>
           <h2
             id="heritage-triad-heading"
@@ -58,8 +58,7 @@ export function HeritageTriadRibbon() {
             </span>
           </h2>
           <p className="mt-2 font-sans text-sm font-medium leading-snug text-slate-500 sm:text-base">
-            Medicine is our source • Art is our breath • Self-respect is our
-            heritage
+            Medicine · Art · Self-respect — our living heritage
           </p>
         </div>
 

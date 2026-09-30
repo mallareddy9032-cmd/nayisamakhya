@@ -6,7 +6,6 @@ import {
   ArrowDownToLine,
   ArrowRight,
   BookOpen,
-  ChevronDown,
   Gavel,
   Music2,
   ScrollText,
@@ -199,193 +198,93 @@ function MilestoneScrubber({
 
   return (
     <div className="relative">
-      {/* Desktop horizontal track — lg+ */}
-      <div className="hidden lg:block">
-        <div className="relative mx-auto max-w-4xl px-2 pt-2 pb-1">
-          <div
-            className="absolute left-8 right-8 top-[22px] h-[2px] overflow-hidden rounded-full bg-[#EAD7B5]"
-            aria-hidden
-          >
+      <div className="mx-auto max-w-4xl px-1 pt-2 pb-1 sm:px-2">
+        <div
+          className="overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x [&::-webkit-scrollbar]:hidden"
+          role="presentation"
+        >
+          <div className="relative min-w-[36rem] px-2 sm:min-w-0 sm:px-0">
             <div
-              className="h-full bg-gradient-to-r from-[#B45309] to-[#D97706] transition-all duration-300"
-              style={{
-                width:
-                  eras.length <= 1
-                    ? "0%"
-                    : `${(activeIndex / (eras.length - 1)) * 100}%`,
-              }}
-            />
+              className="absolute left-6 right-6 top-[22px] h-[2px] overflow-hidden rounded-full bg-[#EAD7B5] sm:left-8 sm:right-8"
+              aria-hidden
+            >
+              <div
+                className="h-full bg-gradient-to-r from-[#B45309] to-[#D97706] transition-all duration-300"
+                style={{
+                  width:
+                    eras.length <= 1
+                      ? "0%"
+                      : `${(activeIndex / (eras.length - 1)) * 100}%`,
+                }}
+              />
+            </div>
+            <ol
+              className="relative z-[1] flex items-start justify-between gap-2 sm:gap-0"
+              role="tablist"
+              aria-label="Chronological civic milestones"
+            >
+              {eras.map((era) => {
+                const selected = era.id === activeId;
+                return (
+                  <li
+                    key={era.id}
+                    className="flex w-[5.25rem] shrink-0 flex-col items-center gap-2 sm:w-24"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      aria-controls="civic-epoch-panel"
+                      id={`epoch-tab-${era.id}`}
+                      onClick={() => onSelect(era.id)}
+                      className={cn(
+                        "civic-focus-ring relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300",
+                        selected
+                          ? "bg-[#B45309] text-white"
+                          : "bg-white text-slate-400 hover:border-[#B45309]/40 hover:text-[#B45309]",
+                      )}
+                      style={
+                        selected
+                          ? {
+                              boxShadow:
+                                "0 0 0 3px #FBFBFA, 0 0 0 5px #B45309, 0 0 12px rgb(180 83 9 / 0.45)",
+                            }
+                          : {
+                              boxShadow: "0 0 0 1.5px #CBD5E1",
+                            }
+                      }
+                    >
+                      {selected ? (
+                        <span
+                          className="motion-safe-ping absolute inset-0 animate-ping rounded-full bg-[#B45309]/35 motion-reduce:hidden"
+                          aria-hidden
+                        />
+                      ) : null}
+                      <span className="relative h-2 w-2 rounded-full bg-current" />
+                    </button>
+                    <span
+                      className={cn(
+                        "max-w-[5.25rem] text-center font-telugu text-[10px] font-bold leading-snug transition-colors duration-300 sm:max-w-none sm:text-[11px]",
+                        selected ? "text-[#B45309]" : "text-slate-500",
+                      )}
+                    >
+                      {era.scrubLabel}
+                    </span>
+                    <span
+                      className={cn(
+                        "hidden max-w-[5.5rem] text-center font-sans text-[9px] font-semibold uppercase tracking-wide transition-colors duration-300 sm:block",
+                        selected ? "text-[#92400e]" : "text-slate-400",
+                      )}
+                    >
+                      {era.badgeEra}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
-          <ol
-            className="relative z-[1] flex items-start justify-between"
-            role="tablist"
-            aria-label="Chronological civic milestones"
-          >
-            {eras.map((era) => {
-              const selected = era.id === activeId;
-              return (
-                <li key={era.id} className="flex w-[4.5rem] flex-col items-center gap-1.5 sm:w-24">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={selected}
-                    aria-controls="civic-epoch-panel"
-                    id={`epoch-tab-${era.id}`}
-                    onClick={() => onSelect(era.id)}
-                    className={cn(
-                      "civic-focus-ring relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300",
-                      selected
-                        ? "bg-[#B45309] text-white"
-                        : "bg-white text-slate-400 hover:border-[#B45309]/40 hover:text-[#B45309]",
-                    )}
-                    style={
-                      selected
-                        ? {
-                            boxShadow:
-                              "0 0 0 3px #FBFBFA, 0 0 0 5px #B45309, 0 0 12px rgb(180 83 9 / 0.45)",
-                          }
-                        : {
-                            boxShadow: "0 0 0 1.5px #CBD5E1",
-                          }
-                    }
-                  >
-                    {selected ? (
-                      <span
-                        className="motion-safe-ping absolute inset-0 animate-ping rounded-full bg-[#B45309]/35 motion-reduce:hidden"
-                        aria-hidden
-                      />
-                    ) : null}
-                    <span className="relative h-2 w-2 rounded-full bg-current" />
-                  </button>
-                  <span
-                    className={cn(
-                      "text-center font-telugu text-[10px] font-bold leading-tight transition-colors duration-300 sm:text-[11px]",
-                      selected ? "text-[#B45309]" : "text-slate-500",
-                    )}
-                  >
-                    {era.scrubLabel}
-                  </span>
-                  <span
-                    className={cn(
-                      "hidden text-center font-sans text-[9px] font-semibold uppercase tracking-wide transition-colors duration-300 sm:block",
-                      selected ? "text-[#92400e]" : "text-slate-400",
-                    )}
-                  >
-                    {era.badgeEra}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
         </div>
       </div>
-    </div>
-  );
-}
-
-function MobileEraAccordion({
-  eras,
-  activeId,
-  onSelect,
-}: {
-  eras: TimelineEra[];
-  activeId: string;
-  onSelect: (id: string) => void;
-}) {
-  return (
-    <div className="space-y-2 lg:hidden" role="list" aria-label="Civic timeline eras">
-      {eras.map((era) => {
-        const Icon = ICON_MAP[era.iconKey];
-        const open = era.id === activeId;
-        return (
-          <div
-            key={era.id}
-            role="listitem"
-            className={cn(
-              "overflow-hidden rounded-2xl border bg-white transition-colors",
-              open ? "border-[#B45309]/50 shadow-sm" : "border-[#EAD7B5]",
-            )}
-          >
-            <button
-              type="button"
-              aria-expanded={open}
-              onClick={() => onSelect(era.id)}
-              className="civic-focus-ring flex min-h-12 w-full items-center gap-3 px-3 py-3 text-left"
-            >
-              <span
-                className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-                  open
-                    ? "bg-[#B45309] text-white"
-                    : "bg-[#B45309]/10 text-[#B45309]",
-                )}
-                aria-hidden
-              >
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-telugu text-sm font-bold leading-snug text-[#0F172A]">
-                  {era.titleTe}
-                </span>
-                <span className="mt-0.5 block font-telugu text-[11px] font-semibold text-[#B45309]">
-                  {era.period} · {era.badgeEra}
-                </span>
-              </span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 shrink-0 text-slate-400 transition-transform",
-                  open && "rotate-180 text-[#B45309]",
-                )}
-                aria-hidden
-              />
-            </button>
-            {open ? (
-              <div className="border-t border-[#EAD7B5] bg-[#FFFDF9] px-3 pb-4 pt-3">
-                <p className="font-sans text-xs font-semibold tracking-wide text-[#B45309]">
-                  {era.titleEn}
-                </p>
-                <p className="mt-2 font-telugu text-sm leading-[1.75] text-slate-600">
-                  {era.summaryTe}
-                </p>
-                <ul className="mt-3 space-y-1.5">
-                  {era.bullets.map((bullet) => (
-                    <li key={bullet} className="flex items-start gap-2">
-                      <span
-                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B45309]"
-                        aria-hidden
-                      />
-                      <span className="font-telugu text-xs leading-relaxed text-[#1E293B]">
-                        {bullet}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {era.citations.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {era.citations.map((cite) => (
-                      <span
-                        key={cite}
-                        className="inline-flex max-w-full rounded-md border border-[#EAD7B5] bg-white/80 px-2 py-0.5 font-telugu text-[10px] font-semibold leading-snug text-slate-600"
-                      >
-                        [{cite}]
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {era.actionLink ? (
-                  <Link
-                    href={era.actionLink.href}
-                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-3 py-2 font-telugu text-xs font-bold text-white"
-                  >
-                    {era.actionLink.labelTe}
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -532,7 +431,7 @@ function EpochCard({ era }: { era: TimelineEra }) {
 
           <p
             className={cn(
-              "font-telugu text-sm leading-[1.7] text-slate-600",
+              "font-telugu text-sm leading-[1.8] text-slate-600",
               isContemporary ? "mt-1.5 line-clamp-2" : "mt-2.5 line-clamp-3",
             )}
           >
@@ -596,7 +495,6 @@ function EpochCard({ era }: { era: TimelineEra }) {
 
 export function CivicTimeline() {
   const [activeId, setActiveId] = useState(TIMELINE_ERAS[0].id);
-  const [hintVisible, setHintVisible] = useState(true);
   const active = TIMELINE_ERAS.find((e) => e.id === activeId) ?? TIMELINE_ERAS[0];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -621,7 +519,6 @@ export function CivicTimeline() {
           ];
         return next?.id ?? current;
       });
-      setHintVisible(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -629,7 +526,6 @@ export function CivicTimeline() {
 
   const selectEra = (id: string) => {
     setActiveId(id);
-    setHintVisible(false);
   };
 
   return (
@@ -640,7 +536,7 @@ export function CivicTimeline() {
       <div className="mx-auto max-w-5xl">
         <header className="mb-5 max-w-3xl">
           <span className="civic-eyebrow-pill">
-            చారిత్రక & చట్టబద్ధ పరిణామ క్రమం • CHRONOLOGICAL CIVIC TIMELINE
+            చారిత్రక & చట్టబద్ధ ప్రస్థానం • HISTORICAL TIMELINE
           </span>
 
           <h2
@@ -659,28 +555,12 @@ export function CivicTimeline() {
           </p>
         </header>
 
-        {/* <1024px: vertical accordion with readable era details */}
-        <MobileEraAccordion
-          eras={TIMELINE_ERAS}
-          activeId={activeId}
-          onSelect={selectEra}
-        />
-
-        {/* lg+: scrubber + single epoch card */}
-        <div className="hidden flex-col gap-3 lg:flex lg:max-h-[560px] lg:gap-4">
+        <div className="flex flex-col gap-4 lg:max-h-[560px]">
           <MilestoneScrubber
             eras={TIMELINE_ERAS}
             activeId={activeId}
             onSelect={selectEra}
           />
-          {hintVisible ? (
-            <p className="text-center font-telugu text-[11px] font-semibold text-slate-500">
-              మైలురాయి ఎంచుకోండి • Select a milestone
-              <span className="ml-1.5 hidden font-sans text-[10px] font-medium text-slate-400 sm:inline">
-                (← →)
-              </span>
-            </p>
-          ) : null}
           <EpochCard era={active} />
         </div>
       </div>

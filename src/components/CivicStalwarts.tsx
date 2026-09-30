@@ -41,8 +41,8 @@ const STALWARTS: Stalwart[] = [
     id: "mahapadmananda",
     nameTe: "సమ్రాట్ మహాపద్మనంద",
     nameEn: "Emperor Mahapadmananda",
-    domainTe: "నంద రాజవంశం & సామ్రాజ్య పాలన",
-    domainEn: "Nanda dynasty & imperial rule",
+    domainTe: "నంద రాజవంశం · సామ్రాజ్య వంశం",
+    domainEn: "Nanda dynasty · Imperial Lineage",
     blurbTe:
       "నంద సామ్రాజ్య ప్రాభవం — జనసంక్షేమం, వ్యవసాయం, పరిపాలనా వైభవం.",
     blurbEn: "Imperial governance rooted in public welfare and strength.",
@@ -135,7 +135,9 @@ export function CivicStalwarts() {
     >
       <div className="mx-auto max-w-6xl rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white via-[#FFFDF9] to-[#FBF7ED] p-5 shadow-xs sm:p-6">
         <header className="mb-5 border-b border-[#EAD7B5] pb-3">
-          <span className="civic-eyebrow-pill">Civic Heritage • సమాజ వారసత్వం</span>
+          <span className="civic-eyebrow-pill">
+            సమాజ మార్గదర్శకులు • LUMINARIES
+          </span>
           <h2
             id="civic-stalwarts-heading"
             className="mt-2.5 font-display-te text-xl tracking-tight text-civic-ink leading-snug sm:text-2xl"
@@ -153,35 +155,39 @@ export function CivicStalwarts() {
               key={stalwart.id}
               className="w-[min(72vw,15.5rem)] shrink-0 snap-start lg:w-auto"
             >
-              <article className="flex h-full flex-col items-center gap-2 rounded-xl border border-[#EAD7B5] bg-white/80 px-3 py-4 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-3.5">
-                <StalwartPortrait
-                  name={`${stalwart.nameTe} — ${stalwart.nameEn}`}
-                  imageSrc={stalwart.imageSrc}
-                  priority={index < 2}
-                />
+              <article className="flex h-full flex-col justify-between gap-2 rounded-xl border border-[#EAD7B5] bg-white/80 px-3 py-4 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-3.5">
+                <div className="flex flex-col items-center gap-2">
+                  <StalwartPortrait
+                    name={`${stalwart.nameTe} — ${stalwart.nameEn}`}
+                    imageSrc={stalwart.imageSrc}
+                    priority={index < 2}
+                  />
 
-                <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
-                  {stalwart.nameTe}
-                </h3>
-                <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
-                  {stalwart.nameEn}
-                </p>
+                  <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
+                    {stalwart.nameTe}
+                  </h3>
+                  <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
+                    {stalwart.nameEn}
+                  </p>
 
-                <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2 py-1">
-                  <span className="font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
-                    {stalwart.domainTe}
+                  <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2 py-1">
+                    <span className="font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
+                      {stalwart.domainTe}
+                    </span>
+                    <span className="font-sans text-[10px] text-slate-500">
+                      {stalwart.domainEn}
+                    </span>
                   </span>
-                  <span className="font-sans text-[10px] text-slate-500">
-                    {stalwart.domainEn}
-                  </span>
-                </span>
+                </div>
 
-                <p className="line-clamp-2 font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
-                  {stalwart.blurbTe}
-                </p>
-                <p className="line-clamp-2 font-sans text-[11px] leading-relaxed text-slate-500">
-                  {stalwart.blurbEn}
-                </p>
+                <div className="mt-1 space-y-1">
+                  <p className="line-clamp-2 font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
+                    {stalwart.blurbTe}
+                  </p>
+                  <p className="line-clamp-2 font-sans text-[11px] leading-relaxed text-slate-500">
+                    {stalwart.blurbEn}
+                  </p>
+                </div>
               </article>
             </li>
           ))}
