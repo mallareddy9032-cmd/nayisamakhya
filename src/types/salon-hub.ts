@@ -2,40 +2,46 @@
 
 export type SalonHubRoute = "gateway" | "procure" | "energy" | "loans";
 
-export type ProcureBundleId = "A" | "B" | "C";
+/** Three wholesale package kits on the Group Indent desk. */
+export type ProcurePackageId = "barber" | "spa" | "towels";
 
-export type ProcureLineItem = {
-  id: string;
-  bundleId: ProcureBundleId;
+export type ProcurePackage = {
+  id: ProcurePackageId;
   nameTe: string;
   nameEn: string;
-  unitPriceInr: number;
-  unitTe: string;
+  specs: string;
+  hubPriceInr: number;
+  mrpInr: number;
 };
 
 export type ProcureCartLine = {
-  itemId: string;
+  packageId: ProcurePackageId;
   qty: number;
 };
 
 export type SalonHubOrder = {
   id: string;
   createdAt: string;
-  name: string;
+  salonName: string;
+  ownerName: string;
   whatsapp: string;
   districtSlug: string;
   districtNameTe: string;
   mandalSlug: string;
   mandalNameTe: string;
-  payment: "cod" | "upi";
+  payment: "cod_upi_hub";
   lines: Array<{
-    itemId: string;
+    packageId: ProcurePackageId;
     nameTe: string;
     qty: number;
-    unitPriceInr: number;
+    hubPriceInr: number;
+    mrpInr: number;
     lineTotalInr: number;
+    lineSavingsInr: number;
   }>;
+  totalItems: number;
   totalInr: number;
+  savingsInr: number;
 };
 
 export type EnergyPlanInput = {

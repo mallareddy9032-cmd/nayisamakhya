@@ -1,14 +1,7 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
-import {
-  CheckCircle2,
-  Minus,
-  Plus,
-  ShoppingCart,
-  MessageCircle,
-  Lock,
-} from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { CheckCircle2, Minus, Package, Plus, X } from "lucide-react";
 import {
   DistrictMandalFields,
   fieldClass,
@@ -17,331 +10,429 @@ import {
 } from "@/components/salon-hub/DistrictMandalFields";
 import {
   formatInr,
-  isDemandWindowOpen,
-  mandalDeskWhatsAppUrl,
-  newOrderId,
-  PROCURE_BUNDLES,
-  PROCURE_CATALOG,
+  indentWhatsAppSlipUrl,
+  newIndentOrderId,
+  PROCURE_PACKAGES,
   saveSalonHubOrder,
 } from "@/lib/salon-hub/catalog";
-import type { ProcureCartLine, SalonHubOrder } from "@/types/salon-hub";
+import type { ProcurePackageId, SalonHubOrder } from "@/types/salon-hub";
+
+const MAX_QTY = 20;
 
 export function ProcureClient() {
-  const windowOpen = isDemandWindowOpen();
-  const [selected, setSelected] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    for (const item of PROCURE_CATALOG) init[item.id] = false;
-    return init;
+  const [qty, setQty] = useState<Record<ProcurePackageId, number>>({
+    barber: 0,
+    spa: 0,
+    towels: 0,
   });
-  const [qty, setQty] = useState<Record<string, number>>(() => {
-    const init: Record<string, number> = {};
-    for (const item of PROCURE_CATALOG) init[item.id] = 1;
-    return init;
-  });
-  const [name, setName] = useState("");
+  const [salonName, setSalonName] = useState("");
+  const [ownerName, setOwnerName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [geo, setGeo] = useGeoSelection();
   const [confirmed, setConfirmed] = useState<SalonHubOrder | null>(null);
   const [error, setError] = useState("");
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const lines: ProcureCartLine[] = useMemo(
-    () =>
-      PROCURE_CATALOG.filter((i) => selected[i.id]).map((i) => ({
-        itemId: i.id,
-        qty: Math.max(1, qty[i.id] || 1),
-      })),
-    [selected, qty],
-  );
+  const cart = useMemo(() => {
+    const lines = PROCURE_PACKAGES.filter((p) => qty[p.id] > 0).map((p) => {
+      const q = qty[p.id];
+      return {
+        packageId: p.id,
+        nameTe: p.nameTe,
+        qty: q,
+        hubPriceInr: p.hubPriceInr,
+        mrpInr: p.mrpInr,
+        lineTotalInr: p.hubPriceInr * q,
+        lineSavingsInr: (p.mrpInr - p.hubPriceInr) * q,
+      };
+    });
+    const totalItems = lines.reduce((s, l) => s + l.qty, 0);
+    const totalInr = lines.reduce((s, l) => s + l.lineTotalInr, 0);
+    const savingsInr = lines.reduce((s, l) => s + l.lineSavingsInr, 0);
+    return { lines, totalItems, totalInr, savingsInr };
+  }, [qty]);
 
-  const total = useMemo(() => {
-    return lines.reduce((sum, line) => {
-      const item = PROCURE_CATALOG.find((i) => i.id === line.itemId);
-      return sum + (item?.unitPriceInr ?? 0) * line.qty;
-    }, 0);
-  }, [lines]);
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (confirmed) {
+      if (!el.open) el.showModal();
+    } else if (el.open) {
+      el.close();
+    }
+  }, [confirmed]);
 
-  function toggle(id: string) {
-    setSelected((s) => ({ ...s, [id]: !s[id] }));
-  }
-
-  function bumpQty(id: string, delta: number) {
+  function bumpQty(id: ProcurePackageId, delta: number) {
     setQty((q) => ({
       ...q,
-      [id]: Math.min(50, Math.max(1, (q[id] || 1) + delta)),
+      [id]: Math.min(MAX_QTY, Math.max(0, (q[id] || 0) + delta)),
     }));
-    setSelected((s) => ({ ...s, [id]: true }));
+  }
+
+  function setQtyExact(id: ProcurePackageId, value: number) {
+    const n = Number.isFinite(value) ? Math.floor(value) : 0;
+    setQty((q) => ({
+      ...q,
+      [id]: Math.min(MAX_QTY, Math.max(0, n)),
+    }));
   }
 
   function submit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!windowOpen) {
-      setError("నెలవారీ డిమాండ్ విండో (1–5 తేదీలు) మాత్రమే తెరిచి ఉంటుంది.");
-      return;
-    }
-    if (lines.length === 0) {
-      setError("కనీసం ఒక వస్తువు ఎంచుకోండి.");
+
+    if (cart.lines.length === 0) {
+      setError("కనీసం ఒక ప్యాకేజ్ ఎంచుకోండి (+ తో పరిమాణం పెంచండి).");
       return;
     }
     const phone = whatsapp.replace(/\D/g, "");
-    if (phone.length < 10) {
-      setError("సరైన వాట్సాప్ నంబర్ ఇవ్వండి.");
+    if (phone.length !== 10) {
+      setError("వాట్సాప్ నంబర్ సరిగ్గా 10 అంకెలు ఉండాలి.");
       return;
     }
-    if (!geo.districtSlug || !geo.mandalSlug || !name.trim()) {
-      setError("పేరు, జిల్లా, మండలం అవసరం.");
+    if (!salonName.trim() || !ownerName.trim()) {
+      setError("సెలూన్ పేరు మరియు యజమాని పేరు అవసరం.");
+      return;
+    }
+    if (!geo.districtSlug || !geo.mandalSlug) {
+      setError("జిల్లా మరియు మండలం ఎంచుకోండి.");
       return;
     }
 
     const order: SalonHubOrder = {
-      id: newOrderId(),
+      id: newIndentOrderId(geo.mandalSlug),
       createdAt: new Date().toISOString(),
-      name: name.trim(),
-      whatsapp: phone.slice(-10),
+      salonName: salonName.trim(),
+      ownerName: ownerName.trim(),
+      whatsapp: phone,
       districtSlug: geo.districtSlug,
       districtNameTe: geo.districtNameTe,
       mandalSlug: geo.mandalSlug,
       mandalNameTe: geo.mandalNameTe,
-      payment: "cod",
-      lines: lines.map((l) => {
-        const item = PROCURE_CATALOG.find((i) => i.id === l.itemId)!;
-        return {
-          itemId: l.itemId,
-          nameTe: item.nameTe,
-          qty: l.qty,
-          unitPriceInr: item.unitPriceInr,
-          lineTotalInr: item.unitPriceInr * l.qty,
-        };
-      }),
-      totalInr: total,
+      payment: "cod_upi_hub",
+      lines: cart.lines,
+      totalItems: cart.totalItems,
+      totalInr: cart.totalInr,
+      savingsInr: cart.savingsInr,
     };
 
     saveSalonHubOrder(order);
     setConfirmed(order);
   }
 
-  if (confirmed) {
-    const wa = mandalDeskWhatsAppUrl(confirmed);
-    return (
-      <div className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
-        <div className="flex items-start gap-3">
-          <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-700" />
-          <div>
-            <h2 className="font-display-te text-xl font-normal text-[#0F172A]">
-              ఇండెంట్ నమోదు అయింది
-            </h2>
-            <p className="mt-1 font-telugu text-sm text-[#334155]">
-              ఆర్డర్ ID: <span className="font-bold">{confirmed.id}</span> ·{" "}
-              {formatInr(confirmed.totalInr)}
-            </p>
-            <p className="mt-2 font-telugu text-sm text-[#475569]">
-              చెల్లింపు: COD / UPI — {confirmed.mandalNameTe} మండల హబ్ వద్ద మాత్రమే.
-              ఆర్డర్ మీ పరికరంలో సేవ్ అయింది.
-            </p>
-          </div>
-        </div>
-        <a
-          href={wa}
-          target="_blank"
-          rel="noreferrer"
-          className="tap inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#128C7E] px-4 font-telugu text-sm font-bold text-white sm:w-auto"
-        >
-          <MessageCircle className="h-4 w-4" aria-hidden />
-          మండల డెస్క్‌కు వాట్సాప్ అలర్ట్
-        </a>
-        <button
-          type="button"
-          className="tap ml-0 mt-2 inline-flex min-h-11 items-center rounded-xl border border-[#E2E8F0] bg-white px-4 font-telugu text-sm font-semibold text-[#0F172A] sm:ml-3"
-          onClick={() => setConfirmed(null)}
-        >
-          మరో ఇండెంట్
-        </button>
-      </div>
-    );
+  function closeModal() {
+    setConfirmed(null);
   }
 
   return (
     <div className="space-y-6">
-      <div
-        className={`rounded-2xl border px-4 py-3 font-telugu text-sm ${
-          windowOpen
-            ? "border-emerald-200 bg-emerald-50/70 text-emerald-900"
-            : "border-amber-200 bg-amber-50/80 text-amber-950"
-        }`}
-        role="status"
-      >
-        {windowOpen ? (
-          <>
-            <span className="font-bold">నెలవారీ డిమాండ్ విండో తెరిచి ఉంది</span> —
-            ప్రతి నెల 1–5 తేదీలు మాత్రమే సమూహ ఇండెంట్ స్వీకరించబడుతుంది.
-          </>
-        ) : (
-          <>
-            <span className="font-bold">డిమాండ్ విండో మూసి ఉంది</span> — ప్రతి నెల
-            1–5 తేదీలలో మాత్రమే ఇండెంట్ ఇవ్వండి. ఇప్పుడు కేటలాగ్ చూడవచ్చు; సబ్మిట్
-            లాక్.
-          </>
-        )}
+      {/* Hero */}
+      <header className="text-center">
+        <p className="inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-[#B45309]/25 bg-[#B45309]/10 px-3 py-1.5 font-telugu text-xs font-semibold tracking-wide text-[#B45309] sm:text-sm">
+          మధ్యవర్తులు లేని హోల్‌సేల్ ధరలు • ఫ్యాక్టరీ డిస్కౌంట్లు
+        </p>
+        <h1 className="mt-4 font-display-te text-3xl font-normal leading-snug text-[#0F172A] sm:text-4xl">
+          సెలూన్ సామాగ్రి సమూహ కొనుగోళ్లు
+        </h1>
+        <p className="mt-1 font-telugu text-base text-[#64748B] sm:text-lg">
+          Salon Supplies Wholesale Group Indent Desk
+        </p>
+        <p className="mx-auto mt-3 max-w-2xl font-telugu text-sm leading-relaxed text-[#475569] sm:text-base">
+          తెలంగాణలోని సెలూన్ యజమానులందరి డిమాండ్‌ను కలిపి, నేరుగా తయారీదారుల
+          నుంచే 30% నుండి 45% తగ్గింపు ధరలకు నాణ్యమైన సామాగ్రిని మీ మండల
+          కేంద్రానికి అందిస్తాము.
+        </p>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+          <span
+            className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"
+            aria-hidden
+          />
+          నెలవారీ ఆర్డర్ల విండో ఓపెన్: ప్రతి నెలా 1వ తేదీ నుండి 5వ తేదీ వరకు •
+          మండల హబ్‌లో డెలివరీ
+        </div>
+      </header>
+
+      {/* Dual column */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
+        {/* LEFT — packages */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-[#B45309]" aria-hidden />
+            <h2 className="font-display-te text-lg font-normal text-[#0F172A]">
+              ప్యాకేజీలు &amp; పరిమాణం
+            </h2>
+          </div>
+
+          {PROCURE_PACKAGES.map((pkg) => {
+            const q = qty[pkg.id];
+            const unitSave = pkg.mrpInr - pkg.hubPriceInr;
+            const active = q > 0;
+            return (
+              <article
+                key={pkg.id}
+                className={`rounded-2xl border bg-white p-4 shadow-sm transition ${
+                  active
+                    ? "border-[#059669]/40 ring-1 ring-[#059669]/20"
+                    : "border-[#E2E8F0]"
+                }`}
+              >
+                <h3 className="font-display-te text-base font-normal leading-snug text-[#0F172A] sm:text-lg">
+                  {pkg.nameTe}{" "}
+                  <span className="font-telugu text-sm text-[#64748B]">
+                    ({pkg.nameEn})
+                  </span>
+                </h3>
+                <p className="mt-1.5 font-telugu text-xs leading-relaxed text-[#64748B] sm:text-sm">
+                  {pkg.specs}
+                </p>
+                <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="font-telugu text-lg font-bold tabular-nums text-[#059669]">
+                      {formatInr(pkg.hubPriceInr)}
+                    </p>
+                    <p className="font-telugu text-xs text-[#94A3B8]">
+                      <span className="line-through">
+                        MRP {formatInr(pkg.mrpInr)}
+                      </span>
+                      <span className="ml-1.5 font-semibold text-[#B45309]">
+                        ఆదా {formatInr(unitSave)}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="tap inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FBFBFA] text-[#0F172A] hover:border-[#B45309]/40 disabled:opacity-40"
+                      onClick={() => bumpQty(pkg.id, -1)}
+                      disabled={q <= 0}
+                      aria-label={`${pkg.nameEn} decrease`}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={MAX_QTY}
+                      value={q}
+                      onChange={(e) =>
+                        setQtyExact(pkg.id, Number(e.target.value))
+                      }
+                      className="h-11 w-14 rounded-xl border border-[#E2E8F0] bg-white text-center text-sm font-bold tabular-nums text-[#0F172A] focus:border-[#B45309]/50 focus:outline-none focus:ring-2 focus:ring-[#B45309]/15"
+                      aria-label={`${pkg.nameEn} quantity`}
+                    />
+                    <button
+                      type="button"
+                      className="tap inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FBFBFA] text-[#0F172A] hover:border-[#B45309]/40 disabled:opacity-40"
+                      onClick={() => bumpQty(pkg.id, 1)}
+                      disabled={q >= MAX_QTY}
+                      aria-label={`${pkg.nameEn} increase`}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+
+          <div className="rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] p-4">
+            <dl className="space-y-1.5 font-telugu text-sm text-[#334155]">
+              <div className="flex justify-between gap-3">
+                <dt>Total Items</dt>
+                <dd className="font-bold tabular-nums text-[#0F172A]">
+                  {cart.totalItems}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt>Total Cart Value</dt>
+                <dd className="font-bold tabular-nums text-[#0F172A]">
+                  {formatInr(cart.totalInr)}
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-2 border-t border-[#EAD7B5]/80 pt-2 font-telugu text-sm font-semibold text-[#059669]">
+              మీరు ఆదా చేసుకుంటున్న మొత్తం: {formatInr(cart.savingsInr)}{" "}
+              (Savings)
+            </p>
+          </div>
+        </section>
+
+        {/* RIGHT — form */}
+        <form
+          onSubmit={submit}
+          className="space-y-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm sm:p-5"
+        >
+          <h2 className="font-display-te text-lg font-normal text-[#0F172A]">
+            మండల హబ్ డెలివరీ వివరాలు
+          </h2>
+          <p className="font-telugu text-xs text-[#64748B]">
+            Mandal Hub delivery — Cash / UPI on pickup only.
+          </p>
+
+          <div>
+            <label className={labelClass} htmlFor="procure-salon">
+              సెలూన్ / షాపు పేరు (Salon Name) *
+            </label>
+            <input
+              id="procure-salon"
+              className={fieldClass}
+              value={salonName}
+              onChange={(e) => setSalonName(e.target.value)}
+              required
+              autoComplete="organization"
+            />
+          </div>
+
+          <div>
+            <label className={labelClass} htmlFor="procure-owner">
+              యజమాని పేరు (Owner Full Name) *
+            </label>
+            <input
+              id="procure-owner"
+              className={fieldClass}
+              value={ownerName}
+              onChange={(e) => setOwnerName(e.target.value)}
+              required
+              autoComplete="name"
+            />
+          </div>
+
+          <div>
+            <label className={labelClass} htmlFor="procure-wa">
+              వాట్సాప్ నంబర్ (WhatsApp Mobile - 10 digits) *
+            </label>
+            <input
+              id="procure-wa"
+              className={fieldClass}
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              value={whatsapp}
+              onChange={(e) =>
+                setWhatsapp(e.target.value.replace(/\D/g, "").slice(0, 10))
+              }
+              placeholder="10 అంకెలు"
+              required
+            />
+          </div>
+
+          <DistrictMandalFields
+            value={geo}
+            onChange={setGeo}
+            idPrefix="procure"
+          />
+
+          <fieldset>
+            <legend className={labelClass}>
+              డెలివరీ విధానం (Delivery Mode)
+            </legend>
+            <div
+              className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 font-telugu text-sm leading-relaxed text-emerald-900"
+              aria-disabled="true"
+            >
+              📦 మండల కోఆర్డినేటర్ కేంద్రం (Mandal Hub Pickup) — క్యాష్ / యూపీఐ
+              ఆన్ డెలివరీ (No advance payment)
+            </div>
+            <input type="hidden" name="delivery" value="mandal_hub_cod_upi" />
+          </fieldset>
+
+          {error ? (
+            <p
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 font-telugu text-sm text-red-800"
+              role="alert"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            className="tap inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 font-telugu text-sm font-bold text-white transition hover:bg-[#92400E]"
+          >
+            సామూహిక ఆర్డర్ కన్ఫర్మ్ చేయండి (Submit Indent) ➔
+          </button>
+        </form>
       </div>
 
-      {PROCURE_BUNDLES.map((bundle) => {
-        const items = PROCURE_CATALOG.filter((i) => i.bundleId === bundle.id);
-        return (
-          <section
-            key={bundle.id}
-            className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm"
-          >
-            <h2 className="font-display-te text-lg font-normal text-[#0F172A]">
-              {bundle.titleTe}
-            </h2>
-            <p className="mt-0.5 font-telugu text-xs text-[#64748B]">
-              {bundle.subtitleTe}
-            </p>
-            <ul className="mt-3 space-y-2">
-              {items.map((item) => {
-                const on = selected[item.id];
-                return (
-                  <li
-                    key={item.id}
-                    className="flex flex-col gap-2 rounded-xl border border-[#F1F5F9] bg-[#FBFBFA] p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2.5">
-                      <input
-                        type="checkbox"
-                        checked={on}
-                        onChange={() => toggle(item.id)}
-                        className="mt-1 h-4 w-4 accent-[#B45309]"
-                      />
-                      <span className="min-w-0">
-                        <span className="block font-telugu text-sm font-semibold text-[#0F172A]">
-                          {item.nameTe}
-                        </span>
-                        <span className="text-xs text-[#64748B]">
-                          {formatInr(item.unitPriceInr)} / {item.unitTe}
-                        </span>
-                      </span>
-                    </label>
-                    <div className="flex items-center gap-2 self-end sm:self-center">
-                      <button
-                        type="button"
-                        className="tap inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white"
-                        onClick={() => bumpQty(item.id, -1)}
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="min-w-[2rem] text-center text-sm font-bold tabular-nums">
-                        {qty[item.id] || 1}
-                      </span>
-                      <button
-                        type="button"
-                        className="tap inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white"
-                        onClick={() => bumpQty(item.id, 1)}
-                        aria-label="Increase quantity"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
-
-      <form
-        onSubmit={submit}
-        className="space-y-4 rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] p-4"
+      {/* Confirmation modal */}
+      <dialog
+        ref={dialogRef}
+        className="w-[min(100%,28rem)] rounded-2xl border border-[#E2E8F0] bg-white p-0 shadow-xl backdrop:bg-[#0F172A]/45"
+        onClose={closeModal}
+        onCancel={(e) => {
+          e.preventDefault();
+          closeModal();
+        }}
       >
-        <h2 className="flex items-center gap-2 font-display-te text-lg font-normal text-[#0F172A]">
-          <ShoppingCart className="h-5 w-5 text-[#B45309]" aria-hidden />
-          చెక్‌అవుట్
-        </h2>
-        <p className="font-telugu text-sm text-[#475569]">
-          మొత్తం:{" "}
-          <span className="font-bold text-[#B45309]">{formatInr(total)}</span>
-        </p>
+        {confirmed ? (
+          <div className="relative p-5 sm:p-6">
+            <button
+              type="button"
+              className="tap absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full text-[#64748B] hover:bg-[#F1F5F9]"
+              onClick={closeModal}
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-        <div>
-          <label className={labelClass} htmlFor="procure-name">
-            పేరు *
-          </label>
-          <input
-            id="procure-name"
-            className={fieldClass}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            autoComplete="name"
-          />
-        </div>
-        <div>
-          <label className={labelClass} htmlFor="procure-wa">
-            వాట్సాప్ నంబర్ *
-          </label>
-          <input
-            id="procure-wa"
-            className={fieldClass}
-            inputMode="tel"
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="10 అంకెలు"
-            required
-          />
-        </div>
-
-        <DistrictMandalFields
-          value={geo}
-          onChange={setGeo}
-          idPrefix="procure"
-        />
-
-        <fieldset className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
-          <legend className="px-1 font-telugu text-sm font-semibold text-[#0F172A]">
-            చెల్లింపు (మండల హబ్ లాక్)
-          </legend>
-          <div className="mt-2 flex flex-wrap gap-3">
-            <label className="inline-flex items-center gap-2 font-telugu text-sm text-[#334155]">
-              <input
-                type="radio"
-                name="pay"
-                checked
-                readOnly
-                className="accent-[#B45309]"
+            <div className="flex items-start gap-3 pr-8">
+              <CheckCircle2
+                className="mt-0.5 h-6 w-6 shrink-0 text-[#059669]"
+                aria-hidden
               />
-              COD — మండల హబ్
-            </label>
-            <label className="inline-flex items-center gap-2 font-telugu text-sm text-[#334155]">
-              <input
-                type="radio"
-                name="pay"
-                disabled
-                className="accent-[#B45309]"
-              />
-              UPI — మండల హబ్
-              <Lock className="h-3.5 w-3.5 text-[#94A3B8]" aria-hidden />
-            </label>
+              <div>
+                <h2 className="font-display-te text-xl font-normal text-[#0F172A]">
+                  ఇండెంట్ నమోదు అయింది
+                </h2>
+                <p className="mt-1 font-telugu text-sm text-[#475569]">
+                  Order Docket Number
+                </p>
+                <p className="mt-0.5 break-all font-mono text-sm font-bold text-[#0F172A]">
+                  {confirmed.id}
+                </p>
+              </div>
+            </div>
+
+            <dl className="mt-4 space-y-2 rounded-xl border border-[#E2E8F0] bg-[#FBFBFA] p-3 font-telugu text-sm text-[#334155]">
+              <div className="flex justify-between gap-3">
+                <dt>Total Amount (pickup)</dt>
+                <dd className="font-bold tabular-nums text-[#B45309]">
+                  {formatInr(confirmed.totalInr)}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt>Assigned Mandal Hub</dt>
+                <dd className="text-right font-semibold text-[#0F172A]">
+                  {confirmed.mandalNameTe} సమన్వయకర్త కేంద్రం
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3 text-[#059669]">
+                <dt>ఆదా (Savings)</dt>
+                <dd className="font-bold tabular-nums">
+                  {formatInr(confirmed.savingsInr)}
+                </dd>
+              </div>
+            </dl>
+
+            <a
+              href={indentWhatsAppSlipUrl(confirmed)}
+              target="_blank"
+              rel="noreferrer"
+              className="tap mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#128C7E] px-4 font-telugu text-sm font-bold text-white"
+            >
+              వాట్సాప్‌లో ఆర్డర్ స్లిప్ పొందండి
+            </a>
+            <button
+              type="button"
+              className="tap mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#E2E8F0] bg-white px-4 font-telugu text-sm font-semibold text-[#0F172A]"
+              onClick={closeModal}
+            >
+              మూసివేయి
+            </button>
           </div>
-          <p className="mt-2 font-telugu text-[11px] text-[#64748B]">
-            ఆన్‌లైన్ చెల్లింపు లేదు — COD/UPI రెండూ మండల హబ్ డెస్క్ వద్ద మాత్రమే.
-          </p>
-        </fieldset>
-
-        {error ? (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 font-telugu text-sm text-red-800" role="alert">
-            {error}
-          </p>
         ) : null}
-
-        <button
-          type="submit"
-          disabled={!windowOpen}
-          className="tap inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 font-telugu text-sm font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.25)] transition hover:bg-[#92400E] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          ఇండెంట్ నమోదు చేయండి
-        </button>
-      </form>
+      </dialog>
     </div>
   );
 }

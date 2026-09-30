@@ -4,8 +4,7 @@ import type {
   LoanDprInput,
   LoanDprResult,
   LoanEquipmentId,
-  ProcureBundleId,
-  ProcureLineItem,
+  ProcurePackage,
   SalonHubOrder,
 } from "@/types/salon-hub";
 import {
@@ -17,132 +16,34 @@ import {
   SALON_HUB_ORDERS_KEY,
 } from "@/types/salon-hub";
 
-export const PROCURE_BUNDLES: {
-  id: ProcureBundleId;
-  titleTe: string;
-  subtitleTe: string;
-}[] = [
+/** Authoritative Group Indent packages (msg 2631). */
+export const PROCURE_PACKAGES: ProcurePackage[] = [
   {
-    id: "A",
-    titleTe: "బండిల్ A — నెలవారీ వినియోగం",
-    subtitleTe: "బ్లేడ్, ఫోమ్, పౌడర్, టానిక్, టవల్స్",
+    id: "barber",
+    nameTe: "నిత్యవసర బార్బర్ ప్యాక్",
+    nameEn: "Daily Barber Essentials Kit",
+    specs:
+      "100pk Platinum Blades + 500g Shaving Cream + Alum Blocks + Disinfectant Spray + 50 Disposable Sheets",
+    hubPriceInr: 850,
+    mrpInr: 1400,
   },
   {
-    id: "B",
-    titleTe: "బండిల్ B — ఎలక్ట్రికల్ టూల్స్",
-    subtitleTe: "ట్రిమ్మర్, డ్రయ్యర్, స్ట్రెయిటనర్, స్టెరిలైజర్",
+    id: "spa",
+    nameTe: "హెయిర్ ట్రీట్‌మెంట్ & స్పా ప్యాక్",
+    nameEn: "Hair Spa & Treatment Pack",
+    specs:
+      "5L Professional Herbal Shampoo + 1kg Deep Spa Cream + 250ml Hair Serum",
+    hubPriceInr: 1450,
+    mrpInr: 2350,
   },
   {
-    id: "C",
-    titleTe: "బండిల్ C — స్టూడియో స్టార్టర్",
-    subtitleTe: "చైర్, మిర్రర్, సైనేజ్, వాటర్ హీటర్",
-  },
-];
-
-export const PROCURE_CATALOG: ProcureLineItem[] = [
-  {
-    id: "a-blades",
-    bundleId: "A",
-    nameTe: "బ్లేడ్ ప్యాక్ (100)",
-    nameEn: "Blade pack (100)",
-    unitPriceInr: 180,
-    unitTe: "ప్యాక్",
-  },
-  {
-    id: "a-foam",
-    bundleId: "A",
-    nameTe: "షేవింగ్ ఫోమ్ (500ml)",
-    nameEn: "Shaving foam (500ml)",
-    unitPriceInr: 220,
-    unitTe: "బాటిల్",
-  },
-  {
-    id: "a-powder",
-    bundleId: "A",
-    nameTe: "టాల్కం / పౌడర్",
-    nameEn: "Talcum / powder",
-    unitPriceInr: 90,
-    unitTe: "ప్యాక్",
-  },
-  {
-    id: "a-tonic",
-    bundleId: "A",
-    nameTe: "హెయిర్ టానిక్ (200ml)",
-    nameEn: "Hair tonic (200ml)",
-    unitPriceInr: 250,
-    unitTe: "బాటిల్",
-  },
-  {
-    id: "a-towels",
-    bundleId: "A",
-    nameTe: "టవల్ సెట్ (6)",
-    nameEn: "Towel set (6)",
-    unitPriceInr: 480,
-    unitTe: "సెట్",
-  },
-  {
-    id: "b-trimmer",
-    bundleId: "B",
-    nameTe: "ప్రొఫెషనల్ ట్రిమ్మర్",
-    nameEn: "Professional trimmer",
-    unitPriceInr: 2499,
-    unitTe: "యూనిట్",
-  },
-  {
-    id: "b-dryer",
-    bundleId: "B",
-    nameTe: "హెయిర్ డ్రయ్యర్",
-    nameEn: "Hair dryer",
-    unitPriceInr: 1899,
-    unitTe: "యూనిట్",
-  },
-  {
-    id: "b-straightener",
-    bundleId: "B",
-    nameTe: "స్ట్రెయిటనర్",
-    nameEn: "Straightener",
-    unitPriceInr: 1499,
-    unitTe: "యూనిట్",
-  },
-  {
-    id: "b-sterilizer",
-    bundleId: "B",
-    nameTe: "స్టెరిలైజర్ బాక్స్",
-    nameEn: "Sterilizer box",
-    unitPriceInr: 1299,
-    unitTe: "యూనిట్",
-  },
-  {
-    id: "c-chair",
-    bundleId: "C",
-    nameTe: "హైడ్రాలిక్ చైర్",
-    nameEn: "Hydraulic chair",
-    unitPriceInr: 12999,
-    unitTe: "యూనిట్",
-  },
-  {
-    id: "c-mirror",
-    bundleId: "C",
-    nameTe: "మిర్రర్ స్టేషన్",
-    nameEn: "Mirror station",
-    unitPriceInr: 6499,
-    unitTe: "యూనిట్",
-  },
-  {
-    id: "c-signage",
-    bundleId: "C",
-    nameTe: "సైనేజ్ / బ్రాండింగ్ కిట్",
-    nameEn: "Signage / branding kit",
-    unitPriceInr: 3499,
-    unitTe: "కిట్",
-  },
-  {
-    id: "c-heater",
-    bundleId: "C",
-    nameTe: "వాటర్ హీటర్ (15L)",
-    nameEn: "Water heater (15L)",
-    unitPriceInr: 4999,
-    unitTe: "యూనిట్",
+    id: "towels",
+    nameTe: "హైజీన్ & ప్రొఫెషనల్ టవల్స్ బండిల్",
+    nameEn: "Hygiene & Towel Bundle",
+    specs:
+      "12pk Microfiber Quick-Dry Towels + 5pk Professional Capes + Sanitizer Glass Jar",
+    hubPriceInr: 620,
+    mrpInr: 1100,
   },
 ];
 
@@ -409,27 +310,17 @@ export function saveSalonHubOrder(order: SalonHubOrder): void {
   );
 }
 
-export function mandalDeskWhatsAppUrl(order: SalonHubOrder): string {
-  const lines = order.lines
-    .map((l) => `• ${l.nameTe} × ${l.qty} = ₹${l.lineTotalInr}`)
-    .join("\n");
-  const text = [
-    "సెలూన్ హబ్ — సమూహ ఇండెంట్ అలర్ట్",
-    `ఆర్డర్: ${order.id}`,
-    `పేరు: ${order.name}`,
-    `వాట్సాప్: ${order.whatsapp}`,
-    `మండలం: ${order.mandalNameTe}, ${order.districtNameTe}`,
-    `చెల్లింపు: ${order.payment === "cod" ? "COD (మండల హబ్)" : "UPI (మండల హబ్)"}`,
-    "వస్తువులు:",
-    lines,
-    `మొత్తం: ₹${order.totalInr}`,
-  ].join("\n");
-  return `https://wa.me/${HELPLINE_WA}?text=${encodeURIComponent(text)}`;
+/** Docket: INDENT-${mandalSlug}-${1000–9999}. */
+export function newIndentOrderId(mandalSlug: string): string {
+  const n = Math.floor(1000 + Math.random() * 9000);
+  return `INDENT-${mandalSlug}-${n}`;
 }
 
-export function newOrderId(): string {
-  const d = new Date();
-  const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `SH-${stamp}-${rand}`;
+/**
+ * User-share slip (msg 2631):
+ * https://wa.me/?text=నాయీ+సమాఖ్య+సెలూన్+హబ్:+నా+ఆర్డర్+నమోదైంది.+Docket:+${orderId},+మండలం:+${mandal},+మొత్తం:+Rs.${total}
+ */
+export function indentWhatsAppSlipUrl(order: SalonHubOrder): string {
+  const text = `నాయీ సమాఖ్య సెలూన్ హబ్: నా ఆర్డర్ నమోదైంది. Docket: ${order.id}, మండలం: ${order.mandalNameTe}, మొత్తం: Rs.${order.totalInr}`;
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
