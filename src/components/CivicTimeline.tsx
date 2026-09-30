@@ -416,10 +416,10 @@ export function CivicTimeline() {
 
           <h2
             id="civic-timeline-heading"
-            className="mt-3 font-display-te text-2xl font-bold leading-tight tracking-tight text-[#0F172A] sm:text-3xl"
+            className="mt-3 font-display-te text-2xl font-normal leading-tight tracking-tight text-[#0F172A] sm:text-3xl"
           >
             ప్రాచీన మూలాల నుండి{" "}
-            <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-serif italic text-transparent">
+            <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-display-te not-italic text-transparent">
               ఆధునిక చట్టబద్ధ హక్కుల వరకు
             </span>
           </h2>

@@ -83,13 +83,13 @@ export default function HomePage() {
               🏛️ చారిత్రక వారసత్వం • చట్టబద్ధ రక్షణ • సమగ్ర సాధికారత
             </span>
 
-            <h1 className="font-display-te text-[2rem] font-bold leading-[1.25] tracking-tight text-[#0F172A] sm:text-4xl md:text-5xl md:leading-[1.2]">
+            <h1 className="font-display-te text-[2rem] font-normal leading-[1.35] tracking-tight text-[#0F172A] sm:text-4xl sm:leading-[1.3] md:text-5xl md:leading-[1.28]">
               ఆత్మగౌరవం • చట్టబద్ధ రక్షణ •
               <br />
-              <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-serif italic text-transparent">
+              <span className="bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] bg-clip-text font-display-te not-italic text-transparent">
                 ఆధునిక ప్రగతి
               </span>
-              <span className="mt-1 block font-sans text-sm font-medium uppercase tracking-widest text-slate-500 lg:text-base">
+              <span className="mt-2 block font-sans text-sm font-medium uppercase tracking-widest text-slate-500 lg:text-base">
                 Statewide Civic Protection &amp; Empowerment Network
               </span>
             </h1>

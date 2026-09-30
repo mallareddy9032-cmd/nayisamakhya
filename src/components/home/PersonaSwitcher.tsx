@@ -127,7 +127,7 @@ function SpotlightPanel({ persona }: { persona: PersonaContent }) {
                 </div>
               </div>
             </div>
-            <p className="mt-3 font-display-te text-sm font-bold text-[#0F172A]">
+            <p className="mt-3 font-telugu text-sm font-bold text-[#0F172A]">
               మండల సమన్వయకర్త
             </p>
             <p className="mt-1 flex items-center gap-1 font-telugu text-[11px] text-slate-600">
@@ -199,12 +199,12 @@ export function PersonaSwitcher() {
           </p>
           <h2
             id="persona-switcher-heading"
-            className="mt-2 font-display-te text-2xl font-bold leading-snug tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
+            className="mt-2 font-display-te text-2xl font-normal leading-snug tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
           >
             ఎవరి కోసం ఈ వేదిక?
           </h2>
-          <p className="mt-2 font-display-te text-lg italic sm:text-xl md:text-2xl">
-            <span className="bg-gradient-to-r from-[#B45309] to-[#D97706] bg-clip-text font-serif text-transparent">
+          <p className="mt-2 font-display-te text-lg not-italic sm:text-xl md:text-2xl">
+            <span className="bg-gradient-to-r from-[#B45309] to-[#D97706] bg-clip-text font-display-te text-transparent">
               Who We Stand For & Empower
             </span>
           </p>
