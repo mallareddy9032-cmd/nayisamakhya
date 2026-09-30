@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  ArrowDownToLine,
   ArrowRight,
   BookOpen,
   Gavel,
@@ -12,6 +13,9 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+export const TRAJECTORY_INFOGRAPHIC_HREF =
+  "/images/heritage/nayee-brahmin-trajectory.png";
 
 export interface TimelineEra {
   id: string;
@@ -25,6 +29,13 @@ export interface TimelineEra {
   iconKey: "vaidya" | "bhakthi" | "survey" | "court" | "gazette" | "power";
   citations: string[];
   actionLink?: { labelTe: string; href: string };
+  /** Era 6 contemporary rights extras — kept off homepage clutter for other eras. */
+  cbiMetric?: {
+    value: number;
+    label: string;
+    source: string;
+    populationTe: string;
+  };
 }
 
 const ICON_MAP = {
@@ -143,27 +154,33 @@ export const TIMELINE_ERAS: TimelineEra[] = [
   },
   {
     id: "power",
-    period: "2021-2026",
-    badgeEra: "G.O. 23 & SEEEPC",
-    scrubLabel: "2021-2026",
-    titleTe: "జీ.ఓ. 23 ఉచిత విద్యుత్ & డిజిటల్ సేవా కేంద్రం",
-    titleEn: "Free Power & Digital Civic Desk",
+    period: "2020-2026",
+    badgeEra: "Contemporary Rights",
+    scrubLabel: "2020-2026",
+    titleTe: "సమకాలీన హక్కులు & సమగ్ర కులగణన",
+    titleEn: "Contemporary Rights & SEEEPC Evidence",
     summaryTe:
-      "G.O. Ms. No. 23 — 250 యూనిట్ల ఉచిత విద్యుత్; సమగ్ర కులగణన (SEEEPC); రాష్ట్రవ్యాప్త డిజిటల్ వినతి వేదిక. నాయి సమాఖ్య 33 జిల్లాలు · 589 మండలాల సేవా నెట్‌వర్క్‌గా విస్తరించింది.",
+      "G.O. 23 ఉచిత విద్యుత్ నుండి CBI 94 / SEEEPC Vol-II వరకు — సంక్షేమ హక్కులు గణన ఆధారంతో స్థిరపడ్డాయి. నాయి సమాఖ్య 33 జిల్లాలు · 589 మండలాల డిజిటల్ సేవా నెట్‌వర్క్.",
     bullets: [
       "జీ.ఓ. 23 — అర్హతగల సెలూన్ / బజంత్రి వృత్తిదుకాణాలకు 250 యూనిట్ల ఉచిత విద్యుత్.",
-      "Electricity Act 2003 సెక్షన్ 43, 50 — కుటీర వృత్తిదారుల సంరక్షణ.",
+      "CBI 94 — Composite Backwardness Index (Telangana SEEEPC Survey Vol-II).",
       "SEEEPC Vol-II — సమగ్ర కులగణన & డిజిటల్ హక్కుల డాక్యుమెంటేషన్.",
     ],
     iconKey: "power",
     citations: [
       "G.O. Ms. No. 23",
+      "CBI 94 · SEEEPC Vol-II",
       "Electricity Act 2003",
-      "SEEEPC Vol-II",
     ],
     actionLink: {
       labelTe: "జీ.ఓ. 23 వినతి",
       href: "/representation?subject=go23_free_power",
+    },
+    cbiMetric: {
+      value: 94,
+      label: "CBI 94",
+      source: "Telangana SEEEPC Survey Vol-II",
+      populationTe: "4,33,785 జనాభా (రాష్ట్ర జనాభాలో 1.2%)",
     },
   },
 ];
@@ -305,8 +322,76 @@ function MilestoneScrubber({
   );
 }
 
+function CbiDialBadge({
+  value,
+  label,
+  source,
+}: {
+  value: number;
+  label: string;
+  source: string;
+}) {
+  const radius = 34;
+  const circumference = 2 * Math.PI * radius;
+  const progress = Math.min(Math.max(value, 0), 100) / 100;
+  const offset = circumference * (1 - progress);
+
+  return (
+    <div
+      className="flex w-full max-w-[13rem] flex-col items-center gap-1.5 rounded-2xl border border-[#B45309]/35 bg-[#0F172A] px-3 py-3 text-center shadow-[0_8px_20px_rgb(15_23_42_/0.22)]"
+      aria-label={`${label}: Composite Backwardness Index ${value}. ${source}`}
+    >
+      <div className="relative flex h-[5.25rem] w-[5.25rem] items-center justify-center">
+        <svg
+          className="absolute inset-0 h-full w-full -rotate-90"
+          viewBox="0 0 80 80"
+          aria-hidden
+        >
+          <circle
+            cx="40"
+            cy="40"
+            r={radius}
+            fill="none"
+            stroke="#334155"
+            strokeWidth="7"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r={radius}
+            fill="none"
+            stroke="#B45309"
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+          />
+        </svg>
+        <div className="relative flex flex-col items-center leading-none">
+          <span className="font-sans text-[1.65rem] font-black tracking-tight text-white">
+            {value}
+          </span>
+          <span className="mt-0.5 font-sans text-[9px] font-bold uppercase tracking-[0.14em] text-[#FBBF24]">
+            CBI
+          </span>
+        </div>
+      </div>
+      <p className="font-sans text-[11px] font-bold tracking-wide text-[#FBBF24]">
+        {label}
+      </p>
+      <p className="font-sans text-[9px] leading-snug text-slate-300">
+        Composite Backwardness Index
+      </p>
+      <p className="font-sans text-[9px] leading-snug text-slate-400">
+        {source}
+      </p>
+    </div>
+  );
+}
+
 function EpochCard({ era }: { era: TimelineEra }) {
   const Icon = ICON_MAP[era.iconKey];
+  const isContemporary = Boolean(era.cbiMetric);
 
   return (
     <div
@@ -319,16 +404,24 @@ function EpochCard({ era }: { era: TimelineEra }) {
       <div className="grid gap-0 md:grid-cols-3">
         {/* Left column */}
         <div className="flex flex-col items-center justify-center gap-3 border-b border-[#EAD7B5] px-4 py-5 md:border-b-0 md:border-r md:px-5 md:py-6">
-          <div
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#B45309]"
-            style={{
-              boxShadow:
-                "0 0 0 2px #FBFBFA, 0 0 0 4px #B45309, 0 0 0 6px rgb(180 83 9 / 0.25)",
-            }}
-            aria-hidden
-          >
-            <Icon className="h-7 w-7" />
-          </div>
+          {era.cbiMetric ? (
+            <CbiDialBadge
+              value={era.cbiMetric.value}
+              label={era.cbiMetric.label}
+              source={era.cbiMetric.source}
+            />
+          ) : (
+            <div
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#B45309]"
+              style={{
+                boxShadow:
+                  "0 0 0 2px #FBFBFA, 0 0 0 4px #B45309, 0 0 0 6px rgb(180 83 9 / 0.25)",
+              }}
+              aria-hidden
+            >
+              <Icon className="h-7 w-7" />
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-1.5">
             <span className="inline-flex rounded-full border border-[#B45309]/30 bg-[#B45309]/10 px-2.5 py-0.5 font-telugu text-[11px] font-bold text-[#B45309]">
@@ -363,12 +456,23 @@ function EpochCard({ era }: { era: TimelineEra }) {
             {era.titleEn}
           </p>
 
-          <p className="mt-2.5 font-telugu text-sm leading-[1.7] text-slate-600 line-clamp-3">
+          {era.cbiMetric ? (
+            <p className="mt-2 font-telugu text-sm font-bold leading-snug text-[#0F172A]">
+              {era.cbiMetric.populationTe}
+            </p>
+          ) : null}
+
+          <p
+            className={cn(
+              "font-telugu text-sm leading-[1.7] text-slate-600",
+              isContemporary ? "mt-1.5 line-clamp-2" : "mt-2.5 line-clamp-3",
+            )}
+          >
             {era.summaryTe}
           </p>
 
           <ul className="mt-3 space-y-1.5">
-            {era.bullets.slice(0, 3).map((bullet) => (
+            {era.bullets.slice(0, isContemporary ? 2 : 3).map((bullet) => (
               <li key={bullet} className="flex items-start gap-2">
                 <span
                   className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B45309]"
@@ -391,6 +495,29 @@ function EpochCard({ era }: { era: TimelineEra }) {
                   [{cite}]
                 </span>
               ))}
+            </div>
+          ) : null}
+
+          {era.cbiMetric ? (
+            <div className="mt-3 flex flex-col gap-2 border-t border-[#EAD7B5]/80 pt-3">
+              <a
+                href={TRAJECTORY_INFOGRAPHIC_HREF}
+                download="nayee-brahmin-trajectory.png"
+                className="civic-focus-ring inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#B45309]/40 bg-white px-3 py-2.5 text-center font-telugu text-[12px] font-bold leading-snug text-[#B45309] shadow-sm transition hover:border-[#B45309] hover:bg-[#FFF7ED] sm:text-[13px]"
+              >
+                <ArrowDownToLine className="h-4 w-4 shrink-0" aria-hidden />
+                <span>
+                  పూర్తి చారిత్రక &amp; చట్టబద్ధ ఇన్ఫోగ్రాఫిక్ (HD Image)
+                  డౌన్‌లోడ్ చేసుకోండి ➔
+                </span>
+              </a>
+              <Link
+                href="/history"
+                className="civic-focus-ring inline-flex min-h-9 items-center justify-center gap-1 font-telugu text-[12px] font-semibold text-[#0F172A] underline-offset-4 hover:text-[#B45309] hover:underline"
+              >
+                పూర్తి ఆర్కైవల్ వీక్షణ · Full archival view
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
             </div>
           ) : null}
         </div>
@@ -465,7 +592,7 @@ export function CivicTimeline() {
         </header>
 
         {/* Compact interactive viewport — scrubber + single card */}
-        <div className="flex flex-col gap-3 md:max-h-[450px] md:gap-4">
+        <div className="flex flex-col gap-3 md:max-h-[560px] md:gap-4">
           <MilestoneScrubber
             eras={TIMELINE_ERAS}
             activeId={activeId}

@@ -57,6 +57,11 @@ export default function SitemapPage() {
                 {te ? "వినతి పత్రం" : "Representation letter"}
               </Link>
             </li>
+            <li>
+              <Link href="/history" className="hover:text-[#C2410C]">
+                {te ? "చారిత్రక పరిణామ క్రమం" : "Historical trajectory"}
+              </Link>
+            </li>
           </ul>
         </div>
 

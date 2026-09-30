@@ -56,6 +56,12 @@ export default function HomePage() {
               జిల్లాలు
             </Link>
             <Link
+              href="/history"
+              className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
+            >
+              చరిత్ర
+            </Link>
+            <Link
               href="/newsletter"
               className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
             >

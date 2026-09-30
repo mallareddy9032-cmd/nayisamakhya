@@ -104,6 +104,17 @@ export function CivicFooter() {
                 </span>
               </Link>
             </li>
+            <li>
+              <Link
+                href="/history"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+              >
+                <span>చారిత్రక పరిణామ క్రమం (History)</span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /history
+                </span>
+              </Link>
+            </li>
           </ul>
         </div>
 
