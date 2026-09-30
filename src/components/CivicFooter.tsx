@@ -25,6 +25,7 @@ import {
   Bot,
   LayoutGrid,
   ChevronRight,
+  Trophy,
 } from "lucide-react";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
@@ -178,6 +179,11 @@ export function CivicFooter() {
               <li>
                 <FooterNavLink href="/announce" icon={MessageCircle}>
                   WhatsApp Mobilization
+                </FooterNavLink>
+              </li>
+              <li>
+                <FooterNavLink href="/sprint" icon={Trophy}>
+                  సేవా సారథి ఛాలెంజ్
                 </FooterNavLink>
               </li>
               <li>

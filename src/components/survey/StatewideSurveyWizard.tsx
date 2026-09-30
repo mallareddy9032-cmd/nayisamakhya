@@ -34,6 +34,12 @@ import {
   TRADE_LICENSE_OPTIONS,
   WELFARE_SCHEME_OPTIONS,
 } from "@/lib/survey/options";
+import {
+  creditLocalRef,
+  isValidSarathiRef,
+  normalizeRefCode,
+  upsertLocalVolunteer,
+} from "@/lib/sprint/volunteers";
 import type {
   AreaType,
   FamilyMember,
@@ -43,6 +49,7 @@ import type {
   SubCaste,
   SurveySubmission,
 } from "@/types/survey";
+import type { Volunteer } from "@/types/volunteer";
 
 const STORAGE_KEY = "nayi_statewide_survey_submissions_v1";
 
@@ -142,6 +149,18 @@ export function StatewideSurveyWizard() {
   const [mockFallback, setMockFallback] = useState(false);
   const [submittedHouseholdSize, setSubmittedHouseholdSize] = useState(0);
   const [submittedMatrimonialCount, setSubmittedMatrimonialCount] = useState(0);
+  const [referralRef, setReferralRef] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = new URLSearchParams(window.location.search).get("ref");
+      if (raw && isValidSarathiRef(raw)) {
+        setReferralRef(normalizeRefCode(raw));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const districts = useMemo(() => surveyDistricts(), []);
 
@@ -359,6 +378,7 @@ export function StatewideSurveyWizard() {
           whatsapp: submission.phone,
           communityWing: submission.subCaste,
           occupation: submission.primaryProfession,
+          ...(referralRef ? { refCode: referralRef } : {}),
         }),
       });
 
@@ -368,32 +388,44 @@ export function StatewideSurveyWizard() {
         persisted?: boolean;
         mock?: boolean;
         error?: string;
+        credited?: boolean;
+        volunteer?: Volunteer | null;
+        refCode?: string;
       };
 
-      if (res.ok && data.success && data.referenceId) {
+      const finishSuccess = (refId: string, mock: boolean) => {
         persistLocal(submission);
-        setReferenceId(data.referenceId);
-        setMockFallback(Boolean(data.mock) || data.persisted === false);
+        // Sync sprint tracker localStorage even when API credit was mock/offline
+        if (referralRef) {
+          if (data.volunteer) {
+            upsertLocalVolunteer(data.volunteer);
+          } else {
+            creditLocalRef(referralRef);
+          }
+        }
+        setReferenceId(refId);
+        setMockFallback(mock);
         setSubmittedHouseholdSize(submission.familyMembers.length);
         setSubmittedMatrimonialCount(
           submission.familyMembers.filter((m) => m.isMatrimonialCandidate)
             .length,
         );
         setSubmitted(true);
+      };
+
+      if (res.ok && data.success && data.referenceId) {
+        finishSuccess(
+          data.referenceId,
+          Boolean(data.mock) || data.persisted === false,
+        );
         return;
       }
 
-      persistLocal(submission);
       const localRef = `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
-      setReferenceId(data.referenceId || localRef);
-      setMockFallback(true);
-      setSubmittedHouseholdSize(submission.familyMembers.length);
-      setSubmittedMatrimonialCount(
-        submission.familyMembers.filter((m) => m.isMatrimonialCandidate).length,
-      );
-      setSubmitted(true);
+      finishSuccess(data.referenceId || localRef, true);
     } catch {
       persistLocal(submission);
+      if (referralRef) creditLocalRef(referralRef);
       setReferenceId(
         `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
       );

@@ -112,18 +112,21 @@ export function CoordinatorCardClient() {
   const [phone, setPhone] = useState(DEFAULTS.phone);
 
   // Instant offline restore from localStorage (no network required).
-  // URL ?district=&zone=/&mandal= from geo desks win on first paint after hydrate.
+  // URL ?name=&role=&district=&mandal=&phone= from sprint cert / geo desks win after hydrate.
   useEffect(() => {
     const draft = readStoredDraft();
+    const qName = searchParams.get("name")?.trim() || "";
+    const qRole = searchParams.get("role")?.trim() || "";
     const qDistrict = searchParams.get("district")?.trim() || "";
     const qMandal =
       searchParams.get("mandal")?.trim() ||
       searchParams.get("zone")?.trim() ||
       "";
+    const qPhone = searchParams.get("phone")?.trim() || "";
 
-    setName(draft.name);
-    setRole(draft.role);
-    setPhone(draft.phone);
+    setName(qName || draft.name);
+    setRole(qRole || draft.role);
+    setPhone(qPhone || draft.phone);
     setDistrict(qDistrict || draft.district);
     setMandal(qMandal || draft.mandal);
     setHydrated(true);

@@ -4,7 +4,14 @@ import {
   validateFamilyMembers,
   withDerivedMatrimonial,
 } from "@/lib/survey/familyMembers";
+import {
+  deriveStatus,
+  isValidSarathiRef,
+  mapDbRow,
+  normalizeRefCode,
+} from "@/lib/sprint/volunteers";
 import type { SurveySubmission } from "@/types/survey";
+import type { Volunteer } from "@/types/volunteer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,6 +40,9 @@ type SurveyBody = {
   engagementType?: string;
   pensionStatus?: string;
   members?: MemberPayload[];
+  /** SARATHI referral from /survey?ref= or sprint share link */
+  refCode?: string;
+  ref?: string;
 };
 
 function abbr(slug: string, len: number) {
@@ -102,6 +112,64 @@ async function tryPersist(row: {
   }
 }
 
+function extractRefCode(body: SurveyBody, submission?: SurveySubmission): string | null {
+  const candidates = [
+    body.refCode,
+    body.ref,
+    (submission as SurveySubmission & { refCode?: string })?.refCode,
+  ];
+  for (const c of candidates) {
+    if (c && isValidSarathiRef(String(c))) {
+      return normalizeRefCode(String(c));
+    }
+  }
+  return null;
+}
+
+/** Credit field-champion volunteer when a survey lands with a valid SARATHI ref. */
+async function creditVolunteerRef(
+  refCode: string,
+): Promise<{ credited: boolean; volunteer: Volunteer | null }> {
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return { credited: false, volunteer: null };
+
+    const { data: existing, error } = await supabase
+      .from("volunteers")
+      .select("*")
+      .eq("ref_code", refCode)
+      .maybeSingle();
+
+    if (error || !existing) return { credited: false, volunteer: null };
+
+    const current = mapDbRow(existing as Record<string, unknown>);
+    const nextCount = (current.completedCount || 0) + 1;
+    const nextStatus = deriveStatus(nextCount);
+
+    const { data: updated, error: updErr } = await supabase
+      .from("volunteers")
+      .update({
+        completed_count: nextCount,
+        status: nextStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("ref_code", refCode)
+      .select("*")
+      .maybeSingle();
+
+    if (updErr) return { credited: false, volunteer: current };
+
+    return {
+      credited: true,
+      volunteer: updated
+        ? mapDbRow(updated as Record<string, unknown>)
+        : { ...current, completedCount: nextCount, status: nextStatus },
+    };
+  } catch {
+    return { credited: false, volunteer: null };
+  }
+}
+
 export async function POST(req: Request) {
   try {
     let body: SurveyBody;
@@ -133,11 +201,13 @@ export async function POST(req: Request) {
         submission.districtSlug,
         submission.mandalSlug,
       );
+      const refCode = extractRefCode(body, submission);
       const payload = {
         schema: "statewide_v1",
         ...submission,
         phone,
         familyMembers: submission.familyMembers,
+        ...(refCode ? { refCode } : {}),
         submittedAt: new Date().toISOString(),
       };
 
@@ -153,12 +223,23 @@ export async function POST(req: Request) {
         payload,
       });
 
+      let credited = false;
+      let volunteer: Volunteer | null = null;
+      if (refCode) {
+        const credit = await creditVolunteerRef(refCode);
+        credited = credit.credited;
+        volunteer = credit.volunteer;
+      }
+
       // Mock-ok when Supabase is down — client also mirrors to localStorage
       return NextResponse.json({
         success: true,
         referenceId,
         persisted,
         mock: !persisted,
+        refCode: refCode || undefined,
+        credited,
+        volunteer,
       });
     }
 
@@ -197,6 +278,7 @@ export async function POST(req: Request) {
     }
 
     const referenceId = buildReferenceId(districtSlug, mandalSlug);
+    const refCode = extractRefCode(body);
     const payload = {
       ...body,
       headName,
@@ -204,6 +286,7 @@ export async function POST(req: Request) {
       gramPanchayat,
       communityWing,
       occupation,
+      ...(refCode ? { refCode } : {}),
       submittedAt: new Date().toISOString(),
     };
 
@@ -232,10 +315,21 @@ export async function POST(req: Request) {
       );
     }
 
+    let credited = false;
+    let volunteer: Volunteer | null = null;
+    if (refCode) {
+      const credit = await creditVolunteerRef(refCode);
+      credited = credit.credited;
+      volunteer = credit.volunteer;
+    }
+
     return NextResponse.json({
       success: true,
       referenceId,
       persisted: true,
+      refCode: refCode || undefined,
+      credited,
+      volunteer,
     });
   } catch (e) {
     return NextResponse.json(

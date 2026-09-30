@@ -23,6 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/poster") ||
     pathname.startsWith("/newsletter") ||
     pathname.startsWith("/survey") ||
+    pathname.startsWith("/sprint") ||
     pathname.startsWith("/twa");
 
   const showBottomNav = !pathname.startsWith("/admin");
