@@ -52,19 +52,18 @@ export function ServiceActionCards() {
     >
       <div className="mx-auto max-w-6xl">
         <div className="mb-7 max-w-3xl">
-          <p className="font-telugu text-xs font-bold tracking-wide text-[#B45309]">
-            ప్రజా సేవా కేంద్రం
-          </p>
+          <span className="civic-eyebrow-pill">
+            ప్రజా సేవా కేంద్రం • 3-CLICK PUBLIC SERVICES
+          </span>
           <h2
             id="three-click-services"
-            className="mt-1 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
+            className="mt-3 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
           >
-            3-దశల ప్రజా సేవలు{" "}
-            <span className="text-[#B45309]">•</span>{" "}
-            <span className="font-sans text-[0.85em] font-semibold tracking-tight text-slate-600 md:text-[0.72em]">
-              3-Click Public Services
-            </span>
+            3-దశల ప్రజా సేవలు
           </h2>
+          <p className="mt-1 font-sans text-sm font-medium tracking-wide text-slate-500">
+            3-Click Public Services
+          </p>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             వృత్తి గౌరవం కోసం అవసరమైన మూడు అధికారిక సాధనాలు — ఎంచుకుని ముందుకు
             సాగండి.
@@ -79,7 +78,7 @@ export function ServiceActionCards() {
               <Link
                 key={svc.id}
                 href={svc.href}
-                className="group flex flex-col rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] p-5 shadow-[0_1px_2px_rgb(15_23_42_/0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#B45309]/50 hover:bg-white hover:shadow-[0_16px_40px_rgb(15_23_42_/0.1)]"
+                className="civic-focus-ring group flex flex-col rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white to-[#FFFDF9] p-5 shadow-[0_1px_2px_rgb(15_23_42_/0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#B45309]/50 hover:bg-white hover:shadow-[0_16px_40px_rgb(15_23_42_/0.1)]"
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#B45309]/20 bg-[#B45309]/10 text-[#B45309]">

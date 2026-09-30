@@ -46,19 +46,18 @@ export function QuickGrievanceWidget() {
     >
       <div className="mx-auto max-w-6xl">
         <div className="mb-5 max-w-3xl">
-          <p className="font-telugu text-xs font-bold tracking-wide text-[#B45309]">
-            Instant Grievance Finder
-          </p>
+          <span className="civic-eyebrow-pill">
+            Instant Grievance Finder • 1-CLICK DESK
+          </span>
           <h2
             id="quick-grievance-heading"
-            className="mt-1 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
+            className="mt-3 font-display-te text-2xl leading-snug text-[#1E293B] md:text-3xl"
           >
-            తక్షణ ప్రజా వినతి డెస్క్{" "}
-            <span className="text-[#B45309]">•</span>{" "}
-            <span className="font-sans text-[0.85em] font-semibold tracking-tight text-slate-600 md:text-[0.72em]">
-              1-Click Instant Request
-            </span>
+            తక్షణ ప్రజా వినతి డెస్క్
           </h2>
+          <p className="mt-1 font-sans text-sm font-medium tracking-wide text-slate-500">
+            1-Click Instant Request
+          </p>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             జిల్లా + సమస్య ఎంచుకుని — ప్రీఫిల్డ్ వినతిపత్రం డాకెట్‌కు వెళ్లండి, లేదా
             WhatsApp హెల్ప్‌లైన్‌కు నేరుగా చాట్ చేయండి.
@@ -122,7 +121,7 @@ export function QuickGrievanceWidget() {
               <button
                 type="button"
                 onClick={openDocket}
-                className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-5 py-3 font-telugu text-xs font-bold text-white shadow-[0_6px_18px_rgb(180_83_9_/0.28)] transition-all duration-300 hover:brightness-110 hover:shadow-[0_10px_28px_rgb(180_83_9_/0.4)] active:scale-[0.99]"
+                className="civic-focus-ring mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-5 py-3 font-telugu text-xs font-bold text-white shadow-[0_6px_18px_rgb(180_83_9_/0.28)] transition-all duration-300 hover:brightness-110 hover:shadow-[0_10px_28px_rgb(180_83_9_/0.4)] active:scale-[0.99]"
               >
                 <Download className="h-4 w-4 shrink-0" aria-hidden />
                 <span className="text-center leading-snug">

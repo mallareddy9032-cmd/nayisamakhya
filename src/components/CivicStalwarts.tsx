@@ -75,9 +75,11 @@ const STALWARTS: Stalwart[] = [
 function StalwartPortrait({
   name,
   imageSrc,
+  priority = false,
 }: {
   name: string;
   imageSrc: string;
+  priority?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -107,6 +109,7 @@ function StalwartPortrait({
             alt={name}
             width={192}
             height={192}
+            priority={priority}
             className="h-full w-full object-cover"
             sizes="96px"
             onError={() => setFailed(true)}
@@ -127,17 +130,15 @@ function StalwartPortrait({
 export function CivicStalwarts() {
   return (
     <section
-      className="civic-watermark border-t border-civic-border bg-civic-paper px-4 py-12"
+      className="civic-watermark border-t border-civic-border bg-civic-paper px-4 py-10 sm:py-12"
       aria-labelledby="civic-stalwarts-heading"
     >
-      <div className="mx-auto max-w-6xl rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white via-[#FFFDF9] to-[#FBF7ED] p-5 shadow-xs sm:p-7">
-        <header className="mb-6 border-b border-[#EAD7B5] pb-4">
-          <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-civic-bronze">
-            Civic Heritage
-          </p>
+      <div className="mx-auto max-w-6xl rounded-2xl border border-[#EAD7B5] bg-gradient-to-b from-white via-[#FFFDF9] to-[#FBF7ED] p-5 shadow-xs sm:p-6">
+        <header className="mb-5 border-b border-[#EAD7B5] pb-3">
+          <span className="civic-eyebrow-pill">Civic Heritage • సమాజ వారసత్వం</span>
           <h2
             id="civic-stalwarts-heading"
-            className="mt-1.5 font-display-te text-xl tracking-tight text-civic-ink leading-snug sm:text-2xl"
+            className="mt-2.5 font-display-te text-xl tracking-tight text-civic-ink leading-snug sm:text-2xl"
           >
             సమాజ మార్గదర్శకులు & విశిష్ట ప్రముఖులు
           </h2>
@@ -146,26 +147,27 @@ export function CivicStalwarts() {
           </p>
         </header>
 
-        <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x lg:grid lg:grid-cols-5 lg:gap-4 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
-          {STALWARTS.map((stalwart) => (
+        <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x lg:grid lg:grid-cols-5 lg:gap-3 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
+          {STALWARTS.map((stalwart, index) => (
             <li
               key={stalwart.id}
-              className="w-[min(78vw,17.5rem)] shrink-0 snap-start lg:w-auto"
+              className="w-[min(72vw,15.5rem)] shrink-0 snap-start lg:w-auto"
             >
-              <article className="flex h-full flex-col items-center gap-3 rounded-xl border border-[#EAD7B5] bg-white/80 px-3.5 py-5 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-4">
+              <article className="flex h-full flex-col items-center gap-2 rounded-xl border border-[#EAD7B5] bg-white/80 px-3 py-4 text-center shadow-[0_4px_16px_rgb(180_83_9_/0.05)] sm:px-3.5">
                 <StalwartPortrait
                   name={`${stalwart.nameTe} — ${stalwart.nameEn}`}
                   imageSrc={stalwart.imageSrc}
+                  priority={index < 2}
                 />
 
-                <h3 className="font-telugu text-sm font-bold leading-[1.65] text-civic-ink">
+                <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
                   {stalwart.nameTe}
                 </h3>
                 <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
                   {stalwart.nameEn}
                 </p>
 
-                <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2.5 py-1.5">
+                <span className="inline-flex max-w-full flex-col items-center gap-0.5 rounded-md border border-x-[#B45309]/35 border-y-[#EAD7B5] bg-[#FFFDF9] px-2 py-1">
                   <span className="font-telugu text-[11px] font-semibold leading-snug text-civic-ink">
                     {stalwart.domainTe}
                   </span>
@@ -174,10 +176,10 @@ export function CivicStalwarts() {
                   </span>
                 </span>
 
-                <p className="font-telugu text-[12px] leading-[1.75] text-civic-navy/90">
+                <p className="line-clamp-2 font-telugu text-[12px] leading-[1.65] text-civic-navy/90">
                   {stalwart.blurbTe}
                 </p>
-                <p className="font-sans text-[11px] leading-relaxed text-slate-500">
+                <p className="line-clamp-2 font-sans text-[11px] leading-relaxed text-slate-500">
                   {stalwart.blurbEn}
                 </p>
               </article>

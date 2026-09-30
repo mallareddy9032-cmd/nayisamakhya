@@ -56,7 +56,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"\u0c2a\u0c4d\u0c30\u0c27\u0c3e\u0c28 \u0c2a\u0c4b\u0c30\u0c4d\u0c1f\u0c32\u0c4d (Home)"}</span>
                 <span className="font-sans text-[10px] text-slate-400">/</span>
@@ -65,7 +65,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/representation"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"\u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c24\u0c2f\u0c3e\u0c30\u0c40"}</span>
                 <span className="font-sans text-[10px] text-slate-400">
@@ -76,7 +76,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/feed"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"\u0c15\u0c4d\u0c37\u0c47\u0c24\u0c4d\u0c30 \u0c38\u0c2e\u0c40\u0c15\u0c4d\u0c37 & \u0c38\u0c2e\u0c38\u0c4d\u0c2f\u0c32 \u0c2b\u0c40\u0c21\u0c4d"}</span>
                 <span className="font-sans text-[10px] text-slate-400">/feed</span>
@@ -85,7 +85,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/newsletter"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>సమాచార పత్రిక (Newsletter)</span>
                 <span className="font-sans text-[10px] text-slate-400">
@@ -108,7 +108,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/poster"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"\u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d \u0c2a\u0c4b\u0c38\u0c4d\u0c1f\u0c30\u0c4d (QR / A4)"}</span>
                 <span className="font-sans text-[10px] text-slate-400">/poster</span>
@@ -117,7 +117,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/announce"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"WhatsApp \u0c38\u0c02\u0c26\u0c47\u0c36 \u0c15\u0c3f\u0c1f\u0c4d"}</span>
                 <span className="font-sans text-[10px] text-slate-400">/announce</span>
@@ -126,7 +126,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/coordinator-card"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"\u0c38\u0c2e\u0c28\u0c4d\u0c35\u0c2f\u0c15\u0c30\u0c4d\u0c24 \u0c15\u0c3e\u0c30\u0c4d\u0c21\u0c41"}</span>
                 <span className="font-sans text-[10px] text-slate-400">
@@ -157,7 +157,7 @@ export function CivicFooter() {
             <li>
               <Link
                 href="/twa"
-                className="flex items-center justify-between hover:text-civic-bronze"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
               >
                 <span>{"\u0c1f\u0c46\u0c32\u0c3f\u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c4d Mini App \u0c39\u0c2c\u0c4d"}</span>
                 <span className="font-sans text-[10px] text-slate-400">/twa</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -215,7 +215,7 @@ function MilestoneScrubber({
                     id={`epoch-tab-${era.id}`}
                     onClick={() => onSelect(era.id)}
                     className={cn(
-                      "relative flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300",
+                      "civic-focus-ring relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300",
                       selected
                         ? "bg-[#B45309] text-white"
                         : "bg-white text-slate-400 hover:border-[#B45309]/40 hover:text-[#B45309]",
@@ -233,7 +233,7 @@ function MilestoneScrubber({
                   >
                     {selected ? (
                       <span
-                        className="absolute inset-0 animate-ping rounded-full bg-[#B45309]/35"
+                        className="motion-safe-ping absolute inset-0 animate-ping rounded-full bg-[#B45309]/35 motion-reduce:hidden"
                         aria-hidden
                       />
                     ) : null}
@@ -280,7 +280,7 @@ function MilestoneScrubber({
               id={`epoch-tab-mobile-${era.id}`}
               onClick={() => onSelect(era.id)}
               className={cn(
-                "inline-flex min-h-10 shrink-0 flex-col items-start justify-center rounded-full border px-3.5 py-1.5 transition-all duration-300",
+                "civic-focus-ring inline-flex min-h-11 shrink-0 flex-col items-start justify-center rounded-full border px-3.5 py-1.5 transition-all duration-300",
                 selected
                   ? "border-[#B45309] bg-[#1E293B] text-white shadow-[0_0_0_1.5px_#B45309]"
                   : "border-[#EAD7B5] bg-white text-[#0F172A] hover:border-[#B45309]/40",
@@ -401,7 +401,41 @@ function EpochCard({ era }: { era: TimelineEra }) {
 
 export function CivicTimeline() {
   const [activeId, setActiveId] = useState(TIMELINE_ERAS[0].id);
+  const [hintVisible, setHintVisible] = useState(true);
   const active = TIMELINE_ERAS.find((e) => e.id === activeId) ?? TIMELINE_ERAS[0];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      e.preventDefault();
+      const delta = e.key === "ArrowRight" ? 1 : -1;
+      setActiveId((current) => {
+        const idx = TIMELINE_ERAS.findIndex((era) => era.id === current);
+        const next =
+          TIMELINE_ERAS[
+            (idx + delta + TIMELINE_ERAS.length) % TIMELINE_ERAS.length
+          ];
+        return next?.id ?? current;
+      });
+      setHintVisible(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const selectEra = (id: string) => {
+    setActiveId(id);
+    setHintVisible(false);
+  };
 
   return (
     <section
@@ -410,7 +444,7 @@ export function CivicTimeline() {
     >
       <div className="mx-auto max-w-5xl">
         <header className="mb-5 max-w-3xl">
-          <span className="inline-flex rounded-full border border-[#FDE68A] bg-[#FEF3C7]/60 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-widest text-[#B45309]">
+          <span className="civic-eyebrow-pill">
             చారిత్రక & చట్టబద్ధ పరిణామ క్రమం • CHRONOLOGICAL CIVIC TIMELINE
           </span>
 
@@ -431,12 +465,20 @@ export function CivicTimeline() {
         </header>
 
         {/* Compact interactive viewport — scrubber + single card */}
-        <div className="flex flex-col gap-4 md:max-h-[450px]">
+        <div className="flex flex-col gap-3 md:max-h-[450px] md:gap-4">
           <MilestoneScrubber
             eras={TIMELINE_ERAS}
             activeId={activeId}
-            onSelect={setActiveId}
+            onSelect={selectEra}
           />
+          {hintVisible ? (
+            <p className="text-center font-telugu text-[11px] font-semibold text-slate-500">
+              మైలురాయి ఎంచుకోండి • Select a milestone
+              <span className="ml-1.5 hidden font-sans text-[10px] font-medium text-slate-400 sm:inline">
+                (← →)
+              </span>
+            </p>
+          ) : null}
           <EpochCard era={active} />
         </div>
       </div>

@@ -22,9 +22,9 @@ const METRICS: Metric[] = [
   },
   {
     id: "free",
-    value: 100,
-    suffix: "%",
-    label: "ఉచిత ప్రజా సేవలు",
+    value: null,
+    display: "ఉచితం",
+    label: "ఉచిత ప్రజా సేవా మార్గాలు",
   },
   {
     id: "go23",
@@ -160,6 +160,10 @@ export function CivicMetricsTicker() {
             </div>
           ))}
         </div>
+        <p className="border-t border-[#E2E8F0] bg-white/60 px-4 py-2 text-center font-telugu text-[10px] leading-relaxed text-slate-500">
+          మండల కవరేజ్ · జీ.ఓ. 23 హక్కు · అధికారిక డెస్క్ — సూచికలు రెండు వారాలకు
+          ఒకసారి నవీకరణ
+        </p>
       </div>
     </section>
   );

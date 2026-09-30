@@ -46,22 +46,20 @@ export function HeritageTriadRibbon() {
         />
 
         <div className="relative border-b border-[#EAD7B5] px-4 py-4 text-center sm:px-6 sm:py-5">
-          <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-[#B45309]">
-            Heritage Triad
-          </p>
+          <span className="civic-eyebrow-pill">
+            Heritage Triad • వారసత్వ త్రయం
+          </span>
           <h2
             id="heritage-triad-heading"
-            className="mt-2 font-display-te text-lg leading-snug sm:text-xl md:text-2xl"
+            className="mt-3 font-display-te text-lg leading-snug sm:text-xl md:text-2xl"
           >
             <span className="bg-gradient-to-r from-[#92400e] via-[#B45309] to-[#C2410C] bg-clip-text text-transparent">
               వైద్యం మన మూలం • కళ మన శ్వాస • ఆత్మగౌరవం మన వారసత్వం
             </span>
           </h2>
-          <p className="mt-2 font-display-te text-sm font-semibold leading-snug sm:text-base">
-            <span className="bg-gradient-to-r from-[#92400e] via-[#B45309] to-[#C2410C] bg-clip-text text-transparent">
-              Medicine is our source • Art is our breath • Self-respect is our
-              heritage
-            </span>
+          <p className="mt-2 font-sans text-sm font-medium leading-snug text-slate-500 sm:text-base">
+            Medicine is our source • Art is our breath • Self-respect is our
+            heritage
           </p>
         </div>
 

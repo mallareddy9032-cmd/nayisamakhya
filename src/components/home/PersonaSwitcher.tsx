@@ -189,17 +189,17 @@ export function PersonaSwitcher() {
 
   return (
     <section
-      className="border-b border-civic-border bg-[#FBFBFA] px-4 py-12 sm:py-14"
+      className="border-b border-civic-border bg-[#FBFBFA] px-4 py-10 sm:py-12"
       aria-labelledby="persona-switcher-heading"
     >
       <div className="mx-auto max-w-6xl">
-        <header className="mb-8 max-w-3xl">
-          <p className="font-sans text-xs font-bold uppercase tracking-widest text-[#B45309]">
+        <header className="mb-6 max-w-3xl">
+          <span className="civic-eyebrow-pill">
             బహుముఖ సాధికారత • TARGETED COMMUNITY EMPOWERMENT
-          </p>
+          </span>
           <h2
             id="persona-switcher-heading"
-            className="mt-2 font-display-te text-2xl font-normal leading-snug tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
+            className="mt-3 font-display-te text-2xl font-normal leading-snug tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
           >
             ఎవరి కోసం ఈ వేదిక?
           </h2>
@@ -233,7 +233,7 @@ export function PersonaSwitcher() {
                 id={`persona-tab-${persona.id}`}
                 onClick={() => setActive(persona.id)}
                 className={cn(
-                  "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-300 sm:justify-start",
+                  "civic-focus-ring flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-300 sm:justify-start",
                   selected
                     ? "bg-[#1E293B] text-white shadow-[0_4px_14px_rgb(15_23_42_/0.2)]"
                     : "text-[#0F172A] hover:bg-white",
@@ -264,7 +264,7 @@ export function PersonaSwitcher() {
           role="tabpanel"
           id={`persona-panel-${current.id}`}
           aria-labelledby={`persona-tab-${current.id}`}
-          className="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-12"
+          className="mt-6 grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8"
         >
           <div
             key={`copy-${current.id}`}
