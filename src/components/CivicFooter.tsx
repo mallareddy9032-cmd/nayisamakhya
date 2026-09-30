@@ -28,6 +28,7 @@ import {
   Trophy,
   Clapperboard,
   Scale,
+  Scissors,
 } from "lucide-react";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
@@ -161,6 +162,11 @@ export function CivicFooter() {
               <li>
                 <FooterNavLink href="/history" icon={BookOpen}>
                   History
+                </FooterNavLink>
+              </li>
+              <li>
+                <FooterNavLink href="/salon-hub" icon={Scissors}>
+                  సెలూన్ హబ్
                 </FooterNavLink>
               </li>
             </ul>

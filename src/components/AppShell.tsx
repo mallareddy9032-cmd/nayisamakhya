@@ -26,6 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/sprint") ||
     pathname.startsWith("/reels") ||
     pathname.startsWith("/quiz") ||
+    pathname.startsWith("/salon-hub") ||
     pathname.startsWith("/twa");
 
   const showBottomNav = !pathname.startsWith("/admin");

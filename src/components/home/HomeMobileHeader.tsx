@@ -10,6 +10,7 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  Scissors,
   Send,
   Trophy,
   X,
@@ -160,6 +161,13 @@ export function HomeMobileHeader() {
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5">
+            <Link
+              href="/salon-hub"
+              className="tap inline-flex max-w-[6.5rem] items-center gap-1 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2 py-1 font-telugu text-[10px] font-bold text-[#B45309]"
+            >
+              <Scissors className="h-3 w-3 shrink-0" aria-hidden />
+              <span className="truncate">సెలూన్ హబ్</span>
+            </Link>
             <CompetitionsMenu compact />
             <div
               className="flex items-center rounded-lg border border-slate-200 bg-[#FBFBFA] p-0.5"
@@ -251,6 +259,13 @@ export function HomeMobileHeader() {
             </Link>
             <CompetitionsMenu className="hidden xl:block" />
             <Link
+              href="/salon-hub"
+              className="civic-focus-ring hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 lg:inline-flex"
+            >
+              <Scissors className="h-3 w-3 shrink-0" aria-hidden />
+              సెలూన్ హబ్
+            </Link>
+            <Link
               href="/survey"
               className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-4 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
             >
@@ -322,6 +337,16 @@ export function HomeMobileHeader() {
               </div>
 
               <ul className="space-y-1">
+                <li>
+                  <Link
+                    href="/salon-hub"
+                    onClick={() => setOpen(false)}
+                    className="tap flex min-h-12 items-center gap-2.5 rounded-xl border border-[#B45309]/25 bg-[#B45309]/10 px-3 font-telugu text-sm font-bold text-[#B45309]"
+                  >
+                    <Scissors className="h-4 w-4" aria-hidden />
+                    సెలూన్ హబ్
+                  </Link>
+                </li>
                 {PRIMARY_LINKS.map((link) => {
                   const Icon = "icon" in link ? link.icon : null;
                   return (

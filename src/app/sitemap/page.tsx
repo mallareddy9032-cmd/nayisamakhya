@@ -88,6 +88,26 @@ export default function SitemapPage() {
                   : "Civic & Legal Rights Quiz"}
               </Link>
             </li>
+            <li>
+              <Link href="/salon-hub" className="hover:text-[#C2410C]">
+                {te ? "సెలూన్ స్టూడియో హబ్" : "Salon Studio Enterprise Hub"}
+              </Link>
+            </li>
+            <li>
+              <Link href="/salon-hub/procure" className="hover:text-[#C2410C]">
+                {te ? "సమూహ ఇండెంట్" : "Group procure indent"}
+              </Link>
+            </li>
+            <li>
+              <Link href="/salon-hub/energy" className="hover:text-[#C2410C]">
+                {te ? "జీ.ఓ. 23 ఎనర్జీ ప్లానర్" : "G.O. 23 energy planner"}
+              </Link>
+            </li>
+            <li>
+              <Link href="/salon-hub/loans" className="hover:text-[#C2410C]">
+                {te ? "బ్యాంక్ డీపీఆర్ జనరేటర్" : "Bank DPR generator"}
+              </Link>
+            </li>
           </ul>
         </div>
 

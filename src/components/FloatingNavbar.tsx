@@ -8,6 +8,7 @@ import {
   Landmark,
   MapPin,
   Menu,
+  Scissors,
   Send,
   Trophy,
   X,
@@ -168,6 +169,13 @@ export function FloatingNavbar() {
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5">
+            <Link
+              href="/salon-hub"
+              className="tap inline-flex max-w-[6.5rem] items-center gap-1 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2 py-1 font-telugu text-[10px] font-bold text-[#B45309]"
+            >
+              <Scissors className="h-3 w-3 shrink-0" aria-hidden />
+              <span className="truncate">సెలూన్ హబ్</span>
+            </Link>
             <CompetitionsMenu compact />
             <button
               type="button"
@@ -224,6 +232,13 @@ export function FloatingNavbar() {
           </nav>
 
           <div className="flex items-center gap-2 pr-1">
+            <Link
+              href="/salon-hub"
+              className="tap hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 md:inline-flex"
+            >
+              <Scissors className="h-3 w-3 shrink-0" aria-hidden />
+              సెలూన్ హబ్
+            </Link>
             <CompetitionsMenu className="hidden md:block" />
             <button
               type="button"
@@ -320,6 +335,16 @@ export function FloatingNavbar() {
                 </ul>
               </div>
               <ul className="space-y-1">
+                <li>
+                  <Link
+                    href="/salon-hub"
+                    onClick={() => setOpen(false)}
+                    className="tap flex min-h-12 items-center gap-2 rounded-xl border border-[#B45309]/25 bg-[#B45309]/10 px-3 font-telugu text-sm font-bold text-[#B45309]"
+                  >
+                    <Scissors className="h-4 w-4" aria-hidden />
+                    సెలూన్ హబ్
+                  </Link>
+                </li>
                 {primaryNav.map((link) => (
                   <li key={link.href}>
                     <Link
