@@ -115,3 +115,6 @@ export interface SurveySubmission {
   desiredAction: "petition" | "coordinator_visit" | "whatsapp_updates";
   declarationAccepted: boolean;
 }
+
+/** Browser localStorage key — array of SurveySubmission (+ optional refCode/referenceId). */
+export const SURVEY_STORAGE_KEY = "nayi_statewide_survey_submissions_v1";

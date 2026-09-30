@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import {
   CheckCircle2,
+  Download,
   Filter,
   Loader2,
   Trash2,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { moderateSubmission } from "@/app/admin/moderation/actions";
+import { downloadStatewideCsv } from "@/lib/moderation/csvExport";
 import { DESK_UI } from "@/lib/moderation/deskCopy";
 
 import type { DeskStatus as Status } from "@/lib/moderation/deskCounts";
@@ -219,7 +221,7 @@ export function ModerationDeskClient({
         <p className="font-telugu text-sm text-[#71717A]">{DESK_UI.lead_te}</p>
       </header>
 
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-5 flex flex-wrap items-center gap-2">
         {tabs.map((t) => {
           const count =
             t.id === "all"
@@ -245,6 +247,25 @@ export function ModerationDeskClient({
             </button>
           );
         })}
+        <button
+          type="button"
+          onClick={() => {
+            const result = downloadStatewideCsv({ includeReels: true });
+            if (!result.ok) {
+              window.alert("CSV download is only available in the browser.");
+              return;
+            }
+            if (result.rowCount === 0) {
+              window.alert(
+                "No statewide survey or reel records found in this browser yet. Submit a survey on /survey (or a reel) on this device, then retry.",
+              );
+            }
+          }}
+          className="tap ml-auto inline-flex items-center gap-2 rounded-full border border-[#EBE8E0] bg-white px-3.5 py-2 text-sm font-semibold text-[#18181B] hover:bg-[#F4F2EB]"
+        >
+          <Download className="h-3.5 w-3.5" aria-hidden />
+          📥 Download Data (CSV)
+        </button>
       </div>
 
       {filtered.length === 0 ? (

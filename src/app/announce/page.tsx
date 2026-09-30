@@ -1,11 +1,13 @@
 import { AnnounceHub } from "@/components/AnnounceHub";
 
-type PageProps = {
-  searchParams?: Promise<{ blast?: string | string[] }> | { blast?: string | string[] };
-};
+type Search = { blast?: string | string[] };
 
-export default async function CommunityAnnouncePage({ searchParams }: PageProps) {
-  const resolved = await Promise.resolve(searchParams ?? {});
+export default async function CommunityAnnouncePage({
+  searchParams,
+}: {
+  searchParams?: Promise<Search>;
+}) {
+  const resolved: Search = (await searchParams) ?? {};
   const raw = resolved.blast;
   const initialBlast = Array.isArray(raw) ? raw[0] : raw;
 

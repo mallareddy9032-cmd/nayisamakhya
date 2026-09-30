@@ -49,9 +49,8 @@ import type {
   SubCaste,
   SurveySubmission,
 } from "@/types/survey";
+import { SURVEY_STORAGE_KEY } from "@/types/survey";
 import type { Volunteer } from "@/types/volunteer";
-
-const STORAGE_KEY = "nayi_statewide_survey_submissions_v1";
 
 const inputClass =
   "w-full min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#B45309]/50 focus:outline-none focus:ring-2 focus:ring-[#B45309]/15";
@@ -128,12 +127,14 @@ function initialForm(): FormState {
   };
 }
 
-function persistLocal(submission: SurveySubmission) {
+function persistLocal(
+  submission: SurveySubmission & { refCode?: string; referenceId?: string },
+) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(SURVEY_STORAGE_KEY);
     const prev = raw ? (JSON.parse(raw) as SurveySubmission[]) : [];
     const next = Array.isArray(prev) ? [...prev, submission] : [submission];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next.slice(-200)));
+    localStorage.setItem(SURVEY_STORAGE_KEY, JSON.stringify(next.slice(-200)));
   } catch {
     /* quota / private mode — non-fatal */
   }
@@ -394,7 +395,11 @@ export function StatewideSurveyWizard() {
       };
 
       const finishSuccess = (refId: string, mock: boolean) => {
-        persistLocal(submission);
+        persistLocal({
+          ...submission,
+          ...(referralRef ? { refCode: referralRef } : {}),
+          referenceId: refId,
+        });
         // Sync sprint tracker localStorage even when API credit was mock/offline
         if (referralRef) {
           if (data.volunteer) {
@@ -424,11 +429,14 @@ export function StatewideSurveyWizard() {
       const localRef = `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
       finishSuccess(data.referenceId || localRef, true);
     } catch {
-      persistLocal(submission);
+      const localRef = `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      persistLocal({
+        ...submission,
+        ...(referralRef ? { refCode: referralRef } : {}),
+        referenceId: localRef,
+      });
       if (referralRef) creditLocalRef(referralRef);
-      setReferenceId(
-        `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
-      );
+      setReferenceId(localRef);
       setMockFallback(true);
       setSubmittedHouseholdSize(submission.familyMembers.length);
       setSubmittedMatrimonialCount(

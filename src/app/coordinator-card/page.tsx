@@ -102,7 +102,7 @@ function GuillocheOverlay() {
   );
 }
 
-export function CoordinatorCardClient() {
+function CoordinatorCardClient() {
   const searchParams = useSearchParams();
   const [hydrated, setHydrated] = useState(false);
   const [name, setName] = useState(DEFAULTS.name);
