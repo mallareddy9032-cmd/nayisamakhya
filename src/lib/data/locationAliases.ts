@@ -32,21 +32,43 @@ export function isUsablePlaceSlug(slug: unknown): slug is string {
 
 /**
  * Prefer a real ULB slug; when Supabase returns null, repair known towns
- * (e.g. Madhira పురపాలక సంఘం → madhira-municipality) or derive from English name.
+ * to canonical AdminEntity slugs (e.g. Madhira → madhira).
  */
 export function repairUlbSlug(
   slug: unknown,
   nameEn: string,
   nameTe: string,
 ): string | null {
-  if (isUsablePlaceSlug(slug)) return slug.trim();
+  if (isUsablePlaceSlug(slug)) {
+    const s = slug.trim();
+    // Normalize known legacy long-form slugs to short canonical forms.
+    if (s === "madhira-municipality") return "madhira";
+    if (s === "sathupalli-municipality") return "sathupalli";
+    if (s === "wyra-municipality") return "wyra";
+    if (s === "khammam-municipal-corporation") return "khammam-corp";
+    if (s === "kallur-municipality") return "kallur";
+    if (s === "yedulapuram-municipality") return "yedulapuram";
+    return s;
+  }
 
   const en = String(nameEn || "").trim();
   const te = String(nameTe || "").trim();
   const hay = `${en} ${te}`.toLowerCase();
 
   if (/madhira/i.test(en) || te.includes("మధిర")) {
-    return "madhira-municipality";
+    return "madhira";
+  }
+  if (/sathupalli|satthupalli/i.test(en) || te.includes("సత్తుపల్లి")) {
+    return "sathupalli";
+  }
+  if (/wyra/i.test(en) || te.includes("వైరా")) {
+    return "wyra";
+  }
+  if (
+    (/khammam/i.test(en) && /corporation/i.test(en)) ||
+    te.includes("ఖమ్మం మున్సిపల్ కార్పొరేషన్")
+  ) {
+    return "khammam-corp";
   }
 
   const base = en
@@ -58,13 +80,13 @@ export function repairUlbSlug(
   if (!base) return null;
 
   if (/municipal corporation|corporation/i.test(en)) {
-    return `${base}-municipal-corporation`;
+    return `${base}-corp`;
   }
   if (/nagar panchayat/i.test(en) || te.includes("నగర పంచాయతీ")) {
     return `${base}-nagar-panchayat`;
   }
   if (/municipality|పురపాలక|మున్సిప/i.test(hay)) {
-    return `${base}-municipality`;
+    return base;
   }
   return base;
 }

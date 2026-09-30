@@ -120,15 +120,18 @@ export async function fetchDistrictDirectory(districtSlug: string): Promise<{
 
   let urban: DirectoryLink[] = listStaticUlbsForDistrict(district.slug)
     .filter((u) => isUsablePlaceSlug(u.slug))
-    .map((u) => ({
-      slug: u.slug,
-      name_en: u.name_en,
-      name_te: u.name_te,
-      href: `/${district.slug}/urban/${u.slug}`,
-      kind: "urban" as const,
-      meta_en: u.ulb_type.replace(/_/g, " "),
-      meta_te: ulbTypeTe(u.ulb_type),
-    }));
+    .map((u) => {
+      const slug = repairUlbSlug(u.slug, u.name_en, u.name_te) || u.slug;
+      return {
+        slug,
+        name_en: u.name_en,
+        name_te: u.name_te,
+        href: `/${district.slug}/${slug}`,
+        kind: "urban" as const,
+        meta_en: u.ulb_type.replace(/_/g, " "),
+        meta_te: ulbTypeTe(u.ulb_type),
+      };
+    });
 
   try {
     const supabase = getSupabase();
@@ -159,7 +162,7 @@ export async function fetchDistrictDirectory(districtSlug: string): Promise<{
               slug,
               name_en: nameEn,
               name_te: nameTe,
-              href: `/${district.slug}/urban/${slug}`,
+              href: `/${district.slug}/${slug}`,
               kind: "urban",
               meta_en: String(u.ulb_type || "municipality").replace(/_/g, " "),
               meta_te: ulbTypeTe(String(u.ulb_type || "municipality")),
@@ -189,6 +192,8 @@ export async function fetchUrbanPortal(
   const uSlug = ulbSlug.trim();
   const fallback = getStaticUlb(dSlug, uSlug);
   const staticPortal = fallback ? fromStaticUlb(fallback) : undefined;
+  // Prefer querying Supabase with the legacy long-form slug when available.
+  const dbSlug = fallback?.slug || uSlug;
 
   try {
     const supabase = getSupabase();
@@ -202,16 +207,43 @@ export async function fetchUrbanPortal(
 
     if (!dRow?.id) return staticPortal;
 
-    const { data: ulb, error } = await supabase
+    type UlbRow = {
+      id: string;
+      slug: string;
+      name_en: string;
+      name_te: string;
+      ulb_type: string;
+      town_coordinators_count: number;
+      registered_establishments_count: number;
+      welfare_support_active: boolean;
+    };
+
+    let ulb: UlbRow | null = null;
+
+    const primary = await supabase
       .from("urban_local_bodies")
       .select(
         "id, slug, name_en, name_te, ulb_type, town_coordinators_count, registered_establishments_count, welfare_support_active",
       )
       .eq("district_id", dRow.id)
-      .eq("slug", uSlug)
+      .eq("slug", dbSlug)
       .maybeSingle();
 
-    if (error || !ulb) return staticPortal;
+    if (!primary.error && primary.data) {
+      ulb = primary.data as UlbRow;
+    } else if (dbSlug !== uSlug) {
+      const retry = await supabase
+        .from("urban_local_bodies")
+        .select(
+          "id, slug, name_en, name_te, ulb_type, town_coordinators_count, registered_establishments_count, welfare_support_active",
+        )
+        .eq("district_id", dRow.id)
+        .eq("slug", uSlug)
+        .maybeSingle();
+      if (!retry.error && retry.data) ulb = retry.data as UlbRow;
+    }
+
+    if (!ulb) return staticPortal;
 
     const [repsRes, estRes] = await Promise.all([
       supabase

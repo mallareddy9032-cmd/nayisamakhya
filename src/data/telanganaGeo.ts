@@ -7,7 +7,10 @@
 
 import { TELANGANA_DISTRICTS as DISTRICT_SEEDS } from "@/lib/data/districts";
 import { MANDALS_DIRECTORY } from "@/lib/data/mandalsDirectory";
-import { URBAN_DIRECTORY } from "@/lib/data/urbanDirectory";
+import {
+  URBAN_DIRECTORY,
+  type StaticUlb,
+} from "@/lib/data/urbanDirectory";
 import { resolveRegionalHubForDistrict } from "@/config/communityHubs";
 
 export interface MandalInfo {
@@ -696,7 +699,7 @@ export function searchTelanganaGeo(query: string, limit = 48): GeoSearchHit[] {
           mandal: m,
           labelEn: `${m.nameEn} · ${d.nameEn}`,
           labelTe: `${m.nameTe} · ${d.nameTe}`,
-          href: `/districts/${d.slug}/${m.slug}`,
+          href: `/${d.slug}/${m.slug}`,
         });
       }
     }
@@ -718,4 +721,344 @@ export function mandalStaticParams(): {
   return TELANGANA_GEO.flatMap((d) =>
     d.mandals.map((m) => ({ district: d.slug, mandal: m.slug })),
   );
+}
+
+/* -------------------------------------------------------------------------- */
+/* AdminEntity — unified ULB + rural mandal desk model                        */
+/* -------------------------------------------------------------------------- */
+
+export type EntityType = "corporation" | "municipality" | "rural-mandal";
+
+export interface AdminEntity {
+  slug: string;
+  nameTe: string;
+  nameEn: string;
+  type: EntityType;
+  districtSlug: string;
+  districtNameTe: string;
+  districtNameEn: string;
+  /** Wards for urban, Panchayats for rural */
+  subUnitsCount: number;
+  /** "మున్సిపల్ వార్డులు" or "గ్రామ పంచాయతీలు" */
+  subUnitsLabelTe: string;
+  headOfficeTe: string;
+  subUnitsList: { id: number | string; nameTe: string; nameEn: string }[];
+  /** Legacy urban-directory / Supabase slug when different from canonical */
+  legacySlug?: string;
+  ulbType?: StaticUlb["ulb_type"];
+}
+
+/** Explicit Khammam (and peer) canonical ULB slugs — never null/empty. */
+const ULB_CANONICAL_BY_LEGACY: Record<string, string> = {
+  "khammam:khammam-municipal-corporation": "khammam-corp",
+  "khammam:madhira-municipality": "madhira",
+  "khammam:sathupalli-municipality": "sathupalli",
+  "khammam:wyra-municipality": "wyra",
+  "khammam:kallur-municipality": "kallur",
+  "khammam:yedulapuram-municipality": "yedulapuram",
+};
+
+/** Display name overrides (TE/EN) for key ULBs. */
+const ULB_NAME_OVERRIDES: Record<
+  string,
+  { nameTe: string; nameEn: string; wards?: number }
+> = {
+  "khammam:khammam-corp": {
+    nameTe: "ఖమ్మం మున్సిపల్ కార్పొరేషన్",
+    nameEn: "Khammam Municipal Corporation",
+    wards: 50,
+  },
+  "khammam:madhira": {
+    nameTe: "మధిర పురపాలక సంఘం",
+    nameEn: "Madhira Municipality",
+    wards: 22,
+  },
+  "khammam:sathupalli": {
+    nameTe: "సత్తుపల్లి మున్సిపాలిటీ",
+    nameEn: "Sathupalli Municipality",
+    wards: 24,
+  },
+  "khammam:wyra": {
+    nameTe: "వైరా మున్సిపాలిటీ",
+    nameEn: "Wyra Municipality",
+    wards: 20,
+  },
+};
+
+/** Mandals that are purely urban LGD rows — exclude from rural tab when ULB exists. */
+const URBAN_ONLY_MANDAL_SLUGS = new Set([
+  "khammam-urban",
+  "suryapet-urban",
+  "hanumakonda-urban",
+  "karimnagar-urban",
+  "nalgonda-urban",
+  "nizamabad-north",
+  "nizamabad-south",
+]);
+
+function stripUlbSuffix(slug: string): string {
+  return slug
+    .replace(/-municipal-corporation$/i, "")
+    .replace(/-municipality$/i, "")
+    .replace(/-nagar-panchayat$/i, "")
+    .replace(/-corporation$/i, "")
+    .replace(/-urban$/i, "");
+}
+
+export function canonicalUlbSlug(
+  districtSlug: string,
+  legacySlug: string,
+  ulbType: StaticUlb["ulb_type"],
+): string {
+  const key = `${districtSlug}:${legacySlug}`;
+  if (ULB_CANONICAL_BY_LEGACY[key]) return ULB_CANONICAL_BY_LEGACY[key];
+
+  const base = stripUlbSuffix(legacySlug) || legacySlug;
+  if (!base || base === "null" || base === "undefined") {
+    throw new Error(
+      `Refusing empty/null ULB slug for ${districtSlug}/${legacySlug}`,
+    );
+  }
+  if (ulbType === "municipal_corporation") {
+    if (base === districtSlug || legacySlug.includes(districtSlug)) {
+      return `${districtSlug}-corp`;
+    }
+    return `${base}-corp`;
+  }
+  return base;
+}
+
+function defaultWardCount(
+  ulbType: StaticUlb["ulb_type"],
+  seed: string,
+): number {
+  const h = geoHash(seed);
+  if (ulbType === "municipal_corporation") return 40 + (h % 21); // 40–60
+  if (ulbType === "nagar_panchayat") return 10 + (h % 6); // 10–15
+  return 18 + (h % 11); // 18–28 municipalities
+}
+
+function buildWardList(
+  count: number,
+): { id: number; nameTe: string; nameEn: string }[] {
+  const list: { id: number; nameTe: string; nameEn: string }[] = [];
+  for (let i = 1; i <= count; i++) {
+    list.push({
+      id: i,
+      nameTe: `వార్డు ${i}`,
+      nameEn: `Ward ${i}`,
+    });
+  }
+  return list;
+}
+
+function entityTypeFromUlb(ulbType: StaticUlb["ulb_type"]): EntityType {
+  return ulbType === "municipal_corporation" ? "corporation" : "municipality";
+}
+
+function buildUrbanEntity(ulb: StaticUlb): AdminEntity {
+  const district = getGeoDistrict(ulb.district_slug);
+  const slug = canonicalUlbSlug(ulb.district_slug, ulb.slug, ulb.ulb_type);
+  if (!slug) {
+    throw new Error(`Empty canonical slug for ${ulb.district_slug}/${ulb.slug}`);
+  }
+  const overrideKey = `${ulb.district_slug}:${slug}`;
+  const override = ULB_NAME_OVERRIDES[overrideKey];
+  const wards =
+    override?.wards ??
+    defaultWardCount(ulb.ulb_type, `${ulb.district_slug}:${slug}`);
+  const nameTe = override?.nameTe || ulb.name_te;
+  const nameEn = override?.nameEn || ulb.name_en;
+  const districtNameTe = district?.nameTe || ulb.district_slug;
+  const districtNameEn = district?.nameEn || ulb.district_slug;
+
+  return {
+    slug,
+    nameTe,
+    nameEn,
+    type: entityTypeFromUlb(ulb.ulb_type),
+    districtSlug: ulb.district_slug,
+    districtNameTe,
+    districtNameEn,
+    subUnitsCount: wards,
+    subUnitsLabelTe: "మున్సిపల్ వార్డులు",
+    headOfficeTe: `${nameTe} ప్రధాన కార్యాలయం, ${districtNameTe}`,
+    subUnitsList: buildWardList(wards),
+    legacySlug: ulb.slug !== slug ? ulb.slug : undefined,
+    ulbType: ulb.ulb_type,
+  };
+}
+
+function ruralCanonicalSlug(
+  districtSlug: string,
+  mandalSlug: string,
+  taken: Set<string>,
+): string {
+  let slug = mandalSlug.trim().toLowerCase();
+  if (!slug || slug === "null" || slug === "undefined") {
+    throw new Error(`Empty rural slug in ${districtSlug}`);
+  }
+  if (taken.has(slug)) {
+    slug = `${slug}-rural`;
+  }
+  // Guarantee uniqueness even if -rural is taken.
+  if (taken.has(slug)) {
+    slug = `${mandalSlug}-mandal`;
+  }
+  if (taken.has(slug)) {
+    slug = `${districtSlug}-${mandalSlug}-rural`;
+  }
+  return slug;
+}
+
+function buildRuralEntity(
+  district: DistrictInfo,
+  mandal: MandalInfo,
+  slug: string,
+): AdminEntity {
+  const h = geoHash(`gp:${district.slug}:${slug}`);
+  const gpCount = 8 + (h % 18); // 8–25 placeholder count
+  return {
+    slug,
+    nameTe: mandal.nameTe,
+    nameEn: mandal.nameEn,
+    type: "rural-mandal",
+    districtSlug: district.slug,
+    districtNameTe: district.nameTe,
+    districtNameEn: district.nameEn,
+    subUnitsCount: gpCount,
+    subUnitsLabelTe: "గ్రామ పంచాయతీలు",
+    headOfficeTe: `${mandal.nameTe} మండల కార్యాలయం, ${district.nameTe}`,
+    subUnitsList: [],
+  };
+}
+
+type DistrictEntityIndex = {
+  urban: AdminEntity[];
+  rural: AdminEntity[];
+  bySlug: Map<string, AdminEntity>;
+  /** legacy urban slug → canonical */
+  legacyToCanonical: Map<string, string>;
+};
+
+function buildDistrictEntityIndex(districtSlug: string): DistrictEntityIndex {
+  const district = getGeoDistrict(districtSlug);
+  if (!district) {
+    return {
+      urban: [],
+      rural: [],
+      bySlug: new Map(),
+      legacyToCanonical: new Map(),
+    };
+  }
+
+  const urban = URBAN_DIRECTORY.filter((u) => u.district_slug === districtSlug)
+    .map(buildUrbanEntity)
+    .filter((e) => Boolean(e.slug))
+    .sort((a, b) => a.nameEn.localeCompare(b.nameEn, "en"));
+
+  const taken = new Set(urban.map((e) => e.slug));
+  const legacyToCanonical = new Map<string, string>();
+  for (const e of urban) {
+    if (e.legacySlug) legacyToCanonical.set(e.legacySlug, e.slug);
+    legacyToCanonical.set(e.slug, e.slug);
+  }
+
+  const rural: AdminEntity[] = [];
+  for (const m of district.mandals) {
+    if (!m.slug || m.slug === "null" || m.slug === "undefined") continue;
+    if (URBAN_ONLY_MANDAL_SLUGS.has(m.slug)) continue;
+    if (m.slug.endsWith("-urban")) continue;
+
+    // Disambiguate when a ULB already claimed this slug (e.g. madhira town vs mandal).
+    const slug = ruralCanonicalSlug(districtSlug, m.slug, taken);
+    const entity = buildRuralEntity(district, { ...m, slug }, slug);
+    taken.add(entity.slug);
+    rural.push(entity);
+  }
+
+  rural.sort((a, b) => a.nameEn.localeCompare(b.nameEn, "en"));
+
+  const bySlug = new Map<string, AdminEntity>();
+  for (const e of urban) bySlug.set(e.slug, e);
+  for (const e of rural) bySlug.set(e.slug, e);
+
+  return { urban, rural, bySlug, legacyToCanonical };
+}
+
+const DISTRICT_ENTITY_INDEX: Record<string, DistrictEntityIndex> =
+  Object.fromEntries(
+    ALL_33_DISTRICT_KEYS.map((slug) => [slug, buildDistrictEntityIndex(slug)]),
+  );
+
+/** All AdminEntity records (urban + rural) across Telangana. */
+export const ADMIN_ENTITIES: AdminEntity[] = ALL_33_DISTRICT_KEYS.flatMap(
+  (slug) => {
+    const idx = DISTRICT_ENTITY_INDEX[slug];
+    return [...idx.urban, ...idx.rural];
+  },
+);
+
+for (const e of ADMIN_ENTITIES) {
+  if (!e.slug || e.slug === "null" || e.slug === "undefined") {
+    throw new Error(
+      `AdminEntity has invalid slug: ${e.districtSlug}/${e.nameEn}`,
+    );
+  }
+}
+
+export function listUrbanEntities(districtSlug: string): AdminEntity[] {
+  return DISTRICT_ENTITY_INDEX[districtSlug]?.urban ?? [];
+}
+
+export function listRuralEntities(districtSlug: string): AdminEntity[] {
+  return DISTRICT_ENTITY_INDEX[districtSlug]?.rural ?? [];
+}
+
+export function listDistrictEntities(districtSlug: string): {
+  urban: AdminEntity[];
+  rural: AdminEntity[];
+} {
+  const idx = DISTRICT_ENTITY_INDEX[districtSlug];
+  return {
+    urban: idx?.urban ?? [],
+    rural: idx?.rural ?? [],
+  };
+}
+
+export function getAdminEntity(
+  districtSlug: string,
+  slug: string,
+): AdminEntity | undefined {
+  const d = districtSlug.trim().toLowerCase();
+  const s = slug.trim().toLowerCase();
+  if (!s || s === "null" || s === "undefined") return undefined;
+  const idx = DISTRICT_ENTITY_INDEX[d];
+  if (!idx) return undefined;
+  const direct = idx.bySlug.get(s);
+  if (direct) return direct;
+  const canonical = idx.legacyToCanonical.get(s);
+  if (canonical) return idx.bySlug.get(canonical);
+  return undefined;
+}
+
+/** Map legacy urban-directory slug → canonical AdminEntity slug. */
+export function resolveCanonicalEntitySlug(
+  districtSlug: string,
+  rawSlug: string,
+): string | null {
+  if (!rawSlug || rawSlug === "null" || rawSlug === "undefined") return null;
+  const entity = getAdminEntity(districtSlug, rawSlug);
+  return entity?.slug ?? null;
+}
+
+export function entityStaticParams(): { district: string; slug: string }[] {
+  return ADMIN_ENTITIES.map((e) => ({
+    district: e.districtSlug,
+    slug: e.slug,
+  }));
+}
+
+export function isUrbanEntityType(type: EntityType): boolean {
+  return type === "corporation" || type === "municipality";
 }

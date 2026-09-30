@@ -32,6 +32,8 @@ import {
 import {
   formatStatutoryBlock,
   getCitationForPreset,
+  isMunicipalRepresentationType,
+  LEGAL_CITATIONS,
 } from "@/config/legalCitations";
 import {
   buildDocketRef,
@@ -88,6 +90,33 @@ const GRIEVANCE_PRESETS: GrievancePreset[] = [
   },
 ];
 
+/** Urban municipal desk deep-links (type=municipal_* | power_subsidy_urban). */
+const MUNICIPAL_PRESETS: GrievancePreset[] = [
+  {
+    id: "municipal_trade",
+    title: "మున్సిపల్ ట్రేడ్ లైసెన్స్ (సె§ 118 & 120)",
+    subject: LEGAL_CITATIONS.municipal_trade.subjectRefTe,
+    body: "పురపాలక / నగరపాలక పరిధిలో సాంప్రదాయ నాయీబ్రాహ్మణ సెలూన్ వృత్తిదారులపై అదనపు ట్రేడ్ లైసెన్స్ రుసుములు భారంగా ఉన్నాయి. తెలంగాణ మున్సిపాలిటీస్ చట్టం 2019 సెక్షన్లు 118 & 120 ప్రకారం రుసుము మినహాయింపు / సౌలభ్యం జారీ చేయవలసిందిగా కోరుచున్నాము.",
+  },
+  {
+    id: "municipal_lease",
+    title: "మున్సిపల్ లీజు (సె§ 54)",
+    subject: LEGAL_CITATIONS.municipal_lease.subjectRefTe,
+    body: "సాంప్రదాయ సెలూన్ / వృత్తి నైపుణ్య కేంద్రాలకు పురపాలక ఆస్తి లీజు లేదా స్థల కేటాయింపు అవసరం. తెలంగాణ మున్సిపాలిటీస్ చట్టం 2019 సెక్షన్ 54 ప్రకారం అనువైన స్థలం లీజు / కేటాయింపు చేయవలసిందిగా కోరుచున్నాము.",
+  },
+  {
+    id: "power_subsidy_urban",
+    title: "పట్టణ విద్యుత్ సబ్సిడీ (జి.ఓ. 23)",
+    subject: LEGAL_CITATIONS.power_subsidy_urban.subjectRefTe,
+    body: "పట్టణ పురపాలక / నగరపాలక పరిధిలో నాయీబ్రాహ్మణ సెలూన్ వృత్తిదారులు అధిక వాణిజ్య విద్యుత్ బిల్లులు ఎదుర్కొంటున్నారు. జి.ఓ. Ms. No. 23 ప్రకారం ఉచిత 250 యూనిట్ల విద్యుత్ సదుపాయం అమలు చేసి, రీడింగ్ సర్దుబాటు చేయవలసిందిగా కోరుచున్నాము.",
+  },
+];
+
+const ALL_PRESETS: GrievancePreset[] = [
+  ...GRIEVANCE_PRESETS,
+  ...MUNICIPAL_PRESETS,
+];
+
 function resolveAuthorityTitle(authorityId: string | null): string {
   if (!authorityId) return AUTHORITIES[0].title_te;
   const match = AUTHORITIES.find((a) => a.id === authorityId);
@@ -119,6 +148,12 @@ export function RepresentationLetterPage() {
   const initialLocality = searchParams.get("locality") || "";
   const initialAuthority = searchParams.get("authority");
   const initialSubject = searchParams.get("subject");
+  const initialType = searchParams.get("type") || "";
+  const initialTown =
+    searchParams.get("town") ||
+    searchParams.get("townEn") ||
+    "";
+  const isMunicipalDesk = isMunicipalRepresentationType(initialType);
 
   const matchedDist = matchDistrictFromQuery(initialDistRaw);
   const defaultDistrictSlug = matchedDist?.slug || "suryapet";
@@ -135,6 +170,19 @@ export function RepresentationLetterPage() {
     return m?.slug || list[0]?.slug || "";
   };
 
+  const initialPresetId = (() => {
+    if (isMunicipalRepresentationType(initialType)) return initialType;
+    if (initialSubject && ALL_PRESETS.some((p) => p.id === initialSubject)) {
+      return initialSubject;
+    }
+    return isMunicipalDesk
+      ? MUNICIPAL_PRESETS[0].id
+      : GRIEVANCE_PRESETS[0].id;
+  })();
+
+  const commissionerTitle =
+    "కమిషనర్, పురపాలక సంఘం / నగరపాలక సంస్థ";
+
   const [step, setStep] = useState<WizardStep>(1);
   const [applicantName, setApplicantName] = useState(
     "సమన్వయకర్త / వృత్తిదారుని పేరు",
@@ -142,17 +190,19 @@ export function RepresentationLetterPage() {
   const [applicantPhone, setApplicantPhone] = useState("");
   const [districtSlug, setDistrictSlug] = useState(defaultDistrictSlug);
   const [mandalSlug, setMandalSlug] = useState(() =>
-    resolveMandalSlug(defaultDistrictSlug, initialMandal),
+    resolveMandalSlug(
+      defaultDistrictSlug,
+      searchParams.get("townSlug") || initialMandal,
+    ),
   );
   const [locality, setLocality] = useState(initialLocality || "గాంధీ నగర్");
+  const [townName, setTownName] = useState(initialTown);
   const [recipientOfficer, setRecipientOfficer] = useState<string>(
-    resolveAuthorityTitle(initialAuthority),
+    isMunicipalDesk
+      ? commissionerTitle
+      : resolveAuthorityTitle(initialAuthority),
   );
-  const [selectedPresetId, setSelectedPresetId] = useState(
-    initialSubject && GRIEVANCE_PRESETS.some((p) => p.id === initialSubject)
-      ? initialSubject
-      : GRIEVANCE_PRESETS[0].id,
-  );
+  const [selectedPresetId, setSelectedPresetId] = useState(initialPresetId);
   const [customBody, setCustomBody] = useState("");
   const [useCustom, setUseCustom] = useState(false);
   const [issuedAt] = useState(() => new Date());
@@ -189,8 +239,10 @@ export function RepresentationLetterPage() {
 
   const district = districtMeta.name_te;
   const mandal = mandalMeta?.name_te || initialMandal || "కోదాడ";
+  const displayTown = townName || mandal;
+  const municipalMode = isMunicipalRepresentationType(selectedPresetId);
 
-  // Deep-link sync when ?dist= / ?mandal= changes (deferred to avoid sync setState-in-effect).
+  // Deep-link sync when ?dist= / ?mandal= / ?type= changes (deferred to avoid sync setState-in-effect).
   useEffect(() => {
     const t = window.setTimeout(() => {
       const raw =
@@ -199,7 +251,8 @@ export function RepresentationLetterPage() {
       const nextSlug = next?.slug;
       if (nextSlug) setDistrictSlug(nextSlug);
 
-      const nextMandal = searchParams.get("mandal") || "";
+      const nextMandal =
+        searchParams.get("townSlug") || searchParams.get("mandal") || "";
       if (nextMandal || nextSlug) {
         setMandalSlug(
           resolveMandalSlug(nextSlug || defaultDistrictSlug, nextMandal),
@@ -207,14 +260,24 @@ export function RepresentationLetterPage() {
       }
       const nextLocality = searchParams.get("locality") || "";
       if (nextLocality) setLocality(nextLocality);
-      const nextAuthority = searchParams.get("authority");
-      if (nextAuthority) {
-        setRecipientOfficer(resolveAuthorityTitle(nextAuthority));
-      }
-      const nextSubject = searchParams.get("subject");
-      if (nextSubject && GRIEVANCE_PRESETS.some((p) => p.id === nextSubject)) {
-        setSelectedPresetId(nextSubject);
+      const nextTown =
+        searchParams.get("town") || searchParams.get("townEn") || "";
+      if (nextTown) setTownName(nextTown);
+      const nextType = searchParams.get("type") || "";
+      if (isMunicipalRepresentationType(nextType)) {
+        setSelectedPresetId(nextType);
         setUseCustom(false);
+        setRecipientOfficer(commissionerTitle);
+      } else {
+        const nextAuthority = searchParams.get("authority");
+        if (nextAuthority) {
+          setRecipientOfficer(resolveAuthorityTitle(nextAuthority));
+        }
+        const nextSubject = searchParams.get("subject");
+        if (nextSubject && ALL_PRESETS.some((p) => p.id === nextSubject)) {
+          setSelectedPresetId(nextSubject);
+          setUseCustom(false);
+        }
       }
     }, 0);
     return () => window.clearTimeout(t);
@@ -230,8 +293,11 @@ export function RepresentationLetterPage() {
     };
   }, []);
 
+  const visiblePresets = municipalMode ? MUNICIPAL_PRESETS : GRIEVANCE_PRESETS;
+
   const activePreset =
-    GRIEVANCE_PRESETS.find((p) => p.id === selectedPresetId) ||
+    ALL_PRESETS.find((p) => p.id === selectedPresetId) ||
+    visiblePresets[0] ||
     GRIEVANCE_PRESETS[0];
 
   const citation = useMemo(
@@ -727,7 +793,7 @@ export function RepresentationLetterPage() {
               </p>
 
               <div className="space-y-2" role="listbox" aria-label="Grievance presets">
-                {GRIEVANCE_PRESETS.map((preset) => {
+                {visiblePresets.map((preset) => {
                   const isSelected =
                     !useCustom && preset.id === selectedPresetId;
                   return (
@@ -739,6 +805,9 @@ export function RepresentationLetterPage() {
                       onClick={() => {
                         setSelectedPresetId(preset.id);
                         setUseCustom(false);
+                        if (isMunicipalRepresentationType(preset.id)) {
+                          setRecipientOfficer(commissionerTitle);
+                        }
                       }}
                       className={`w-full cursor-pointer rounded-xl border p-3.5 text-left transition-all ${
                         isSelected
@@ -944,9 +1013,13 @@ export function RepresentationLetterPage() {
               <DocketHeader
                 refLabel={docket.refLabel}
                 teluguDate={teluguDate}
-                mandalTe={mandal}
+                mandalTe={displayTown}
                 districtTe={district}
-                recipientLine={`గౌరవనీయులైన ${recipientOfficer} గారి సమక్షంలోకి:\n${mandal} / సర్కిల్, ${district} జిల్లా, తెలంగాణ రాష్ట్రం.`}
+                recipientLine={
+                  municipalMode
+                    ? `గౌరవనీయులైన కమిషనర్ గారు, పురపాలక సంఘం / నగరపాలక సంస్థ, ${displayTown}`
+                    : `గౌరవనీయులైన ${recipientOfficer} గారి సమక్షంలోకి:\n${mandal} / సర్కిల్, ${district} జిల్లా, తెలంగాణ రాష్ట్రం.`
+                }
                 verifyUrl={verifyUrl}
                 docketId={docket.docketId}
               />
@@ -971,10 +1044,21 @@ export function RepresentationLetterPage() {
                   <strong>అయ్యా / ఆర్యా,</strong>
                 </p>
                 <p>
-                  మేము {district} జిల్లా, {mandal} మండలం, {locality}{" "}
-                  ప్రాంతానికి చెందిన నాయి బ్రాహ్మణ, మంగలి మరియు సాంప్రదాయ వృత్తిదారులము. మా కమ్యూనిటీ
-                  జీవనోపాధి మరియు సంక్షేమానికి సంబంధించి క్రింది ముఖ్యమైన అంశాన్ని తమరి దృష్టికి
-                  తీసుకువస్తున్నాము.
+                  {municipalMode ? (
+                    <>
+                      మేము {district} జిల్లా, {displayTown} పురపాలక / నగరపాలక పరిధి,{" "}
+                      {locality} ప్రాంతానికి చెందిన నాయి బ్రాహ్మణ, మంగలి మరియు సాంప్రదాయ
+                      వృత్తిదారులము. మా కమ్యూనిటీ జీవనోపాధి మరియు సంక్షేమానికి సంబంధించి క్రింది
+                      ముఖ్యమైన అంశాన్ని తమరి దృష్టికి తీసుకువస్తున్నాము.
+                    </>
+                  ) : (
+                    <>
+                      మేము {district} జిల్లా, {mandal} మండలం, {locality}{" "}
+                      ప్రాంతానికి చెందిన నాయి బ్రాహ్మణ, మంగలి మరియు సాంప్రదాయ వృత్తిదారులము. మా కమ్యూనిటీ
+                      జీవనోపాధి మరియు సంక్షేమానికి సంబంధించి క్రింది ముఖ్యమైన అంశాన్ని తమరి దృష్టికి
+                      తీసుకువస్తున్నాము.
+                    </>
+                  )}
                 </p>
                 <p className="rounded-md border border-civic-border bg-civic-paper p-3 font-medium leading-relaxed text-slate-800 print:p-2">
                   {letterBody}

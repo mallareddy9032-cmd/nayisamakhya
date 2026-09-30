@@ -55,7 +55,20 @@ export function getStaticUlb(
   districtSlug: string,
   ulbSlug: string,
 ): StaticUlb | undefined {
-  return URBAN_DIRECTORY.find(
+  const direct = URBAN_DIRECTORY.find(
     (u) => u.district_slug === districtSlug && u.slug === ulbSlug,
+  );
+  if (direct) return direct;
+
+  // Canonical short slug → legacy long-form in JSON (e.g. madhira → madhira-municipality)
+  const candidates = [
+    `${ulbSlug}-municipality`,
+    `${ulbSlug}-municipal-corporation`,
+    `${ulbSlug}-nagar-panchayat`,
+    ulbSlug.replace(/-corp$/, "-municipal-corporation"),
+  ];
+  return URBAN_DIRECTORY.find(
+    (u) =>
+      u.district_slug === districtSlug && candidates.includes(u.slug),
   );
 }

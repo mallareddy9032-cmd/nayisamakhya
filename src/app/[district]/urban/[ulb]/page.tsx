@@ -1,20 +1,20 @@
-import { notFound } from "next/navigation";
-import { UrbanPortalClient } from "@/components/UrbanPortalClient";
-import { fetchUrbanPortal } from "@/lib/data/urbanRepository";
-
-export const dynamic = "force-dynamic";
+import { notFound, redirect } from "next/navigation";
+import { resolveCanonicalEntitySlug } from "@/data/telanganaGeo";
+import { isUsablePlaceSlug } from "@/lib/data/locationAliases";
 
 type Props = {
   params: Promise<{ district: string; ulb: string }>;
 };
 
-export default async function UrbanUlbPage({ params }: Props) {
+/**
+ * Legacy urban portal URL — permanent redirect to unified /[district]/[slug].
+ */
+export default async function UrbanUlbRedirectPage({ params }: Props) {
   const { district, ulb } = await params;
-  if (!ulb || ulb === "null" || ulb === "undefined") {
-    notFound();
-  }
-  const portal = await fetchUrbanPortal(district, ulb);
-  if (!portal) notFound();
+  if (!isUsablePlaceSlug(ulb)) notFound();
 
-  return <UrbanPortalClient portal={portal} />;
+  const canonical = resolveCanonicalEntitySlug(district, ulb);
+  if (!canonical) notFound();
+
+  redirect(`/${district.trim().toLowerCase()}/${canonical}`);
 }

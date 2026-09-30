@@ -13,7 +13,7 @@ import { SurveyWizard } from "@/components/SurveyWizard";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: Promise<{ district: string; mandal: string }>;
+  params: Promise<{ district: string; slug: string }>;
 };
 
 type GpOption = { id: string; nameTe: string; nameEn: string };
@@ -160,17 +160,21 @@ async function resolveSurveyContext(
 }
 
 export default async function SurveyPage({ params }: Props) {
-  const { district, mandal } = await params;
+  const { district, slug } = await params;
+  const mandal = slug.endsWith("-rural") || slug.endsWith("-mandal")
+    ? slug.replace(/-rural$|-mandal$/, "")
+    : slug;
 
   let ctx: SurveyContext | null = null;
   try {
-    ctx = await resolveSurveyContext(district, mandal);
+    ctx = (await resolveSurveyContext(district, mandal)) ||
+      (await resolveSurveyContext(district, slug));
   } catch {
-    ctx = fromStatic(district, mandal);
+    ctx = fromStatic(district, mandal) || fromStatic(district, slug);
   }
   if (!ctx) notFound();
 
-  const portalHref = `/${ctx.districtSlug}/${ctx.mandalSlug}`;
+  const portalHref = `/${ctx.districtSlug}/${slug}`;
 
   return (
     <div className="min-h-screen bg-[#FBFBF9]">
