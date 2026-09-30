@@ -99,8 +99,19 @@ export function MandalSelector({
     setMandalSlug(first?.slug || "");
   }
 
+  function isInvalidMandalSlug(slug: string): boolean {
+    const s = slug.trim().toLowerCase();
+    return !s || s === "null" || s === "undefined";
+  }
+
   function go() {
-    if (!selectedDistrict || !mandalSlug) return;
+    if (
+      !selectedDistrict ||
+      !mandalSlug ||
+      isInvalidMandalSlug(mandalSlug)
+    ) {
+      return;
+    }
     setMandalPref(selectedDistrict.slug, mandalSlug);
     const path =
       target === "survey"
@@ -109,7 +120,9 @@ export function MandalSelector({
     router.push(path);
   }
 
-  const canGo = Boolean(selectedDistrict && mandalSlug) && !loading;
+  const canGo =
+    Boolean(selectedDistrict && mandalSlug && !isInvalidMandalSlug(mandalSlug)) &&
+    !loading;
 
   const label = (row: { name_te: string; name_en: string }) =>
     te ? `${row.name_te}` : row.name_en;

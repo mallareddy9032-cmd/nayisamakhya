@@ -4,6 +4,7 @@ import {
   ModerationDeskClient,
   type DeskSubmission,
 } from "@/components/admin/ModerationDeskClient";
+import { buildDeskCounts } from "@/lib/moderation/deskCounts";
 import { ModerationUnlockForm } from "@/components/admin/ModerationUnlockForm";
 import {
   deskAuthRequired,
@@ -165,13 +166,7 @@ export default async function ModerationDeskPage({
     const rows = ((fallback.data || []) as unknown as DeskSubmission[]).map(
       normalizePhotoUrls,
     );
-    const counts = {
-      pending: rows.filter((r) => r.status === "pending").length,
-      approved: rows.filter((r) => r.status === "approved").length,
-      rejected: rows.filter((r) => r.status === "rejected").length,
-      flagged: rows.filter((r) => r.status === "flagged").length,
-      all: rows.length,
-    };
+    const counts = buildDeskCounts(rows);
 
     return (
       <main className="min-h-screen bg-[#FBFBF9]">
@@ -190,13 +185,7 @@ export default async function ModerationDeskPage({
   const rows = ((submissions || []) as unknown as DeskSubmission[]).map(
     normalizePhotoUrls,
   );
-  const counts = {
-    pending: rows.filter((r) => r.status === "pending").length,
-    approved: rows.filter((r) => r.status === "approved").length,
-    rejected: rows.filter((r) => r.status === "rejected").length,
-    flagged: rows.filter((r) => r.status === "flagged").length,
-    all: rows.length,
-  };
+  const counts = buildDeskCounts(rows);
 
   return (
     <main className="min-h-screen bg-[#FBFBF9]">

@@ -15,6 +15,10 @@ import {
 import type { Mandal } from "@/lib/types";
 import { listEstablishmentsForMandal } from "@/lib/data/establishments";
 import { loc } from "@/lib/i18n/dictionary";
+import {
+  formatGramPanchayatDisplay,
+  isBlockedGramPanchayatName,
+} from "@/lib/data/gramPanchayatNames";
 import { useLanguageStore } from "@/lib/store/preferences";
 import { EstablishmentDirectory } from "@/components/EstablishmentDirectory";
 import { NodalOfficersRoster } from "@/components/officers/NodalOfficersRoster";
@@ -60,7 +64,11 @@ export function MandalPortalView({ mandal: m }: Props) {
     },
   ];
 
-  const filtered = m.gramPanchayats.filter((gp) => {
+  const gramPanchayats = m.gramPanchayats.filter(
+    (gp) => !isBlockedGramPanchayatName(gp.name.en, gp.name.te),
+  );
+
+  const filtered = gramPanchayats.filter((gp) => {
     const q = gpQuery.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -71,6 +79,8 @@ export function MandalPortalView({ mandal: m }: Props) {
   });
 
   const shortMandal = loc(m.mandal, lang).replace(/ మండలం| Mandal/gi, "");
+  const mandalShortTe = loc(m.mandal, "te").replace(/ మండలం$/, "");
+  const mandalShortEn = loc(m.mandal, "en").replace(/ Mandal$/i, "");
   const establishments = listEstablishmentsForMandal(
     m.districtSlug,
     m.mandalSlug,
@@ -91,7 +101,7 @@ export function MandalPortalView({ mandal: m }: Props) {
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6">
           <Link
             href="/mandals"
-            className={`text-xs text-[#71717A] transition-colors hover:text-[#C2410C] ${te ? "font-telugu" : ""}`}
+            className={`text-xs text-[#71717A] transition-colors hover:text-[#B45309] ${te ? "font-telugu" : ""}`}
           >
             {te ? "← అన్ని మండలాలు" : "← All mandals"}
           </Link>
@@ -100,23 +110,34 @@ export function MandalPortalView({ mandal: m }: Props) {
             className={`mt-4 inline-flex flex-wrap items-center gap-x-1.5 rounded-full border border-[#EBE8E0] bg-white/90 px-3.5 py-1.5 text-xs text-[#71717A] shadow-sm backdrop-blur-sm ${te ? "font-telugu" : ""}`}
           >
             <span>{loc(m.state, lang)}</span>
-            <span className="text-[#C2410C]" aria-hidden>
+            <span className="text-[#B45309]" aria-hidden>
               •
             </span>
             <span>{loc(m.district, lang)}</span>
-            <span className="text-[#C2410C]" aria-hidden>
+            <span className="text-[#B45309]" aria-hidden>
               •
             </span>
-            <span className="font-medium text-[#18181B]">{loc(m.mandal, lang)}</span>
+            <span className="font-medium text-[#0F172A]">{loc(m.mandal, lang)}</span>
           </p>
 
           <h1
-            className={`mt-4 max-w-3xl text-2xl font-bold tracking-tight text-[#18181B] sm:text-3xl md:text-4xl ${te ? "font-telugu leading-relaxed" : ""}`}
+            className={`font-display-te mt-4 max-w-3xl text-2xl font-normal leading-[1.35] tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl ${te ? "font-telugu" : ""}`}
           >
-            {loc(m.portalHeadline, lang)}
+            {te ? (
+              <>
+                <span className="text-[#B45309]">{mandalShortTe}</span>
+                {" మండల నాయీ - భజంత్రి సమాఖ్య అధికారిక వేదిక"}
+              </>
+            ) : (
+              <>
+                Official{" "}
+                <span className="text-[#B45309]">{mandalShortEn}</span>
+                {" Mandal Nayi–Bajantri Samakhya Portal"}
+              </>
+            )}
           </h1>
           <p
-            className={`mt-3 max-w-2xl text-sm leading-relaxed text-[#71717A] sm:text-base ${te ? "font-telugu" : ""}`}
+            className={`mt-3 max-w-2xl font-sans text-sm leading-relaxed text-[#71717A] sm:text-base ${te ? "font-telugu" : ""}`}
           >
             {loc(m.portalSub, lang)}
           </p>
@@ -298,7 +319,7 @@ export function MandalPortalView({ mandal: m }: Props) {
               <li
                 className={`col-span-full rounded-2xl border border-[#EBE8E0] bg-white p-8 text-center text-sm text-[#71717A] ${te ? "font-telugu" : ""}`}
               >
-                {m.gramPanchayats.length === 0
+                {gramPanchayats.length === 0
                   ? te
                     ? "ఈ మండలానికి గ్రామ పంచాయతీ జాబితా ఇంకా సీడ్ కాలేదు. సర్వేలో పంచాయతీ పేరు టైప్ చేయవచ్చు."
                     : "Gram panchayat list is not seeded for this mandal yet. You can type the panchayat name in the survey form."
@@ -312,38 +333,33 @@ export function MandalPortalView({ mandal: m }: Props) {
                   key={gp.id}
                   className="rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <h3
-                      className={`text-sm font-semibold text-[#18181B] ${te ? "font-telugu" : ""}`}
-                    >
-                      {loc(gp.name, lang)}
-                    </h3>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                        gp.surveyPct >= 70
-                          ? "bg-[#C2410C]/10 text-[#C2410C]"
-                          : gp.surveyPct >= 55
-                            ? "bg-[#F4F2EB] text-[#71717A]"
-                            : "border border-[#EBE8E0] bg-white text-[#A1A1AA]"
-                      }`}
-                    >
-                      {gp.surveyPct}%{" "}
-                      {te ? "సర్వే పూర్తి" : "survey"}
-                    </span>
-                  </div>
+                  <h3
+                    className={`text-sm font-semibold leading-snug text-[#0F172A] ${te ? "font-telugu" : ""}`}
+                  >
+                    {formatGramPanchayatDisplay(gp.name, lang)}
+                  </h3>
                   <p
                     className={`mt-2 metric-tnum text-xs text-[#71717A] ${te ? "font-telugu" : ""}`}
                   >
-                    {gp.households}{" "}
-                    {te ? "కుటుంబాలు" : "households"}
-                    {" • "}
+                    {gp.households.toLocaleString()}{" "}
+                    {te ? "కుటుంబాలు" : "families"}
+                    {" · "}
                     {gp.surveyPct}%{" "}
                     {te ? "సర్వే పూర్తి" : "survey complete"}
                   </p>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#F4F2EB]">
                     <div
-                      className="h-full rounded-full bg-[#C2410C]"
-                      style={{ width: `${gp.surveyPct}%` }}
+                      className="h-full rounded-full bg-[#B45309]"
+                      style={{ width: `${Math.min(100, Math.max(0, gp.surveyPct))}%` }}
+                      role="progressbar"
+                      aria-valuenow={gp.surveyPct}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={
+                        te
+                          ? `${formatGramPanchayatDisplay(gp.name, lang)} సర్వే ${gp.surveyPct}%`
+                          : `${formatGramPanchayatDisplay(gp.name, lang)} survey ${gp.surveyPct}%`
+                      }
                     />
                   </div>
                 </li>

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { moderateSubmission } from "@/app/admin/moderation/actions";
 import { DESK_UI } from "@/lib/moderation/deskCopy";
 
-type Status = "pending" | "approved" | "rejected" | "flagged";
+import type { DeskStatus as Status } from "@/lib/moderation/deskCounts";
 
 type District = { id: string; slug: string; name_en: string; name_te: string };
 type Mandal = {

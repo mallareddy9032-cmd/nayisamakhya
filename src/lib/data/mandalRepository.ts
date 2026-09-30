@@ -17,6 +17,9 @@ import {
   canonicalMandalSlug,
 } from "@/lib/data/locationAliases";
 import { getSupabase } from "@/lib/supabase/client";
+import {
+  isBlockedGramPanchayatName,
+} from "@/lib/data/gramPanchayatNames";
 
 const HELPLINE = "919032654111";
 
@@ -236,7 +239,15 @@ function officerFromRoster(
 
 function mapGps(rows: GpRow[]): GramPanchayat[] {
   return rows
-    .filter((gp) => gp && (gp.name_en || gp.name_te))
+    .filter(
+      (gp) =>
+        gp &&
+        (gp.name_en || gp.name_te) &&
+        !isBlockedGramPanchayatName(
+          String(gp.name_en || ""),
+          String(gp.name_te || ""),
+        ),
+    )
     .map((gp) => ({
       id: String(gp.id),
       name: {
