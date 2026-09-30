@@ -316,9 +316,7 @@ function DesktopMap({
                   type="button"
                   onMouseEnter={() => setActiveId(node.id)}
                   onFocus={() => setActiveId(node.id)}
-                  onClick={() =>
-                    setActiveId(activeId === node.id ? null : node.id)
-                  }
+                  onClick={() => setActiveId(node.id)}
                   className={cn(
                     "civic-focus-ring group flex w-full items-start gap-3 rounded-xl border bg-white/90 p-3 text-left shadow-xs transition-all duration-300",
                     on
