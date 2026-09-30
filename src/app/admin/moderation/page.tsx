@@ -4,7 +4,10 @@ import {
   ModerationDeskClient,
   type DeskSubmission,
 } from "@/components/admin/ModerationDeskClient";
-import { buildDeskCounts } from "@/lib/moderation/deskCounts";
+import {
+  buildDeskCounts,
+  type DeskStatus as Status,
+} from "@/lib/moderation/deskCounts";
 import { ModerationUnlockForm } from "@/components/admin/ModerationUnlockForm";
 import {
   deskAuthRequired,
@@ -166,7 +169,7 @@ export default async function ModerationDeskPage({
     const rows = ((fallback.data || []) as unknown as DeskSubmission[]).map(
       normalizePhotoUrls,
     );
-    const counts = buildDeskCounts(rows);
+    const counts: Record<"all" | Status, number> = buildDeskCounts(rows);
 
     return (
       <main className="min-h-screen bg-[#FBFBF9]">
@@ -185,7 +188,7 @@ export default async function ModerationDeskPage({
   const rows = ((submissions || []) as unknown as DeskSubmission[]).map(
     normalizePhotoUrls,
   );
-  const counts = buildDeskCounts(rows);
+  const counts: Record<"all" | Status, number> = buildDeskCounts(rows);
 
   return (
     <main className="min-h-screen bg-[#FBFBF9]">

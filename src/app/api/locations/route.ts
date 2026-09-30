@@ -4,6 +4,8 @@ import { listDistricts } from "@/lib/data/districts";
 import {
   canonicalDistrictSlug,
   canonicalMandalSlug,
+  isUsablePlaceSlug,
+  repairUlbSlug,
 } from "@/lib/data/locationAliases";
 import { listMandalsDirectory } from "@/lib/data/mandalsDirectory";
 import { listUrbanDirectory } from "@/lib/data/urbanDirectory";
@@ -158,7 +160,9 @@ export async function GET() {
             const districtSlug = canonicalDistrictSlug(
               uuidToSlug.get(row.district_id) || row.district_id,
             );
+            if (!isUsablePlaceSlug(row.slug)) return null;
             const slug = canonicalMandalSlug(row.slug);
+            if (!isUsablePlaceSlug(slug)) return null;
             return {
               id: row.id,
               district_id: districtSlug,
@@ -167,7 +171,7 @@ export async function GET() {
               name_te: row.name_te,
             };
           })
-          .filter((row) => Boolean(row.district_id));
+          .filter((row): row is LocationMandal => Boolean(row?.district_id));
 
         mandals = mergeByKey(
           fallback.mandals,
@@ -191,16 +195,18 @@ export async function GET() {
             const districtSlug = canonicalDistrictSlug(
               uuidToSlug.get(row.district_id) || row.district_id,
             );
+            const slug = repairUlbSlug(row.slug, row.name_en, row.name_te);
+            if (!slug) return null;
             return {
               id: row.id,
               district_id: districtSlug,
-              slug: row.slug,
+              slug,
               name_en: row.name_en,
               name_te: row.name_te,
               ulb_type: row.ulb_type || "municipality",
             };
           })
-          .filter((row) => Boolean(row.district_id));
+          .filter((row): row is LocationUlb => Boolean(row?.district_id));
 
         ulbs = mergeByKey(
           fallback.ulbs,

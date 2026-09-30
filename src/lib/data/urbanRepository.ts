@@ -1,7 +1,11 @@
 import { getSupabase } from "@/lib/supabase/client";
 import { listDistricts } from "@/lib/data/districts";
 import { listMandalsForDistrict } from "@/lib/data/mandalsDirectory";
-import { canonicalDistrictSlug } from "@/lib/data/locationAliases";
+import {
+  canonicalDistrictSlug,
+  isUsablePlaceSlug,
+  repairUlbSlug,
+} from "@/lib/data/locationAliases";
 import {
   getStaticUlb,
   listStaticUlbsForDistrict,
@@ -102,8 +106,9 @@ export async function fetchDistrictDirectory(districtSlug: string): Promise<{
   const district = districtSummary(districtSlug);
   if (!district) return null;
 
-  const rural: DirectoryLink[] = listMandalsForDistrict(district.slug).map(
-    (m) => ({
+  const rural: DirectoryLink[] = listMandalsForDistrict(district.slug)
+    .filter((m) => isUsablePlaceSlug(m.slug))
+    .map((m) => ({
       slug: m.slug,
       name_en: m.name_en,
       name_te: m.name_te,
@@ -111,11 +116,11 @@ export async function fetchDistrictDirectory(districtSlug: string): Promise<{
       kind: "rural" as const,
       meta_en: "Mandal",
       meta_te: "మండలం",
-    }),
-  );
+    }));
 
-  let urban: DirectoryLink[] = listStaticUlbsForDistrict(district.slug).map(
-    (u) => ({
+  let urban: DirectoryLink[] = listStaticUlbsForDistrict(district.slug)
+    .filter((u) => isUsablePlaceSlug(u.slug))
+    .map((u) => ({
       slug: u.slug,
       name_en: u.name_en,
       name_te: u.name_te,
@@ -123,8 +128,7 @@ export async function fetchDistrictDirectory(districtSlug: string): Promise<{
       kind: "urban" as const,
       meta_en: u.ulb_type.replace(/_/g, " "),
       meta_te: ulbTypeTe(u.ulb_type),
-    }),
-  );
+    }));
 
   try {
     const supabase = getSupabase();
@@ -145,20 +149,27 @@ export async function fetchDistrictDirectory(districtSlug: string): Promise<{
           .order("name_en", { ascending: true });
 
         if (ulbs?.length) {
-          const remote = ulbs.map((u) => ({
-            slug: String(u.slug),
-            name_en: String(u.name_en),
-            name_te: String(u.name_te),
-            href: `/${district.slug}/urban/${u.slug}`,
-            kind: "urban" as const,
-            meta_en: String(u.ulb_type || "municipality").replace(/_/g, " "),
-            meta_te: ulbTypeTe(String(u.ulb_type || "municipality")),
-          }));
+          const remote: DirectoryLink[] = [];
+          for (const u of ulbs) {
+            const nameEn = String(u.name_en || "");
+            const nameTe = String(u.name_te || "");
+            const slug = repairUlbSlug(u.slug, nameEn, nameTe);
+            if (!slug) continue;
+            remote.push({
+              slug,
+              name_en: nameEn,
+              name_te: nameTe,
+              href: `/${district.slug}/urban/${slug}`,
+              kind: "urban",
+              meta_en: String(u.ulb_type || "municipality").replace(/_/g, " "),
+              meta_te: ulbTypeTe(String(u.ulb_type || "municipality")),
+            });
+          }
           const map = new Map(urban.map((u) => [u.slug, u]));
           for (const row of remote) map.set(row.slug, row);
-          urban = [...map.values()].sort((a, b) =>
-            a.name_en.localeCompare(b.name_en),
-          );
+          urban = [...map.values()]
+            .filter((u) => isUsablePlaceSlug(u.slug))
+            .sort((a, b) => a.name_en.localeCompare(b.name_en));
         }
       }
     }
@@ -174,6 +185,7 @@ export async function fetchUrbanPortal(
   ulbSlug: string,
 ): Promise<UrbanPortal | undefined> {
   const dSlug = canonicalDistrictSlug(districtSlug.trim());
+  if (!isUsablePlaceSlug(ulbSlug)) return undefined;
   const uSlug = ulbSlug.trim();
   const fallback = getStaticUlb(dSlug, uSlug);
   const staticPortal = fallback ? fromStaticUlb(fallback) : undefined;

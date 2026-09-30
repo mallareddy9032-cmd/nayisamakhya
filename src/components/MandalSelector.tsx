@@ -105,11 +105,10 @@ export function MandalSelector({
   }
 
   function go() {
-    if (
-      !selectedDistrict ||
-      !mandalSlug ||
-      isInvalidMandalSlug(mandalSlug)
-    ) {
+    if (!selectedDistrict) return;
+    if (!mandalSlug || isInvalidMandalSlug(mandalSlug)) {
+      // District-only fallback — never navigate to /{district}/null
+      router.push(`/${selectedDistrict.slug}`);
       return;
     }
     setMandalPref(selectedDistrict.slug, mandalSlug);
@@ -120,9 +119,7 @@ export function MandalSelector({
     router.push(path);
   }
 
-  const canGo =
-    Boolean(selectedDistrict && mandalSlug && !isInvalidMandalSlug(mandalSlug)) &&
-    !loading;
+  const canGo = Boolean(selectedDistrict) && !loading;
 
   const label = (row: { name_te: string; name_en: string }) =>
     te ? `${row.name_te}` : row.name_en;

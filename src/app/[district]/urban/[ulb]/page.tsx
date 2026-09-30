@@ -10,6 +10,9 @@ type Props = {
 
 export default async function UrbanUlbPage({ params }: Props) {
   const { district, ulb } = await params;
+  if (!ulb || ulb === "null" || ulb === "undefined") {
+    notFound();
+  }
   const portal = await fetchUrbanPortal(district, ulb);
   if (!portal) notFound();
 

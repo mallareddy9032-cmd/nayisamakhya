@@ -20,3 +20,51 @@ export function canonicalDistrictSlug(slug: string): string {
 export function canonicalMandalSlug(slug: string): string {
   return MANDAL_SLUG_ALIASES[slug] || slug;
 }
+
+/** Reject empty / literal "null" / "undefined" place slugs from bad DB rows. */
+export function isUsablePlaceSlug(slug: unknown): slug is string {
+  if (typeof slug !== "string") return false;
+  const s = slug.trim();
+  if (!s) return false;
+  const lower = s.toLowerCase();
+  return lower !== "null" && lower !== "undefined" && lower !== "none";
+}
+
+/**
+ * Prefer a real ULB slug; when Supabase returns null, repair known towns
+ * (e.g. Madhira పురపాలక సంఘం → madhira-municipality) or derive from English name.
+ */
+export function repairUlbSlug(
+  slug: unknown,
+  nameEn: string,
+  nameTe: string,
+): string | null {
+  if (isUsablePlaceSlug(slug)) return slug.trim();
+
+  const en = String(nameEn || "").trim();
+  const te = String(nameTe || "").trim();
+  const hay = `${en} ${te}`.toLowerCase();
+
+  if (/madhira/i.test(en) || te.includes("మధిర")) {
+    return "madhira-municipality";
+  }
+
+  const base = en
+    .toLowerCase()
+    .replace(/\b(municipality|municipal corporation|nagar panchayat|corporation)\b/gi, "")
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  if (!base) return null;
+
+  if (/municipal corporation|corporation/i.test(en)) {
+    return `${base}-municipal-corporation`;
+  }
+  if (/nagar panchayat/i.test(en) || te.includes("నగర పంచాయతీ")) {
+    return `${base}-nagar-panchayat`;
+  }
+  if (/municipality|పురపాలక|మున్సిప/i.test(hay)) {
+    return `${base}-municipality`;
+  }
+  return base;
+}

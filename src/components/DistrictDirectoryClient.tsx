@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Building2, Landmark, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { DirectoryLink, DistrictSummary } from "@/lib/data/urbanRepository";
+import { isUsablePlaceSlug } from "@/lib/data/locationAliases";
 import { useLanguageStore } from "@/lib/store/preferences";
 import { cn } from "@/lib/utils";
 
@@ -13,20 +14,39 @@ type Props = {
   rural: DirectoryLink[];
 };
 
+function directoryHref(districtSlug: string, item: DirectoryLink): string {
+  if (!isUsablePlaceSlug(item.slug)) {
+    return `/${districtSlug}`;
+  }
+  if (item.kind === "urban") {
+    return `/${districtSlug}/urban/${item.slug}`;
+  }
+  return `/${districtSlug}/${item.slug}`;
+}
+
 export function DistrictDirectoryClient({ district, urban, rural }: Props) {
   const lang = useLanguageStore((s) => s.lang);
   const te = lang === "te";
+  const cleanUrban = useMemo(
+    () => urban.filter((item) => Boolean(item.slug && item.slug !== "null")),
+    [urban],
+  );
+  const cleanRural = useMemo(
+    () => rural.filter((item) => Boolean(item.slug && item.slug !== "null")),
+    [rural],
+  );
   const [tab, setTab] = useState<"urban" | "rural">(
-    urban.length > 0 ? "urban" : "rural",
+    cleanUrban.length > 0 ? "urban" : "rural",
   );
   const [query, setQuery] = useState("");
 
-  const items = tab === "urban" ? urban : rural;
+  const items = tab === "urban" ? cleanUrban : cleanRural;
   const filtered = useMemo(() => {
+    const usable = items.filter((item) => isUsablePlaceSlug(item.slug));
     const q = query.trim().toLowerCase();
-    if (!q) return items;
+    if (!q) return usable;
     const raw = query.trim();
-    return items.filter(
+    return usable.filter(
       (item) =>
         item.name_en.toLowerCase().includes(q) ||
         item.name_te.includes(raw) ||
@@ -66,7 +86,7 @@ export function DistrictDirectoryClient({ district, urban, rural }: Props) {
               )}
             >
               <Building2 className="h-4 w-4" aria-hidden />
-              {te ? "పట్టణ కేంద్రాలు" : "Urban Centers"} ({urban.length})
+              {te ? "పట్టణ కేంద్రాలు" : "Urban Centers"} ({cleanUrban.length})
             </button>
             <button
               type="button"
@@ -79,7 +99,7 @@ export function DistrictDirectoryClient({ district, urban, rural }: Props) {
               )}
             >
               <Landmark className="h-4 w-4" aria-hidden />
-              {te ? "గ్రామీణ మండలాలు" : "Rural Mandals"} ({rural.length})
+              {te ? "గ్రామీణ మండలాలు" : "Rural Mandals"} ({cleanRural.length})
             </button>
           </div>
 
@@ -117,31 +137,36 @@ export function DistrictDirectoryClient({ district, urban, rural }: Props) {
           </p>
         ) : (
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((item) => (
-              <li key={`${item.kind}-${item.slug}`}>
-                <Link
-                  href={item.href}
-                  className="tap block h-full rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm transition-colors hover:border-[#C2410C]/35 hover:bg-[#FFF7ED]"
-                >
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#A1A1AA]">
-                    {item.kind === "urban" ? "urban" : "mandal"} · {item.slug}
-                  </p>
-                  <h2
-                    className={`mt-2 text-lg font-semibold text-[#18181B] ${te ? "font-telugu" : ""}`}
+            {filtered.map((item) => {
+              const href = directoryHref(district.slug, item);
+              return (
+                <li key={`${item.kind}-${item.slug}`}>
+                  <Link
+                    href={href}
+                    className="tap block h-full rounded-2xl border border-[#EBE8E0] bg-white p-4 shadow-sm transition-colors hover:border-[#C2410C]/35 hover:bg-[#FFF7ED]"
                   >
-                    {te ? item.name_te : item.name_en}
-                  </h2>
-                  <p className={`mt-1 text-xs text-[#71717A] ${te ? "font-telugu" : ""}`}>
-                    {te ? item.meta_te : item.meta_en}
-                  </p>
-                  <span
-                    className={`mt-4 inline-flex text-sm font-semibold text-[#C2410C] ${te ? "font-telugu" : ""}`}
-                  >
-                    {te ? "తెరవండి →" : "Open →"}
-                  </span>
-                </Link>
-              </li>
-            ))}
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-[#A1A1AA]">
+                      {item.kind === "urban" ? "urban" : "mandal"} · {item.slug}
+                    </p>
+                    <h2
+                      className={`mt-2 text-lg font-semibold text-[#18181B] ${te ? "font-telugu" : ""}`}
+                    >
+                      {te ? item.name_te : item.name_en}
+                    </h2>
+                    <p
+                      className={`mt-1 text-xs text-[#71717A] ${te ? "font-telugu" : ""}`}
+                    >
+                      {te ? item.meta_te : item.meta_en}
+                    </p>
+                    <span
+                      className={`mt-4 inline-flex text-sm font-semibold text-[#C2410C] ${te ? "font-telugu" : ""}`}
+                    >
+                      {te ? "తెరవండి →" : "Open →"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
