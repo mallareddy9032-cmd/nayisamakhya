@@ -38,11 +38,11 @@ export default function StatewideSurveyPage() {
 
       <div className="mx-auto max-w-lg px-4 py-5 pb-28">
         <p className="mb-4 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 font-telugu text-sm leading-relaxed text-[#1E293B]">
-          తెలంగాణ నాయి బ్రాహ్మణ / మంగలి / భజంత్రి కుటుంబాల సమాజ, జీవనోపాధి &
-          సంక్షేమ సమాచారం — మొబైల్‌లో 4 దశల్లో నమోదు చేయండి.
+          మీ మొత్తం కుటుంబాన్ని దశలవారీగా నమోదు చేయండి — అర్హులైన వివాహ అభ్యర్థులను
+          అదే సమయంలో ప్లాట్‌ఫామ్‌కు నమోదు చేయవచ్చు.
           <span className="mt-1 block text-xs text-[#64748B]">
-            Mobile-first census for community, livelihood, G.O. 23 welfare, and
-            optional matrimonial registration.
+            Document the entire household step by step while instantly
+            registering eligible candidates for the matrimonial platform.
           </span>
         </p>
         <StatewideSurveyWizard />

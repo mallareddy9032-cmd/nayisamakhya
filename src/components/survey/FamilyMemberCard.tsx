@@ -185,7 +185,7 @@ export function FamilyMemberCard({
           </label>
         </div>
 
-        <label className="flex min-h-[48px] cursor-pointer items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-4">
+        <label className="flex min-h-[48px] cursor-pointer items-start gap-3 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3">
           <input
             type="checkbox"
             checked={member.isMatrimonialCandidate}
@@ -199,17 +199,26 @@ export function FamilyMemberCard({
                 guardianPhone: on ? member.guardianPhone || "" : undefined,
               });
             }}
-            className="h-4 w-4 accent-[#B45309]"
+            className="mt-1 h-4 w-4 accent-[#B45309]"
           />
-          <span className="font-telugu text-sm text-[#0F172A]">
-            వివాహ అభ్యర్థి · Matrimonial candidate
+          <span className="min-w-0">
+            <span className="block font-telugu text-sm font-medium text-[#0F172A]">
+              వివాహ ప్లాట్‌ఫామ్‌కు నమోదు చేయండి
+            </span>
+            <span className="mt-0.5 block text-xs leading-snug text-[#64748B]">
+              Register this member on the matrimonial platform on submit
+            </span>
           </span>
         </label>
 
         {member.isMatrimonialCandidate ? (
           <div className="space-y-2.5 rounded-xl border border-[#B45309]/25 bg-[#B45309]/5 p-3">
             <p className="font-telugu text-xs font-semibold text-[#B45309]">
-              వివాహ వివరాలు · Matrimonial fields
+              వివాహ నమోదు వివరాలు
+            </p>
+            <p className="text-[11px] leading-snug text-[#92400E]">
+              These fields register an eligible candidate for Nayi Samakhya
+              matrimonial matching.
             </p>
             <div className="grid grid-cols-2 gap-2">
               <input

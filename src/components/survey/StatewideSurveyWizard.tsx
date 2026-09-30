@@ -140,6 +140,8 @@ export function StatewideSurveyWizard() {
   const [submitted, setSubmitted] = useState(false);
   const [referenceId, setReferenceId] = useState("");
   const [mockFallback, setMockFallback] = useState(false);
+  const [submittedHouseholdSize, setSubmittedHouseholdSize] = useState(0);
+  const [submittedMatrimonialCount, setSubmittedMatrimonialCount] = useState(0);
 
   const districts = useMemo(() => surveyDistricts(), []);
 
@@ -372,6 +374,11 @@ export function StatewideSurveyWizard() {
         persistLocal(submission);
         setReferenceId(data.referenceId);
         setMockFallback(Boolean(data.mock) || data.persisted === false);
+        setSubmittedHouseholdSize(submission.familyMembers.length);
+        setSubmittedMatrimonialCount(
+          submission.familyMembers.filter((m) => m.isMatrimonialCandidate)
+            .length,
+        );
         setSubmitted(true);
         return;
       }
@@ -380,6 +387,10 @@ export function StatewideSurveyWizard() {
       const localRef = `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
       setReferenceId(data.referenceId || localRef);
       setMockFallback(true);
+      setSubmittedHouseholdSize(submission.familyMembers.length);
+      setSubmittedMatrimonialCount(
+        submission.familyMembers.filter((m) => m.isMatrimonialCandidate).length,
+      );
       setSubmitted(true);
     } catch {
       persistLocal(submission);
@@ -387,6 +398,10 @@ export function StatewideSurveyWizard() {
         `#LOCAL-${submission.districtSlug.slice(0, 4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
       );
       setMockFallback(true);
+      setSubmittedHouseholdSize(submission.familyMembers.length);
+      setSubmittedMatrimonialCount(
+        submission.familyMembers.filter((m) => m.isMatrimonialCandidate).length,
+      );
       setSubmitted(true);
     } finally {
       setSubmitting(false);
@@ -399,6 +414,8 @@ export function StatewideSurveyWizard() {
     setSubmitted(false);
     setReferenceId("");
     setMockFallback(false);
+    setSubmittedHouseholdSize(0);
+    setSubmittedMatrimonialCount(0);
     setError("");
   }
 
@@ -408,10 +425,25 @@ export function StatewideSurveyWizard() {
         <div className="flex flex-col items-center text-center">
           <CheckCircle2 className="h-16 w-16 text-emerald-600" aria-hidden />
           <h2 className="mt-4 font-display-te text-2xl font-normal leading-snug text-[#0F172A]">
-            సర్వే విజయవంతంగా నమోదైంది
+            కుటుంబం నమోదైంది
           </h2>
           <p className="mt-1 text-sm text-[#64748B]">
-            Statewide survey recorded successfully
+            Household recorded successfully
+          </p>
+          <p className="mt-3 max-w-sm font-telugu text-sm leading-relaxed text-[#1E293B]">
+            {submittedHouseholdSize} మంది కుటుంబ సభ్యులు నమోదు
+            {submittedMatrimonialCount > 0
+              ? ` · ${submittedMatrimonialCount} వివాహ అభ్యర్థి${submittedMatrimonialCount === 1 ? "" : "లు"} ప్లాట్‌ఫామ్‌కు నమోదయ్యారు`
+              : ""}
+            .
+          </p>
+          <p className="mt-1 max-w-sm text-xs leading-relaxed text-[#64748B]">
+            {submittedHouseholdSize} household member
+            {submittedHouseholdSize === 1 ? "" : "s"} documented
+            {submittedMatrimonialCount > 0
+              ? ` · ${submittedMatrimonialCount} matrimonial candidate${submittedMatrimonialCount === 1 ? "" : "s"} registered`
+              : ""}
+            .
           </p>
 
           <div className="mt-5 w-full rounded-xl border border-[#E2E8F0] bg-[#FBFBFA] px-4 py-3">
@@ -697,9 +729,18 @@ export function StatewideSurveyWizard() {
             <h2 className="font-display-te text-xl font-normal leading-snug text-[#0F172A]">
               కుటుంబ సభ్యులు
             </h2>
-            <p className="mt-0.5 text-xs text-[#64748B]">
-              Family roster · {form.familyMembers.length} member
+            <p className="mt-1 font-telugu text-sm leading-relaxed text-[#1E293B]">
+              మీ మొత్తం కుటుంబాన్ని దశలవారీగా నమోదు చేయండి. అర్హులైన వారిని
+              వివాహ ప్లాట్‌ఫామ్‌కు వెంటనే నమోదు చేయవచ్చు.
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+              Document the entire household in this clean step. Mark eligible
+              members to register them for the matrimonial platform on submit ·{" "}
+              {form.familyMembers.length} member
               {form.familyMembers.length === 1 ? "" : "s"}
+              {form.familyMembers.some((m) => m.isMatrimonialCandidate)
+                ? ` · ${form.familyMembers.filter((m) => m.isMatrimonialCandidate).length} matrimonial`
+                : ""}
             </p>
           </div>
 
