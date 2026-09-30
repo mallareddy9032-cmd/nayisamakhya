@@ -15,8 +15,8 @@ import {
   districtDeskMetrics,
   districtStaticParams,
   getGeoDistrict,
+  listUrbanPlaces,
 } from "@/data/telanganaGeo";
-import { resolveRegionalHubForDistrict } from "@/config/communityHubs";
 
 type Props = {
   params: Promise<{ district: string }>;
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title: `${d.nameTe} జిల్లా సేవా డెస్క్ | ${d.nameEn} | Nayi Samakhya`,
-    description: `${d.nameTe} — ${d.mandalCount} మండలాలు, HQ ${d.headquarters.te}. నాయి సమాఖ్య జిల్లా సమన్వయ డెస్క్.`,
+    description: `${d.nameTe} — ${d.mandals.length} మండలాలు, HQ ${d.headquarters}. నాయి సమాఖ్య జిల్లా సమన్వయ డెస్క్.`,
     openGraph: {
       title: `${d.nameEn} District Desk — Nayi Samakhya`,
       url: `/districts/${d.slug}`,
@@ -48,7 +48,7 @@ export default async function DistrictDeskPage({ params }: Props) {
   if (!district) notFound();
 
   const metrics = districtDeskMetrics(district.slug);
-  const hub = resolveRegionalHubForDistrict(district.slug);
+  const towns = listUrbanPlaces(district);
   const petitionHref = `/representation?dist=${encodeURIComponent(district.slug)}`;
 
   return (
@@ -94,11 +94,12 @@ export default async function DistrictDeskPage({ params }: Props) {
               {district.nameTe}
             </h1>
             <p className="font-sans mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">
-              {district.nameEn} District · HQ {district.headquarters.en}
+              {district.nameEn} District · {district.zone} · HQ{" "}
+              {district.headquarters}
             </p>
             <p className="font-telugu mt-3 flex items-center gap-1.5 text-sm text-slate-600">
               <MapPin className="h-4 w-4 text-[#B45309]" aria-hidden />
-              జిల్లా కేంద్రం: {district.headquarters.te}
+              జిల్లా కేంద్రం: {district.headquarters}
             </p>
           </div>
 
@@ -110,17 +111,15 @@ export default async function DistrictDeskPage({ params }: Props) {
               <FileText className="h-4 w-4" aria-hidden />
               జిల్లా వినతిపత్రం
             </Link>
-            {hub ? (
-              <a
-                href={hub.inviteUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#EAD7B5] bg-white px-4 py-2.5 font-telugu text-sm font-semibold text-[#1E293B] hover:border-[#B45309]/40"
-              >
-                <MessageCircle className="h-4 w-4 text-[#B45309]" aria-hidden />
-                WhatsApp కారిడార్
-              </a>
-            ) : null}
+            <a
+              href={district.whatsappCorridorUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="civic-focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#EAD7B5] bg-white px-4 py-2.5 font-telugu text-sm font-semibold text-[#1E293B] hover:border-[#B45309]/40"
+            >
+              <MessageCircle className="h-4 w-4 text-[#B45309]" aria-hidden />
+              WhatsApp కారిడార్
+            </a>
           </div>
         </div>
 
@@ -131,7 +130,7 @@ export default async function DistrictDeskPage({ params }: Props) {
           {[
             {
               label: "మండలాలు",
-              value: district.mandalCount,
+              value: district.mandals.length,
               icon: MapPin,
             },
             {
@@ -163,7 +162,7 @@ export default async function DistrictDeskPage({ params }: Props) {
           ))}
         </section>
 
-        {district.towns.length > 0 ? (
+        {towns.length > 0 ? (
           <section className="mb-10" aria-labelledby="towns-heading">
             <h2
               id="towns-heading"
@@ -172,15 +171,18 @@ export default async function DistrictDeskPage({ params }: Props) {
               ప్రధాన పట్టణాలు &amp; మున్సిపాలిటీలు
             </h2>
             <ul className="flex flex-wrap gap-2">
-              {district.towns.map((t) => (
+              {towns.map((t) => (
                 <li key={t.slug}>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3 py-1.5 font-telugu text-xs text-slate-700">
+                  <Link
+                    href={`/districts/${district.slug}/${t.slug}`}
+                    className="civic-focus-ring inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3 py-1.5 font-telugu text-xs text-slate-700 hover:border-[#B45309]/40"
+                  >
                     <Building2 className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
                     {t.nameTe}
                     <span className="font-sans text-[10px] uppercase text-slate-400">
-                      {t.ulbType}
+                      {t.type}
                     </span>
-                  </span>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -193,7 +195,7 @@ export default async function DistrictDeskPage({ params }: Props) {
               id="mandals-heading"
               className="font-display-te text-xl font-normal text-[#0F172A] md:text-2xl"
             >
-              {district.mandalCount} మండల సేవా డెస్కులు
+              {district.mandals.length} మండల సేవా డెస్కులు
             </h2>
             <p className="font-sans text-xs font-medium uppercase tracking-wider text-slate-500">
               Mandal desks
@@ -212,6 +214,7 @@ export default async function DistrictDeskPage({ params }: Props) {
                     </span>
                     <span className="font-sans block truncate text-[11px] text-slate-500">
                       {m.nameEn}
+                      {m.type !== "mandal" ? ` · ${m.type}` : ""}
                     </span>
                   </span>
                   <ArrowRight

@@ -11,12 +11,12 @@ import {
 } from "lucide-react";
 import {
   searchTelanganaGeo,
-  type GeoDistrict,
+  type DistrictInfo,
   type GeoSearchHit,
 } from "@/data/telanganaGeo";
 
 type Props = {
-  districts: GeoDistrict[];
+  districts: DistrictInfo[];
   totalMandals: number;
   totalTowns: number;
 };
@@ -58,9 +58,7 @@ export function DistrictsSearchHub({
   const deferredQuery = useDeferredValue(query);
   const sorted = useMemo(
     () =>
-      [...districts].sort((a, b) =>
-        a.nameTe.localeCompare(b.nameTe, "te"),
-      ),
+      [...districts].sort((a, b) => a.nameTe.localeCompare(b.nameTe, "te")),
     [districts],
   );
 
@@ -92,7 +90,7 @@ export function DistrictsSearchHub({
         />
         <p className="mt-2 font-sans text-[11px] text-slate-500">
           {districts.length} districts · {totalMandals} mandals · {totalTowns}{" "}
-          towns indexed
+          urban desks indexed
         </p>
       </div>
 
@@ -108,9 +106,7 @@ export function DistrictsSearchHub({
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2">
               {hits.map((hit) => (
-                <li
-                  key={`${hit.kind}-${hit.href}-${hit.labelEn}`}
-                >
+                <li key={`${hit.kind}-${hit.href}-${hit.labelEn}`}>
                   <HitRow hit={hit} />
                 </li>
               ))}
@@ -131,41 +127,52 @@ export function DistrictsSearchHub({
             </p>
           </div>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {sorted.map((d) => (
-              <li key={d.slug}>
-                <Link
-                  href={`/districts/${d.slug}`}
-                  className="civic-focus-ring group flex h-full flex-col rounded-2xl border border-[#EAD7B5]/90 bg-gradient-to-br from-[#FFFDF9] via-[#FAF6ED] to-[#F5EFE0] p-4 shadow-sm transition hover:border-[#B45309]/45 hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="rounded-lg border border-[#B45309]/20 bg-white/80 p-2 text-[#B45309]">
-                      <Landmark className="h-4 w-4" aria-hidden />
+            {sorted.map((d) => {
+              const urbanCount = d.mandals.filter(
+                (m) => m.type !== "mandal",
+              ).length;
+              return (
+                <li key={d.slug}>
+                  <Link
+                    href={`/districts/${d.slug}`}
+                    className="civic-focus-ring group flex h-full flex-col rounded-2xl border border-[#EAD7B5]/90 bg-gradient-to-br from-[#FFFDF9] via-[#FAF6ED] to-[#F5EFE0] p-4 shadow-sm transition hover:border-[#B45309]/45 hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="rounded-lg border border-[#B45309]/20 bg-white/80 p-2 text-[#B45309]">
+                        <Landmark className="h-4 w-4" aria-hidden />
+                      </span>
+                      <span className="rounded-full border border-[#FDE68A] bg-[#FEF3C7]/80 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-[#B45309]">
+                        {d.mandals.length} mandals
+                      </span>
+                    </div>
+                    <h3 className="font-display-te mt-3 text-lg font-normal leading-snug text-[#0F172A]">
+                      {d.nameTe}
+                    </h3>
+                    <p className="font-sans mt-0.5 text-xs font-medium text-slate-500">
+                      {d.nameEn} · {d.zone}
+                    </p>
+                    <p className="font-telugu mt-3 flex items-center gap-1.5 text-[11px] text-slate-600">
+                      <MapPin
+                        className="h-3.5 w-3.5 text-[#B45309]"
+                        aria-hidden
+                      />
+                      HQ: {d.headquarters}
+                    </p>
+                    <p className="font-telugu mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                      <Building2
+                        className="h-3.5 w-3.5 text-slate-400"
+                        aria-hidden
+                      />
+                      {urbanCount} పట్టణ / మున్సిపాలిటీ
+                    </p>
+                    <span className="font-telugu mt-4 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-[#B45309] group-hover:gap-2">
+                      జిల్లా డెస్క్ తెరవండి
+                      <ArrowRight className="h-4 w-4" aria-hidden />
                     </span>
-                    <span className="rounded-full border border-[#FDE68A] bg-[#FEF3C7]/80 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-[#B45309]">
-                      {d.mandalCount} mandals
-                    </span>
-                  </div>
-                  <h3 className="font-display-te mt-3 text-lg font-normal leading-snug text-[#0F172A]">
-                    {d.nameTe}
-                  </h3>
-                  <p className="font-sans mt-0.5 text-xs font-medium text-slate-500">
-                    {d.nameEn}
-                  </p>
-                  <p className="font-telugu mt-3 flex items-center gap-1.5 text-[11px] text-slate-600">
-                    <MapPin className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
-                    HQ: {d.headquarters.te}
-                  </p>
-                  <p className="font-telugu mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                    <Building2 className="h-3.5 w-3.5 text-slate-400" aria-hidden />
-                    {d.townCount} పట్టణ / మున్సిపాలిటీ
-                  </p>
-                  <span className="font-telugu mt-4 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-[#B45309] group-hover:gap-2">
-                    జిల్లా డెస్క్ తెరవండి
-                    <ArrowRight className="h-4 w-4" aria-hidden />
-                  </span>
-                </Link>
-              </li>
-            ))}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

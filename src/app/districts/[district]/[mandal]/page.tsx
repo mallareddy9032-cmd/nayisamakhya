@@ -17,7 +17,6 @@ import {
   mandalDeskMetrics,
   mandalStaticParams,
 } from "@/data/telanganaGeo";
-import { resolveRegionalHubForDistrict } from "@/config/communityHubs";
 
 type Props = {
   params: Promise<{ district: string; mandal: string }>;
@@ -52,18 +51,15 @@ export default async function MandalDeskPage({ params }: Props) {
 
   const badge = mandalCoordinatorBadge(district, mandal);
   const metrics = mandalDeskMetrics(district.slug, mandal.slug);
-  const hub = resolveRegionalHubForDistrict(district.slug);
-  const isTownLike =
-    /urban|municipality|town|corporation|nagar/i.test(mandal.slug) ||
-    /అర్బన్|మున్సిప|పట్టణ|కార్పొరేషన్/.test(mandal.nameTe);
-  const placeKindTe = isTownLike ? "పట్టణం" : "మండలం";
+  const placeKindTe =
+    mandal.type === "corporation"
+      ? "కార్పొరేషన్"
+      : mandal.type === "municipality"
+        ? "పట్టణం"
+        : "మండలం";
 
   const petitionHref = `/representation?dist=${encodeURIComponent(district.slug)}&mandal=${encodeURIComponent(mandal.slug)}`;
-  const waHref =
-    hub?.inviteUrl ||
-    `https://wa.me/${badge.phoneE164}?text=${encodeURIComponent(
-      `${mandal.nameTe} (${district.nameTe}) సేవా డెస్క్ — సహాయం కావాలి`,
-    )}`;
+  const waHref = district.whatsappCorridorUrl;
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] text-[#0F172A] antialiased">

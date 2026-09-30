@@ -1,188 +1,531 @@
 /**
  * Telangana statewide geographic directory — 33 districts × 589 mandals.
- * Composes Phase-1 districts + Phase-2 mandal directory + urban ULBs with
- * headquarters metadata and desk helpers for /districts routes.
+ *
+ * Curated desk metadata (zones, WhatsApp corridors, ULB typing) is merged
+ * onto the Phase-2 LGD mandal directory so every district remains complete.
  */
 
-import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
+import { TELANGANA_DISTRICTS as DISTRICT_SEEDS } from "@/lib/data/districts";
 import { MANDALS_DIRECTORY } from "@/lib/data/mandalsDirectory";
 import { URBAN_DIRECTORY } from "@/lib/data/urbanDirectory";
+import { resolveRegionalHubForDistrict } from "@/config/communityHubs";
 
-export type GeoPlaceName = {
-  en: string;
-  te: string;
-};
-
-export type GeoMandal = {
+export interface MandalInfo {
   slug: string;
   nameEn: string;
   nameTe: string;
-  lgdCode: string;
-  districtSlug: string;
-};
-
-export type GeoTown = {
-  slug: string;
-  nameEn: string;
-  nameTe: string;
-  ulbType: string;
-  districtSlug: string;
-};
-
-export type GeoHeadquarters = GeoPlaceName & {
-  /** Collectorate / district seat locality slug when known. */
-  seatSlug?: string;
-};
-
-export type GeoDistrict = {
-  slug: string;
-  nameEn: string;
-  nameTe: string;
-  zone: string;
-  headquarters: GeoHeadquarters;
-  mandals: GeoMandal[];
-  towns: GeoTown[];
-  mandalCount: number;
-  townCount: number;
-};
-
-/** Official / commonly cited district headquarters (collectorate seats). */
-const DISTRICT_HEADQUARTERS: Record<string, GeoHeadquarters> = {
-  adilabad: { en: "Adilabad", te: "ఆదిలాబాద్", seatSlug: "adilabad" },
-  "bhadradri-kothagudem": {
-    en: "Kothagudem",
-    te: "కొత్తగూడెం",
-    seatSlug: "kothagudem",
-  },
-  hanumakonda: { en: "Hanumakonda", te: "హనుమకొండ", seatSlug: "hanumakonda" },
-  hyderabad: { en: "Hyderabad", te: "హైదరాబాద్", seatSlug: "hyderabad" },
-  jagtial: { en: "Jagtial", te: "జగిత్యాల", seatSlug: "jagtial" },
-  jangaon: { en: "Jangaon", te: "జనగాం", seatSlug: "jangaon" },
-  "jayashankar-bhupalpally": {
-    en: "Bhupalpally",
-    te: "భూపాలపల్లి",
-    seatSlug: "bhupalpally",
-  },
-  "jogulamba-gadwal": { en: "Gadwal", te: "గద్వాల", seatSlug: "gadwal" },
-  kamareddy: { en: "Kamareddy", te: "కామారెడ్డి", seatSlug: "kamareddy" },
-  karimnagar: { en: "Karimnagar", te: "కరీంనగర్", seatSlug: "karimnagar" },
-  khammam: { en: "Khammam", te: "ఖమ్మం", seatSlug: "khammam" },
-  "kumuram-bheem-asifabad": {
-    en: "Asifabad",
-    te: "ఆసిఫాబాద్",
-    seatSlug: "asifabad",
-  },
-  mahabubabad: { en: "Mahabubabad", te: "మహబూబాబాద్", seatSlug: "mahabubabad" },
-  mahabubnagar: {
-    en: "Mahabubnagar",
-    te: "మహబూబ్‌నగర్",
-    seatSlug: "mahabubnagar",
-  },
-  mancherial: { en: "Mancherial", te: "మంచిర్యాల", seatSlug: "mancherial" },
-  medak: { en: "Medak", te: "మెదక్", seatSlug: "medak" },
-  "medchal-malkajgiri": {
-    en: "Medchal",
-    te: "మేడ్చల్",
-    seatSlug: "medchal",
-  },
-  mulugu: { en: "Mulugu", te: "ములుగు", seatSlug: "mulugu" },
-  nagarkurnool: {
-    en: "Nagarkurnool",
-    te: "నాగర్‌కర్నూల్",
-    seatSlug: "nagarkurnool",
-  },
-  nalgonda: { en: "Nalgonda", te: "నల్గొండ", seatSlug: "nalgonda" },
-  narayanpet: { en: "Narayanpet", te: "నారాయణపేట", seatSlug: "narayanpet" },
-  nirmal: { en: "Nirmal", te: "నిర్మల్", seatSlug: "nirmal" },
-  nizamabad: { en: "Nizamabad", te: "నిజామాబాద్", seatSlug: "nizamabad" },
-  peddapalli: { en: "Peddapalli", te: "పెద్దపల్లి", seatSlug: "peddapalli" },
-  "rajanna-sircilla": {
-    en: "Sircilla",
-    te: "సిరిసిల్ల",
-    seatSlug: "sircilla",
-  },
-  rangareddy: {
-    en: "Shamshabad / Kandukur",
-    te: "శంషాబాద్ / కందుకూర్",
-    seatSlug: "shamshabad",
-  },
-  sangareddy: { en: "Sangareddy", te: "సంగారెడ్డి", seatSlug: "sangareddy" },
-  siddipet: { en: "Siddipet", te: "సిద్దిపేట", seatSlug: "siddipet" },
-  suryapet: { en: "Suryapet", te: "సూర్యాపేట", seatSlug: "suryapet" },
-  vikarabad: { en: "Vikarabad", te: "వికారాబాద్", seatSlug: "vikarabad" },
-  wanaparthy: { en: "Wanaparthy", te: "వనపర్తి", seatSlug: "wanaparthy" },
-  warangal: { en: "Warangal", te: "వరంగల్", seatSlug: "warangal" },
-  "yadadri-bhuvanagiri": {
-    en: "Bhuvanagiri",
-    te: "భువనగిరి",
-    seatSlug: "bhuvanagiri",
-  },
-};
-
-function buildDistricts(): GeoDistrict[] {
-  return TELANGANA_DISTRICTS.map((d) => {
-    const mandals: GeoMandal[] = MANDALS_DIRECTORY.filter(
-      (m) => m.district_slug === d.slug,
-    )
-      .map((m) => ({
-        slug: m.slug,
-        nameEn: m.name_en,
-        nameTe: m.name_te,
-        lgdCode: m.lgd_code,
-        districtSlug: m.district_slug,
-      }))
-      .sort((a, b) => a.nameEn.localeCompare(b.nameEn, "en"));
-
-    const towns: GeoTown[] = URBAN_DIRECTORY.filter(
-      (u) => u.district_slug === d.slug,
-    )
-      .map((u) => ({
-        slug: u.slug,
-        nameEn: u.name_en,
-        nameTe: u.name_te,
-        ulbType: u.ulb_type,
-        districtSlug: u.district_slug,
-      }))
-      .sort((a, b) => a.nameEn.localeCompare(b.nameEn, "en"));
-
-    const headquarters =
-      DISTRICT_HEADQUARTERS[d.slug] ??
-      ({ en: d.name_en, te: d.name_te } satisfies GeoHeadquarters);
-
-    return {
-      slug: d.slug,
-      nameEn: d.name_en,
-      nameTe: d.name_te,
-      zone: d.zone,
-      headquarters,
-      mandals,
-      towns,
-      mandalCount: mandals.length,
-      townCount: towns.length,
-    };
-  });
+  type: "mandal" | "municipality" | "corporation";
 }
 
-/** Canonical statewide geo tree — 33 districts. */
-export const TELANGANA_GEO: GeoDistrict[] = buildDistricts();
+export interface DistrictInfo {
+  slug: string;
+  nameEn: string;
+  nameTe: string;
+  headquarters: string;
+  zone: "South Telangana" | "North Telangana" | "Central/Capital";
+  whatsappCorridorUrl: string;
+  mandals: MandalInfo[];
+}
 
-const DISTRICT_BY_SLUG = new Map(
-  TELANGANA_GEO.map((d) => [d.slug, d] as const),
-);
+export type GeoZone = DistrictInfo["zone"];
 
-const MANDAL_BY_KEY = new Map(
-  TELANGANA_GEO.flatMap((d) =>
-    d.mandals.map((m) => [`${d.slug}/${m.slug}`, m] as const),
-  ),
+/** Canonical 33-district key list (slug order matches civic directory). */
+export const ALL_33_DISTRICT_KEYS = [
+  "adilabad",
+  "bhadradri-kothagudem",
+  "hanumakonda",
+  "hyderabad",
+  "jagtial",
+  "jangaon",
+  "jayashankar-bhupalpally",
+  "jogulamba-gadwal",
+  "kamareddy",
+  "karimnagar",
+  "khammam",
+  "kumuram-bheem-asifabad",
+  "mahabubabad",
+  "mahabubnagar",
+  "mancherial",
+  "medak",
+  "medchal-malkajgiri",
+  "mulugu",
+  "nagarkurnool",
+  "nalgonda",
+  "narayanpet",
+  "nirmal",
+  "nizamabad",
+  "peddapalli",
+  "rajanna-sircilla",
+  "rangareddy",
+  "sangareddy",
+  "siddipet",
+  "suryapet",
+  "vikarabad",
+  "wanaparthy",
+  "warangal",
+  "yadadri-bhuvanagiri",
+] as const;
+
+export type DistrictKey = (typeof ALL_33_DISTRICT_KEYS)[number];
+
+/** Curated pilot hubs — names, zones, corridors, and ULB typing overrides. */
+const CURATED_DISTRICTS: Partial<Record<string, DistrictInfo>> = {
+  suryapet: {
+    slug: "suryapet",
+    nameEn: "Suryapet",
+    nameTe: "సూర్యాపేట",
+    headquarters: "Suryapet",
+    zone: "South Telangana",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-suryapet-hub",
+    mandals: [
+      { slug: "kodad", nameEn: "Kodad", nameTe: "కోదాడ", type: "municipality" },
+      {
+        slug: "suryapet",
+        nameEn: "Suryapet Urban",
+        nameTe: "సూర్యాపేట అర్బన్",
+        type: "municipality",
+      },
+      {
+        slug: "huzurnagar",
+        nameEn: "Huzurnagar",
+        nameTe: "హుజూర్‌నగర్",
+        type: "municipality",
+      },
+      { slug: "mothey", nameEn: "Mothey", nameTe: "మోతే", type: "mandal" },
+      { slug: "munagala", nameEn: "Munagala", nameTe: "మునగాల", type: "mandal" },
+      {
+        slug: "nadigudem",
+        nameEn: "Nadigudem",
+        nameTe: "నడిగూడెం",
+        type: "mandal",
+      },
+      { slug: "chilkur", nameEn: "Chilkur", nameTe: "చిలుకూరు", type: "mandal" },
+      {
+        slug: "mellachervu",
+        nameEn: "Mellachervu",
+        nameTe: "మేళ్లచెరువు",
+        type: "mandal",
+      },
+      {
+        slug: "chivemla",
+        nameEn: "Chivvemla",
+        nameTe: "చివ్వెంల",
+        type: "mandal",
+      },
+      {
+        slug: "atmakur-s",
+        nameEn: "Atmakur (S)",
+        nameTe: "ఆత్మకూర్ (ఎస్)",
+        type: "mandal",
+      },
+    ],
+  },
+  rangareddy: {
+    slug: "rangareddy",
+    nameEn: "Rangareddy",
+    nameTe: "రంగారెడ్డి",
+    headquarters: "Shamshabad",
+    zone: "Central/Capital",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-rangareddy-hub",
+    mandals: [
+      {
+        slug: "ibrahimpatnam",
+        nameEn: "Ibrahimpatnam",
+        nameTe: "ఇబ్రహీంపట్నం",
+        type: "municipality",
+      },
+      {
+        slug: "rajendranagar",
+        nameEn: "Rajendranagar",
+        nameTe: "రాజేంద్రనగర్",
+        type: "corporation",
+      },
+      {
+        slug: "serilingampally",
+        nameEn: "Serilingampally",
+        nameTe: "శేరిలింగంపల్లి",
+        type: "corporation",
+      },
+      {
+        slug: "maheshwaram",
+        nameEn: "Maheshwaram",
+        nameTe: "మహేశ్వరం",
+        type: "mandal",
+      },
+      { slug: "chevella", nameEn: "Chevella", nameTe: "చేవెళ్ల", type: "mandal" },
+      {
+        slug: "shadnagar",
+        nameEn: "Shadnagar",
+        nameTe: "షాద్‌‌నగర్",
+        type: "municipality",
+      },
+    ],
+  },
+  hyderabad: {
+    slug: "hyderabad",
+    nameEn: "Hyderabad",
+    nameTe: "హైదరాబాద్",
+    headquarters: "Hyderabad",
+    zone: "Central/Capital",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-hyderabad-hub",
+    mandals: [
+      {
+        slug: "amberpet",
+        nameEn: "Amberpet",
+        nameTe: "అంబర్‌పేట్",
+        type: "corporation",
+      },
+      {
+        slug: "khairatabad",
+        nameEn: "Khairatabad",
+        nameTe: "ఖైరతాబాద్",
+        type: "corporation",
+      },
+      {
+        slug: "secunderabad",
+        nameEn: "Secunderabad",
+        nameTe: "సికింద్రాబాద్",
+        type: "corporation",
+      },
+      {
+        slug: "charminar",
+        nameEn: "Charminar",
+        nameTe: "చార్మినార్",
+        type: "corporation",
+      },
+      {
+        slug: "jubilee-hills",
+        nameEn: "Jubilee Hills",
+        nameTe: "జూబ్లీహిల్స్",
+        type: "corporation",
+      },
+    ],
+  },
+  hanumakonda: {
+    slug: "hanumakonda",
+    nameEn: "Hanumakonda",
+    nameTe: "హనుమకొండ",
+    headquarters: "Hanumakonda",
+    zone: "North Telangana",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-warangal-hub",
+    mandals: [
+      {
+        slug: "hanumakonda",
+        nameEn: "Hanumakonda Urban",
+        nameTe: "హనుమకొండ అర్బన్",
+        type: "corporation",
+      },
+      { slug: "kazipet", nameEn: "Kazipet", nameTe: "కాజీపేట", type: "corporation" },
+      {
+        slug: "kamalapur",
+        nameEn: "Kamalapur",
+        nameTe: "కమలాపూర్",
+        type: "mandal",
+      },
+      { slug: "parkal", nameEn: "Parkal", nameTe: "పరకాల", type: "municipality" },
+    ],
+  },
+  karimnagar: {
+    slug: "karimnagar",
+    nameEn: "Karimnagar",
+    nameTe: "కరీంనగర్",
+    headquarters: "Karimnagar",
+    zone: "North Telangana",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-karimnagar-hub",
+    mandals: [
+      {
+        slug: "karimnagar",
+        nameEn: "Karimnagar Urban",
+        nameTe: "కరీంనగర్ అర్బన్",
+        type: "corporation",
+      },
+      {
+        slug: "huzurabad",
+        nameEn: "Huzurabad",
+        nameTe: "హుజూరాబాద్",
+        type: "municipality",
+      },
+      {
+        slug: "choppadandi",
+        nameEn: "Choppadandi",
+        nameTe: "చొప్పదండి",
+        type: "municipality",
+      },
+      {
+        slug: "manakondur",
+        nameEn: "Manakondur",
+        nameTe: "మానకొండూర్",
+        type: "mandal",
+      },
+    ],
+  },
+  khammam: {
+    slug: "khammam",
+    nameEn: "Khammam",
+    nameTe: "ఖమ్మం",
+    headquarters: "Khammam",
+    zone: "South Telangana",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-khammam-hub",
+    mandals: [
+      {
+        slug: "khammam-urban",
+        nameEn: "Khammam Urban",
+        nameTe: "ఖమ్మం అర్బన్",
+        type: "corporation",
+      },
+      { slug: "madhira", nameEn: "Madhira", nameTe: "మధిర", type: "municipality" },
+      {
+        slug: "sathupalli",
+        nameEn: "Sathupalli",
+        nameTe: "సత్తుపల్లి",
+        type: "municipality",
+      },
+      { slug: "kalluru", nameEn: "Kalluru", nameTe: "కల్లూరు", type: "mandal" },
+    ],
+  },
+  nalgonda: {
+    slug: "nalgonda",
+    nameEn: "Nalgonda",
+    nameTe: "నల్గొండ",
+    headquarters: "Nalgonda",
+    zone: "South Telangana",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-nalgonda-hub",
+    mandals: [
+      {
+        slug: "nalgonda",
+        nameEn: "Nalgonda Urban",
+        nameTe: "నల్గొండ అర్బన్",
+        type: "municipality",
+      },
+      {
+        slug: "miryalaguda",
+        nameEn: "Miryalaguda",
+        nameTe: "మిర్యాలగూడ",
+        type: "municipality",
+      },
+      {
+        slug: "devarakonda",
+        nameEn: "Devarakonda",
+        nameTe: "దేవరకొండ",
+        type: "municipality",
+      },
+      {
+        slug: "nakrekal",
+        nameEn: "Nakrekal",
+        nameTe: "నకిరేకల్",
+        type: "municipality",
+      },
+    ],
+  },
+  nizamabad: {
+    slug: "nizamabad",
+    nameEn: "Nizamabad",
+    nameTe: "నిజామాబాద్",
+    headquarters: "Nizamabad",
+    zone: "North Telangana",
+    whatsappCorridorUrl: "https://chat.whatsapp.com/sample-nizamabad-hub",
+    mandals: [
+      {
+        slug: "nizamabad-north",
+        nameEn: "Nizamabad North",
+        nameTe: "నిజామాబాద్ నార్త్",
+        type: "corporation",
+      },
+      { slug: "armur", nameEn: "Armur", nameTe: "ఆర్మూర్", type: "municipality" },
+      { slug: "bodhan", nameEn: "Bodhan", nameTe: "బోధన్", type: "municipality" },
+      { slug: "balkonda", nameEn: "Balkonda", nameTe: "బాల్కొండ", type: "mandal" },
+    ],
+  },
+};
+
+const SOUTH_ZONE = new Set([
+  "suryapet",
+  "nalgonda",
+  "khammam",
+  "bhadradri-kothagudem",
+  "yadadri-bhuvanagiri",
+  "mahabubnagar",
+  "nagarkurnool",
+  "wanaparthy",
+  "jogulamba-gadwal",
+  "narayanpet",
+  "mahabubabad",
+  "mulugu",
+  "jayashankar-bhupalpally",
+]);
+
+const CENTRAL_ZONE = new Set([
+  "hyderabad",
+  "rangareddy",
+  "medchal-malkajgiri",
+  "vikarabad",
+  "sangareddy",
+  "medak",
+  "siddipet",
+]);
+
+const HQ_EN: Record<string, string> = {
+  adilabad: "Adilabad",
+  "bhadradri-kothagudem": "Kothagudem",
+  hanumakonda: "Hanumakonda",
+  hyderabad: "Hyderabad",
+  jagtial: "Jagtial",
+  jangaon: "Jangaon",
+  "jayashankar-bhupalpally": "Bhupalpally",
+  "jogulamba-gadwal": "Gadwal",
+  kamareddy: "Kamareddy",
+  karimnagar: "Karimnagar",
+  khammam: "Khammam",
+  "kumuram-bheem-asifabad": "Asifabad",
+  mahabubabad: "Mahabubabad",
+  mahabubnagar: "Mahabubnagar",
+  mancherial: "Mancherial",
+  medak: "Medak",
+  "medchal-malkajgiri": "Medchal",
+  mulugu: "Mulugu",
+  nagarkurnool: "Nagarkurnool",
+  nalgonda: "Nalgonda",
+  narayanpet: "Narayanpet",
+  nirmal: "Nirmal",
+  nizamabad: "Nizamabad",
+  peddapalli: "Peddapalli",
+  "rajanna-sircilla": "Sircilla",
+  rangareddy: "Shamshabad",
+  sangareddy: "Sangareddy",
+  siddipet: "Siddipet",
+  suryapet: "Suryapet",
+  vikarabad: "Vikarabad",
+  wanaparthy: "Wanaparthy",
+  warangal: "Warangal",
+  "yadadri-bhuvanagiri": "Bhuvanagiri",
+};
+
+function zoneFor(slug: string): GeoZone {
+  if (CENTRAL_ZONE.has(slug)) return "Central/Capital";
+  if (SOUTH_ZONE.has(slug)) return "South Telangana";
+  return "North Telangana";
+}
+
+function corridorUrlFor(slug: string, curated?: string): string {
+  if (curated?.trim()) return curated.trim();
+  const hub = resolveRegionalHubForDistrict(slug);
+  if (hub?.inviteUrl) return hub.inviteUrl;
+  return `https://chat.whatsapp.com/sample-${slug}-hub`;
+}
+
+function ulbTypeForSlug(
+  districtSlug: string,
+  mandalSlug: string,
+): MandalInfo["type"] | null {
+  const base = mandalSlug.replace(/-urban$|-rural$/i, "");
+  const hit = URBAN_DIRECTORY.find((u) => {
+    if (u.district_slug !== districtSlug) return false;
+    const us = u.slug
+      .replace(/-municipality$|-municipal-corporation$|-nagar-panchayat$/i, "")
+      .replace(/-corporation$/i, "");
+    return (
+      u.slug === mandalSlug ||
+      us === mandalSlug ||
+      us === base ||
+      u.slug.includes(base) ||
+      mandalSlug.includes(us)
+    );
+  });
+  if (!hit) return null;
+  if (hit.ulb_type === "municipal_corporation") return "corporation";
+  return "municipality";
+}
+
+function inferMandalType(
+  districtSlug: string,
+  mandalSlug: string,
+  nameEn: string,
+): MandalInfo["type"] {
+  const fromUlb = ulbTypeForSlug(districtSlug, mandalSlug);
+  if (fromUlb) return fromUlb;
+  const blob = `${mandalSlug} ${nameEn}`.toLowerCase();
+  if (/corporation|ghmc|circle/.test(blob)) return "corporation";
+  if (/municipality|urban|town|nagar/.test(blob)) return "municipality";
+  if (districtSlug === "hyderabad") return "corporation";
+  return "mandal";
+}
+
+function curatedOverrideMap(
+  curated: DistrictInfo | undefined,
+): Map<string, MandalInfo> {
+  const map = new Map<string, MandalInfo>();
+  if (!curated) return map;
+  for (const m of curated.mandals) {
+    map.set(m.slug, m);
+    // Accept legacy aliases used in curated drafts.
+    if (m.slug === "suryapet") map.set("suryapet-urban", m);
+    if (m.slug === "chivemla") map.set("chivvemla", m);
+    if (m.slug === "nadigudem") map.set("nadirgudem", m);
+    if (m.slug === "hanumakonda") map.set("hanumakonda-urban", m);
+    if (m.slug === "karimnagar") map.set("karimnagar-urban", m);
+    if (m.slug === "nalgonda") map.set("nalgonda-urban", m);
+  }
+  return map;
+}
+
+function buildDistrict(slug: string): DistrictInfo {
+  const curated = CURATED_DISTRICTS[slug];
+  const seed = DISTRICT_SEEDS.find((d) => d.slug === slug);
+  const overrides = curatedOverrideMap(curated);
+
+  const directoryRows = MANDALS_DIRECTORY.filter(
+    (m) => m.district_slug === slug,
+  );
+
+  const mandals: MandalInfo[] = directoryRows
+    .map((row) => {
+      const override = overrides.get(row.slug);
+      if (override) {
+        return {
+          slug: row.slug,
+          nameEn: override.nameEn || row.name_en,
+          nameTe: override.nameTe || row.name_te,
+          type: override.type,
+        };
+      }
+      return {
+        slug: row.slug,
+        nameEn: row.name_en,
+        nameTe: row.name_te,
+        type: inferMandalType(slug, row.slug, row.name_en),
+      };
+    })
+    .sort((a, b) => a.nameEn.localeCompare(b.nameEn, "en"));
+
+  return {
+    slug,
+    nameEn: curated?.nameEn || seed?.name_en || slug,
+    nameTe: curated?.nameTe || seed?.name_te || slug,
+    headquarters: curated?.headquarters || HQ_EN[slug] || seed?.name_en || slug,
+    zone: curated?.zone || zoneFor(slug),
+    whatsappCorridorUrl: corridorUrlFor(slug, curated?.whatsappCorridorUrl),
+    mandals,
+  };
+}
+
+/** Full 33-district geographic index (curated + dynamically extended). */
+export const TELANGANA_DISTRICTS: Record<string, DistrictInfo> =
+  Object.fromEntries(
+    ALL_33_DISTRICT_KEYS.map((slug) => [slug, buildDistrict(slug)]),
+  );
+
+export const TELANGANA_GEO: DistrictInfo[] = ALL_33_DISTRICT_KEYS.map(
+  (slug) => TELANGANA_DISTRICTS[slug],
 );
 
 export const TELANGANA_DISTRICT_COUNT = TELANGANA_GEO.length;
 export const TELANGANA_MANDAL_COUNT = TELANGANA_GEO.reduce(
-  (n, d) => n + d.mandalCount,
+  (n, d) => n + d.mandals.length,
   0,
 );
 export const TELANGANA_TOWN_COUNT = TELANGANA_GEO.reduce(
-  (n, d) => n + d.townCount,
+  (n, d) =>
+    n + d.mandals.filter((m) => m.type !== "mandal").length,
   0,
 );
 
@@ -197,27 +540,31 @@ if (TELANGANA_MANDAL_COUNT !== 589) {
   );
 }
 
-export function listGeoDistricts(): GeoDistrict[] {
+/** @deprecated Prefer DistrictInfo — kept for page/helper aliases. */
+export type GeoDistrict = DistrictInfo;
+/** @deprecated Prefer MandalInfo */
+export type GeoMandal = MandalInfo;
+
+export function listGeoDistricts(): DistrictInfo[] {
   return TELANGANA_GEO;
 }
 
-export function getGeoDistrict(slug: string): GeoDistrict | undefined {
-  return DISTRICT_BY_SLUG.get(slug.trim().toLowerCase());
+export function getGeoDistrict(slug: string): DistrictInfo | undefined {
+  return TELANGANA_DISTRICTS[slug.trim().toLowerCase()];
 }
 
 export function getGeoMandal(
   districtSlug: string,
   mandalSlug: string,
-): GeoMandal | undefined {
-  return MANDAL_BY_KEY.get(
-    `${districtSlug.trim().toLowerCase()}/${mandalSlug.trim().toLowerCase()}`,
-  );
+): MandalInfo | undefined {
+  const d = getGeoDistrict(districtSlug);
+  if (!d) return undefined;
+  const key = mandalSlug.trim().toLowerCase();
+  return d.mandals.find((m) => m.slug === key);
 }
 
-export function listAllGeoMandals(): Array<GeoMandal & { district: GeoDistrict }> {
-  return TELANGANA_GEO.flatMap((d) =>
-    d.mandals.map((m) => ({ ...m, district: d })),
-  );
+export function listUrbanPlaces(district: DistrictInfo): MandalInfo[] {
+  return district.mandals.filter((m) => m.type !== "mandal");
 }
 
 /** Stable FNV-1a style hash for deterministic desk metrics (SSR-safe). */
@@ -240,7 +587,7 @@ export type DeskMetrics = {
 export function districtDeskMetrics(districtSlug: string): DeskMetrics {
   const h = geoHash(`district:${districtSlug}`);
   const d = getGeoDistrict(districtSlug);
-  const mandals = d?.mandalCount ?? 12;
+  const mandals = d?.mandals.length ?? 12;
   return {
     activeSalons: 40 + (h % 90) + mandals * 2,
     go23Claims: 25 + (h % 70) + Math.floor(mandals * 1.5),
@@ -273,10 +620,9 @@ export type CoordinatorBadge = {
   verified: boolean;
 };
 
-/** Deterministic coordinator badge for desk pages (helpline until roster sync). */
 export function mandalCoordinatorBadge(
-  district: GeoDistrict,
-  mandal: GeoMandal,
+  district: DistrictInfo,
+  mandal: MandalInfo,
 ): CoordinatorBadge {
   const code = geoHash(`${district.slug}:${mandal.slug}`)
     .toString(16)
@@ -301,23 +647,15 @@ export function mandalCoordinatorBadge(
 export type GeoSearchHit =
   | {
       kind: "district";
-      district: GeoDistrict;
+      district: DistrictInfo;
       labelEn: string;
       labelTe: string;
       href: string;
     }
   | {
-      kind: "mandal";
-      district: GeoDistrict;
-      mandal: GeoMandal;
-      labelEn: string;
-      labelTe: string;
-      href: string;
-    }
-  | {
-      kind: "town";
-      district: GeoDistrict;
-      town: GeoTown;
+      kind: "mandal" | "town";
+      district: DistrictInfo;
+      mandal: MandalInfo;
       labelEn: string;
       labelTe: string;
       href: string;
@@ -334,8 +672,8 @@ export function searchTelanganaGeo(query: string, limit = 48): GeoSearchHit[] {
       d.slug.includes(q) ||
       d.nameEn.toLowerCase().includes(q) ||
       d.nameTe.includes(raw) ||
-      d.headquarters.en.toLowerCase().includes(q) ||
-      d.headquarters.te.includes(raw)
+      d.headquarters.toLowerCase().includes(q) ||
+      d.zone.toLowerCase().includes(q)
     ) {
       hits.push({
         kind: "district",
@@ -353,36 +691,12 @@ export function searchTelanganaGeo(query: string, limit = 48): GeoSearchHit[] {
         m.nameTe.includes(raw)
       ) {
         hits.push({
-          kind: "mandal",
+          kind: m.type === "mandal" ? "mandal" : "town",
           district: d,
           mandal: m,
           labelEn: `${m.nameEn} · ${d.nameEn}`,
           labelTe: `${m.nameTe} · ${d.nameTe}`,
           href: `/districts/${d.slug}/${m.slug}`,
-        });
-      }
-    }
-
-    for (const t of d.towns) {
-      if (
-        t.slug.includes(q) ||
-        t.nameEn.toLowerCase().includes(q) ||
-        t.nameTe.includes(raw)
-      ) {
-        // Town desks resolve via nearest HQ mandal when possible, else district page.
-        const hqSlug = d.headquarters.seatSlug;
-        const hqMandal =
-          (hqSlug && d.mandals.find((m) => m.slug.includes(hqSlug))) ||
-          d.mandals[0];
-        hits.push({
-          kind: "town",
-          district: d,
-          town: t,
-          labelEn: `${t.nameEn} · ${d.nameEn}`,
-          labelTe: `${t.nameTe} · ${d.nameTe}`,
-          href: hqMandal
-            ? `/districts/${d.slug}/${hqMandal.slug}`
-            : `/districts/${d.slug}`,
         });
       }
     }
@@ -394,7 +708,7 @@ export function searchTelanganaGeo(query: string, limit = 48): GeoSearchHit[] {
 }
 
 export function districtStaticParams(): { district: string }[] {
-  return TELANGANA_GEO.map((d) => ({ district: d.slug }));
+  return ALL_33_DISTRICT_KEYS.map((district) => ({ district }));
 }
 
 export function mandalStaticParams(): {
