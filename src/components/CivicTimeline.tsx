@@ -385,15 +385,6 @@ function EpochCard({ era }: { era: TimelineEra }) {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-center gap-1.5">
-            <span className="inline-flex rounded-full border border-[#B45309]/30 bg-[#B45309]/10 px-2.5 py-0.5 font-telugu text-[11px] font-bold text-[#B45309]">
-              {era.period}
-            </span>
-            <span className="inline-flex rounded-full border border-[#1E293B]/10 bg-white px-2.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-              {era.badgeEra}
-            </span>
-          </div>
-
           {era.actionLink ? (
             <Link
               href={era.actionLink.href}
@@ -538,9 +529,6 @@ export function CivicTimeline() {
               ఆధునిక చట్టబద్ధ హక్కుల వరకు
             </span>
           </h2>
-          <p className="mt-1.5 font-sans text-sm font-medium tracking-wide text-slate-500">
-            From ancient roots to modern legal rights
-          </p>
           <p className="mt-2 max-w-3xl font-telugu text-sm leading-[1.8] text-slate-600">
             ఆయుర్వేద శస్త్రచికిత్స, నాదస్వర వారసత్వం నుండి నేటి జీ.ఓ. 23 ఉచిత
             విద్యుత్ మరియు సమగ్ర కులగణన (SEEEPC) వరకు మన ప్రస్థానం.

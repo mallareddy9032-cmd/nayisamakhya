@@ -27,7 +27,7 @@ const TABS = [
   {
     id: "feed",
     href: "/feed",
-    label: "గెజిట్",
+    label: "గెజిట్ (Gazette)",
     emoji: "📰",
   },
 ] as const;

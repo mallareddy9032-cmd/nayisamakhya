@@ -30,12 +30,12 @@ export const translations = {
     en: "Survey",
   },
   navGazette: {
-    te: "గెజిట్ & జీవోలు (Gazette)",
-    en: "గెజిట్ & జీవోలు (Gazette)",
+    te: "గెజిట్ (Gazette)",
+    en: "గెజిట్ (Gazette)",
   },
   navNewsletter: {
-    te: "గెజిట్ & జీవోలు (Gazette)",
-    en: "గెజిట్ & జీవోలు (Gazette)",
+    te: "గెజిట్ (Gazette)",
+    en: "గెజిట్ (Gazette)",
   },
   navCtaSurvey: {
     te: "సర్వే ప్రారంభించండి ➔",

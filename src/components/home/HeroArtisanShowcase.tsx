@@ -3,15 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { IdCard, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { IdCard, MapPin, Phone, Zap } from "lucide-react";
 
 type CommunityFigure = {
   id: string;
   src: string;
   alt: string;
   monogram: string;
-  label: string;
-  labelEn: string;
 };
 
 const FIGURES: CommunityFigure[] = [
@@ -20,24 +18,18 @@ const FIGURES: CommunityFigure[] = [
     src: "/home/persona-artisan-salon.png",
     alt: "ఆధునిక సెలూన్ స్టైలిస్ట్ — Modern salon stylist",
     monogram: "సె",
-    label: "సెలూన్ స్టైలిస్ట్",
-    labelEn: "Modern Salon",
   },
   {
     id: "nadaswaram",
     src: "/home/artisan-craftsman-portrait.png",
     alt: "సాంప్రదాయ నాదస్వరం కళాకారుడు — Traditional nadaswaram artist",
     monogram: "నా",
-    label: "నాదస్వరం కళాకారుడు",
-    labelEn: "Nadaswaram",
   },
   {
     id: "youth",
     src: "/home/persona-youth-scholarship.png",
     alt: "విద్యార్థి / యువ నిపుణుడు — Student and young professional",
     monogram: "యు",
-    label: "యువ నిపుణుడు",
-    labelEn: "Young Professional",
   },
 ];
 
@@ -132,30 +124,26 @@ export function HeroArtisanShowcase() {
         aria-hidden
       />
 
-      {/* Community figures — side satellites + rotating primary */}
-      <div className="relative z-[1] flex w-full items-end justify-center gap-1 sm:gap-2">
+      {/* Top-left G.O. 23 pill — only floating label kept */}
+      <div className="absolute left-0 top-0 z-[3] sm:left-1 sm:top-1">
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/35 bg-white/95 px-2.5 py-1 font-sans text-[10px] font-semibold tracking-wide text-[#92400E] shadow-md backdrop-blur-sm sm:text-[11px]">
+          <Zap className="h-3 w-3 shrink-0 text-[#B45309]" aria-hidden />
+          250 Units Free Power (G.O. 23)
+        </span>
+      </div>
+
+      {/* Community figures — portraits only (no floating MT-prone labels) */}
+      <div className="relative z-[1] flex w-full items-end justify-center gap-1 pt-8 sm:gap-2 sm:pt-6">
         <div className="mb-6 motion-safe:animate-float motion-safe:[animation-delay:-1.2s] sm:mb-8">
           <PortraitRing figure={left} size="sm" />
-          <p className="mt-1.5 max-w-[4.5rem] truncate text-center font-sans text-[8px] font-semibold text-slate-500 sm:max-w-[5rem] sm:text-[9px]">
-            {left.labelEn}
-          </p>
         </div>
 
         <div className="relative mx-1 motion-safe:animate-float sm:mx-2">
           <PortraitRing figure={primary} size="lg" priority />
-          <div className="absolute -bottom-2 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/30 bg-white px-3 py-1 shadow-md">
-            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
-            <span className="font-telugu text-[10px] font-bold text-[#1E293B]">
-              BC-A · {primary.label}
-            </span>
-          </div>
         </div>
 
         <div className="mb-6 motion-safe:animate-float motion-safe:[animation-delay:-2.4s] sm:mb-8">
           <PortraitRing figure={right} size="sm" />
-          <p className="mt-1.5 max-w-[4.5rem] truncate text-center font-sans text-[8px] font-semibold text-slate-500 sm:max-w-[5rem] sm:text-[9px]">
-            {right.labelEn}
-          </p>
         </div>
       </div>
 
@@ -171,7 +159,7 @@ export function HeroArtisanShowcase() {
             type="button"
             role="tab"
             aria-selected={i === active}
-            aria-label={fig.labelEn}
+            aria-label={fig.alt}
             onClick={() => setActive(i)}
             className={`h-1.5 rounded-full transition-all ${
               i === active
@@ -182,12 +170,12 @@ export function HeroArtisanShowcase() {
         ))}
       </div>
 
-      {/* Coordinator card — counter-phase float + shadow bloom */}
+      {/* Zone Coordinator card — green live pulse */}
       <div className="relative z-10 mx-auto mt-3 w-auto max-w-[280px] motion-safe:animate-float-card">
         <Link
           href="/coordinator-card"
           className="block rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs ring-1 ring-[#B45309]/20 motion-safe:animate-shadow-bloom"
-          aria-label="సమన్వయకర్త డిజిటల్ కార్డు ప్రివ్యూ"
+          aria-label="Zone Coordinator digital card preview"
         >
           <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-[#B45309]" aria-hidden />
           <div className="flex items-start justify-between gap-2 pt-0.5">
@@ -197,7 +185,7 @@ export function HeroArtisanShowcase() {
                 నాయి సమాఖ్య
               </p>
               <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wider text-slate-500">
-                Coordinator Desk
+                Zone Coordinator
               </p>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[#E2E8F0] bg-[#FBFBFA]">
@@ -219,11 +207,10 @@ export function HeroArtisanShowcase() {
             కోదాడ · సూర్యాపేట
           </p>
 
-          {/* Live indicator pill */}
           <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1">
             <span className="live-pulse-dot" aria-hidden />
-            <span className="font-telugu text-[9px] font-bold tracking-wide text-emerald-800">
-              589 మండలాలు యాక్టివ్
+            <span className="whitespace-nowrap font-sans text-[9px] font-bold tracking-wide text-emerald-800">
+              589 Mandals Live
             </span>
           </div>
 

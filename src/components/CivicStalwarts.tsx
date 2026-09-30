@@ -159,7 +159,7 @@ export function CivicStalwarts() {
                     priority={index < 2}
                   />
 
-                  {/* Telugu name / role / description */}
+                  {/* TE: name / role / bio */}
                   <div className="space-y-1.5 px-0.5">
                     <h3 className="font-telugu text-sm font-bold leading-[1.55] text-civic-ink">
                       {stalwart.nameTe}
@@ -173,9 +173,9 @@ export function CivicStalwarts() {
                   </div>
                 </div>
 
-                {/* English italic footer — separated from TE block */}
+                {/* EN italic footer */}
                 <footer className="mt-auto space-y-0.5 border-t border-[#EAD7B5]/70 pt-2.5 italic">
-                  <p className="font-sans text-[10px] font-medium tracking-wide text-[#B45309]">
+                  <p className="font-sans text-[10px] font-medium not-italic tracking-wide text-[#B45309]">
                     {stalwart.nameEn}
                   </p>
                   <p className="font-sans text-[10px] leading-snug text-slate-500">

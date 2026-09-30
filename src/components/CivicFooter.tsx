@@ -103,16 +103,16 @@ export function CivicFooter() {
 
   return (
     <footer className="no-print mt-auto border-t border-slate-200 bg-[#F8F7F4] font-sans text-slate-700 print:hidden">
-      <div className="mx-auto max-w-6xl px-4 pt-10 pb-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+      <div className="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Col 1 — Brand */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="rounded-lg border border-civic-bronze/20 bg-civic-bronze/10 p-1.5 text-civic-bronze">
                 <ShieldCheck className="h-4 w-4" />
               </span>
-              <span className="font-display-te text-sm font-normal text-civic-ink">
-                నాయి సమాఖ్య తెలంగాణ
+              <span className="whitespace-nowrap font-display-te text-sm font-normal text-civic-ink">
+                నాయీ సమాఖ్య తెలంగాణ
               </span>
             </div>
             <p className="font-telugu text-sm leading-relaxed text-slate-600">
@@ -145,7 +145,7 @@ export function CivicFooter() {
               </li>
               <li>
                 <FooterNavLink href="/feed" icon={Newspaper}>
-                  Gazette
+                  గెజిట్ (Gazette)
                 </FooterNavLink>
               </li>
               <li>
@@ -169,8 +169,10 @@ export function CivicFooter() {
           {/* Col 3 — Coordinators */}
           <div>
             <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5 font-telugu text-xs font-bold tracking-wider text-civic-ink">
-              <Users className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              సమన్వయకర్తల వేదిక • FOR COORDINATORS
+              <Users className="h-3.5 w-3.5 shrink-0 text-civic-bronze" aria-hidden />
+              <span className="leading-snug">
+                సమన్వయకర్తల విభాగం • FOR COORDINATORS
+              </span>
             </h3>
             <ul className="space-y-2 font-telugu">
               <li>
@@ -257,7 +259,7 @@ export function CivicFooter() {
             </div>
 
             <nav
-              className="flex flex-wrap items-center gap-x-2 gap-y-1 lg:justify-end"
+              className="flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap lg:justify-end"
               aria-label="Legal and admin"
             >
               <Link
@@ -291,7 +293,7 @@ export function CivicFooter() {
                 href="/admin/desk"
                 className="civic-focus-ring inline-flex items-center gap-1 transition-colors hover:text-amber-700"
               >
-                <Lock className="h-3 w-3 text-slate-400" aria-hidden />
+                <Lock className="h-3 w-3 shrink-0 text-slate-400" aria-hidden />
                 Admin Login
               </Link>
             </nav>
@@ -299,7 +301,7 @@ export function CivicFooter() {
 
           <div className="mt-3 flex flex-col items-start justify-between gap-2 pb-4 sm:flex-row sm:items-center">
             <p className="font-telugu">
-              © {year} నాయి సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.
+              © {year} నాయీ సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.
             </p>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/50 px-2.5 py-0.5 font-sans font-medium text-slate-600">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />

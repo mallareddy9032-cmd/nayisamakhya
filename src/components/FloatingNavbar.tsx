@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   ChevronDown,
   Contrast,
@@ -9,6 +9,7 @@ import {
   MapPin,
   Menu,
   Send,
+  Trophy,
   X,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -24,6 +25,12 @@ const primaryNav = [
   { href: "/feed", key: "navGazette" as const, badge: false },
 ];
 
+const COMPETITIONS = [
+  { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
+  { href: "/quiz", label: "⚖️ లీగల్ క్విజ్" },
+  { href: "/reels", label: "🎬 మన కళ రీల్స్" },
+] as const;
+
 function NewBadge({ className }: { className?: string }) {
   return (
     <span
@@ -37,70 +44,84 @@ function NewBadge({ className }: { className?: string }) {
   );
 }
 
-function SprintPill({
+function CompetitionsMenu({
   className,
-  onClick,
+  compact = false,
+  onNavigate,
 }: {
   className?: string;
-  onClick?: () => void;
+  compact?: boolean;
+  onNavigate?: () => void;
 }) {
-  return (
-    <Link
-      href="/sprint"
-      onClick={onClick}
-      className={cn(
-        "tap inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.25)] transition hover:bg-amber-500/25",
-        className,
-      )}
-    >
-      <span aria-hidden>🏆</span>
-      సేవా సారథి ఛాలెంజ్
-    </Link>
-  );
-}
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
-/** Secondary contest link — kept quieter than సేవా సారథి pill. */
-function ReelsLink({
-  className,
-  onClick,
-}: {
-  className?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <Link
-      href="/reels"
-      onClick={onClick}
-      className={cn(
-        "tap inline-flex items-center gap-1 px-2 py-1.5 font-telugu text-[11px] font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline",
-        className,
-      )}
-    >
-      మన కళ
-    </Link>
-  );
-}
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
-/** Competition 3 — Legal Rights Quiz pill. */
-function QuizPill({
-  className,
-  onClick,
-}: {
-  className?: string;
-  onClick?: () => void;
-}) {
   return (
-    <Link
-      href="/quiz"
-      onClick={onClick}
-      className={cn(
-        "tap inline-flex items-center gap-1 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.2)] transition hover:bg-[#B45309]/20",
-        className,
-      )}
-    >
-      <span aria-hidden>⚖️</span>
-      లీగల్ క్విజ్
-    </Link>
+    <div ref={rootRef} className={cn("relative", className)}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "tap inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 font-telugu font-bold text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.25)] transition hover:bg-amber-500/25",
+          compact
+            ? "px-2 py-1 text-[10px]"
+            : "px-2.5 py-1.5 text-[11px]",
+        )}
+      >
+        <Trophy className="h-3 w-3 shrink-0" aria-hidden />
+        <span className="whitespace-nowrap">పోటీలు (Competitions)</span>
+        <ChevronDown
+          className={cn(
+            "h-3 w-3 shrink-0 transition-transform",
+            open ? "rotate-180" : "",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <ul
+          id={menuId}
+          role="menu"
+          className="absolute right-0 z-50 mt-1.5 min-w-[13.5rem] overflow-hidden rounded-xl border border-[#E2E8F0] bg-white py-1 shadow-lg"
+        >
+          {COMPETITIONS.map((item) => (
+            <li key={item.href} role="none">
+              <Link
+                href={item.href}
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  onNavigate?.();
+                }}
+                className="tap flex min-h-10 items-center px-3 font-telugu text-[12px] font-semibold text-[#0F172A] transition hover:bg-amber-50 hover:text-[#B45309]"
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 
@@ -134,24 +155,20 @@ export function FloatingNavbar() {
       <header className="no-print sticky top-0 z-50 border-b border-[#EBE8E0] bg-[#FBFBFA]/95 backdrop-blur-md">
         {/* Mobile <768px — 52px sticky */}
         <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 md:hidden lg:px-8">
-          <Link href="/" className="tap flex min-w-0 items-center gap-2">
+          <Link
+            href="/"
+            className="tap flex min-w-0 flex-shrink-0 items-center gap-2"
+          >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 text-[#B45309]">
               <Landmark className="h-4 w-4" aria-hidden />
             </span>
-            <span className="min-w-0 truncate">
-              <span className="block truncate font-display-te text-sm font-normal tracking-tight text-[#0F172A]">
-                నాయీ సమాఖ్య
-              </span>
-              <span className="block truncate text-[9px] uppercase tracking-[0.12em] text-muted">
-                Nayi Samakhya
-              </span>
+            <span className="max-w-[11rem] truncate whitespace-nowrap font-display-te text-sm font-normal tracking-tight text-[#0F172A] sm:max-w-none">
+              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
             </span>
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5">
-            <SprintPill className="max-w-[9.5rem] truncate px-2 text-[10px] sm:max-w-none" />
-            <QuizPill className="max-w-[6.75rem] truncate px-2 text-[10px] sm:max-w-none sm:px-2.5 sm:text-[11px]" />
-            <ReelsLink className="hidden sm:inline-flex" />
+            <CompetitionsMenu compact />
             <button
               type="button"
               onClick={() => setLanguage(language === "te" ? "en" : "te")}
@@ -175,17 +192,15 @@ export function FloatingNavbar() {
 
         {/* ≥768px bar */}
         <div className="mx-auto hidden max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 md:flex lg:px-8">
-          <Link href="/" className="tap flex min-w-0 items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-warm text-brand">
+          <Link
+            href="/"
+            className="tap flex flex-shrink-0 items-center gap-2.5 whitespace-nowrap"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-brand">
               <Landmark className="h-5 w-5" aria-hidden />
             </span>
-            <span className="min-w-0">
-              <span className="block truncate font-display-te text-sm font-normal tracking-tight text-ink sm:text-base">
-                నాయీ సమాఖ్య తెలంగాణ
-              </span>
-              <span className="hidden text-[10px] uppercase tracking-[0.14em] text-muted sm:block">
-                Nayi Samakhya
-              </span>
+            <span className="whitespace-nowrap font-display-te text-sm font-normal tracking-tight text-ink sm:text-base">
+              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
             </span>
           </Link>
 
@@ -208,10 +223,8 @@ export function FloatingNavbar() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <SprintPill className="hidden md:inline-flex" />
-            <QuizPill className="hidden lg:inline-flex" />
-            <ReelsLink className="hidden xl:inline-flex" />
+          <div className="flex items-center gap-2 pr-1">
+            <CompetitionsMenu className="hidden md:block" />
             <button
               type="button"
               onClick={() => setLanguage(language === "te" ? "en" : "te")}
@@ -234,7 +247,7 @@ export function FloatingNavbar() {
 
             <Link
               href="/survey"
-              className="tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-3.5 py-2.5 font-telugu text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex"
+              className="tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-4 py-2.5 font-telugu text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex"
             >
               సర్వే ప్రారంభించండి ➔
             </Link>
@@ -287,19 +300,24 @@ export function FloatingNavbar() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-3">
-              <div className="mb-3 space-y-2">
-                <SprintPill
-                  className="w-full justify-center py-2.5 text-sm"
-                  onClick={() => setOpen(false)}
-                />
-                <QuizPill
-                  className="w-full justify-center py-2.5 text-sm"
-                  onClick={() => setOpen(false)}
-                />
-                <ReelsLink
-                  className="w-full justify-center rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-sm"
-                  onClick={() => setOpen(false)}
-                />
+              <div className="mb-3 rounded-2xl border border-amber-200/80 bg-amber-50/60 p-2.5">
+                <p className="mb-2 flex items-center gap-1.5 px-1 font-telugu text-[11px] font-bold text-amber-900">
+                  <Trophy className="h-3.5 w-3.5" aria-hidden />
+                  పోటీలు (Competitions)
+                </p>
+                <ul className="space-y-1">
+                  {COMPETITIONS.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className="tap flex min-h-11 items-center rounded-xl bg-white px-3 font-telugu text-sm font-semibold text-[#0F172A] hover:bg-amber-50"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
               <ul className="space-y-1">
                 {primaryNav.map((link) => (
@@ -328,7 +346,7 @@ export function FloatingNavbar() {
               <Link
                 href="/survey"
                 onClick={() => setOpen(false)}
-                className="tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-3 font-telugu text-sm font-bold text-white"
+                className="tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 font-telugu text-sm font-bold text-white"
               >
                 సర్వే ప్రారంభించండి ➔
               </Link>

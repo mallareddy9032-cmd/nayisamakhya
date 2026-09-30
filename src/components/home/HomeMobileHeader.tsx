@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
+  ChevronDown,
   Contrast,
   FileText,
   Landmark,
@@ -10,6 +11,7 @@ import {
   Menu,
   MessageCircle,
   Send,
+  Trophy,
   X,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -17,15 +19,99 @@ import { useAccessibilityStore } from "@/lib/store/accessibility";
 import { MandalSelector } from "@/components/MandalSelector";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
+const PRIMARY_LINKS = [
   { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
   { href: "/survey", label: "సమగ్ర సర్వే" },
+  { href: "/representation", label: "వినతిపత్రం", icon: FileText },
+  { href: "/feed", label: "గెజిట్ (Gazette)" },
+] as const;
+
+const COMPETITIONS = [
   { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
   { href: "/quiz", label: "⚖️ లీగల్ క్విజ్" },
   { href: "/reels", label: "🎬 మన కళ రీల్స్" },
-  { href: "/representation", label: "వినతిపత్రం", icon: FileText },
-  { href: "/feed", label: "గెజిట్ & జీవోలు (Gazette)" },
 ] as const;
+
+function CompetitionsMenu({
+  className,
+  compact = false,
+  onNavigate,
+}: {
+  className?: string;
+  compact?: boolean;
+  onNavigate?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className={cn("relative", className)}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "tap civic-focus-ring inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 font-telugu font-bold text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.25)] transition hover:bg-amber-500/25",
+          compact
+            ? "max-w-[9.5rem] px-2 py-1 text-[10px]"
+            : "min-h-11 px-2.5 text-[11px]",
+        )}
+      >
+        <Trophy className="h-3 w-3 shrink-0" aria-hidden />
+        <span className="truncate whitespace-nowrap">పోటీలు (Competitions)</span>
+        <ChevronDown
+          className={cn(
+            "h-3 w-3 shrink-0 transition-transform",
+            open ? "rotate-180" : "",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <ul
+          id={menuId}
+          role="menu"
+          className="absolute right-0 z-50 mt-1.5 min-w-[13.5rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+        >
+          {COMPETITIONS.map((item) => (
+            <li key={item.href} role="none">
+              <Link
+                href={item.href}
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  onNavigate?.();
+                }}
+                className="tap flex min-h-10 items-center px-3 font-telugu text-[12px] font-semibold text-[#0F172A] transition hover:bg-amber-50 hover:text-[#B45309]"
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * Homepage sticky header — 52px mobile bar with slide-out sheet.
@@ -60,31 +146,21 @@ export function HomeMobileHeader() {
     <>
       <header className="sticky top-0 z-40 border-b border-civic-border bg-white/95 shadow-xs backdrop-blur-sm">
         {/* Mobile <768px — 52px bar */}
-        <div className="mx-auto flex h-[52px] max-w-6xl items-center justify-between gap-2 px-4 sm:px-6 md:hidden lg:px-8">
-          <Link href="/" className="tap flex min-w-0 items-center gap-2">
+        <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 md:hidden lg:px-8">
+          <Link
+            href="/"
+            className="tap flex min-w-0 flex-shrink-0 items-center gap-2"
+          >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 text-[#B45309]">
               <Landmark className="h-4 w-4" aria-hidden />
             </span>
-            <span className="truncate font-telugu text-sm font-bold tracking-tight text-[#0F172A]">
-              నాయీ సమాఖ్య
+            <span className="max-w-[10.5rem] truncate whitespace-nowrap font-display-te text-sm font-normal tracking-tight text-[#0F172A] sm:max-w-none">
+              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
             </span>
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5">
-            <Link
-              href="/sprint"
-              className="tap inline-flex max-w-[7.5rem] items-center gap-0.5 truncate rounded-full border border-amber-500/40 bg-amber-500/15 px-2 py-1 font-telugu text-[10px] font-bold text-amber-800 shadow-[0_0_8px_rgba(245,158,11,0.25)] sm:max-w-none sm:px-2.5 sm:text-[11px]"
-            >
-              <span aria-hidden>🏆</span>
-              సేవా సారథి
-            </Link>
-            <Link
-              href="/quiz"
-              className="tap inline-flex max-w-[6.5rem] items-center gap-0.5 truncate rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2 py-1 font-telugu text-[10px] font-bold text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.2)] sm:max-w-none sm:px-2.5 sm:text-[11px]"
-            >
-              <span aria-hidden>⚖️</span>
-              లీగల్ క్విజ్
-            </Link>
+            <CompetitionsMenu compact />
             <div
               className="flex items-center rounded-lg border border-slate-200 bg-[#FBFBFA] p-0.5"
               role="group"
@@ -130,22 +206,20 @@ export function HomeMobileHeader() {
         </div>
 
         {/* Desktop / tablet ≥768px */}
-        <div className="mx-auto hidden h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 md:flex lg:px-8">
-          <div className="flex min-w-0 items-center gap-2.5">
+        <div className="mx-auto hidden h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 md:flex lg:px-8">
+          <Link
+            href="/"
+            className="tap flex flex-shrink-0 items-center gap-2.5 whitespace-nowrap"
+          >
             <span className="rounded-xl border border-civic-bronze/20 bg-civic-bronze/10 p-2 text-civic-bronze">
               <Landmark className="h-5 w-5" aria-hidden />
             </span>
-            <div className="min-w-0">
-              <span className="font-telugu text-base font-black tracking-tight text-civic-ink md:text-lg">
-                నాయీ సమాఖ్య తెలంగాణ
-              </span>
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Official Civic Welfare Portal
-              </p>
-            </div>
-          </div>
+            <span className="whitespace-nowrap font-display-te text-base font-normal tracking-tight text-civic-ink md:text-lg">
+              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
+            </span>
+          </Link>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 pr-1 sm:gap-2">
             <Link
               href="/districts"
               className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
@@ -163,26 +237,6 @@ export function HomeMobileHeader() {
               </span>
             </Link>
             <Link
-              href="/sprint"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 font-telugu text-[11px] font-bold text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.25)] transition hover:bg-amber-500/25 xl:inline-flex"
-            >
-              <span aria-hidden>🏆</span>
-              సేవా సారథి ఛాలెంజ్
-            </Link>
-            <Link
-              href="/quiz"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 font-telugu text-[11px] font-bold text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.2)] transition hover:bg-[#B45309]/20 xl:inline-flex"
-            >
-              <span aria-hidden>⚖️</span>
-              లీగల్ క్విజ్
-            </Link>
-            <Link
-              href="/reels"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2 font-telugu text-[11px] font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
-            >
-              మన కళ
-            </Link>
-            <Link
               href="/representation"
               className="civic-focus-ring inline-flex min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline"
             >
@@ -193,11 +247,12 @@ export function HomeMobileHeader() {
               href="/feed"
               className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
             >
-              గెజిట్ &amp; జీవోలు (Gazette)
+              గెజిట్ (Gazette)
             </Link>
+            <CompetitionsMenu className="hidden xl:block" />
             <Link
               href="/survey"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
+              className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-4 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
             >
               సర్వే ప్రారంభించండి ➔
             </Link>
@@ -246,8 +301,28 @@ export function HomeMobileHeader() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-3">
+              <div className="mb-3 rounded-2xl border border-amber-200/80 bg-amber-50/60 p-2.5">
+                <p className="mb-2 flex items-center gap-1.5 px-1 font-telugu text-[11px] font-bold text-amber-900">
+                  <Trophy className="h-3.5 w-3.5" aria-hidden />
+                  పోటీలు (Competitions)
+                </p>
+                <ul className="space-y-1">
+                  {COMPETITIONS.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className="tap flex min-h-11 items-center rounded-xl bg-white px-3 font-telugu text-sm font-semibold text-[#0F172A] hover:bg-amber-50"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <ul className="space-y-1">
-                {NAV_LINKS.map((link) => {
+                {PRIMARY_LINKS.map((link) => {
                   const Icon = "icon" in link ? link.icon : null;
                   return (
                     <li key={link.href}>
@@ -280,6 +355,14 @@ export function HomeMobileHeader() {
                   </a>
                 </li>
               </ul>
+
+              <Link
+                href="/survey"
+                onClick={() => setOpen(false)}
+                className="tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 font-telugu text-sm font-bold text-white"
+              >
+                సర్వే ప్రారంభించండి ➔
+              </Link>
 
               <div className="mt-4 rounded-2xl border border-slate-200 bg-[#FBFBFA] p-3">
                 <p className="mb-2 font-telugu text-[11px] font-bold uppercase tracking-wide text-slate-500">

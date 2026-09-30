@@ -48,12 +48,12 @@ export default function HomePage() {
 
             <div>
               <h1 className="tracking-tight">
-                <span className="block font-display-te text-[28px] font-normal leading-[36px] text-[#0F172A] sm:text-[36px] sm:leading-[44px] lg:text-[42px] lg:leading-[52px]">
+                <span className="block font-display-te text-4xl font-normal leading-tight text-slate-900 lg:text-5xl">
                   ఆత్మగౌరవం • చట్టబద్ధ రక్షణ
                 </span>
-                <span className="mt-1 block font-display-te text-[24px] font-normal italic leading-[32px] text-[#B45309] sm:text-[28px] sm:leading-[36px] lg:text-[34px] lg:leading-[44px]">
-                  ఆధునిక ప్రగతి{" "}
-                  <span className="font-sans text-[0.55em] font-medium not-italic tracking-wide text-[#B45309]/80">
+                <span className="mt-1.5 block font-display-te text-3xl font-normal italic leading-snug text-amber-600 lg:text-4xl">
+                  ఆధునిక వికాసం{" "}
+                  <span className="font-sans text-[0.55em] font-medium not-italic tracking-wide text-amber-600/80">
                     (Self-Respect &amp; Progress)
                   </span>
                 </span>

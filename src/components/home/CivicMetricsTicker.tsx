@@ -18,24 +18,18 @@ const METRICS: Metric[] = [
     id: "mandals",
     value: 589,
     display: "589/589",
-    label: "తెలంగాణ మండలాలు",
-  },
-  {
-    id: "free",
-    value: null,
-    display: "ఉచితం",
-    label: "ఉచిత ప్రజా సేవా మార్గాలు",
+    label: "Mandals",
   },
   {
     id: "go23",
     value: 250,
-    label: "యూనిట్ల జీ.ఓ. 23 హక్కు",
+    label: "Units G.O. 23",
   },
   {
     id: "helpline",
     value: null,
     display: "24/7",
-    label: "డిజిటల్ సహాయవాణి",
+    label: "Helpline",
   },
 ];
 
@@ -83,10 +77,9 @@ function AnimatedFigure({
   }, [active, metric.value, reduced]);
 
   if (metric.display && metric.id === "mandals") {
-    // Keep denominator fixed; animate numerator for pride signal.
     const num = active || reduced ? (reduced ? 589 : n) : n;
     return (
-      <span className="metric-tnum tabular-nums text-xl font-black tracking-tight text-[#0F172A] md:text-2xl">
+      <span className="metric-tnum tabular-nums text-xl font-semibold tracking-tight text-[#0F172A] md:text-2xl">
         {num}/589
       </span>
     );
@@ -94,14 +87,14 @@ function AnimatedFigure({
 
   if (metric.display && metric.value == null) {
     return (
-      <span className="metric-tnum tabular-nums text-xl font-black tracking-tight text-[#0F172A] md:text-2xl">
+      <span className="metric-tnum tabular-nums text-xl font-semibold tracking-tight text-[#0F172A] md:text-2xl">
         {metric.display}
       </span>
     );
   }
 
   return (
-    <span className="metric-tnum tabular-nums text-xl font-black tracking-tight text-[#0F172A] md:text-2xl">
+    <span className="metric-tnum tabular-nums text-xl font-semibold tracking-tight text-[#0F172A] md:text-2xl">
       {metric.prefix}
       {n}
       {metric.suffix}
@@ -137,33 +130,29 @@ export function CivicMetricsTicker() {
         <div className="flex items-center justify-center gap-2 border-b border-[#E2E8F0] bg-white/70 px-4 py-2">
           <span className="h-0.5 w-6 rounded-full bg-[#B45309]" aria-hidden />
           <span className="live-pulse-dot" aria-hidden />
-          <p className="font-telugu text-[11px] font-bold tracking-wide text-[#0F172A]">
-            నిరంతర ప్రజా పర్యవేక్షణ
+          <p className="font-sans text-[11px] font-semibold tracking-wide text-[#0F172A]">
+            Live Civic Coverage
           </p>
           <span className="h-0.5 w-6 rounded-full bg-[#B45309]" aria-hidden />
         </div>
 
-        <div className="grid grid-cols-2 gap-3 p-3 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-[#E2E8F0] lg:p-0">
+        <div className="grid grid-cols-3 gap-0 divide-x divide-[#E2E8F0]">
           {METRICS.map((metric) => (
             <div
               key={metric.id}
-              className="flex flex-col items-center justify-center gap-1 rounded-xl border border-[#E2E8F0] bg-white/80 px-3 py-4 text-center sm:px-4 sm:py-5 lg:rounded-none lg:border-0 lg:bg-transparent"
+              className="flex flex-col items-center justify-center gap-1 px-3 py-4 text-center sm:px-4 sm:py-5"
             >
               <AnimatedFigure
                 metric={metric}
                 active={active}
                 reduced={reduced}
               />
-              <p className="max-w-[11rem] font-telugu text-[11px] font-semibold leading-snug text-slate-600 md:text-xs">
+              <p className="whitespace-nowrap font-sans text-[11px] font-semibold leading-snug text-slate-600 md:text-xs">
                 {metric.label}
               </p>
             </div>
           ))}
         </div>
-        <p className="border-t border-[#E2E8F0] bg-white/60 px-4 py-2 text-center font-telugu text-[10px] leading-relaxed text-slate-500">
-          మండల కవరేజ్ · జీ.ఓ. 23 హక్కు · అధికారిక డెస్క్ — సూచికలు రెండు వారాలకు
-          ఒకసారి నవీకరణ
-        </p>
       </div>
     </section>
   );
