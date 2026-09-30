@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/survey",
     "/sprint",
     "/reels",
+    "/quiz",
     "/districts",
     "/poster",
     "/announce",

@@ -21,6 +21,7 @@ const NAV_LINKS = [
   { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
   { href: "/survey", label: "సమగ్ర సర్వే" },
   { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
+  { href: "/quiz", label: "⚖️ లీగల్ క్విజ్" },
   { href: "/reels", label: "🎬 మన కళ రీల్స్" },
   { href: "/representation", label: "వినతిపత్రం", icon: FileText },
   { href: "/feed", label: "గెజిట్ & జీవోలు (Gazette)" },
@@ -76,6 +77,13 @@ export function HomeMobileHeader() {
             >
               <span aria-hidden>🏆</span>
               సేవా సారథి
+            </Link>
+            <Link
+              href="/quiz"
+              className="tap inline-flex max-w-[6.5rem] items-center gap-0.5 truncate rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2 py-1 font-telugu text-[10px] font-bold text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.2)] sm:max-w-none sm:px-2.5 sm:text-[11px]"
+            >
+              <span aria-hidden>⚖️</span>
+              లీగల్ క్విజ్
             </Link>
             <div
               className="flex items-center rounded-lg border border-slate-200 bg-[#FBFBFA] p-0.5"
@@ -160,6 +168,13 @@ export function HomeMobileHeader() {
             >
               <span aria-hidden>🏆</span>
               సేవా సారథి ఛాలెంజ్
+            </Link>
+            <Link
+              href="/quiz"
+              className="civic-focus-ring hidden min-h-11 items-center gap-1 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 font-telugu text-[11px] font-bold text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.2)] transition hover:bg-[#B45309]/20 xl:inline-flex"
+            >
+              <span aria-hidden>⚖️</span>
+              లీగల్ క్విజ్
             </Link>
             <Link
               href="/reels"

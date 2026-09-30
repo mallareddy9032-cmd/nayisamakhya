@@ -81,6 +81,13 @@ export default function SitemapPage() {
                   : "Mana Kala reel contest"}
               </Link>
             </li>
+            <li>
+              <Link href="/quiz" className="hover:text-[#C2410C]">
+                {te
+                  ? "చట్ట హక్కుల అన్వేషి (లీగల్ క్విజ్)"
+                  : "Civic & Legal Rights Quiz"}
+              </Link>
+            </li>
           </ul>
         </div>
 

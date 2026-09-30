@@ -27,6 +27,7 @@ import {
   ChevronRight,
   Trophy,
   Clapperboard,
+  Scale,
 } from "lucide-react";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
@@ -185,6 +186,11 @@ export function CivicFooter() {
               <li>
                 <FooterNavLink href="/sprint" icon={Trophy}>
                   సేవా సారథి ఛాలెంజ్
+                </FooterNavLink>
+              </li>
+              <li>
+                <FooterNavLink href="/quiz" icon={Scale}>
+                  లీగల్ క్విజ్
                 </FooterNavLink>
               </li>
               <li>
