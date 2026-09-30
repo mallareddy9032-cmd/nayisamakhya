@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   FileText,
+  MapPin,
   MessageCircle,
   Send,
   ShieldCheck,
@@ -47,6 +48,13 @@ export default function HomePage() {
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Link
+              href="/districts"
+              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
+            >
+              <MapPin className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
+              జిల్లాలు
+            </Link>
             <Link
               href="/newsletter"
               className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"

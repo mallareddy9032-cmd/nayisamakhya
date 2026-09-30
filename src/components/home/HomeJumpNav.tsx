@@ -1,4 +1,5 @@
 const JUMPS = [
+  { href: "/districts", label: "జిల్లాలు" },
   { href: "#heritage-triad", label: "వారసత్వం" },
   { href: "#persona-section", label: "వ్యక్తిత్వాలు" },
   { href: "#civic-timeline", label: "కాలక్రమం" },

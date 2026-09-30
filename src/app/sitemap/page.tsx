@@ -43,6 +43,11 @@ export default function SitemapPage() {
               </Link>
             </li>
             <li>
+              <Link href="/districts" className="hover:text-[#C2410C]">
+                {te ? "జిల్లా & మండల డైరెక్టరీ" : "District & mandal directory"}
+              </Link>
+            </li>
+            <li>
               <Link href="/mandals" className="hover:text-[#C2410C]">
                 {te ? "మండల కేంద్రాలు" : "Mandal hubs"}
               </Link>

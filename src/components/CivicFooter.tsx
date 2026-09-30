@@ -93,6 +93,17 @@ export function CivicFooter() {
                 </span>
               </Link>
             </li>
+            <li>
+              <Link
+                href="/districts"
+                className="civic-focus-ring flex min-h-10 items-center justify-between rounded-lg px-1 py-2 hover:text-civic-bronze"
+              >
+                <span>జిల్లా &amp; మండల డైరెక్టరీ</span>
+                <span className="font-sans text-[10px] text-slate-400">
+                  /districts
+                </span>
+              </Link>
+            </li>
           </ul>
         </div>
 
