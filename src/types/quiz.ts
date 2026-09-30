@@ -26,20 +26,13 @@ export type QuizAttempt = {
   completedAt: string;
 };
 
-export type QuizOption = {
-  te: string;
-  en: string;
-};
-
-export type QuizQuestion = {
-  id: string;
-  categoryTe: string;
-  categoryEn: string;
+export interface QuizQuestion {
+  id: number;
   questionTe: string;
   questionEn: string;
-  options: [QuizOption, QuizOption, QuizOption, QuizOption];
-  correctIndex: 0 | 1 | 2 | 3;
-  explanationTe: string;
-  explanationEn: string;
-  citationHint?: string;
-};
+  optionsTe: string[];
+  optionsEn: string[];
+  correctIndex: number;
+  legalNoteTe: string;
+  legalNoteEn: string;
+}

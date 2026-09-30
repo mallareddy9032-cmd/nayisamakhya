@@ -329,7 +329,7 @@ export function QuizClient() {
         <div className="no-print rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="font-telugu text-xs font-bold text-[#B45309]">
-              {question.categoryTe}
+              ప్రశ్న {question.id}
             </p>
             <p className="font-mono text-xs font-semibold text-[#64748B]">
               {qIndex + 1}/{total}
@@ -358,7 +358,8 @@ export function QuizClient() {
           </p>
 
           <ul className="mt-5 space-y-2.5" role="listbox" aria-label="జవాబులు">
-            {question.options.map((opt, idx) => {
+            {question.optionsTe.map((optTe, idx) => {
+              const optEn = question.optionsEn[idx] ?? "";
               const picked = selected === idx;
               const showCorrect = revealed && idx === question.correctIndex;
               const showWrong = revealed && picked && !isCorrect;
@@ -397,10 +398,10 @@ export function QuizClient() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-telugu text-sm font-semibold leading-snug text-[#0F172A]">
-                        {opt.te}
+                        {optTe}
                       </span>
                       <span className="mt-0.5 block text-[11px] text-[#64748B]">
-                        {opt.en}
+                        {optEn}
                       </span>
                     </span>
                     {showCorrect ? (
@@ -435,10 +436,10 @@ export function QuizClient() {
                 {isCorrect ? "✓ సరైన జవాబు" : "ⓘ గమనిక — సరైన జవాబు హైలైట్"}
               </p>
               <p className="mt-1.5 font-telugu text-sm leading-relaxed text-[#334155]">
-                {question.explanationTe}
+                {question.legalNoteTe}
               </p>
               <p className="mt-1 text-[11px] leading-relaxed text-[#64748B]">
-                {question.explanationEn}
+                {question.legalNoteEn}
               </p>
             </div>
           ) : null}

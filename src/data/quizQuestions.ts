@@ -1,6 +1,6 @@
 /**
  * Competition 3 — చట్ట హక్కుల అన్వేషి
- * Quiz bank aligned with portal legalCitations + heritage timeline facts.
+ * Exact statutory question bank (user schema).
  */
 
 import type { QuizQuestion } from "@/types/quiz";
@@ -8,219 +8,230 @@ import { QUIZ_QUESTION_COUNT } from "@/types/quiz";
 
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
-    id: "go23-units",
-    categoryTe: "జీ.ఓ. 23 · విద్యుత్",
-    categoryEn: "G.O. 23 · Power",
+    id: 1,
     questionTe:
-      "G.O. Ms. No. 23 (ఇంధన శాఖ) ప్రకారం అర్హ సెలూన్ / సాంప్రదాయ వృత్తి దుకాణాలకు నెలకు ఎన్ని యూనిట్ల ఉచిత విద్యుత్ కల్పించబడింది?",
+      "జీవో నెం. 23 ప్రకారం అర్హులైన నాయీ బ్రాహ్మణ సెలూన్లకు ఎన్ని యూనిట్ల ఉచిత విద్యుత్ లభిస్తుంది?",
     questionEn:
-      "Under G.O. Ms. No. 23 (Energy Dept.), how many free electricity units per month are provided to eligible traditional salon / craft shops?",
-    options: [
-      { te: "100 యూనిట్లు", en: "100 units" },
-      { te: "250 యూనిట్లు", en: "250 units" },
-      { te: "500 యూనిట్లు", en: "500 units" },
-      { te: "అపరిమితం", en: "Unlimited" },
-    ],
+      "How many units of free power are provided per month under G.O. Ms. No. 23?",
+    optionsTe: ["100 యూనిట్లు", "250 యూనిట్లు", "200 యూనిట్లు", "300 యూనిట్లు"],
+    optionsEn: ["100 Units", "250 Units", "200 Units", "300 Units"],
     correctIndex: 1,
-    explanationTe:
-      "తెలంగాణ రాష్ట్ర ప్రభుత్వ ఉత్తర్వు G.O. Ms. No. 23, ఇంధన (విద్యుత్) శాఖ — అర్హ నాయీబ్రాహ్మణ సెలూన్లకు నెలకు 250 యూనిట్ల ఉచిత విద్యుత్.",
-    explanationEn:
-      "Telangana G.O. Ms. No. 23 (Energy / Power) provides 250 free units per month to eligible Nayi Brahmin salon establishments.",
-    citationHint: "power_subsidy",
+    legalNoteTe:
+      "జీవో 23 ప్రకారం ప్రతినెలా 250 యూనిట్ల వరకు ఉచిత విద్యుత్ అర్హత ఉంది.",
+    legalNoteEn:
+      "G.O. Ms. No. 23 mandates up to 250 units of free power monthly for registered salons.",
   },
   {
-    id: "go23-dept",
-    categoryTe: "జీ.ఓ. 23 · శాఖ",
-    categoryEn: "G.O. 23 · Department",
+    id: 2,
     questionTe:
-      "G.O. Ms. No. 23 ఉచిత విద్యుత్ ఉత్తర్వు ఏ శాఖ ద్వారా జారీ అయింది?",
+      "మున్సిపల్ కాంప్లెక్స్‌లలో షాపుల కేటాయింపులో నాయీ బ్రాహ్మణులకు చట్టబద్ధమైన హక్కు ఏ చట్టం ద్వారా రక్షించబడుతుంది?",
     questionEn:
-      "Which department issued G.O. Ms. No. 23 on free electricity for eligible craft shops?",
-    options: [
-      { te: "విద్యా శాఖ", en: "Education Department" },
-      { te: "ఆరోగ్య శాఖ", en: "Health Department" },
-      { te: "ఇంధన (విద్యుత్) శాఖ", en: "Energy (Power) Department" },
-      { te: "రవాణా శాఖ", en: "Transport Department" },
+      "Which statute safeguards the shop reservation rights in municipal shopping complexes?",
+    optionsTe: [
+      "పంచాయతీ రాజ్ చట్టం 1994",
+      "తెలంగాణ మున్సిపాలిటీల చట్టం 2019",
+      "కార్మిక సంక్షేమ చట్టం",
+      "షాప్స్ & ఎస్టాబ్లిష్‌మెంట్స్ చట్టం",
     ],
+    optionsEn: [
+      "Panchayat Raj Act 1994",
+      "Telangana Municipalities Act 2019",
+      "Labor Welfare Act",
+      "Shops & Establishments Act",
+    ],
+    correctIndex: 1,
+    legalNoteTe:
+      "తెలంగాణ మున్సిపాలిటీల చట్టం 2019 ప్రకారం దుకాణాల కేటాయింపులో చట్టబద్ధ నిబంధనలు వర్తిస్తాయి.",
+    legalNoteEn:
+      "The Telangana Municipalities Act 2019 protects artisanal statutory quotas in municipal complexes.",
+  },
+  {
+    id: 3,
+    questionTe:
+      "మహాత్మా జ్యోతిబా ఫూలే విదేశీ విద్యా నిధి కింద బీసీ విద్యార్థులకు అందే గరిష్ట విదేశీ విద్య గ్రాంట్ ఎంత?",
+    questionEn:
+      "What is the maximum overseas education grant under Mahatma Jyotiba Phule Overseas Scheme?",
+    optionsTe: ["₹10 లక్షలు", "₹15 లక్షలు", "₹20 లక్షలు", "₹25 లక్షలు"],
+    optionsEn: ["₹10 Lakhs", "₹15 Lakhs", "₹20 Lakhs", "₹25 Lakhs"],
     correctIndex: 2,
-    explanationTe:
-      "పోర్టల్ చట్ట సూచనల ప్రకారం — «తెలంగాణ రాష్ట్ర ప్రభుత్వ ఉత్తర్వు G.O. Ms. No. 23, ఇంధన (విద్యుత్) శాఖ».",
-    explanationEn:
-      "Portal citations state: Telangana G.O. Ms. No. 23, Energy (Power) Department.",
-    citationHint: "power_subsidy",
+    legalNoteTe:
+      "అర్హులైన బీసీ విద్యార్థులకు విదేశీ ఉన్నత విద్య కోసం ప్రభుత్వం గరిష్టంగా ₹20 లక్షల ఆర్థిక సహాయం అందిస్తుంది.",
+    legalNoteEn:
+      "Eligible BC students receive up to ₹20 Lakhs grant for overseas postgraduate education.",
   },
   {
-    id: "muni-act-year",
-    categoryTe: "మున్సిపాలిటీల చట్టం",
-    categoryEn: "Municipalities Act",
+    id: 4,
     questionTe:
-      "ట్రేడ్ లైసెన్స్ / పురపాలక రుసుము విషయాల్లో పోర్టల్ ఏ చట్టాన్ని ప్రాథమికంగా ఉదహరిస్తుంది?",
+      "భారతదేశంలో తొలిసారిగా బీసీ వర్గాలకు చట్టబద్ధ రక్షణ కల్పించిన నంద సామ్రాజ్య స్థాపకుడు ఎవరు?",
     questionEn:
-      "Which Act does the portal primarily cite for municipal trade-licence / fee matters?",
-    options: [
-      { te: "తెలంగాణ మున్సిపాలిటీల చట్టం 2019", en: "Telangana Municipalities Act, 2019" },
-      { te: "కేంద్ర GST చట్టం 2017", en: "Central GST Act, 2017" },
-      { te: "భారతీయ దండ సంహిత", en: "Indian Penal Code" },
-      { te: "ల్యాండ్ అక్విజిషన్ చట్టం 2013", en: "Land Acquisition Act, 2013" },
+      "Who was the founder of the Nanda Empire recognized for social welfare and state lineage?",
+    optionsTe: [
+      "చంద్రగుప్త మౌర్య",
+      "చక్రవర్తి మహాపద్మనంద",
+      "అశోక చక్రవర్తి",
+      "బింబిసారుడు",
     ],
-    correctIndex: 0,
-    explanationTe:
-      "ట్రేడ్ లైసెన్స్ మినహాయింపు వినతులకు «తెలంగాణ మున్సిపాలిటీల చట్టం 2019» మరియు పంచాయత్ రాజ్ నిబంధనలు ఉదహరించబడతాయి.",
-    explanationEn:
-      "Trade-licence waiver petitions cite the Telangana Municipalities Act, 2019 and Panchayat Raj rules.",
-    citationHint: "trade_license",
-  },
-  {
-    id: "muni-ss-118",
-    categoryTe: "మున్సిపల్ లైసెన్స్",
-    categoryEn: "Municipal licence",
-    questionTe:
-      "తెలంగాణ మున్సిపాలిటీస్ చట్టం 2019లో ట్రేడ్ లైసెన్స్‌కు సంబంధించి పోర్టల్ ఏ సెక్షన్లను ఉదహరిస్తుంది?",
-    questionEn:
-      "Which sections of the Telangana Municipalities Act, 2019 does the portal cite for trade licences?",
-    options: [
-      { te: "సెక్షన్లు 10 & 12", en: "Sections 10 & 12" },
-      { te: "సెక్షన్లు 118 & 120", en: "Sections 118 & 120" },
-      { te: "సెక్షన్లు 200 & 201", en: "Sections 200 & 201" },
-      { te: "సెక్షన్ 1 మాత్రమే", en: "Section 1 only" },
+    optionsEn: [
+      "Chandragupta Maurya",
+      "Emperor Mahapadmananda",
+      "Emperor Ashoka",
+      "Bimbisara",
     ],
     correctIndex: 1,
-    explanationTe:
-      "మున్సిపల్ ట్రేడ్ లైసెన్స్ వినతి — సెక్షన్ 118 (trade licence) మరియు సెక్షన్ 120 (fees / exemptions) ప్రకారం సాంప్రదాయ సెలూన్ వృత్తిదారులకు రుసుము మినహాయింపు / సౌలభ్యం.",
-    explanationEn:
-      "Municipal trade petitions cite §118 (trade licence) and §120 (fees / exemptions) for traditional salon fee relief.",
-    citationHint: "municipal_trade",
+    legalNoteTe:
+      "చక్రవర్తి మహాపద్మనంద నంద సామ్రాజ్యాన్ని స్థాపించి ప్రజారంజక పరిపాలన అందించారు.",
+    legalNoteEn:
+      "Emperor Mahapadmananda established the powerful Nanda Empire in ancient India.",
   },
   {
-    id: "muni-lease-54",
-    categoryTe: "మున్సిపల్ లీజు",
-    categoryEn: "Municipal lease",
+    id: 5,
     questionTe:
-      "పురపాలక ఆస్తి / స్థలం లీజు కేటాయింపు వినతికి పోర్టల్ ఏ సెక్షన్‌ను ఉదహరిస్తుంది?",
+      "ప్రాచీన భారతదేశంలో శస్త్రచికిత్స (Surgery) మరియు ఆయుర్వేదానికి పితామహుడిగా ఎవరిని పరిగణిస్తారు?",
     questionEn:
-      "Which section does the portal cite for municipal property / site lease allotment petitions?",
-    options: [
-      { te: "సెక్షన్ 22", en: "Section 22" },
-      { te: "సెక్షన్ 99", en: "Section 99" },
-      { te: "సెక్షన్ 54", en: "Section 54" },
-      { te: "సెక్షన్ 301", en: "Section 301" },
+      "Who is celebrated as the foundational pioneer of Indian surgery and classical clinical sciences?",
+    optionsTe: [
+      "భరద్వాజ",
+      "ఆచార్య సుశ్రుతుడు & ధన్వంతరి",
+      "భాస్కరాచార్య",
+      "వరాహమిహిర",
     ],
-    correctIndex: 2,
-    explanationTe:
-      "తెలంగాణ మున్సిపాలిటీస్ చట్టం 2019 — సెక్షన్ 54 ప్రకారం పురపాలక ఆస్తి లీజు / కేటాయింపు విధానం ద్వారా సాంప్రదాయ వృత్తి స్థల సదుపాయం.",
-    explanationEn:
-      "Telangana Municipalities Act, 2019 — Section 54 covers municipal property lease / allotment for traditional livelihood space.",
-    citationHint: "municipal_lease",
-  },
-  {
-    id: "bc-welfare-land",
-    categoryTe: "బీసీ సంక్షేమం",
-    categoryEn: "BC Welfare",
-    questionTe:
-      "కమ్యూనిటీ భవనం / స్థల కేటాయింపు వినతులకు పోర్టల్ ఏ శాఖ మార్గదర్శకాలను ఉదహరిస్తుంది?",
-    questionEn:
-      "Which department’s guidelines does the portal cite for community hall / land allotment petitions?",
-    options: [
-      { te: "తెలంగాణ బీసీ సంక్షేమ శాఖ", en: "Telangana BC Welfare Department" },
-      { te: "రైల్వే శాఖ", en: "Railways Department" },
-      { te: "పర్యాటక శాఖ మాత్రమే", en: "Tourism Department only" },
-      { te: "విదేశాంగ శాఖ", en: "External Affairs" },
-    ],
-    correctIndex: 0,
-    explanationTe:
-      "స్థల & హాల్ కేటాయింపు — «తెలంగాణ బీసీ సంక్షేమ శాఖ సంక్షేమ మార్గదర్శకాలు & ప్రభుత్వ భూ కేటాయింపు నిబంధనలు».",
-    explanationEn:
-      "Land & hall allotment cites Telangana BC Welfare Department guidelines and government land allotment rules.",
-    citationHint: "land_hall",
-  },
-  {
-    id: "bc-a-identity",
-    categoryTe: "బీసీ వర్గీకరణ",
-    categoryEn: "BC classification",
-    questionTe:
-      "తెలంగాణ సంక్షేమ నిబంధనల్లో నాయీ బ్రాహ్మణ / మంగలి సమూహాలు సాధారణంగా ఏ విస్తృత వర్గంలో గుర్తించబడతాయి?",
-    questionEn:
-      "In Telangana welfare frameworks, Nayi Brahmin / Mangali communities are generally recognised under which broad category?",
-    options: [
-      { te: "షెడ్యూల్డ్ ట్రైబ్ (ST) మాత్రమే", en: "Scheduled Tribe (ST) only" },
-      { te: "బ్యాక్‌వర్డ్ క్లాసెస్ (BC) — BC-A పరిణామం", en: "Backward Classes (BC) — BC-A lineage" },
-      { te: "ఆర్థికంగా బలహీన వర్గాలు మాత్రమే (EWS)", en: "EWS only" },
-      { te: "ఎలాంటి వర్గీకరణ లేదు", en: "No classification exists" },
+    optionsEn: [
+      "Bharadwaja",
+      "Acharya Sushruta & Dhanvantari",
+      "Bhaskaracharya",
+      "Varahamihira",
     ],
     correctIndex: 1,
-    explanationTe:
-      "సామాజిక సర్వే / కుల గణన చరిత్రలో వృత్తి ఆధారిత నాయీ సమూహాలు BC-A వర్గీకరణ పరిణామంలో స్థానం పొందాయి — స్కాలర్‌షిప్ & సంక్షేమ ప్రణాళికకు ఆధారం.",
-    explanationEn:
-      "Occupational Nayi communities are placed in the BC-A lineage under Telangana welfare planning — basis for scholarships and schemes.",
-    citationHint: "heritage_survey",
+    legalNoteTe:
+      "సుశ్రుత సంహిత రచించిన ఆచార్య సుశ్రుతుడు ప్రపంచ శస్త్రచికిత్సా విజ్ఞానానికి ఆద్యుడు.",
+    legalNoteEn:
+      "Acharya Sushruta authored the Sushruta Samhita, pioneering classical surgical techniques.",
   },
   {
-    id: "heritage-vaidya",
-    categoryTe: "వారసత్వం · వైద్య",
-    categoryEn: "Heritage · Vaidya",
+    id: 6,
     questionTe:
-      "నాయీ వృత్తి గౌరవానికి ప్రాచీన మూలంగా పోర్టల్ హైలైట్ చేసే వైద్య / శస్త్ర పరంపర ఏది?",
+      "సెలూన్ విద్యుత్ మీటర్లను అధికారులు అకారణంగా కమర్షియల్ కేటగిరీ కిందకు మార్చితే ఎవరికి దరఖాస్తు సమర్పించాలి?",
     questionEn:
-      "Which ancient medical / surgical lineage does the portal highlight as a root of Nayi occupational dignity?",
-    options: [
-      { te: "ధన్వంతరి · చరక · సుశ్రుత పరంపర", en: "Dhanvantari · Charaka · Sushruta lineage" },
-      { te: "కేవలం ఆధునిక అలోపతి", en: "Modern allopathy only" },
-      { te: "యూనానీ మాత్రమే", en: "Unani only" },
-      { te: "పశ్చిమ హోమియోపతి", en: "Western homeopathy" },
+      "To whom should a statutory grievance petition be submitted if free power is wrongly billed?",
+    optionsTe: [
+      "పోలీస్ స్టేషన్",
+      "డిస్కామ్ ADE / విద్యుత్ విజిలెన్స్ / కలెక్టర్",
+      "ట్రాన్స్పోర్ట్ ఆఫీస్",
+      "పంచాయతీ సెక్రటరీ",
     ],
-    correctIndex: 0,
-    explanationTe:
-      "ధన్వంతరి, చరక, సుశ్రుత మహర్షుల మార్గంలో ఆయుర్వేదం & శస్త్రచికిత్స — నాయీ వృత్తి గౌరవానికి ప్రాథమిక స్తంభం.",
-    explanationEn:
-      "The Dhanvantari–Charaka–Sushruta Ayurvedic / surgical lineage anchors traditional Nayi occupational dignity on the portal timeline.",
-    citationHint: "heritage_vaidya",
-  },
-  {
-    id: "heritage-nada",
-    categoryTe: "వారసత్వం · నాదం",
-    categoryEn: "Heritage · Nada",
-    questionTe:
-      "«నాదం బ్రహ్మం» సందర్భంలో నాయీ సమాఖ్య హైలైట్ చేసే సాంస్కృతిక వారసత్వం ఏది?",
-    questionEn:
-      "In the “Nada Brahma” context, which cultural heritage does Nayi Samakhya highlight?",
-    options: [
-      { te: "క్రికెట్ మాత్రమే", en: "Cricket only" },
-      { te: "బజంత్రి / నాదస్వర శాస్త్రీయ పరంపర", en: "Bajantri / Nadaswara classical lineage" },
-      { te: "సినిమా నృత్యం మాత్రమే", en: "Film dance only" },
-      { te: "విదేశీ రాక్ సంగీతం", en: "Foreign rock music" },
+    optionsEn: [
+      "Police Station",
+      "DISCOM ADE / District Collector",
+      "Transport Office",
+      "Panchayat Secretary",
     ],
     correctIndex: 1,
-    explanationTe:
-      "బజంత్రి / నాదస్వర వారసత్వం — ఆలయ · సామూహిక ఉత్సవాల సాంస్కృతిక శ్వాస; కళ, భక్తి, సామాజిక సేవ ఏకమయ్యే గుర్తింపు.",
-    explanationEn:
-      "Bajantri / Nadaswara heritage — temple and community festival music uniting craft, devotion, and social service.",
-    citationHint: "heritage_nada",
+    legalNoteTe:
+      "జీవో 23 అమలుపై విద్యుత్ సర్కిల్ ADE మరియు జిల్లా కలెక్టరేట్ ప్రజావాణికి ఫిర్యాదు చేయాలి.",
+    legalNoteEn:
+      "Submit representation with USCNO to DISCOM ADE and District Collectorate Grievance Cell.",
   },
   {
-    id: "geo-coverage",
-    categoryTe: "సమాఖ్య · కవరేజ్",
-    categoryEn: "Samakhya · Coverage",
+    id: 7,
     questionTe:
-      "నాయీ సమాఖ్య డిజిటల్ సేవా నెట్‌వర్క్ తెలంగాణలో ఎన్ని జిల్లాలు · మండలాలను కవర్ చేస్తుంది?",
+      "భారత రత్న కర్పూరి ఠాకూర్ ఏ రాష్ట్ర ముఖ్యమంత్రిగా బడుగు, బలహీన వర్గాల కోసం రిజర్వేషన్ సంస్కరణలు తెచ్చారు?",
     questionEn:
-      "How many districts and mandals does the Nayi Samakhya digital service network cover in Telangana?",
-    options: [
-      { te: "10 జిల్లాలు · 100 మండలాలు", en: "10 districts · 100 mandals" },
-      { te: "33 జిల్లాలు · 589 మండలాలు", en: "33 districts · 589 mandals" },
-      { te: "5 జిల్లాలు · 50 మండలాలు", en: "5 districts · 50 mandals" },
-      { te: "కేవలం హైదరాబాద్", en: "Hyderabad only" },
+      "Bharat Ratna Karpoori Thakur served as Chief Minister of which state implementing historic BC quotas?",
+    optionsTe: ["ఉత్తరప్రదేశ్", "బీహార్", "మధ్యప్రదేశ్", "రాజస్థాన్"],
+    optionsEn: ["Uttar Pradesh", "Bihar", "Madhya Pradesh", "Rajasthan"],
+    correctIndex: 1,
+    legalNoteTe:
+      "కర్పూరి ఠాకూర్ బీహార్ ముఖ్యమంత్రిగా అత్యంత వెనుకబడిన వర్గాలకు (EBC) రిజర్వేషన్లు కల్పించారు.",
+    legalNoteEn:
+      "Karpoori Thakur served as the CM of Bihar, pioneering the historic Karpoori Formula.",
+  },
+  {
+    id: 8,
+    questionTe:
+      "ఆలయాల్లో పనిచేసే నాదస్వర, డోలు కళాకారుల పింఛన్లు మరియు గౌరవ భృతిని ఏ శాఖ పర్యవేక్షిస్తుంది?",
+    questionEn:
+      "Which state department oversees temple pensions and welfare stipends for Nadaswaram musicians?",
+    optionsTe: [
+      "రెవెన్యూ శాఖ",
+      "దేవాదాయ మరియు ధర్మాదాయ శాఖ (Endowments)",
+      "పర్యాటక శాఖ",
+      "విద్యుత్ శాఖ",
+    ],
+    optionsEn: [
+      "Revenue Department",
+      "Endowments Department",
+      "Tourism Department",
+      "Energy Department",
     ],
     correctIndex: 1,
-    explanationTe:
-      "నాయీ సమాఖ్య — 33 జిల్లాలు · 589 మండలాల రాష్ట్రవ్యాప్త డిజిటల్ సేవా నెట్‌వర్క్; సర్వే, వినతి, సమన్వయకర్త డెస్క్ ఏకీకృతం.",
-    explanationEn:
-      "Nayi Samakhya spans 33 districts and 589 mandals — statewide digital desk for survey, petitions, and coordinators.",
-    citationHint: "heritage_geo",
+    legalNoteTe:
+      "దేవాదాయ శాఖ ద్వారా అర్హులైన దేవాలయ కళాకారులకు భృతి మరియు గుర్తింపు కార్డులు లభిస్తాయి.",
+    legalNoteEn:
+      "The Telangana Endowments Department administers pensions and cultural allowances for temple artists.",
+  },
+  {
+    id: 9,
+    questionTe:
+      "ముద్రా (Mudra) లేదా బీసీ కార్పొరేషన్ రుణాలకు బ్యాంకు మేనేజర్‌కు సమర్పించాల్సిన ప్రాథమిక నివేదిక ఏది?",
+    questionEn:
+      "Which formal document is required by bank managers to process salon modernization credit?",
+    optionsTe: [
+      "కేవలం ఆధార్ జెరాక్స్",
+      "వివరణాత్మక ప్రాజెక్ట్ రిపోర్ట్ (DPR)",
+      "వ్యక్తిగత లేఖ",
+      "గ్రామ సర్పంచ్ పత్రం",
+    ],
+    optionsEn: [
+      "Only Aadhaar Xerox",
+      "Detailed Project Report (DPR)",
+      "Informal Letter",
+      "Sarpanch Note",
+    ],
+    correctIndex: 1,
+    legalNoteTe:
+      "పరికరాల కొనుగోలు, వ్యయ-ఆదాయాల సాధ్యాసాధ్యాలను తెలిపే వివరణాత్మక DPR నివేదిక తప్పనిసరి.",
+    legalNoteEn:
+      "A formal Detailed Project Report (DPR) detailing equipment outlay and cashflow viability is mandatory.",
+  },
+  {
+    id: 10,
+    questionTe:
+      "నాయీ సమాఖ్య పోర్టల్ ద్వారా అధికారులు స్పందించే విధంగా స్వయంచాలకంగా సిద్ధమయ్యే పత్రం ఏది?",
+    questionEn:
+      "Which instant legal document is auto-generated on the Nayi Samakhya platform?",
+    optionsTe: [
+      "సాధారణ ఫీడ్‌బ్యాక్",
+      "చట్టబద్ధ అధికారిక వినతిపత్రం (Legal Petition Docket)",
+      "ప్రైవేట్ మెమో",
+      "ఏదీ కాదు",
+    ],
+    optionsEn: [
+      "General Feedback",
+      "Official Legal Petition Docket",
+      "Private Memo",
+      "None",
+    ],
+    correctIndex: 1,
+    legalNoteTe:
+      "అధికారులకు సమర్పించేందుకు చట్ట నిబంధనలు, సంతకం వివరాలతో కూడిన A4 వినతిపత్రం తయారవుతుంది.",
+    legalNoteEn:
+      "A complete, stamped A4 legal petition docket ready for MRO, ADE, or Collector submission is generated.",
   },
 ];
 
 if (QUIZ_QUESTIONS.length !== QUIZ_QUESTION_COUNT) {
   throw new Error(
     `Expected ${QUIZ_QUESTION_COUNT} quiz questions, got ${QUIZ_QUESTIONS.length}`,
+  );
+}
+
+const ids = QUIZ_QUESTIONS.map((q) => q.id);
+if (
+  ids.length !== QUIZ_QUESTION_COUNT ||
+  new Set(ids).size !== QUIZ_QUESTION_COUNT ||
+  !ids.every((id, i) => id === i + 1)
+) {
+  throw new Error(
+    `Expected quiz question ids 1–${QUIZ_QUESTION_COUNT}, got [${ids.join(", ")}]`,
   );
 }
