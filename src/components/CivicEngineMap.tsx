@@ -82,21 +82,21 @@ const OUTPUTS: {
   {
     id: "petition",
     title: "లీగల్ పిటిషన్",
-    blurb: "Prefill · స్టాంప్‌డ్ A4 డాకెట్",
+    blurb: "Prefill · stamped A4 docket",
     href: "/representation",
     icon: FileText,
   },
   {
     id: "card",
     title: "కోఆర్డినేటర్ కార్డు",
-    blurb: "QR గుర్తింపు · లామినేషన్-రెడీ",
+    blurb: "QR identity · lamination-ready",
     href: "/coordinator-card",
     icon: IdCard,
   },
   {
     id: "whatsapp",
     title: "WhatsApp డెస్క్",
-    blurb: "24/7 సహాయవాణి · తక్షణ చాట్",
+    blurb: "24/7 helpline · instant chat",
     href: WA_DESK,
     icon: MessageCircle,
     external: true,
@@ -429,32 +429,22 @@ function DesktopMap({
         </div>
       </div>
 
-      {/* CTA band clear of SVG wires */}
+      {/* CTA band clear of SVG wires — always two separate Links */}
       <div className="relative z-[2] mt-5 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#EAD7B5]/80 bg-[#FBFBFA]/95 px-4 py-3.5 shadow-[0_8px_24px_rgb(15_23_42_/0.04)] backdrop-blur-sm">
-        {active ? (
-          <>
-            <Link
-              href={active.ctaHref}
-              className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-5 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:brightness-110"
-            >
-              {active.ctaLabel}
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-            {active.id === "districts" ? (
-              <Link
-                href="/announce"
-                className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#1E293B]/12 bg-white px-4 py-2.5 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
-              >
-                మొబిలైజేషన్ అనౌన్స్
-                <ArrowRight className="h-3 w-3" aria-hidden />
-              </Link>
-            ) : null}
-          </>
-        ) : (
-          <p className="font-telugu text-[11px] text-slate-500">
-            ఎడమ విభాగం ఎంచుకుని రూటింగ్ చూడండి
-          </p>
-        )}
+        <Link
+          href={active?.ctaHref?.startsWith("/representation") ? active.ctaHref : "/representation"}
+          className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-5 py-2.5 font-telugu text-xs font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)] transition hover:brightness-110"
+        >
+          {active?.ctaLabel ?? "వినతిపత్రం తెరవండి"}
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
+        <Link
+          href="/announce"
+          className="civic-focus-ring inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[#1E293B]/12 bg-white px-4 py-2.5 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/40"
+        >
+          మొబిలైజేషన్ అనౌన్స్
+          <ArrowRight className="h-3 w-3" aria-hidden />
+        </Link>
       </div>
     </div>
   );
@@ -472,14 +462,14 @@ function MobileJourney({
 
   return (
     <div className="space-y-4 lg:hidden">
-      {/* Step 1 — మీ విభాగం */}
+      {/* Step 1 — మీ సమస్యను ఎంచుకోండి */}
       <div className="rounded-2xl border border-[#EAD7B5] bg-white/95 p-4 shadow-xs">
         <div className="mb-3 flex items-center gap-2">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#1E293B] font-sans text-xs font-bold text-white">
             1
           </span>
           <p className="font-telugu text-sm font-bold text-[#1E293B]">
-            మీ విభాగం
+            మీ సమస్యను ఎంచుకోండి
           </p>
         </div>
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -580,10 +570,15 @@ function MobileJourney({
                       )}
                       aria-hidden
                     />
-                    <span className="flex-1 font-telugu text-xs font-bold text-[#1E293B]">
-                      {out.title}
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-telugu text-xs font-bold text-[#1E293B]">
+                        {out.title}
+                      </span>
+                      <span className="block font-telugu text-[10px] leading-snug text-slate-500">
+                        {out.blurb}
+                      </span>
                     </span>
-                    <ArrowRight className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
                   </a>
                 </li>
               );
@@ -607,34 +602,36 @@ function MobileJourney({
                     )}
                     aria-hidden
                   />
-                  <span className="flex-1 font-telugu text-xs font-bold text-[#1E293B]">
-                    {out.title}
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-telugu text-xs font-bold text-[#1E293B]">
+                      {out.title}
+                    </span>
+                    <span className="block font-telugu text-[10px] leading-snug text-slate-500">
+                      {out.blurb}
+                    </span>
                   </span>
-                  <ArrowRight className="h-3.5 w-3.5 text-[#B45309]" aria-hidden />
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
                 </Link>
               </li>
             );
           })}
         </ul>
 
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            href={active.ctaHref}
+            href="/representation"
             className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#92400e] px-4 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_20px_rgb(180_83_9_/0.3)]"
           >
-            {active.ctaLabel}
+            వినతిపత్రం తెరవండి
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
-
-          {active.id === "districts" ? (
-            <Link
-              href="/announce"
-              className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-[#1E293B]/15 bg-[#FBFBFA] px-4 py-3 font-telugu text-xs font-bold text-[#1E293B]"
-            >
-              మొబిలైజేషన్ అనౌన్స్
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          ) : null}
+          <Link
+            href="/announce"
+            className="civic-focus-ring inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-[#1E293B]/15 bg-[#FBFBFA] px-4 py-3 font-telugu text-xs font-bold text-[#1E293B]"
+          >
+            మొబిలైజేషన్ అనౌన్స్
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
         </div>
       </div>
     </div>

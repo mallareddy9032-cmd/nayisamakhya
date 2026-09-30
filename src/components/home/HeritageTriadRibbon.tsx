@@ -58,7 +58,7 @@ export function HeritageTriadRibbon() {
             </span>
           </h2>
           <p className="mt-2 font-sans text-sm font-medium leading-snug text-slate-500 sm:text-base">
-            Medicine · Art · Self-respect — our living heritage
+            Three civic pillars of community dignity
           </p>
         </div>
 

@@ -61,6 +61,9 @@ export function ServiceActionCards() {
           >
             3-దశల ప్రజా సేవలు
           </h2>
+          <p className="mt-1.5 font-sans text-sm font-medium tracking-wide text-slate-500">
+            Petition · coordinator card · wall poster
+          </p>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             వృత్తి గౌరవం కోసం అవసరమైన మూడు అధికారిక సాధనాలు — ఎంచుకుని ముందుకు
             సాగండి.

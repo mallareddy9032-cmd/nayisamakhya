@@ -20,12 +20,12 @@ export function HomeJumpNav() {
           ఈ పేజీలో ముఖ్య విభాగాలు • Quick Nav
         </span>
       </p>
-      <ul className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center sm:overflow-visible">
+      <ul className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x sm:flex-wrap sm:justify-center sm:overflow-visible [&::-webkit-scrollbar]:hidden">
         {JUMPS.map((j) => (
           <li key={j.href} className="shrink-0">
             <a
               href={j.href}
-              className="civic-focus-ring inline-flex min-h-10 items-center rounded-full border border-[#EAD7B5] bg-white px-3.5 py-2 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/50 hover:bg-[#FFFDF9]"
+              className="civic-focus-ring inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-[#EAD7B5] bg-white px-3.5 py-2 font-telugu text-[11px] font-bold text-[#1E293B] transition hover:border-[#B45309]/50 hover:bg-[#FFFDF9]"
             >
               {j.label}
             </a>

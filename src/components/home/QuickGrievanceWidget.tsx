@@ -55,6 +55,9 @@ export function QuickGrievanceWidget() {
           >
             తక్షణ ప్రజా వినతి డెస్క్
           </h2>
+          <p className="mt-1.5 font-sans text-sm font-medium tracking-wide text-slate-500">
+            District + issue → prefilled petition docket
+          </p>
           <p className="mt-2 font-telugu text-sm leading-relaxed text-slate-600">
             జిల్లా + సమస్య ఎంచుకుని — ప్రీఫిల్డ్ వినతిపత్రం డాకెట్‌కు వెళ్లండి, లేదా
             WhatsApp హెల్ప్‌లైన్‌కు నేరుగా చాట్ చేయండి.

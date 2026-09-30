@@ -34,7 +34,7 @@ export default function HomePage() {
       {/* Dignified artisanal hero — stacked on mobile, 2-col on desktop */}
       <section
         id="home-hero"
-        className="relative scroll-mt-20 overflow-x-hidden border-b border-civic-border bg-gradient-to-b from-white via-[#FBFBFA] to-[#FBFBFA] px-4 pb-14 pt-10 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8"
+        className="relative scroll-mt-20 overflow-visible border-b border-civic-border bg-gradient-to-b from-white via-[#FBFBFA] to-[#FBFBFA] px-4 pb-14 pt-10 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8"
       >
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,_rgb(180_83_9_/0.08),_transparent_60%)]"
@@ -88,7 +88,7 @@ export default function HomePage() {
           </div>
 
           {/* Artisan photo stacked below headline on mobile */}
-          <div className="relative mx-auto w-full max-w-md overflow-x-hidden pb-10 lg:max-w-none lg:pb-6">
+          <div className="relative mx-auto w-full max-w-md overflow-visible pb-6 lg:max-w-none lg:pb-6">
             <HeroArtisanShowcase />
           </div>
         </div>

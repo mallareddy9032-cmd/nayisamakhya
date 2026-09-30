@@ -194,97 +194,91 @@ function MilestoneScrubber({
   activeId: string;
   onSelect: (id: string) => void;
 }) {
-  const activeIndex = eras.findIndex((e) => e.id === activeId);
-
   return (
-    <div className="relative">
-      <div className="mx-auto max-w-4xl px-1 pt-2 pb-1 sm:px-2">
-        <div
-          className="overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x [&::-webkit-scrollbar]:hidden"
-          role="presentation"
+    <div className="relative" role="presentation">
+      {/* Mobile: horizontal scroll pills above detail card */}
+      <div className="overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x md:hidden [&::-webkit-scrollbar]:hidden">
+        <ol
+          className="flex w-max min-w-full gap-2 px-0.5"
+          role="tablist"
+          aria-label="Chronological civic milestones"
         >
-          <div className="relative min-w-[36rem] px-2 sm:min-w-0 sm:px-0">
-            <div
-              className="absolute left-6 right-6 top-[22px] h-[2px] overflow-hidden rounded-full bg-[#EAD7B5] sm:left-8 sm:right-8"
-              aria-hidden
-            >
-              <div
-                className="h-full bg-gradient-to-r from-[#B45309] to-[#D97706] transition-all duration-300"
-                style={{
-                  width:
-                    eras.length <= 1
-                      ? "0%"
-                      : `${(activeIndex / (eras.length - 1)) * 100}%`,
-                }}
-              />
-            </div>
-            <ol
-              className="relative z-[1] flex items-start justify-between gap-2 sm:gap-0"
-              role="tablist"
-              aria-label="Chronological civic milestones"
-            >
-              {eras.map((era) => {
-                const selected = era.id === activeId;
-                return (
-                  <li
-                    key={era.id}
-                    className="flex w-[5.25rem] shrink-0 flex-col items-center gap-2 sm:w-24"
+          {eras.map((era) => {
+            const selected = era.id === activeId;
+            return (
+              <li key={era.id} className="shrink-0">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls="civic-epoch-panel"
+                  id={`epoch-tab-${era.id}`}
+                  onClick={() => onSelect(era.id)}
+                  className={cn(
+                    "civic-focus-ring inline-flex min-h-11 min-w-[7.5rem] flex-col items-center justify-center rounded-full border px-3.5 py-2 transition-all duration-300",
+                    selected
+                      ? "border-[#B45309] bg-[#B45309] text-white shadow-[0_0_0_3px_rgb(180_83_9_/0.2)]"
+                      : "border-[#EAD7B5] bg-white text-[#1E293B] hover:border-[#B45309]/50",
+                  )}
+                >
+                  <span className="font-telugu text-[11px] font-bold leading-snug">
+                    {era.scrubLabel}
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-0.5 font-sans text-[9px] font-semibold uppercase tracking-wide",
+                      selected ? "text-white/85" : "text-slate-500",
+                    )}
                   >
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      aria-controls="civic-epoch-panel"
-                      id={`epoch-tab-${era.id}`}
-                      onClick={() => onSelect(era.id)}
-                      className={cn(
-                        "civic-focus-ring relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300",
-                        selected
-                          ? "bg-[#B45309] text-white"
-                          : "bg-white text-slate-400 hover:border-[#B45309]/40 hover:text-[#B45309]",
-                      )}
-                      style={
-                        selected
-                          ? {
-                              boxShadow:
-                                "0 0 0 3px #FBFBFA, 0 0 0 5px #B45309, 0 0 12px rgb(180 83 9 / 0.45)",
-                            }
-                          : {
-                              boxShadow: "0 0 0 1.5px #CBD5E1",
-                            }
-                      }
-                    >
-                      {selected ? (
-                        <span
-                          className="motion-safe-ping absolute inset-0 animate-ping rounded-full bg-[#B45309]/35 motion-reduce:hidden"
-                          aria-hidden
-                        />
-                      ) : null}
-                      <span className="relative h-2 w-2 rounded-full bg-current" />
-                    </button>
-                    <span
-                      className={cn(
-                        "max-w-[5.25rem] text-center font-telugu text-[10px] font-bold leading-snug transition-colors duration-300 sm:max-w-none sm:text-[11px]",
-                        selected ? "text-[#B45309]" : "text-slate-500",
-                      )}
-                    >
-                      {era.scrubLabel}
-                    </span>
-                    <span
-                      className={cn(
-                        "hidden max-w-[5.5rem] text-center font-sans text-[9px] font-semibold uppercase tracking-wide transition-colors duration-300 sm:block",
-                        selected ? "text-[#92400e]" : "text-slate-400",
-                      )}
-                    >
-                      {era.badgeEra}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </div>
+                    {era.badgeEra}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
       </div>
+
+      {/* Desktop: non-wrapping horizontal pill bar */}
+      <ol
+        className="hidden w-full flex-nowrap items-stretch justify-between gap-2 md:flex"
+        role="tablist"
+        aria-label="Chronological civic milestones"
+      >
+        {eras.map((era) => {
+          const selected = era.id === activeId;
+          return (
+            <li key={era.id} className="min-w-0 flex-1">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-controls="civic-epoch-panel"
+                id={`epoch-tab-desk-${era.id}`}
+                onClick={() => onSelect(era.id)}
+                className={cn(
+                  "civic-focus-ring flex h-full min-h-12 w-full min-w-[6.5rem] flex-col items-center justify-center rounded-full border px-2 py-2.5 text-center transition-all duration-300 xl:min-w-[7.25rem] xl:px-3",
+                  selected
+                    ? "border-[#B45309] bg-[#B45309] text-white shadow-[0_0_0_3px_rgb(180_83_9_/0.2)]"
+                    : "border-[#EAD7B5] bg-white text-[#1E293B] hover:border-[#B45309]/50",
+                )}
+              >
+                <span className="font-telugu text-[11px] font-bold leading-snug xl:text-xs">
+                  {era.scrubLabel}
+                </span>
+                <span
+                  className={cn(
+                    "mt-0.5 font-sans text-[9px] font-semibold uppercase tracking-wide",
+                    selected ? "text-white/85" : "text-slate-500",
+                  )}
+                >
+                  {era.badgeEra}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
@@ -429,12 +423,7 @@ function EpochCard({ era }: { era: TimelineEra }) {
             </p>
           ) : null}
 
-          <p
-            className={cn(
-              "mt-2.5 font-telugu text-sm leading-[1.8] text-slate-600",
-              isContemporary && "line-clamp-3",
-            )}
-          >
+          <p className="mt-2.5 font-telugu text-sm leading-[1.8] text-slate-600">
             {era.summaryTe}
           </p>
 
@@ -548,14 +537,16 @@ export function CivicTimeline() {
               ఆధునిక చట్టబద్ధ హక్కుల వరకు
             </span>
           </h2>
-
+          <p className="mt-1.5 font-sans text-sm font-medium tracking-wide text-slate-500">
+            From ancient roots to modern legal rights
+          </p>
           <p className="mt-2 max-w-3xl font-telugu text-sm leading-[1.8] text-slate-600">
             ఆయుర్వేద శస్త్రచికిత్స, నాదస్వర వారసత్వం నుండి నేటి జీ.ఓ. 23 ఉచిత
             విద్యుత్ మరియు సమగ్ర కులగణన (SEEEPC) వరకు మన ప్రస్థానం.
           </p>
         </header>
 
-        <div className="flex flex-col gap-4 lg:max-h-[560px]">
+        <div className="flex flex-col gap-4">
           <MilestoneScrubber
             eras={TIMELINE_ERAS}
             activeId={activeId}
