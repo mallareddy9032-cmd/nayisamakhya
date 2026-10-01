@@ -28,7 +28,12 @@ export function InAppBrowserBanner() {
   }, []);
 
   if (!visible) return null;
-  if (pathname?.startsWith("/representation")) return null;
+  if (
+    pathname?.startsWith("/representation") ||
+    pathname?.startsWith("/grievance")
+  ) {
+    return null;
+  }
 
   return (
     <div

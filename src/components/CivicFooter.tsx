@@ -29,6 +29,7 @@ import {
   Clapperboard,
   Scale,
   Scissors,
+  Zap,
 } from "lucide-react";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
@@ -142,6 +143,11 @@ export function CivicFooter() {
               <li>
                 <FooterNavLink href="/representation" icon={ScrollText}>
                   Petition
+                </FooterNavLink>
+              </li>
+              <li>
+                <FooterNavLink href="/grievance" icon={Zap}>
+                  జీవో 23 ఫిర్యాదు
                 </FooterNavLink>
               </li>
               <li>
@@ -287,10 +293,10 @@ export function CivicFooter() {
                 |
               </span>
               <Link
-                href="/representation?subject=go23_free_power"
+                href="/grievance"
                 className="civic-focus-ring transition-colors hover:text-amber-700"
               >
-                G.O. 23 Reference
+                G.O. 23 Grievance
               </Link>
               <span className="text-slate-300" aria-hidden>
                 |

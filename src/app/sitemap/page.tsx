@@ -58,6 +58,11 @@ export default function SitemapPage() {
               </Link>
             </li>
             <li>
+              <Link href="/grievance" className="hover:text-[#C2410C]">
+                {te ? "జీవో 23 ఫిర్యాదు డాకెట్" : "G.O. 23 grievance docket"}
+              </Link>
+            </li>
+            <li>
               <Link href="/history" className="hover:text-[#C2410C]">
                 {te ? "చారిత్రక పరిణామ క్రమం" : "Historical trajectory"}
               </Link>

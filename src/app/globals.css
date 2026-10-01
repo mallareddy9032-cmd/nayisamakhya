@@ -212,6 +212,7 @@ body {
 #petition-document,
 #representation-letter-print,
 .representation-letter-print,
+#grievance-docket-print,
 #newsletter-print-root,
 .civic-hero-surface {
   position: relative;
@@ -222,6 +223,7 @@ body {
 #petition-document::before,
 #representation-letter-print::before,
 .representation-letter-print::before,
+#grievance-docket-print::before,
 #newsletter-print-root::before,
 .civic-hero-surface::before {
   content: "";
@@ -239,6 +241,8 @@ body {
 .civic-watermark > *,
 #petition-document > *,
 #representation-letter-print > *,
+.representation-letter-print > *,
+#grievance-docket-print > *,
 #newsletter-print-root > *,
 .civic-hero-surface > * {
   position: relative;
@@ -252,6 +256,7 @@ body {
   .civic-watermark::before,
   #petition-document::before,
   #representation-letter-print::before,
+  #grievance-docket-print::before,
   #newsletter-print-root::before,
   .civic-hero-surface::before {
     opacity: 0.04 !important;

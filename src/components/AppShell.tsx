@@ -17,6 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/feed") ||
     pathname.startsWith("/representation") ||
+    pathname.startsWith("/grievance") ||
     pathname.startsWith("/coordinator-card") ||
     pathname.startsWith("/coordinators") ||
     pathname.startsWith("/announce") ||

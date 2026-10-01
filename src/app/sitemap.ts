@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticHigh: MetadataRoute.Sitemap = [
     "/",
     "/representation",
+    "/grievance",
     "/survey",
     "/sprint",
     "/reels",

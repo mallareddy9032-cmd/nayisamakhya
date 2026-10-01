@@ -29,6 +29,7 @@ const primaryNav = [
 const COMPETITIONS = [
   { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
   { href: "/quiz", label: "⚖️ లీగల్ క్విజ్" },
+  { href: "/grievance", label: "⚡ జీవో 23 ఫిర్యాదు" },
   { href: "/reels", label: "🎬 మన కళ రీల్స్" },
 ] as const;
 
