@@ -3,9 +3,9 @@ import { SalonHubChrome } from "@/components/salon-hub/SalonHubChrome";
 import { ProcureClient } from "@/components/salon-hub/ProcureClient";
 
 export const metadata: Metadata = {
-  title: "సెలూన్ సామాగ్రి సమూహ కొనుగోళ్లు | Group Indent Desk",
+  title: "సెలూన్ సమూహ సేకరణ (Group Procurement Hub)",
   description:
-    "తెలంగాణలోని సెలూన్ యజమానులందరి డిమాండ్‌ను కలిపి, నేరుగా తయారీదారుల నుంచే 30% నుండి 45% తగ్గింపు ధరలకు నాణ్యమైన సామాగ్రిని మీ మండల కేంద్రానికి అందిస్తాము.",
+    "హోల్‌సేల్ ధరలకే నాణ్యమైన కటింగ్ కిట్లు మరియు సెలూన్ పరికరాల సమూహ ఆర్డర్.",
   alternates: { canonical: "/salon-hub/procure" },
 };
 

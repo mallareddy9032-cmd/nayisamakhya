@@ -4,9 +4,9 @@ import { ArrowLeft, Clapperboard } from "lucide-react";
 import { ReelsClient } from "@/components/reels/ReelsClient";
 
 export const metadata: Metadata = {
-  title: "మన కళ - మన ఆత్మగౌరవం | 60-Second Reel Contest",
+  title: "మన కళ రీల్స్ ఛాలెంజ్ (60s Mobile Reels)",
   description:
-    "Nayi Samakhya Competition 2 — submit a 60-second mobile reel on salon craft, nadaswaram music, or youth education. Community pride storytelling contest.",
+    "మన సంస్కృతి, నాదస్వరం, మరియు సెలూన్ నైపుణ్యాలపై వీడియోలు పంపి రాష్ట్ర స్థాయి గుర్తింపు పొందండి.",
   alternates: { canonical: "/reels" },
 };
 
