@@ -129,15 +129,22 @@ export function ModerationDeskClient({
         includeReels: true,
       });
       if (!result.ok) {
-        window.alert("Export is only available in the browser.");
+        window.alert(
+          result.reason === "ssr"
+            ? "Export is only available in the browser."
+            : "Export failed. Please retry.",
+        );
         return;
       }
       if (result.rowCount === 0) {
-        window.alert(
-          result.source === "supabase"
-            ? "Supabase returned no statewide survey or reel rows yet."
-            : "No statewide survey or reel records found (Supabase unset / empty). Submit a survey on /survey (or a reel) on this device for localStorage fallback, then retry.",
-        );
+        // CSV: `exportToCSV` already showed the bilingual empty-data alert.
+        if (format === "excel") {
+          window.alert(
+            result.source === "supabase"
+              ? "Supabase returned no statewide survey or reel rows yet."
+              : "No statewide survey or reel records found (Supabase unset / empty). Submit a survey on /survey (or a reel) on this device for localStorage fallback, then retry.",
+          );
+        }
         return;
       }
       if (result.source === "localStorage") {
