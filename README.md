@@ -51,8 +51,10 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 | `/twa` | Telegram Mini App hub (petition, feed, GO 23, ID card) |
 | `/announce` | Community WhatsApp blasts + coordinator SOP (`?blast=desk|representation|feed|sop`) |
 | `/poster` | Printable A4 Digital Desk QR poster (`@NayiSamakhyaDeskBot`) |
-| `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → submissions + **analytics** tab with statewide choropleth / Saturation Index; approve/reject notifies submitter on Telegram) |
-| `/admin/moderation` | Field photo moderation desk (cookie PIN via `MODERATION_DESK_SECRET`) |
+| `/admin/login` | Bilingual admin portal PIN login — sets HTTP-only `admin_session` (HMAC, 7 days) |
+| `/admin/volunteers` | Volunteers control desk (requires `admin_session`; logout clears cookie) |
+| `/admin/desk` | Admin moderation desk (Bearer `MODERATION_DESK_SECRET` → submissions + **analytics** tab with statewide choropleth / Saturation Index; approve/reject notifies submitter on Telegram). Portal session also unlocks desk actions. |
+| `/admin/moderation` | Field photo moderation desk (cookie PIN via `MODERATION_DESK_SECRET`, or portal `admin_session`) |
 | `/{district}/{mandal}/survey` | Family survey wizard |
 | `/policies/*` · `/sitemap` | Legal pages |
 
@@ -91,7 +93,7 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
 Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/officer`, album batching, photo ingest). **Never replace GitHub `main` with a telegram-only tree** — that wipes the Next site and 404s Vercel (including `/representation`). Edit the route under `src/` and push the full app.
 
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket), then `005_moderation_desk_v2.sql` and `006_admin_desk_submissions_api.sql` (`panchayat_name`, `admin_notes`, `reviewed_at`).
-2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`.
+2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`, plus Admin Portal `ADMIN_SECRET_PIN` and `ADMIN_SESSION_SECRET` (HMAC cookie gate for `/admin/*`).
 3. Point the bot webhook (use **www** — apex redirects break Telegram). Include `callback_query` so welcome inline buttons work:
    ```bash
    curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
@@ -100,8 +102,18 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
      -d 'allowed_updates=["message","callback_query"]'
    ```
    Or: `npm run setup:method3` (needs `VERCEL_TOKEN` + the keys above).
-4. Open `/admin/moderation`, unlock with `MODERATION_DESK_SECRET`, then review queues.
+4. Open `/admin/login`, enter `ADMIN_SECRET_PIN` (falls back to `MODERATION_DESK_SECRET` if unset), then use `/admin/volunteers` or `/admin/moderation`.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
+5. Logout: navbar **నిష్క్రమించు** → `POST /api/admin/logout` clears `admin_session`.
+
+### Admin Portal auth (Milestone 1)
+
+| Env | Purpose |
+|-----|---------|
+| `ADMIN_SECRET_PIN` | PIN checked by `POST /api/admin/login` (timing-safe). Falls back to `MODERATION_DESK_SECRET`, then a **dev-only** placeholder outside production. |
+| `ADMIN_SESSION_SECRET` | HMAC-SHA256 key for `admin_session` cookie. Dev-only placeholder outside production if unset. |
+
+Cookie: `admin_session` — HTTP-only, `SameSite=strict`, `Secure` in production, `maxAge` 7 days. Middleware redirects unauthenticated `/admin/*` (except `/admin/login`) to the login page.
 
 ### Telegram Mini App (`/twa`)
 

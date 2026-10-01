@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { isAdminAuthenticated } from "@/lib/admin/sessionCookies";
 
 export const DESK_COOKIE = "nayi_moderation_desk";
 
@@ -20,8 +21,15 @@ export function deskAuthRequired() {
   return Boolean(expectedDeskSecret()) || process.env.NODE_ENV === "production";
 }
 
+/**
+ * Desk unlock: legacy `nayi_moderation_desk` cookie OR portal `admin_session`
+ * (Milestone 1) — one login at `/admin/login` unlocks moderation actions too.
+ */
 export async function isDeskUnlocked(): Promise<boolean> {
   try {
+    if (await isAdminAuthenticated()) {
+      return true;
+    }
     const expected = expectedDeskSecret();
     if (!expected) {
       return process.env.NODE_ENV !== "production";

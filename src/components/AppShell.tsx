@@ -35,7 +35,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     // Light civic tools (/feed, /poster, /announce, …) sit on paper; admin desks keep slate.
     // Use <div> — tool pages own their own <main> landmark.
     const shellBg = pathname.startsWith("/admin")
-      ? "bg-slate-950"
+      ? pathname.startsWith("/admin/login") ||
+        pathname.startsWith("/admin/volunteers")
+        ? "bg-[#FBFBFA]"
+        : "bg-slate-950"
       : "bg-civic-paper";
     return (
       <div
