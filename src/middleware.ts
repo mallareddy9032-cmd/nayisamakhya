@@ -19,8 +19,9 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value || "";
   const secret = expectedSessionSecret();
 
-  // Portal gate inactive until ADMIN_SESSION_SECRET is set in production
-  // (dev uses a local fallback secret). Avoid bricking legacy desks pre-env.
+  // Portal gate inactive until a session secret exists (explicit
+  // ADMIN_SESSION_SECRET, or derived from MODERATION_DESK_SECRET / CRON /
+  // TELEGRAM_WEBHOOK_SECRET). Dev uses a local fallback when none are set.
   if (!secret) {
     return NextResponse.next();
   }

@@ -15,13 +15,16 @@ export const runtime = "nodejs";
 const INVALID_PIN_MESSAGE =
   "తప్పుడు పాస్‌వర్డ్ / Invalid Admin Security PIN";
 
+const NOT_CONFIGURED_MESSAGE =
+  "సర్వర్ అడ్మిన్ లాగిన్ సెటప్ కాలేదు / Admin auth is not configured. Set ADMIN_SECRET_PIN (or MODERATION_DESK_SECRET) and ADMIN_SESSION_SECRET on Vercel, then redeploy.";
+
 export async function POST(request: Request) {
   if (!adminAuthConfigured()) {
     return NextResponse.json(
       {
         success: false,
-        error:
-          "Admin auth is not configured. Set ADMIN_SECRET_PIN and ADMIN_SESSION_SECRET.",
+        code: "not_configured",
+        error: NOT_CONFIGURED_MESSAGE,
       },
       { status: 503 },
     );
@@ -33,7 +36,11 @@ export async function POST(request: Request) {
     pin = typeof body.pin === "string" ? body.pin : "";
   } catch {
     return NextResponse.json(
-      { success: false, error: INVALID_PIN_MESSAGE },
+      {
+        success: false,
+        code: "invalid_pin",
+        error: INVALID_PIN_MESSAGE,
+      },
       { status: 401 },
     );
   }
@@ -41,7 +48,11 @@ export async function POST(request: Request) {
   const expected = expectedAdminPin();
   if (!timingSafeEqualString(pin.trim(), expected)) {
     return NextResponse.json(
-      { success: false, error: INVALID_PIN_MESSAGE },
+      {
+        success: false,
+        code: "invalid_pin",
+        error: INVALID_PIN_MESSAGE,
+      },
       { status: 401 },
     );
   }

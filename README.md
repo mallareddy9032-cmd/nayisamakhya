@@ -93,7 +93,7 @@ RLS: public `SELECT` on districts, mandals, officers, mandal_officers, gram_panc
 Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/officer`, album batching, photo ingest). **Never replace GitHub `main` with a telegram-only tree** — that wipes the Next site and 404s Vercel (including `/representation`). Edit the route under `src/` and push the full app.
 
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket), then `005_moderation_desk_v2.sql` and `006_admin_desk_submissions_api.sql` (`panchayat_name`, `admin_notes`, `reviewed_at`).
-2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`, plus Admin Portal `ADMIN_SECRET_PIN` and `ADMIN_SESSION_SECRET` (HMAC cookie gate for `/admin/*`).
+2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`. Prefer also setting Admin Portal `ADMIN_SECRET_PIN` and `ADMIN_SESSION_SECRET`; if those are unset, login falls back to the desk PIN and a derived HMAC key from existing ops secrets.
 3. Point the bot webhook (use **www** — apex redirects break Telegram). Include `callback_query` so welcome inline buttons work:
    ```bash
    curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
@@ -102,7 +102,7 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
      -d 'allowed_updates=["message","callback_query"]'
    ```
    Or: `npm run setup:method3` (needs `VERCEL_TOKEN` + the keys above).
-4. Open `/admin/login`, enter `ADMIN_SECRET_PIN` (falls back to `MODERATION_DESK_SECRET` if unset), then use `/admin/volunteers` or `/admin/moderation`.
+4. Open `/admin/login`, enter `ADMIN_SECRET_PIN` (or the existing `MODERATION_DESK_SECRET` desk PIN if `ADMIN_SECRET_PIN` is unset), then use `/admin/volunteers` or `/admin/moderation`.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
 5. Logout: navbar **నిష్క్రమించు** → `POST /api/admin/logout` clears `admin_session`.
 
@@ -110,10 +110,17 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
 
 | Env | Purpose |
 |-----|---------|
-| `ADMIN_SECRET_PIN` | PIN checked by `POST /api/admin/login` (timing-safe). Falls back to `MODERATION_DESK_SECRET`, then a **dev-only** placeholder outside production. |
-| `ADMIN_SESSION_SECRET` | HMAC-SHA256 key for `admin_session` cookie. Dev-only placeholder outside production if unset. |
+| `ADMIN_SECRET_PIN` | Preferred PIN for `POST /api/admin/login` (timing-safe). Falls back to `MODERATION_DESK_SECRET`, then a **dev-only** placeholder outside production. |
+| `ADMIN_SESSION_SECRET` | Preferred HMAC-SHA256 key for `admin_session`. If unset, derived from `MODERATION_DESK_SECRET` → `CRON_SECRET` → `TELEGRAM_WEBHOOK_SECRET` (domain-separated). Dev-only placeholder outside production if none exist. |
+| `MODERATION_DESK_SECRET` | Existing desk unlock PIN; also unlocks portal login when `ADMIN_SECRET_PIN` is unset, and can back the session HMAC derivation. |
 
-Cookie: `admin_session` — HTTP-only, `SameSite=strict`, `Secure` in production, `maxAge` 7 days. Middleware redirects unauthenticated `/admin/*` (except `/admin/login`) to the login page.
+**Vercel checklist (production):**
+
+1. Preferred: set both `ADMIN_SECRET_PIN` and `ADMIN_SESSION_SECRET` (long random), then Redeploy.
+2. Minimum for “our credentials” to work today: ensure `MODERATION_DESK_SECRET` is set (already used by moderation) — portal will accept that PIN and derive the session key.
+3. After env changes, Redeploy (or wait for next deploy) and hard-refresh `/admin/login`.
+
+Cookie: `admin_session` — HTTP-only, `SameSite=strict`, `Secure` in production, `maxAge` 7 days. Middleware redirects unauthenticated `/admin/*` (except `/admin/login`) once a session secret is available.
 
 ### Telegram Mini App (`/twa`)
 

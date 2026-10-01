@@ -7,6 +7,9 @@ import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 const ERROR_FALLBACK =
   "తప్పుడు పాస్‌వర్డ్ / Invalid Admin Security PIN";
 
+const NOT_CONFIGURED_FALLBACK =
+  "సర్వర్ అడ్మిన్ లాగిన్ సెటప్ కాలేదు / Admin auth is not configured. Ask ops to set Vercel env, then redeploy.";
+
 function safeRedirect(raw: string | null): string {
   if (!raw) return "/admin/volunteers";
   if (!raw.startsWith("/") || raw.startsWith("//")) return "/admin/volunteers";
@@ -25,11 +28,15 @@ export default function AdminLoginForm() {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
+  const [errorKind, setErrorKind] = useState<"invalid_pin" | "not_configured" | "">(
+    "",
+  );
   const [pending, startTransition] = useTransition();
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setErrorKind("");
     startTransition(async () => {
       try {
         const res = await fetch("/api/admin/login", {
@@ -39,15 +46,27 @@ export default function AdminLoginForm() {
         });
         const data = (await res.json().catch(() => ({}))) as {
           success?: boolean;
+          code?: string;
           error?: string;
         };
         if (!res.ok || !data.success) {
-          setError(data.error || ERROR_FALLBACK);
+          const kind =
+            data.code === "not_configured" || res.status === 503
+              ? "not_configured"
+              : "invalid_pin";
+          setErrorKind(kind);
+          setError(
+            data.error ||
+              (kind === "not_configured"
+                ? NOT_CONFIGURED_FALLBACK
+                : ERROR_FALLBACK),
+          );
           return;
         }
         router.push(redirectTo);
         router.refresh();
       } catch {
+        setErrorKind("invalid_pin");
         setError(ERROR_FALLBACK);
       }
     });
@@ -84,9 +103,18 @@ export default function AdminLoginForm() {
           {error ? (
             <div
               role="alert"
-              className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-3 text-sm text-rose-800"
+              className={
+                errorKind === "not_configured"
+                  ? "mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-950"
+                  : "mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-3 text-sm text-rose-800"
+              }
             >
-              <p className="font-telugu leading-telugu">{error}</p>
+              <p className="font-medium leading-snug">
+                {errorKind === "not_configured"
+                  ? "సర్వర్ సెటప్ / Server misconfigured"
+                  : "తప్పుడు పిన్ / Wrong PIN"}
+              </p>
+              <p className="mt-1 font-telugu leading-telugu">{error}</p>
             </div>
           ) : null}
 

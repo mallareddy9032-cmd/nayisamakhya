@@ -9,10 +9,17 @@ export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 
 const SESSION_PREFIX = "nayi-admin-session-v1";
 
+/** Domain separator for deriving HMAC key from existing ops secrets (not a PIN). */
+const SESSION_DERIVE_PREFIX = "nayi-admin-session-hmac-v1";
+
 /** Dev-only fallbacks — never used when NODE_ENV === "production". */
 const DEV_PIN_FALLBACK = "nayi-local-admin-pin";
 const DEV_SESSION_FALLBACK = "nayi-local-session-secret-dev-only";
 
+/**
+ * Prefer ADMIN_SECRET_PIN; else the desk unlock PIN already used in prod
+ * (MODERATION_DESK_SECRET). Dev-only placeholder outside production.
+ */
 export function expectedAdminPin(): string {
   const pin =
     process.env.ADMIN_SECRET_PIN?.trim() ||
@@ -23,9 +30,32 @@ export function expectedAdminPin(): string {
   return "";
 }
 
+/**
+ * Existing project secrets that can back a derived session HMAC key when
+ * ADMIN_SESSION_SECRET is unset. Order: desk → cron → Telegram webhook.
+ * Values are never hardcoded production PINs — only env material.
+ */
+function existingOpsSecretMaterial(): string {
+  return (
+    process.env.MODERATION_DESK_SECRET?.trim() ||
+    process.env.CRON_SECRET?.trim() ||
+    process.env.TELEGRAM_WEBHOOK_SECRET?.trim() ||
+    ""
+  );
+}
+
+/**
+ * Prefer ADMIN_SESSION_SECRET; else derive a domain-separated HMAC key from
+ * well-known existing secrets so portal login works when only desk/cron
+ * env is configured. Dev-only placeholder outside production.
+ */
 export function expectedSessionSecret(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET?.trim() || "";
-  if (secret) return secret;
+  const explicit = process.env.ADMIN_SESSION_SECRET?.trim() || "";
+  if (explicit) return explicit;
+
+  const material = existingOpsSecretMaterial();
+  if (material) return `${SESSION_DERIVE_PREFIX}:${material}`;
+
   if (process.env.NODE_ENV !== "production") return DEV_SESSION_FALLBACK;
   return "";
 }
