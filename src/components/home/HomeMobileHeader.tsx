@@ -23,6 +23,11 @@ import { cn } from "@/lib/utils";
 const PRIMARY_LINKS = [
   { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
   { href: "/survey", label: "సమగ్ర సర్వే" },
+  {
+    href: "/grievance",
+    label: "జీవో 23 రక్షణ లేఖ",
+    highlight: "go23" as const,
+  },
   { href: "/representation", label: "వినతిపత్రం", icon: FileText },
   { href: "/feed", label: "గెజిట్ (Gazette)" },
 ] as const;
@@ -30,6 +35,7 @@ const PRIMARY_LINKS = [
 const COMPETITIONS = [
   { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
   { href: "/quiz", label: "⚖️ లీగల్ క్విజ్" },
+  { href: "/grievance", label: "⚡ జీవో 23 దరఖాస్తు" },
   { href: "/reels", label: "🎬 మన కళ రీల్స్" },
 ] as const;
 
@@ -252,6 +258,12 @@ export function HomeMobileHeader() {
               వినతిపత్రం
             </Link>
             <Link
+              href="/grievance"
+              className="civic-focus-ring inline-flex min-h-11 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 font-telugu text-xs font-bold text-amber-900 shadow-[0_0_10px_rgba(245,158,11,0.22)] transition hover:bg-amber-500/25"
+            >
+              ⚡ జీవో 23 దరఖాస్తు
+            </Link>
+            <Link
               href="/feed"
               className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
             >
@@ -316,6 +328,21 @@ export function HomeMobileHeader() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-3">
+              <Link
+                href="/grievance"
+                onClick={() => setOpen(false)}
+                className="tap mb-3 flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 font-telugu text-sm font-bold text-amber-900 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+              >
+                <span className="inline-flex min-w-0 flex-col leading-tight">
+                  <span>జీవో 23 రక్షణ లేఖ</span>
+                  <span className="text-[10px] font-semibold text-amber-800/80">
+                    Grievance Docket
+                  </span>
+                </span>
+                <span className="shrink-0 rounded-md border border-amber-500/45 bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
+                  ⚡ జీవో 23 దరఖాస్తు
+                </span>
+              </Link>
               <div className="mb-3 rounded-2xl border border-amber-200/80 bg-amber-50/60 p-2.5">
                 <p className="mb-2 flex items-center gap-1.5 px-1 font-telugu text-[11px] font-bold text-amber-900">
                   <Trophy className="h-3.5 w-3.5" aria-hidden />
@@ -349,12 +376,19 @@ export function HomeMobileHeader() {
                 </li>
                 {PRIMARY_LINKS.map((link) => {
                   const Icon = "icon" in link ? link.icon : null;
+                  const isGo23 =
+                    "highlight" in link && link.highlight === "go23";
                   return (
                     <li key={link.href}>
                       <Link
                         href={link.href}
                         onClick={() => setOpen(false)}
-                        className="tap flex min-h-12 items-center gap-2.5 rounded-xl px-3 font-telugu text-sm font-semibold text-[#0F172A] hover:bg-[#FBFBFA]"
+                        className={cn(
+                          "tap flex min-h-12 items-center gap-2.5 rounded-xl px-3 font-telugu text-sm font-semibold hover:bg-[#FBFBFA]",
+                          isGo23
+                            ? "border border-amber-500/35 bg-amber-500/10 text-amber-900"
+                            : "text-[#0F172A]",
+                        )}
                       >
                         {Icon ? (
                           <Icon
@@ -363,6 +397,11 @@ export function HomeMobileHeader() {
                           />
                         ) : null}
                         {link.label}
+                        {isGo23 ? (
+                          <span className="ml-auto rounded-md border border-amber-500/45 bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
+                            ⚡ జీవో 23
+                          </span>
+                        ) : null}
                       </Link>
                     </li>
                   );

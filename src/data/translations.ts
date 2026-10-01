@@ -25,6 +25,10 @@ export const translations = {
     te: "వినతిపత్రం",
     en: "Petition",
   },
+  navGrievance: {
+    te: "జీవో 23 రక్షణ లేఖ",
+    en: "Grievance Docket",
+  },
   navSurvey: {
     te: "సమగ్ర సర్వే",
     en: "Survey",

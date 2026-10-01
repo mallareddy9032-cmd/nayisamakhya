@@ -60,6 +60,9 @@ export type GrievanceRecord = GrievanceFormState & {
 
 export const GRIEVANCE_STORAGE_KEY = "nayi_grievance_dockets_v1";
 
+/** In-progress intake draft (auto-save) — separate from completed docket log. */
+export const GRIEVANCE_DRAFT_KEY = "nayi_grievance_form_draft_v1";
+
 export const GRIEVANCE_TYPES: GrievanceTypeOption[] = [
   {
     id: "subsidy_not_applied",

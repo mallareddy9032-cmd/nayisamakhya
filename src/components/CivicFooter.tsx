@@ -147,7 +147,7 @@ export function CivicFooter() {
               </li>
               <li>
                 <FooterNavLink href="/grievance" icon={Zap}>
-                  జీవో 23 ఫిర్యాదు
+                  జీవో 23 ఉచిత విద్యుత్ ఫిర్యాదు డెస్క్ (Grievance Docket Generator)
                 </FooterNavLink>
               </li>
               <li>

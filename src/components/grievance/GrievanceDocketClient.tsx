@@ -13,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import {
+  GRIEVANCE_DRAFT_KEY,
   GRIEVANCE_TYPES,
   getGrievanceType,
   subjectForUscno,
@@ -34,6 +35,8 @@ import {
   persistLocalGrievance,
   suggestDiscom,
 } from "@/lib/grievance/store";
+import { useFormAutoSave } from "@/hooks/useFormAutoSave";
+import { DraftSavedBanner } from "@/components/forms/DraftSavedBanner";
 import { cn } from "@/lib/utils";
 
 function FieldLabel({
@@ -70,6 +73,26 @@ export function GrievanceDocketClient() {
   const [dispatchNote, setDispatchNote] = useState<string | null>(null);
   const [referenceId, setReferenceId] = useState<string | null>(null);
 
+  const { isHydrated, lastSaved, clearDraft, hasDraft } = useFormAutoSave(
+    GRIEVANCE_DRAFT_KEY,
+    form,
+    {
+      debounceMs: 500,
+      onHydrate: (draft) => {
+        if (!draft || typeof draft !== "object") return;
+        setForm((prev) => ({
+          ...prev,
+          ...draft,
+          // Keep geo/discom coherent if draft districts changed upstream.
+          districtSlug: draft.districtSlug || prev.districtSlug,
+          mandalSlug: draft.mandalSlug || prev.mandalSlug,
+          discom: draft.discom || prev.discom,
+          grievanceType: draft.grievanceType || prev.grievanceType,
+        }));
+      },
+    },
+  );
+
   const districts = useMemo(() => districtOptions(), []);
   const mandals = useMemo(
     () => mandalOptions(form.districtSlug),
@@ -83,13 +106,22 @@ export function GrievanceDocketClient() {
   const officialDate = formatOfficialDate();
 
   useEffect(() => {
+    if (!isHydrated) return;
     if (!mandals.some((m) => m.slug === form.mandalSlug)) {
       setForm((prev) => ({
         ...prev,
         mandalSlug: mandals[0]?.slug || "",
       }));
     }
-  }, [mandals, form.mandalSlug]);
+  }, [mandals, form.mandalSlug, isHydrated]);
+
+  function handleClearDraft() {
+    clearDraft();
+    setForm(defaultFormState());
+    setErrors({});
+    setDispatchNote(null);
+    setReferenceId(null);
+  }
 
   function patch<K extends keyof GrievanceFormState>(
     key: K,
@@ -257,6 +289,15 @@ export function GrievanceDocketClient() {
               వినతి నమోదు · Intake
             </h2>
           </div>
+
+          <DraftSavedBanner
+            isHydrated={isHydrated}
+            hasDraft={hasDraft}
+            lastSaved={lastSaved}
+            onClear={handleClearDraft}
+            lang="te"
+            className="mb-4"
+          />
 
           <div className="space-y-4">
             <fieldset>

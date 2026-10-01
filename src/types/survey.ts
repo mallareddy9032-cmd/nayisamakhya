@@ -118,3 +118,6 @@ export interface SurveySubmission {
 
 /** Browser localStorage key — array of SurveySubmission (+ optional refCode/referenceId). */
 export const SURVEY_STORAGE_KEY = "nayi_statewide_survey_submissions_v1";
+
+/** In-progress survey wizard draft (auto-save). */
+export const SURVEY_DRAFT_KEY = "nayi_statewide_survey_draft_v1";

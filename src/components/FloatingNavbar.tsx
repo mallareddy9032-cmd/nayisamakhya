@@ -20,16 +20,21 @@ import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
-  { href: "/districts", key: "navDistricts" as const, badge: false },
-  { href: "/survey", key: "navSurvey" as const, badge: true },
-  { href: "/representation", key: "navRepresentation" as const, badge: false },
-  { href: "/feed", key: "navGazette" as const, badge: false },
+  { href: "/districts", key: "navDistricts" as const, style: "plain" as const },
+  { href: "/survey", key: "navSurvey" as const, style: "survey" as const },
+  { href: "/grievance", key: "navGrievance" as const, style: "go23" as const },
+  {
+    href: "/representation",
+    key: "navRepresentation" as const,
+    style: "plain" as const,
+  },
+  { href: "/feed", key: "navGazette" as const, style: "plain" as const },
 ];
 
 const COMPETITIONS = [
   { href: "/sprint", label: "🏆 సేవా సారథి ఛాలెంజ్" },
   { href: "/quiz", label: "⚖️ లీగల్ క్విజ్" },
-  { href: "/grievance", label: "⚡ జీవో 23 ఫిర్యాదు" },
+  { href: "/grievance", label: "⚡ జీవో 23 దరఖాస్తు" },
   { href: "/reels", label: "🎬 మన కళ రీల్స్" },
 ] as const;
 
@@ -42,6 +47,19 @@ function NewBadge({ className }: { className?: string }) {
       )}
     >
       సర్వే (New)
+    </span>
+  );
+}
+
+function Go23Badge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "ml-1.5 inline-flex items-center rounded-md border border-amber-500/45 bg-amber-500/15 px-1.5 py-0.5 font-telugu text-[9px] font-bold tracking-wide text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.28)]",
+        className,
+      )}
+    >
+      ⚡ జీవో 23
     </span>
   );
 }
@@ -222,12 +240,16 @@ export function FloatingNavbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "inline-flex items-center rounded-lg px-2.5 py-2 text-[12px] font-medium text-ink transition-colors hover:bg-[#F4F2EB]",
+                  "inline-flex items-center rounded-lg px-2.5 py-2 text-[12px] font-medium transition-colors hover:bg-[#F4F2EB]",
                   language === "te" ? "font-telugu" : "",
+                  link.style === "go23"
+                    ? "border border-amber-500/35 bg-amber-500/10 text-amber-900 hover:bg-amber-500/20"
+                    : "text-ink",
                 )}
               >
                 {t(link.key)}
-                {link.badge ? <NewBadge /> : null}
+                {link.style === "survey" ? <NewBadge /> : null}
+                {link.style === "go23" ? <Go23Badge /> : null}
               </Link>
             ))}
           </nav>
@@ -316,6 +338,21 @@ export function FloatingNavbar() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-3">
+              <Link
+                href="/grievance"
+                onClick={() => setOpen(false)}
+                className="tap mb-3 flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 font-telugu text-sm font-bold text-amber-900 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+              >
+                <span className="inline-flex min-w-0 flex-col leading-tight">
+                  <span>జీవో 23 రక్షణ లేఖ</span>
+                  <span className="text-[10px] font-semibold text-amber-800/80">
+                    Grievance Docket
+                  </span>
+                </span>
+                <span className="shrink-0 rounded-md border border-amber-500/45 bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
+                  ⚡ జీవో 23 దరఖాస్తు
+                </span>
+              </Link>
               <div className="mb-3 rounded-2xl border border-amber-200/80 bg-amber-50/60 p-2.5">
                 <p className="mb-2 flex items-center gap-1.5 px-1 font-telugu text-[11px] font-bold text-amber-900">
                   <Trophy className="h-3.5 w-3.5" aria-hidden />
@@ -352,13 +389,17 @@ export function FloatingNavbar() {
                       href={link.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "tap flex min-h-12 items-center justify-between rounded-xl px-3 text-sm font-medium text-ink hover:bg-warm",
+                        "tap flex min-h-12 items-center justify-between rounded-xl px-3 text-sm font-medium hover:bg-warm",
                         language === "te" ? "font-telugu" : "",
+                        link.style === "go23"
+                          ? "border border-amber-500/35 bg-amber-500/10 text-amber-900"
+                          : "text-ink",
                       )}
                     >
                       <span className="inline-flex items-center">
                         {t(link.key)}
-                        {link.badge ? <NewBadge /> : null}
+                        {link.style === "survey" ? <NewBadge /> : null}
+                        {link.style === "go23" ? <Go23Badge /> : null}
                       </span>
                       <ChevronDown
                         className="h-4 w-4 -rotate-90 text-muted"

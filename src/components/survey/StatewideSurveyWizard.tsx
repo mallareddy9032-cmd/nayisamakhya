@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { FamilyMemberCard } from "@/components/survey/FamilyMemberCard";
 import { SurveyProgress } from "@/components/survey/SurveyProgress";
+import { DraftSavedBanner } from "@/components/forms/DraftSavedBanner";
+import { useFormAutoSave } from "@/hooks/useFormAutoSave";
 import {
   formatSubUnitLabel,
   surveyDistricts,
@@ -49,7 +51,7 @@ import type {
   SubCaste,
   SurveySubmission,
 } from "@/types/survey";
-import { SURVEY_STORAGE_KEY } from "@/types/survey";
+import { SURVEY_DRAFT_KEY, SURVEY_STORAGE_KEY } from "@/types/survey";
 import type { Volunteer } from "@/types/volunteer";
 
 const inputClass =
@@ -102,6 +104,11 @@ type FormState = {
   declarationAccepted: boolean;
 };
 
+type SurveyDraftBundle = {
+  form: FormState;
+  step: number;
+};
+
 function initialForm(): FormState {
   return {
     fullName: "",
@@ -151,6 +158,39 @@ export function StatewideSurveyWizard() {
   const [submittedHouseholdSize, setSubmittedHouseholdSize] = useState(0);
   const [submittedMatrimonialCount, setSubmittedMatrimonialCount] = useState(0);
   const [referralRef, setReferralRef] = useState<string | null>(null);
+
+  const draftBundle = useMemo<SurveyDraftBundle>(
+    () => ({ form, step }),
+    [form, step],
+  );
+
+  const { isHydrated, lastSaved, clearDraft, hasDraft } = useFormAutoSave(
+    SURVEY_DRAFT_KEY,
+    draftBundle,
+    {
+      debounceMs: 500,
+      enabled: !submitted,
+      onHydrate: (draft) => {
+        if (!draft || typeof draft !== "object") return;
+        if (draft.form && typeof draft.form === "object") {
+          setForm((prev) => ({
+            ...prev,
+            ...draft.form,
+            familyMembers: Array.isArray(draft.form.familyMembers)
+              ? draft.form.familyMembers
+              : prev.familyMembers,
+          }));
+        }
+        if (
+          typeof draft.step === "number" &&
+          draft.step >= 1 &&
+          draft.step <= 5
+        ) {
+          setStep(draft.step);
+        }
+      },
+    },
+  );
 
   useEffect(() => {
     try {
@@ -408,6 +448,7 @@ export function StatewideSurveyWizard() {
             creditLocalRef(referralRef);
           }
         }
+        clearDraft();
         setReferenceId(refId);
         setMockFallback(mock);
         setSubmittedHouseholdSize(submission.familyMembers.length);
@@ -436,6 +477,7 @@ export function StatewideSurveyWizard() {
         referenceId: localRef,
       });
       if (referralRef) creditLocalRef(referralRef);
+      clearDraft();
       setReferenceId(localRef);
       setMockFallback(true);
       setSubmittedHouseholdSize(submission.familyMembers.length);
@@ -449,6 +491,7 @@ export function StatewideSurveyWizard() {
   }
 
   function resetAll() {
+    clearDraft();
     setForm(initialForm());
     setStep(1);
     setSubmitted(false);
@@ -456,6 +499,13 @@ export function StatewideSurveyWizard() {
     setMockFallback(false);
     setSubmittedHouseholdSize(0);
     setSubmittedMatrimonialCount(0);
+    setError("");
+  }
+
+  function handleClearDraft() {
+    clearDraft();
+    setForm(initialForm());
+    setStep(1);
     setError("");
   }
 
@@ -531,6 +581,13 @@ export function StatewideSurveyWizard() {
 
   return (
     <div className="space-y-4">
+      <DraftSavedBanner
+        isHydrated={isHydrated}
+        hasDraft={hasDraft}
+        lastSaved={lastSaved}
+        onClear={handleClearDraft}
+        lang="te"
+      />
       <SurveyProgress step={step} total={5} />
 
       {step === 1 ? (
