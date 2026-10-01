@@ -138,6 +138,18 @@ Cookie: `admin_session` — HTTP-only, `SameSite=strict`, `Secure` in production
   ```
 - BotFather → Bot Settings → Domain: `www.nayisamakhya.org`. Always set `NEXT_PUBLIC_SITE_URL=https://www.nayisamakhya.org`.
 
+## Pilot simulation (5 field cohorts)
+
+End-to-end harness for Kodad / Chilkur / Huzurnagar / Suryapet / Mellachervu coordinators:
+
+```bash
+# Requires NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (or anon) in .env.local
+# Telegram optional — skips cleanly when TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID unset
+npm run test:pilot
+```
+
+Inserts into `surveys`, `quiz_records`, `grievances`, and `orders` (when present), validates UTF-8 BOM CSV with Telugu, and dispatches War Room alerts. Apply `017_quiz_records.sql` + `018_grievances.sql` in Supabase for full inserts; missing tables soft-skip with logs. Artifacts land in `scripts/.pilot-artifacts/` (gitignored).
+
 ## Deploy
 
 GitHub `mallareddy9032-cmd/nayisamakhya` **`main`** → Vercel (Next.js). Domain: `nayisamakhya.org`.
