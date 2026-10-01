@@ -1,6 +1,9 @@
 /**
  * 1-click statewide CSV + Excel export for the moderation desk.
  *
+ * CSV downloads go through shared `exportToCSV` (UTF-8 BOM for Telugu in Excel,
+ * dated `{prefix}_{YYYY-MM-DD}.csv`, bilingual empty-data alert).
+ *
  * Data sources (priority):
  * 1. Supabase via desk server action (`surveys` + `reels`) when service role is set
  * 2. Browser localStorage fallback — `nayi_statewide_survey_submissions_v1` + `reels_db`
@@ -17,6 +20,7 @@
  */
 
 import { getGeoDistrict } from "@/data/telanganaGeo";
+import { exportToCSV } from "@/lib/exportToCSV";
 import { GO23_STATUS_OPTIONS, SUB_CASTE_OPTIONS } from "@/lib/survey/options";
 import { readLocalReels } from "@/lib/reels/store";
 import { REELS_STORAGE_KEY } from "@/types/reels";
@@ -30,6 +34,9 @@ import type { ReelSubmission } from "@/types/reels";
 
 export { SURVEY_STORAGE_KEY };
 
+/** Filename prefix; dated as `{prefix}_{YYYY-MM-DD}.csv` via `exportToCSV`. */
+export const CSV_DOWNLOAD_FILENAME_PREFIX = "nayisamakhya_statewide_data";
+/** @deprecated Prefer dated downloads from `exportToCSV`; kept for callers. */
 export const CSV_DOWNLOAD_FILENAME = "nayisamakhya_statewide_data.csv";
 export const EXCEL_DOWNLOAD_FILENAME = "nayisamakhya_statewide_data.xls";
 
@@ -314,8 +321,8 @@ function triggerBrowserDownload(
 }
 
 /**
- * Trigger browser download of statewide CSV.
- * No-ops when `window` is unavailable (SSR).
+ * Trigger browser download of statewide CSV (UTF-8 BOM + dated filename).
+ * No-ops when `window` is unavailable (SSR). Empty sets surface a bilingual alert.
  */
 export function downloadStatewideCsv(options?: {
   includeReels?: boolean;
@@ -335,13 +342,21 @@ export function downloadStatewideCsv(options?: {
 
   const source = options?.source ?? "localStorage";
   const rows = aggregateStatewideCsvRows(options);
-  triggerBrowserDownload(
-    rowsToCsv(rows),
-    CSV_DOWNLOAD_FILENAME,
-    "text/csv;charset=utf-8",
-  );
+  // Stable column order (Object.keys on row objects follows CSV_HEADERS insertion).
+  const ordered = rows.map((row) => {
+    const out = {} as StatewideCsvRow;
+    for (const h of CSV_HEADERS) out[h] = row[h] ?? "";
+    return out;
+  });
+  const downloaded = exportToCSV(ordered, CSV_DOWNLOAD_FILENAME_PREFIX);
 
-  return { ok: true, rowCount: rows.length, source, format: "csv" };
+  return {
+    ok: downloaded || ordered.length === 0,
+    rowCount: ordered.length,
+    source,
+    format: "csv",
+    reason: downloaded || ordered.length === 0 ? undefined : "download_failed",
+  };
 }
 
 /**
