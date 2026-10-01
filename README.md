@@ -94,11 +94,11 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
 
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket), then `005_moderation_desk_v2.sql` and `006_admin_desk_submissions_api.sql` (`panchayat_name`, `admin_notes`, `reviewed_at`).
 2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`. Prefer also setting Admin Portal `ADMIN_SECRET_PIN` and `ADMIN_SESSION_SECRET`; if those are unset, login falls back to the desk PIN and a derived HMAC key from existing ops secrets.
-3. War Room chat id — add the bot to the alert group, send any message there, then run:
+3. Alert channel chat id — add `@NayiSamakhyaTelanganaBot` as admin on **“Nayi Samakhya Alert”**, publish a short channel post, then run:
    ```bash
    npm run setup:telegram
    ```
-   This writes `TELEGRAM_CHAT_ID` into `.env.local` (gitignored) and posts a Telugu HTML test ping. Mirror the same id to Vercel as `TELEGRAM_ADMIN_CHANNEL_ID` if deskDispatch should use that channel.
+   This detects `channel_post` / `my_chat_member`, writes `TELEGRAM_CHAT_ID` into `.env.local` (gitignored), and posts a Telugu HTML test ping. Mirror the same id to Vercel as `TELEGRAM_ADMIN_CHANNEL_ID` for deskDispatch.
 4. Point the bot webhook (use **www** — apex redirects break Telegram). Include `callback_query` so welcome inline buttons work:
    ```bash
    curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \

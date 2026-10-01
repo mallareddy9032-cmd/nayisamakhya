@@ -1,19 +1,25 @@
 #!/usr/bin/env node
 /**
- * Auto-detect TELEGRAM_CHAT_ID from the bot's latest group/channel update,
- * write it into gitignored .env.local, and ping the War Room with a Telugu
- * HTML confirmation.
+ * Auto-detect TELEGRAM_CHAT_ID from the bot's latest channel/group update,
+ * write it into gitignored .env.local, and ping the Alert channel with a
+ * Telugu HTML confirmation.
+ *
+ * Target: Telegram CHANNEL “Nayi Samakhya Alert” (not a private group).
+ * Bot: @NayiSamakhyaTelanganaBot
  *
  * Prerequisites:
  *   1. Set TELEGRAM_BOT_TOKEN in .env.local (see .env.example)
- *   2. Add the bot to the War Room group / channel (admin optional but recommended)
- *   3. Send any message in that group so getUpdates can see the chat id
+ *   2. Add the bot to the channel as an admin (channels need admin to post)
+ *   3. Publish any short channel post so getUpdates sees channel_post
  *
  * Run:
  *   npm run setup:telegram
  *   # or: node --env-file=.env.local scripts/setup-telegram.mjs
  *
  * Notes:
+ *   - Reads channel_post / edited_channel_post / my_chat_member (not only message).
+ *   - Forces getUpdates allowed_updates so a prior Method-3 webhook that only
+ *     subscribed to ["message","callback_query"] cannot hide channel posts.
  *   - Writes only TELEGRAM_CHAT_ID into .env.local (never commits secrets).
  *   - Desk dispatch still reads TELEGRAM_ADMIN_CHANNEL_ID; copy the detected
  *     id there in Vercel if you want live executive-desk forwarding.
@@ -95,27 +101,54 @@ function upsertEnvLocal(key, value) {
   writeFileSync(ENV_LOCAL, content, "utf8");
 }
 
+/** Update kinds needed to discover a channel (or group) chat id. */
+const SETUP_ALLOWED_UPDATES = [
+  "message",
+  "edited_message",
+  "channel_post",
+  "edited_channel_post",
+  "my_chat_member",
+  "callback_query",
+];
+
 /**
- * Prefer the newest update that has a group/supergroup/channel chat.
- * Falls back to any chat.id on the latest message-bearing update.
+ * Prefer the newest channel chat, then group/supergroup.
+ * Channels usually emit channel_post / my_chat_member — not message.
  */
 function extractChatFromUpdates(updates) {
   if (!Array.isArray(updates) || updates.length === 0) return null;
 
   const ranked = [];
   for (const update of updates) {
-    const message =
-      update.message ||
-      update.channel_post ||
-      update.edited_message ||
-      update.edited_channel_post ||
-      null;
-
-    if (message?.chat?.id != null) {
+    if (update.channel_post?.chat?.id != null) {
       ranked.push({
         updateId: update.update_id,
-        chat: message.chat,
+        chat: update.channel_post.chat,
+        source: "channel_post",
+      });
+      continue;
+    }
+    if (update.edited_channel_post?.chat?.id != null) {
+      ranked.push({
+        updateId: update.update_id,
+        chat: update.edited_channel_post.chat,
+        source: "edited_channel_post",
+      });
+      continue;
+    }
+    if (update.message?.chat?.id != null) {
+      ranked.push({
+        updateId: update.update_id,
+        chat: update.message.chat,
         source: "message",
+      });
+      continue;
+    }
+    if (update.edited_message?.chat?.id != null) {
+      ranked.push({
+        updateId: update.update_id,
+        chat: update.edited_message.chat,
+        source: "edited_message",
       });
       continue;
     }
@@ -126,7 +159,7 @@ function extractChatFromUpdates(updates) {
       ranked.push({
         updateId: update.update_id,
         chat: memberChat,
-        source: "membership",
+        source: update.my_chat_member ? "my_chat_member" : "chat_member",
       });
     }
   }
@@ -135,8 +168,12 @@ function extractChatFromUpdates(updates) {
 
   ranked.sort((a, b) => b.updateId - a.updateId);
 
-  const groupTypes = new Set(["group", "supergroup", "channel"]);
-  const groupHit = ranked.find((r) => groupTypes.has(r.chat.type));
+  // Prefer broadcast channel (Alert desk), then groups, else latest anything.
+  const channelHit = ranked.find((r) => r.chat.type === "channel");
+  if (channelHit) return channelHit;
+  const groupHit = ranked.find(
+    (r) => r.chat.type === "group" || r.chat.type === "supergroup",
+  );
   return groupHit || ranked[0];
 }
 
@@ -144,11 +181,13 @@ function printNoMessagesHelp() {
   console.error(`
 No Telegram updates found for this bot yet.
 
+Target is the CHANNEL “Nayi Samakhya Alert” (@NayiSamakhyaTelanganaBot).
+
 Do this first, then re-run:
 
-  1. Open the War Room group (or channel) in Telegram
-  2. Add the bot as a member (admin recommended for channels)
-  3. Send any short test message in that group (e.g. "ping")
+  1. Open channel “Nayi Samakhya Alert” in Telegram
+  2. Add @NayiSamakhyaTelanganaBot as a channel admin (Post Messages on)
+  3. Publish any short channel post (channels do not use private “message” updates)
   4. npm run setup:telegram
 
 Tip: if the bot already has a production webhook, this script clears it
@@ -158,8 +197,8 @@ temporarily so getUpdates can run. After setup, restore with:
 }
 
 async function main() {
-  console.log("NayiSamakhya — Telegram War Room setup");
-  console.log("─────────────────────────────────────");
+  console.log("NayiSamakhya — Telegram Alert channel setup");
+  console.log("──────────────────────────────────────────");
 
   if (!BOT_TOKEN) {
     console.error(
@@ -183,8 +222,15 @@ async function main() {
   const botUser = me.json.result?.username || "(unknown)";
   console.log(`Bot OK: @${botUser}`);
 
+  const getUpdatesBody = {
+    limit: 100,
+    timeout: 0,
+    // Override any prior webhook filter (Method 3 uses message+callback only).
+    allowed_updates: SETUP_ALLOWED_UPDATES,
+  };
+
   let webhookCleared = false;
-  let updatesRes = await telegram("getUpdates", { limit: 100, timeout: 0 });
+  let updatesRes = await telegram("getUpdates", getUpdatesBody);
 
   if (
     !updatesRes.json?.ok &&
@@ -204,7 +250,7 @@ async function main() {
       process.exit(1);
     }
     webhookCleared = true;
-    updatesRes = await telegram("getUpdates", { limit: 100, timeout: 0 });
+    updatesRes = await telegram("getUpdates", getUpdatesBody);
   }
 
   if (!updatesRes.json?.ok) {
@@ -265,13 +311,17 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("Test message sent to War Room (HTML parse_mode).");
+  console.log(
+    "Test message sent to Alert channel (HTML parse_mode).",
+  );
   console.log("");
   console.log("Next:");
   console.log(
     "  • Mirror TELEGRAM_CHAT_ID into Vercel as TELEGRAM_ADMIN_CHANNEL_ID",
   );
-  console.log("    if you want deskDispatch alerts on the same channel.");
+  console.log(
+    "    so deskDispatch posts to “Nayi Samakhya Alert”.",
+  );
   if (webhookCleared) {
     console.log(
       "  • Restore production webhook: npm run setup:method3",
