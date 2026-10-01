@@ -27,12 +27,13 @@ import {
   generateSarathiRefCode,
   mandalOptions,
   surveyShareUrl,
+  buildSprintWhatsAppMessage,
   uid,
   upsertLocalVolunteer,
-  whatsAppShareHref,
   writeSprintSession,
   readSprintSession,
 } from "@/lib/sprint/volunteers";
+import { triggerWhatsAppShare } from "@/lib/whatsappShare";
 import { getGeoDistrict } from "@/data/telanganaGeo";
 
 const inputClass =
@@ -550,15 +551,23 @@ export function SprintClient() {
                 </button>
               </div>
 
-              <a
-                href={whatsAppShareHref(volunteer.refCode)}
-                target="_blank"
-                rel="noreferrer"
-                className="tap inline-flex w-full min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#128C7E] px-4 py-4 font-telugu text-base font-bold text-white shadow-[0_10px_28px_rgb(18_140_126_/0.35)] transition hover:bg-[#0E7A6E]"
+              <button
+                type="button"
+                onClick={() =>
+                  triggerWhatsAppShare(
+                    buildSprintWhatsAppMessage(volunteer.refCode),
+                  )
+                }
+                className="tap inline-flex w-full min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl bg-[#128C7E] px-4 py-3 font-telugu text-base font-bold text-white shadow-[0_10px_28px_rgb(18_140_126_/0.35)] transition hover:bg-[#0E7A6E]"
               >
-                <MessageCircle className="h-5 w-5" />
-                వాట్సాప్ ద్వారా ప్రచారం ప్రారంభించండి
-              </a>
+                <span className="inline-flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  వాట్సాప్ ద్వారా ప్రచారం ప్రారంభించండి
+                </span>
+                <span className="text-[11px] font-medium text-white/85">
+                  Share survey referral · Invite friends to /sprint
+                </span>
+              </button>
 
               {certified ? (
                 <div className="space-y-3 rounded-2xl border border-[#B45309]/35 bg-gradient-to-b from-[#FFFDF9] to-[#FBF7ED] p-4">
