@@ -12,7 +12,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { moderateSubmission } from "@/app/admin/moderation/actions";
-import { downloadStatewideCsv } from "@/lib/moderation/csvExport";
+import {
+  downloadStatewideExport,
+  type ExportFormat,
+} from "@/lib/moderation/csvExport";
 import { DESK_UI } from "@/lib/moderation/deskCopy";
 
 import type { DeskStatus as Status } from "@/lib/moderation/deskCounts";
@@ -116,6 +119,40 @@ export function ModerationDeskClient({
   const [isPending, startTransition] = useTransition();
   const [drafts, setDrafts] = useState(() => buildDrafts(initial));
   const [carouselIdx, setCarouselIdx] = useState<Record<string, number>>({});
+  const [exportBusy, setExportBusy] = useState<ExportFormat | null>(null);
+
+  async function handleExport(format: ExportFormat) {
+    if (exportBusy) return;
+    setExportBusy(format);
+    try {
+      const result = await downloadStatewideExport(format, {
+        includeReels: true,
+      });
+      if (!result.ok) {
+        window.alert("Export is only available in the browser.");
+        return;
+      }
+      if (result.rowCount === 0) {
+        window.alert(
+          result.source === "supabase"
+            ? "Supabase returned no statewide survey or reel rows yet."
+            : "No statewide survey or reel records found (Supabase unset / empty). Submit a survey on /survey (or a reel) on this device for localStorage fallback, then retry.",
+        );
+        return;
+      }
+      if (result.source === "localStorage") {
+        window.alert(
+          `Downloaded ${result.rowCount} row(s) from this browser’s localStorage (Supabase unavailable or empty).`,
+        );
+      }
+    } catch (err) {
+      window.alert(
+        err instanceof Error ? err.message : "Export failed. Please retry.",
+      );
+    } finally {
+      setExportBusy(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     if (tab === "all") return rows;
@@ -247,25 +284,34 @@ export function ModerationDeskClient({
             </button>
           );
         })}
-        <button
-          type="button"
-          onClick={() => {
-            const result = downloadStatewideCsv({ includeReels: true });
-            if (!result.ok) {
-              window.alert("CSV download is only available in the browser.");
-              return;
-            }
-            if (result.rowCount === 0) {
-              window.alert(
-                "No statewide survey or reel records found in this browser yet. Submit a survey on /survey (or a reel) on this device, then retry.",
-              );
-            }
-          }}
-          className="tap ml-auto inline-flex items-center gap-2 rounded-full border border-[#EBE8E0] bg-white px-3.5 py-2 text-sm font-semibold text-[#18181B] hover:bg-[#F4F2EB]"
-        >
-          <Download className="h-3.5 w-3.5" aria-hidden />
-          📥 Download Data (CSV)
-        </button>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={Boolean(exportBusy)}
+            onClick={() => void handleExport("csv")}
+            className="tap inline-flex items-center gap-2 rounded-full border border-[#EBE8E0] bg-white px-3.5 py-2 text-sm font-semibold text-[#18181B] hover:bg-[#F4F2EB] disabled:opacity-60"
+          >
+            {exportBusy === "csv" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+            ) : (
+              <Download className="h-3.5 w-3.5" aria-hidden />
+            )}
+            Download CSV
+          </button>
+          <button
+            type="button"
+            disabled={Boolean(exportBusy)}
+            onClick={() => void handleExport("excel")}
+            className="tap inline-flex items-center gap-2 rounded-full border border-[#C2410C]/30 bg-[#FFF7ED] px-3.5 py-2 text-sm font-semibold text-[#9A3412] hover:bg-[#FFEDD5] disabled:opacity-60"
+          >
+            {exportBusy === "excel" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+            ) : (
+              <Download className="h-3.5 w-3.5" aria-hidden />
+            )}
+            Download Excel
+          </button>
+        </div>
       </div>
 
       {filtered.length === 0 ? (

@@ -1,9 +1,9 @@
 /**
- * 1-click statewide CSV export for the moderation desk.
+ * 1-click statewide CSV + Excel export for the moderation desk.
  *
- * Data sources (browser localStorage — same keys as citizen flows):
- * 1. Surveys (primary): `nayi_statewide_survey_submissions_v1`
- * 2. Reels (optional rows): `reels_db` — best-effort column map
+ * Data sources (priority):
+ * 1. Supabase via desk server action (`surveys` + `reels`) when service role is set
+ * 2. Browser localStorage fallback — `nayi_statewide_survey_submissions_v1` + `reels_db`
  *
  * Reel → CSV mapping:
  *   id → ID
@@ -31,6 +31,7 @@ import type { ReelSubmission } from "@/types/reels";
 export { SURVEY_STORAGE_KEY };
 
 export const CSV_DOWNLOAD_FILENAME = "nayisamakhya_statewide_data.csv";
+export const EXCEL_DOWNLOAD_FILENAME = "nayisamakhya_statewide_data.xls";
 
 /** Exact header order required by ops export. */
 export const CSV_HEADERS = [
@@ -57,6 +58,16 @@ export type SurveyWithRef = SurveySubmission & {
   referenceId?: string;
 };
 
+export type ExportFormat = "csv" | "excel";
+
+export type ExportDownloadResult = {
+  ok: boolean;
+  rowCount: number;
+  source: "supabase" | "localStorage" | "none";
+  format: ExportFormat;
+  reason?: string;
+};
+
 function cell(value: unknown): string {
   if (value === null || value === undefined) return "";
   return String(value);
@@ -77,6 +88,43 @@ export function rowsToCsv(rows: StatewideCsvRow[]): string {
     CSV_HEADERS.map((h) => escapeCsvField(row[h])).join(","),
   );
   return [headerLine, ...body].join("\r\n");
+}
+
+function escapeXml(value: unknown): string {
+  return cell(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Excel 2003 XML Spreadsheet — opens natively in Excel / LibreOffice. */
+export function rowsToExcelXml(rows: StatewideCsvRow[]): string {
+  const cellXml = (value: unknown) =>
+    `<Cell><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`;
+  const rowXml = (values: readonly string[]) =>
+    `<Row>${values.map((v) => cellXml(v)).join("")}</Row>`;
+
+  const header = rowXml(CSV_HEADERS);
+  const body = rows
+    .map((row) => rowXml(CSV_HEADERS.map((h) => row[h])))
+    .join("");
+
+  return [
+    `<?xml version="1.0"?>`,
+    `<?mso-application progid="Excel.Sheet"?>`,
+    `<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"`,
+    ` xmlns:o="urn:schemas-microsoft-com:office:office"`,
+    ` xmlns:x="urn:schemas-microsoft-com:office:excel"`,
+    ` xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">`,
+    `<Worksheet ss:Name="Statewide">`,
+    `<Table>`,
+    header,
+    body,
+    `</Table>`,
+    `</Worksheet>`,
+    `</Workbook>`,
+  ].join("");
 }
 
 function resolvePlaceName(districtSlug: string, mandalSlug: string): {
@@ -228,14 +276,17 @@ export function readLocalSurveys(): SurveyWithRef[] {
  */
 export function aggregateStatewideCsvRows(options?: {
   includeReels?: boolean;
+  surveys?: SurveyWithRef[];
+  reels?: ReelSubmission[];
 }): StatewideCsvRow[] {
   const includeReels = options?.includeReels !== false;
-  const surveys = readLocalSurveys();
+  const surveys = options?.surveys ?? readLocalSurveys();
   const rows = surveys.map(mapSurveyToCsvRow);
   const seen = new Set(rows.map((r) => r.ID).filter(Boolean));
 
   if (includeReels) {
-    for (const reel of readLocalReels()) {
+    const reels = options?.reels ?? readLocalReels();
+    for (const reel of reels) {
       if (reel.id && seen.has(reel.id)) continue;
       rows.push(mapReelToCsvRow(reel));
       if (reel.id) seen.add(reel.id);
@@ -245,31 +296,140 @@ export function aggregateStatewideCsvRows(options?: {
   return rows;
 }
 
-/**
- * Trigger browser download of `nayisamakhya_statewide_data.csv`.
- * No-ops when `window` is unavailable (SSR).
- */
-export function downloadStatewideCsv(options?: {
-  includeReels?: boolean;
-}): { ok: boolean; rowCount: number; reason?: string } {
-  if (typeof window === "undefined") {
-    return { ok: false, rowCount: 0, reason: "ssr" };
-  }
-
-  const rows = aggregateStatewideCsvRows(options);
-  const csv = rowsToCsv(rows);
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+function triggerBrowserDownload(
+  content: string,
+  filename: string,
+  mime: string,
+): void {
+  const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = CSV_DOWNLOAD_FILENAME;
+  a.download = filename;
   a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
 
-  return { ok: true, rowCount: rows.length };
+/**
+ * Trigger browser download of statewide CSV.
+ * No-ops when `window` is unavailable (SSR).
+ */
+export function downloadStatewideCsv(options?: {
+  includeReels?: boolean;
+  surveys?: SurveyWithRef[];
+  reels?: ReelSubmission[];
+  source?: ExportDownloadResult["source"];
+}): ExportDownloadResult {
+  if (typeof window === "undefined") {
+    return {
+      ok: false,
+      rowCount: 0,
+      source: "none",
+      format: "csv",
+      reason: "ssr",
+    };
+  }
+
+  const source = options?.source ?? "localStorage";
+  const rows = aggregateStatewideCsvRows(options);
+  triggerBrowserDownload(
+    rowsToCsv(rows),
+    CSV_DOWNLOAD_FILENAME,
+    "text/csv;charset=utf-8",
+  );
+
+  return { ok: true, rowCount: rows.length, source, format: "csv" };
+}
+
+/**
+ * Trigger browser download of statewide Excel (.xls SpreadsheetML).
+ */
+export function downloadStatewideExcel(options?: {
+  includeReels?: boolean;
+  surveys?: SurveyWithRef[];
+  reels?: ReelSubmission[];
+  source?: ExportDownloadResult["source"];
+}): ExportDownloadResult {
+  if (typeof window === "undefined") {
+    return {
+      ok: false,
+      rowCount: 0,
+      source: "none",
+      format: "excel",
+      reason: "ssr",
+    };
+  }
+
+  const source = options?.source ?? "localStorage";
+  const rows = aggregateStatewideCsvRows(options);
+  triggerBrowserDownload(
+    rowsToExcelXml(rows),
+    EXCEL_DOWNLOAD_FILENAME,
+    "application/vnd.ms-excel;charset=utf-8",
+  );
+
+  return { ok: true, rowCount: rows.length, source, format: "excel" };
+}
+
+/**
+ * Prefer Supabase (desk server action); fall back to localStorage when env/admin
+ * is unset or returns no rows.
+ */
+export async function downloadStatewideExport(
+  format: ExportFormat,
+  options?: { includeReels?: boolean },
+): Promise<ExportDownloadResult> {
+  if (typeof window === "undefined") {
+    return {
+      ok: false,
+      rowCount: 0,
+      source: "none",
+      format,
+      reason: "ssr",
+    };
+  }
+
+  const includeReels = options?.includeReels !== false;
+  let surveys: SurveyWithRef[] | undefined;
+  let reels: ReelSubmission[] | undefined;
+  let source: ExportDownloadResult["source"] = "localStorage";
+
+  try {
+    const { fetchStatewideExportData } = await import(
+      "@/app/admin/moderation/exportActions"
+    );
+    const remote = await fetchStatewideExportData();
+    if (
+      remote.ok &&
+      remote.source === "supabase" &&
+      (remote.surveys.length > 0 || remote.reels.length > 0)
+    ) {
+      surveys = remote.surveys;
+      reels = includeReels ? remote.reels : [];
+      source = "supabase";
+    }
+  } catch {
+    // Fall through to localStorage mock path
+  }
+
+  if (format === "excel") {
+    return downloadStatewideExcel({
+      includeReels,
+      surveys,
+      reels,
+      source,
+    });
+  }
+
+  return downloadStatewideCsv({
+    includeReels,
+    surveys,
+    reels,
+    source,
+  });
 }
 
 /** Re-export for docs / tests. */
