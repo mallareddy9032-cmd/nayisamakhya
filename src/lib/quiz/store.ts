@@ -1,6 +1,7 @@
 import { listGeoDistricts, getGeoDistrict } from "@/data/telanganaGeo";
 import { HELPLINE_WA_URL } from "@/lib/data/mobilizationDispatcher";
 import { resolveRegionalHubForDistrict } from "@/config/communityHubs";
+import { generateWhatsAppShareUrl } from "@/lib/whatsappShare";
 import {
   QUIZ_PASS_THRESHOLD,
   QUIZ_SESSION_KEY,
@@ -131,19 +132,23 @@ export function buildCertificateShareMessage(opts: {
 }): string {
   const place = `${mandalLabel(opts.district, opts.mandal)} · ${districtLabel(opts.district)}`;
   return (
-    `⚖️ *నాయీ సమాఖ్య — చట్ట హక్కుల అన్వేషి*\n\n` +
+    `⚖️ *నాయీ సమాఖ్య — చట్ట హక్కుల అన్వేషి*\n` +
+    `Nayi Samakhya — Civic Rights Quiz\n\n` +
     `🏆 *ధ్రువీకృత ప్రజా హక్కుల రక్షకుడు*\n` +
+    `Certified Civic Rights Defender\n\n` +
     `👤 ${opts.name}\n` +
     `📍 ${place}\n` +
-    `✅ స్కోర్: ${opts.score}/${opts.total}\n` +
+    `✅ స్కోర్ / Score: ${opts.score}/${opts.total}\n` +
     `🆔 ${opts.certificateId}\n\n` +
-    `👉 క్విజ్: https://www.nayisamakhya.org/quiz\n` +
+    `మీరు కూడా క్విజ్ రాసి సర్టిఫికేట్ సంపాదించండి!\n` +
+    `Take the quiz & earn your certificate:\n` +
+    `👉 https://www.nayisamakhya.org/quiz\n\n` +
     `🤝 నాయీ సమాఖ్య తెలంగాణ`
   );
 }
 
 export function whatsAppShareHref(message: string): string {
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  return generateWhatsAppShareUrl(message);
 }
 
 /** Legal Advocacy Cell — prefer district hub, else helpline. */

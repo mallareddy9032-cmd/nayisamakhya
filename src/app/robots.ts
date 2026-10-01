@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { SITE_ORIGIN } from "@/lib/seo/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -10,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/"],
       },
     ],
-    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
+    sitemap: "https://nayisamakhya.org/sitemap.xml",
   };
 }

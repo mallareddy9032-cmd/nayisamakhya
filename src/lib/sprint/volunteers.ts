@@ -2,6 +2,7 @@ import { resolveRegionalHubForDistrict } from "@/config/communityHubs";
 import { listGeoDistricts, getGeoDistrict } from "@/data/telanganaGeo";
 import { PORTAL_URL } from "@/lib/data/communityAnnounce";
 import { HELPLINE_WA_URL } from "@/lib/data/mobilizationDispatcher";
+import { generateWhatsAppShareUrl } from "@/lib/whatsappShare";
 import {
   SPRINT_CERT_THRESHOLD,
   SPRINT_SESSION_KEY,
@@ -44,26 +45,30 @@ export function surveyShareUrl(refCode: string): string {
 }
 
 /**
- * Exact Telugu WhatsApp blast for సేవా సారథి —
- * GO 23 + municipal rights + marriage platform + survey?ref=
+ * High-conversion bilingual WhatsApp blast for సేవా సారథి —
+ * GO 23 + municipal rights + marriage platform + survey?ref= + /sprint join.
  */
 export function buildSprintWhatsAppMessage(refCode: string): string {
   const link = surveyShareUrl(refCode);
   return (
-    `🙏 *నాయీ సమాఖ్య — మండల సేవా సారథి*\n\n` +
+    `🙏 *నాయీ సమాఖ్య — మండల సేవా సారథి*\n` +
+    `Nayi Samakhya — Mandal Seva Sarathi Sprint\n\n` +
     `సోదరులారా! *జీ.ఓ. 23* ఉచిత విద్యుత్, *మున్సిపల్ షాపు హక్కులు*, ట్రేడ్ లైసెన్స్ రక్షణ, మరియు మన కమ్యూనిటీ *వివాహ వేదిక* కోసం రాష్ట్రవ్యాప్త సర్వేలో చేరండి.\n\n` +
-    `✅ కుటుంబ & వృత్తి వివరాలు నమోదు\n` +
-    `✅ సంక్షేమ అర్హత గుర్తింపు\n` +
-    `✅ వివాహ వేదికకు అర్హులైన అభ్యర్థుల నమోదు\n` +
-    `✅ వినతిపత్రం & సమన్వయకర్త సహాయం\n\n` +
-    `👉 *సర్వే లింక్:*\n${link}\n\n` +
+    `Brothers & sisters — join the statewide survey for *G.O. 23* free power, municipal shop rights, trade-licence defence, and our community *matrimonial platform*.\n\n` +
+    `✅ కుటుంబ & వృత్తి వివరాలు · Family & trade details\n` +
+    `✅ సంక్షేమ అర్హత · Welfare eligibility\n` +
+    `✅ వివాహ వేదిక నమోదు · Matrimonial registration\n` +
+    `✅ వినతిపత్రం & సమన్వయకర్త సహాయం · Petition help\n\n` +
+    `👉 *సర్వే / Survey (my referral):*\n${link}\n\n` +
+    `🏃 మీరు కూడా సారథి అవ్వండి / Become a Sarathi:\n` +
+    `https://www.nayisamakhya.org/sprint\n\n` +
     `_ఈ సందేశాన్ని మీ మండల వాట్సాప్ గ్రూపుల్లో తప్పకుండా షేర్ చేయండి._\n` +
     `🤝 *నాయీ సమాఖ్య తెలంగాణ*`
   );
 }
 
 export function whatsAppShareHref(refCode: string): string {
-  return `https://wa.me/?text=${encodeURIComponent(buildSprintWhatsAppMessage(refCode))}`;
+  return generateWhatsAppShareUrl(buildSprintWhatsAppMessage(refCode));
 }
 
 /** Spec Button1: /coordinator-card?name=...&mandal=...&role=Mandal+Coordinator */

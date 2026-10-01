@@ -30,9 +30,9 @@ import {
   persistAttempt,
   readSession,
   uid,
-  whatsAppShareHref,
   writeSession,
 } from "@/lib/quiz/store";
+import { triggerWhatsAppShare } from "@/lib/whatsappShare";
 import { QuizCertificate } from "@/components/quiz/QuizCertificate";
 import { QuizCertificatePreview } from "@/components/quiz/QuizCertificatePreview";
 import { cn } from "@/lib/utils";
@@ -508,18 +508,16 @@ export function QuizClient() {
   if (!attempt) return null;
   const passed = attempt.passed;
   const certId = attempt.certificateId;
-  const shareHref =
+  const shareMessage =
     passed && certId
-      ? whatsAppShareHref(
-          buildCertificateShareMessage({
-            name: attempt.name,
-            score: attempt.score,
-            total: attempt.total,
-            certificateId: certId,
-            district: attempt.district,
-            mandal: attempt.mandal,
-          }),
-        )
+      ? buildCertificateShareMessage({
+          name: attempt.name,
+          score: attempt.score,
+          total: attempt.total,
+          certificateId: certId,
+          district: attempt.district,
+          mandal: attempt.mandal,
+        })
       : null;
   const advocacyHref = advocacyWhatsAppHref(attempt.district);
 
@@ -564,16 +562,20 @@ export function QuizClient() {
               <Printer className="h-4 w-4" aria-hidden />
               Print / Save A4
             </button>
-            {shareHref ? (
-              <a
-                href={shareHref}
-                target="_blank"
-                rel="noreferrer"
-                className="tap inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#0E7A6E] px-4 font-telugu text-sm font-bold text-white"
+            {shareMessage ? (
+              <button
+                type="button"
+                onClick={() => triggerWhatsAppShare(shareMessage)}
+                className="tap inline-flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl bg-[#0E7A6E] px-4 py-2 font-telugu text-sm font-bold text-white"
               >
-                <Share2 className="h-4 w-4" aria-hidden />
-                WhatsApp షేర్
-              </a>
+                <span className="inline-flex items-center gap-2">
+                  <Share2 className="h-4 w-4" aria-hidden />
+                  WhatsApp షేర్ · స్నేహితులను ఆహ్వానించండి
+                </span>
+                <span className="text-[11px] font-medium text-white/85">
+                  Share certificate · Invite friends to /quiz
+                </span>
+              </button>
             ) : null}
           </div>
         </>

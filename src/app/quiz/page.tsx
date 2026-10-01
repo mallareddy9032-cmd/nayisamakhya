@@ -5,8 +5,9 @@ import { QuizClient } from "@/components/quiz/QuizClient";
 import { QUIZ_PASS_THRESHOLD } from "@/types/quiz";
 
 export const metadata: Metadata = {
-  title: "చట్ట హక్కుల అన్వేషి | Civic & Legal Rights Quiz",
-  description: `Nayi Samakhya Competition 3 — 10-question bilingual quiz on G.O. Ms. No. 23, Telangana Municipalities Act 2019, BC welfare, and community heritage. Score ${QUIZ_PASS_THRESHOLD}+ for a printable Rights Guardian certificate.`,
+  title: "చట్టబద్ధ హక్కుల క్విజ్ & సర్టిఫికేషన్ (Civic Rights Quiz)",
+  description:
+    "జీవో నం. 23 మరియు సంక్షేమ హక్కులపై మీ అవగాహనను పరీక్షించుకుని అధికారిక డిజిటల్ సర్టిఫికెట్ పొందండి.",
   alternates: { canonical: "/quiz" },
 };
 

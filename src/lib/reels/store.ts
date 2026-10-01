@@ -1,5 +1,6 @@
 import { listGeoDistricts, getGeoDistrict } from "@/data/telanganaGeo";
 import { PORTAL_URL } from "@/lib/data/communityAnnounce";
+import { generateWhatsAppShareUrl } from "@/lib/whatsappShare";
 import {
   REELS_STORAGE_KEY,
   isReelCategory,
@@ -214,7 +215,7 @@ export function buildReelWhatsAppMessage(reel: ReelSubmission): string {
 }
 
 export function whatsAppShareHref(reel: ReelSubmission): string {
-  return `https://wa.me/?text=${encodeURIComponent(buildReelWhatsAppMessage(reel))}`;
+  return generateWhatsAppShareUrl(buildReelWhatsAppMessage(reel));
 }
 
 export { PORTAL_URL };
