@@ -10,7 +10,6 @@ import {
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo/jsonLd";
-import { SITE_ORIGIN } from "@/lib/seo/site";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -33,28 +32,40 @@ const displayTe = Suranna({
   display: "swap",
 });
 
-const title =
-  "\u0c28\u0c3e\u0c2f\u0c3f \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 | \u0c05\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c3f\u0c15 \u0c21\u0c3f\u0c1c\u0c3f\u0c1f\u0c32\u0c4d \u0c38\u0c47\u0c35\u0c3e \u0c21\u0c46\u0c38\u0c4d\u0c15\u0c4d";
+const titleDefault =
+  "నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya 2.0";
 const description =
-  "\u0c24\u0c46\u0c32\u0c02\u0c17\u0c3e\u0c23 \u0c28\u0c3e\u0c2f\u0c3f \u0c2c\u0c4d\u0c30\u0c3e\u0c39\u0c4d\u0c2e\u0c23, \u0c2e\u0c02\u0c17\u0c32\u0c3f & \u0c2c\u0c1c\u0c02\u0c24\u0c4d\u0c30\u0c3f \u0c15\u0c2e\u0c4d\u0c2f\u0c42\u0c28\u0c3f\u0c1f\u0c40 \u0c38\u0c3e\u0c27\u0c3f\u0c15\u0c3e\u0c30\u0c24, \u0c38\u0c02\u0c15\u0c4d\u0c37\u0c47\u0c2e\u0c02 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c3e\u0c32 \u0c38\u0c2e\u0c30\u0c4d\u0c2a\u0c23 \u0c15\u0c47\u0c02\u0c26\u0c4d\u0c30\u0c02.";
-const ogImageUrl = "https://www.nayisamakhya.org/api/og";
-const ogImageAlt =
-  "\u0c28\u0c3e\u0c2f\u0c40 \u0c38\u0c2e\u0c3e\u0c16\u0c4d\u0c2f \u0c35\u0c3f\u0c28\u0c24\u0c3f\u0c2a\u0c24\u0c4d\u0c30\u0c02";
+  "తెలంగాణ నాయీబ్రాహ్మణుల హక్కుల సాధికారత, జీవో నం. 23 ఉచిత విద్యుత్ రక్షణ, సెలూన్ ఎంటర్‌ప్రైజ్ హబ్ మరియు కమ్యూనిటీ పోర్టల్.";
+const ogTitle =
+  "నాయీ సమాఖ్య 2.0 • రాష్ట్ర స్థాయి సాధికారత & సేవా వేదిక";
+const ogDescription =
+  "జీవో నం. 23 ఉచిత విద్యుత్ అమలు, సెలూన్ సమూహ సేకరణ మరియు యువత నైపుణ్య వేదిక.";
+const twitterDescription =
+  "సెలూన్ ఎంటర్‌ప్రైజ్ హబ్, జీవో 23 చట్టబద్ధ రక్షణ & కమ్యూనిటీ వేదిక.";
 const ogImage = {
-  url: ogImageUrl,
-  type: "image/png" as const,
+  url: "/og-banner.png",
   width: 1200,
   height: 630,
-  alt: ogImageAlt,
+  alt: "నాయీ సమాఖ్య తెలంగాణ 2.0",
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_ORIGIN),
+  metadataBase: new URL("https://nayisamakhya.org"),
   title: {
-    default: title,
-    template: "%s | Nayi Samakhya",
+    default: titleDefault,
+    template: "%s | నాయీ సమాఖ్య తెలంగాణ",
   },
   description,
+  keywords: [
+    "నాయీ సమాఖ్య",
+    "Nayi Samakhya",
+    "Telangana Barbers",
+    "G.O. 23",
+    "Salon Hub",
+    "BC Welfare",
+    "Free Electricity 250 Units",
+    "Mandal Sprint",
+  ],
   applicationName: "Nayi Samakhya",
   manifest: "/manifest.webmanifest",
   alternates: {
@@ -66,18 +77,18 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Nayi Samakhya",
     locale: "te_IN",
-    url: "/",
-    title,
-    description,
+    url: "https://nayisamakhya.org",
+    siteName: "నాయీ సమాఖ్య తెలంగాణ",
+    title: ogTitle,
+    description: ogDescription,
     images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
-    title,
-    description,
-    images: [ogImageUrl],
+    title: titleDefault,
+    description: twitterDescription,
+    images: ["/og-banner.png"],
   },
 };
 
