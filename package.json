@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:officers": "node --env-file=.env.local scripts/seed-officers.mjs",
-    "setup:method3": "node --env-file=.env.local scripts/setup-method3.mjs"
+    "setup:method3": "node --env-file=.env.local scripts/setup-method3.mjs",
+    "setup:telegram": "node --env-file=.env.local scripts/setup-telegram.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.20",

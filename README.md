@@ -94,7 +94,12 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
 
 1. Run `supabase/migrations/create_moderation_desk.sql` (creates `survey_submissions` + `survey-photos` bucket), then `005_moderation_desk_v2.sql` and `006_admin_desk_submissions_api.sql` (`panchayat_name`, `admin_notes`, `reviewed_at`).
 2. Set in Vercel / `.env.local`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `MODERATION_DESK_SECRET`. Prefer also setting Admin Portal `ADMIN_SECRET_PIN` and `ADMIN_SESSION_SECRET`; if those are unset, login falls back to the desk PIN and a derived HMAC key from existing ops secrets.
-3. Point the bot webhook (use **www** — apex redirects break Telegram). Include `callback_query` so welcome inline buttons work:
+3. War Room chat id — add the bot to the alert group, send any message there, then run:
+   ```bash
+   npm run setup:telegram
+   ```
+   This writes `TELEGRAM_CHAT_ID` into `.env.local` (gitignored) and posts a Telugu HTML test ping. Mirror the same id to Vercel as `TELEGRAM_ADMIN_CHANNEL_ID` if deskDispatch should use that channel.
+4. Point the bot webhook (use **www** — apex redirects break Telegram). Include `callback_query` so welcome inline buttons work:
    ```bash
    curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
      -d "url=https://www.nayisamakhya.org/api/telegram-webhook" \
@@ -102,9 +107,9 @@ Webhook lives at `src/app/api/telegram-webhook/route.ts` (welcome menu, `/office
      -d 'allowed_updates=["message","callback_query"]'
    ```
    Or: `npm run setup:method3` (needs `VERCEL_TOKEN` + the keys above).
-4. Open `/admin/login`, enter `ADMIN_SECRET_PIN` (or the existing `MODERATION_DESK_SECRET` desk PIN if `ADMIN_SECRET_PIN` is unset), then use `/admin/volunteers` or `/admin/moderation`.
+5. Open `/admin/login`, enter `ADMIN_SECRET_PIN` (or the existing `MODERATION_DESK_SECRET` desk PIN if `ADMIN_SECRET_PIN` is unset), then use `/admin/volunteers` or `/admin/moderation`.
    External tools can POST `/api/admin/moderate` with header `x-moderation-secret: $MODERATION_DESK_SECRET`.
-5. Logout: navbar **నిష్క్రమించు** → `POST /api/admin/logout` clears `admin_session`.
+6. Logout: navbar **నిష్క్రమించు** → `POST /api/admin/logout` clears `admin_session`.
 
 ### Admin Portal auth (Milestone 1)
 
