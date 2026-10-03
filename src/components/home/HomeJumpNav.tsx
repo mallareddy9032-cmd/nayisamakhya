@@ -20,7 +20,7 @@ export function HomeJumpNav() {
           ఈ పేజీలో ముఖ్య విభాగాలు • Quick Nav
         </span>
       </p>
-      <ul className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x sm:flex-wrap sm:justify-center sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+      <ul className="no-scrollbar flex gap-2 overflow-x-auto overscroll-x-contain pb-1 touch-pan-x sm:flex-wrap sm:justify-center sm:overflow-visible">
         {JUMPS.map((j) => (
           <li key={j.href} className="shrink-0">
             <a

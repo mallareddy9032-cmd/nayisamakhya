@@ -178,9 +178,65 @@ body {
   overflow-x: hidden;
 }
 
-/* iOS home-indicator safe padding for sticky mobile bars */
+/* iOS / Android home-indicator safe padding for sticky mobile bars */
 .pb-safe {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+/* Clearance under fixed MobileBottomNav (~56px + safe-area) */
+.pb-nav-clear {
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .pb-nav-clear {
+    padding-bottom: 0;
+  }
+}
+
+/* Drawer / sheet scroll body — keep last items above home indicator */
+.pb-drawer-safe {
+  padding-bottom: max(8rem, calc(6rem + env(safe-area-inset-bottom, 0px)));
+}
+
+/* Horizontal pill rails — hide scrollbars, keep touch pan */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Telugu glyph safety — ottulu / maatras clip under leading-none / leading-tight.
+ * Enforce a floor even when utility classes try to tighten leading.
+ */
+.font-telugu,
+.font-display-te {
+  line-height: max(1.65, 1em);
+}
+
+.font-telugu.leading-none,
+.font-telugu.leading-tight,
+.font-telugu.leading-snug,
+.font-display-te.leading-none,
+.font-display-te.leading-tight,
+.font-display-te.leading-snug,
+h1.font-telugu,
+h2.font-telugu,
+h3.font-telugu,
+h1 .font-display-te,
+h2 .font-display-te,
+h1.font-display-te,
+h2.font-display-te,
+h3.font-display-te {
+  line-height: 1.7 !important;
 }
 
 img,
@@ -266,8 +322,13 @@ body {
 .font-telugu {
   /* Noto Sans Telugu — relaxed leading protects ottulu / maatras from clipping */
   font-family: var(--font-telugu), var(--font-sans), system-ui, sans-serif;
-  line-height: 1.8;
+  line-height: 1.75;
   font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.font-display-te {
+  font-family: var(--font-display-te), var(--font-telugu), serif;
+  line-height: 1.7;
 }
 
 /* Unified baseline for mixed Telugu + Latin numerals / dates */

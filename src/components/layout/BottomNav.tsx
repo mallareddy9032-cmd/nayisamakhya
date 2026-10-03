@@ -27,10 +27,10 @@ export function BottomNav() {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-md pb-safe md:hidden"
         aria-label="Primary"
       >
-        <ul className="mx-auto grid max-w-lg grid-cols-4 px-2 pb-[env(safe-area-inset-bottom)]">
+        <ul className="mx-auto grid max-w-lg grid-cols-4 px-2">
           {tabs.map((tab) => {
             const active =
               tab.id === "home"

@@ -104,7 +104,7 @@ export function CivicFooter() {
   }
 
   return (
-    <footer className="no-print mt-auto border-t border-slate-200 bg-[#F8F7F4] font-sans text-slate-700 print:hidden">
+    <footer className="no-print mt-auto border-t border-slate-200 bg-[#F8F7F4] font-sans text-slate-700 print:hidden pb-nav-clear md:pb-0">
       <div className="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Col 1 — Brand */}
@@ -311,8 +311,8 @@ export function CivicFooter() {
             </nav>
           </div>
 
-          <div className="mt-3 flex flex-col items-start justify-between gap-2 pb-4 sm:flex-row sm:items-center">
-            <p className="font-telugu">
+          <div className="mt-3 flex flex-col items-start justify-between gap-2 pb-2 sm:flex-row sm:items-center md:pb-4">
+            <p className="font-telugu leading-telugu">
               © {year} నాయీ సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.
             </p>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/50 px-2.5 py-0.5 font-sans font-medium text-slate-600">

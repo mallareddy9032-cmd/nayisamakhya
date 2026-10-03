@@ -58,7 +58,7 @@ export function ServiceActionCards() {
           </span>
           <h2
             id="three-click-services"
-            className="mt-3 font-display-te text-2xl font-normal leading-snug text-[#1E293B] md:text-3xl"
+            className="mt-3 font-display-te text-2xl font-normal leading-telugu text-[#1E293B] md:text-3xl"
           >
             3-దశల ప్రజా సేవలు
           </h2>

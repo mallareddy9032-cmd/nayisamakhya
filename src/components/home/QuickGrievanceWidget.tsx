@@ -52,7 +52,7 @@ export function QuickGrievanceWidget() {
           </span>
           <h2
             id="quick-grievance-heading"
-            className="mt-3 font-display-te text-2xl font-normal leading-snug text-[#1E293B] md:text-3xl"
+            className="mt-3 font-display-te text-2xl font-normal leading-telugu text-[#1E293B] md:text-3xl"
           >
             తక్షణ ప్రజా వినతి డెస్క్
           </h2>

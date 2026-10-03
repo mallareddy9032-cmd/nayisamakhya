@@ -57,7 +57,7 @@ export function SalonHubChrome() {
       </div>
 
       <nav
-        className="mx-auto flex max-w-6xl justify-center gap-1.5 overflow-x-auto px-4 pb-3"
+        className="no-scrollbar mx-auto flex max-w-6xl justify-start gap-1.5 overflow-x-auto px-4 pb-3 touch-pan-x sm:justify-center"
         aria-label="Salon hub sections"
       >
         {TABS.map((tab) => {

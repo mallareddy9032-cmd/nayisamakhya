@@ -153,28 +153,26 @@ export function HomeMobileHeader() {
     <>
       <header className="sticky top-0 z-40 border-b border-civic-border bg-white/95 shadow-xs backdrop-blur-sm">
         {/* Mobile <768px — 52px bar */}
-        <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 md:hidden lg:px-8">
+        <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 md:hidden lg:px-8">
           <Link
             href="/"
-            className="tap flex min-w-0 flex-shrink-0 items-center gap-2"
+            className="tap flex min-w-0 flex-1 items-center gap-2"
+            aria-label="నాయీ సమాఖ్య తెలంగాణ — Nayi Samakhya"
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 text-[#B45309]">
               <Landmark className="h-4 w-4" aria-hidden />
             </span>
-            <span className="max-w-[10.5rem] truncate whitespace-nowrap font-display-te text-sm font-normal tracking-tight text-[#0F172A] sm:max-w-none">
-              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
+            <span className="min-w-0">
+              <span className="block whitespace-nowrap font-display-te text-[13px] font-normal leading-telugu tracking-tight text-[#0F172A] sm:text-sm">
+                నాయీ సమాఖ్య
+              </span>
+              <span className="block truncate font-sans text-[10px] font-semibold tracking-wide text-slate-500">
+                Nayi Samakhya · TG
+              </span>
             </span>
           </Link>
 
-          <div className="flex shrink-0 items-center gap-1.5">
-            <Link
-              href="/salon-hub"
-              className="tap inline-flex max-w-[6.5rem] items-center gap-1 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2 py-1 font-telugu text-[10px] font-bold text-[#B45309]"
-            >
-              <Scissors className="h-3 w-3 shrink-0" aria-hidden />
-              <span className="truncate">సెలూన్ హబ్</span>
-            </Link>
-            <CompetitionsMenu compact />
+          <div className="flex shrink-0 items-center gap-1">
             <div
               className="flex items-center rounded-lg border border-slate-200 bg-[#FBFBFA] p-0.5"
               role="group"
@@ -297,10 +295,10 @@ export function HomeMobileHeader() {
         </div>
       </header>
 
-      {/* Hamburger slide-out */}
+      {/* Hamburger slide-out — z above MobileBottomNav; own scroll + pb clears fixed bar */}
       {open ? (
         <div
-          className="fixed inset-0 z-[60] md:hidden"
+          className="fixed inset-0 z-[70] md:hidden"
           role="presentation"
           onClick={() => setOpen(false)}
         >
@@ -310,10 +308,10 @@ export function HomeMobileHeader() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute inset-y-0 right-0 flex w-[min(100%,20rem)] flex-col bg-white shadow-xl"
+            className="absolute inset-y-0 right-0 flex w-[min(100%,20rem)] flex-col bg-white shadow-xl pt-safe"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex h-[52px] items-center justify-between border-b border-slate-200 px-4">
+            <div className="flex h-[52px] shrink-0 items-center justify-between border-b border-slate-200 px-4">
               <span className="font-telugu text-sm font-bold text-[#0F172A]">
                 మెనూ
               </span>
@@ -327,13 +325,13 @@ export function HomeMobileHeader() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3 py-3">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 pb-drawer-safe">
               <Link
                 href="/grievance"
                 onClick={() => setOpen(false)}
                 className="tap mb-3 flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 font-telugu text-sm font-bold text-amber-900 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
               >
-                <span className="inline-flex min-w-0 flex-col leading-tight">
+                <span className="inline-flex min-w-0 flex-col leading-telugu">
                   <span>జీవో 23 రక్షణ లేఖ</span>
                   <span className="text-[10px] font-semibold text-amber-800/80">
                     Grievance Docket
@@ -489,6 +487,50 @@ export function HomeMobileHeader() {
                 <MapPin className="h-4 w-4" aria-hidden />
                 జిల్లా / మండలం ఎంపిక
               </button>
+              <nav
+                className="mt-4 border-t border-slate-200 pt-3 pb-2"
+                aria-label="Legal and admin"
+              >
+                <ul className="space-y-1 font-telugu text-sm text-slate-600">
+                  <li>
+                    <Link
+                      href="/policies/privacy"
+                      onClick={() => setOpen(false)}
+                      className="tap flex min-h-11 items-center rounded-xl px-3 hover:bg-[#FBFBFA]"
+                    >
+                      Privacy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/policies/terms"
+                      onClick={() => setOpen(false)}
+                      className="tap flex min-h-11 items-center rounded-xl px-3 hover:bg-[#FBFBFA]"
+                    >
+                      Terms
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/grievance"
+                      onClick={() => setOpen(false)}
+                      className="tap flex min-h-11 items-center rounded-xl px-3 hover:bg-[#FBFBFA]"
+                    >
+                      G.O. 23 Grievance
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin/desk"
+                      onClick={() => setOpen(false)}
+                      className="tap flex min-h-11 items-center rounded-xl px-3 hover:bg-[#FBFBFA]"
+                    >
+                      Admin Login
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+
             </div>
           </aside>
         </div>

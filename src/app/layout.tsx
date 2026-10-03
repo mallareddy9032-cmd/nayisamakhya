@@ -110,7 +110,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${sans.variable} ${telugu.variable} ${displayTe.variable} h-full overflow-x-hidden`}
     >
-      <body className="flex min-h-[100dvh] flex-col justify-between overflow-x-hidden bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white pb-[env(safe-area-inset-bottom,1rem)] pt-[env(safe-area-inset-top,0px)]">
+      <body className="flex min-h-[100dvh] flex-col justify-between overflow-x-hidden bg-civic-paper font-sans text-civic-ink antialiased selection:bg-civic-bronze selection:text-white pt-[env(safe-area-inset-top,0px)]">
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <a
           href="#main-content"

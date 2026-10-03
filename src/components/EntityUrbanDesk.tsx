@@ -83,7 +83,7 @@ export function EntityUrbanDesk({ entity, portal }: Props) {
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#FBFBFA] pb-24 text-[#0F172A] md:pb-0">
+    <div className="min-h-screen overflow-x-hidden bg-[#FBFBFA] pb-nav-clear text-[#0F172A]">
       <section className="border-b border-[#E8E4DC] bg-gradient-to-b from-[#FFF8EF] to-[#FBFBFA]">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
           <Link

@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return (
       <div
         id="main-content"
-        className={`flex-1 overflow-x-hidden ${shellBg} ${showBottomNav ? "pb-24 md:pb-0" : ""}`}
+        className={`flex-1 overflow-x-hidden ${shellBg} ${showBottomNav ? "pb-nav-clear" : ""}`}
       >
         {children}
         {showBottomNav ? <MobileBottomNav /> : null}
@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       <main
         id="main-content"
-        className="flex-1 overflow-x-hidden pb-24 md:pb-0"
+        className="flex-1 overflow-x-hidden pb-nav-clear"
       >
         {children}
       </main>

@@ -48,10 +48,10 @@ export default function HomePage() {
 
             <div>
               <h1 className="tracking-tight">
-                <span className="block font-display-te text-4xl font-normal leading-tight text-slate-900 lg:text-5xl">
+                <span className="block font-display-te text-[1.85rem] font-normal leading-telugu text-slate-900 sm:text-4xl lg:text-5xl">
                   ఆత్మగౌరవం • చట్టబద్ధ రక్షణ
                 </span>
-                <span className="mt-1.5 block font-display-te text-3xl font-normal italic leading-snug text-amber-600 lg:text-4xl">
+                <span className="mt-2 block font-display-te text-[1.55rem] font-normal italic leading-telugu text-amber-600 sm:text-3xl lg:text-4xl">
                   ఆధునిక వికాసం{" "}
                   <span className="font-sans text-[0.55em] font-medium not-italic tracking-wide text-amber-600/80">
                     (Self-Respect &amp; Progress)
@@ -60,7 +60,7 @@ export default function HomePage() {
               </h1>
             </div>
 
-            <p className="mx-auto mt-3 max-w-2xl font-telugu text-base font-normal leading-relaxed text-slate-600 sm:text-lg lg:mx-0">
+            <p className="mx-auto mt-3 max-w-2xl font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg lg:mx-0">
               శతాబ్దాల కళా-వైద్య వైభవాన్ని పునరుద్ధరిస్తూ —{" "}
               <strong className="font-bold text-[#0F172A]">
                 జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్

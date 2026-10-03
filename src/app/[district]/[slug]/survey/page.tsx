@@ -217,7 +217,7 @@ export default async function SurveyPage({ params }: Props) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-md px-4 py-5 pb-24">
+      <div className="mx-auto max-w-md px-4 py-5 pb-nav-clear md:pb-8">
         <SurveyWizard
           districtSlug={ctx.districtSlug}
           mandalSlug={ctx.mandalSlug}

@@ -25,7 +25,7 @@ export function SectionHeading({
       <span className="civic-eyebrow-pill">{eyebrow}</span>
       <h2
         id={titleId}
-        className="mt-3 font-display-te text-2xl font-normal leading-snug tracking-tight text-[#0F172A] sm:text-3xl"
+        className="mt-3 font-display-te text-2xl font-normal leading-telugu tracking-tight text-[#0F172A] sm:text-3xl"
       >
         {title}
       </h2>

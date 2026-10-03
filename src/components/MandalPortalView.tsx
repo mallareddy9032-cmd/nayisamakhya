@@ -103,7 +103,7 @@ export function MandalPortalView({ mandal: m }: Props) {
   );
 
   return (
-    <div className="overflow-x-hidden bg-[#FBFBF9] pb-24 md:pb-0">
+    <div className="overflow-x-hidden bg-[#FBFBF9] pb-nav-clear">
       {/* Localized civic hero */}
       <section className="relative overflow-hidden border-b border-[#EBE8E0]">
         <div

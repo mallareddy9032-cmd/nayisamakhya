@@ -52,7 +52,7 @@ export function HeritageTriadRibbon() {
           </span>
           <h2
             id="heritage-triad-heading"
-            className="mt-3 font-display-te text-lg font-normal leading-snug sm:text-xl md:text-2xl"
+            className="mt-3 font-display-te text-lg font-normal leading-telugu sm:text-xl md:text-2xl"
           >
             <span className="bg-gradient-to-r from-[#92400e] via-[#B45309] to-[#C2410C] bg-clip-text text-transparent">
               వైద్యం మన మూలం • కళ మన శ్వాస • ఆత్మగౌరవం మన వారసత్వం

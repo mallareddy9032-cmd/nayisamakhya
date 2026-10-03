@@ -200,7 +200,7 @@ export function PersonaSwitcher() {
           </span>
           <h2
             id="persona-switcher-heading"
-            className="mt-3 font-display-te text-2xl font-normal leading-snug tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
+            className="mt-3 font-display-te text-2xl font-normal leading-telugu tracking-tight text-[#0F172A] sm:text-3xl md:text-4xl"
           >
             ఎవరి కోసం ఈ వేదిక?
           </h2>

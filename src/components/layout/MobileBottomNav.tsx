@@ -8,33 +8,34 @@ const TABS = [
   {
     id: "districts",
     href: "/districts",
-    label: "\u0c1c\u0c3f\u0c32\u0c4d\u0c32\u0c3e\u0c32\u0c41",
-    emoji: "\u{1F5FA}\uFE0F",
+    label: "జిల్లాలు",
+    emoji: "🗺️",
   },
   {
     id: "survey",
     href: "/survey",
-    label: "\u0c38\u0c2e\u0c17\u0c4d\u0c30 \u0c38\u0c30\u0c4d\u0c35\u0c47",
-    emoji: "\u{1F4CB}",
-    badge: true as const,
+    label: "సర్వే",
+    emoji: "📋",
+    badge: "నూతన" as const,
   },
   {
     id: "grievance",
     href: "/grievance",
-    label: "\u0c1c\u0c40\u0c35\u0c4b 23",
-    emoji: "\u26A1",
+    label: "జీవో 23",
+    emoji: "⚡",
     go23: true as const,
   },
   {
     id: "feed",
     href: "/feed",
-    label: "\u0c17\u0c46\u0c1c\u0c3f\u0c1f\u0c4d (Gazette)",
-    emoji: "\u{1F4F0}",
+    label: "గెజిట్",
+    emoji: "📰",
   },
 ] as const;
 
 /**
  * Portal sticky mobile bottom bar — mirrors primary civic nav.
+ * Uses .pb-safe for home-indicator inset; labels stay above system chrome.
  */
 export function MobileBottomNav() {
   const pathname = usePathname() || "";
@@ -43,16 +44,16 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 block border-t border-slate-200 bg-white/95 px-4 py-2 shadow-lg backdrop-blur-md pb-safe md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 block border-t border-slate-200 bg-white/95 px-2 pt-1.5 shadow-[0_-6px_20px_rgb(15_23_42/0.08)] backdrop-blur-md pb-safe md:hidden"
       aria-label="Mobile quick actions"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-4 gap-1">
+      <ul className="mx-auto grid max-w-lg grid-cols-4 gap-0.5">
         {TABS.map((tab) => {
           const active =
             pathname === tab.href || pathname.startsWith(`${tab.href}/`);
           const isGo23 = "go23" in tab && tab.go23;
           const className = cn(
-            "tap civic-focus-ring relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 font-telugu text-[11px] font-bold transition-colors",
+            "tap civic-focus-ring relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 font-telugu text-[10px] font-bold leading-telugu transition-colors sm:text-[11px]",
             active
               ? isGo23
                 ? "bg-amber-500/15 text-amber-900"
@@ -68,16 +69,16 @@ export function MobileBottomNav() {
                 <span aria-hidden className="text-base leading-none">
                   {tab.emoji}
                 </span>
-                <span className="inline-flex items-center gap-0.5">
-                  {tab.label}
+                <span className="inline-flex max-w-full items-center justify-center gap-0.5 px-0.5 text-center leading-telugu">
+                  <span className="truncate">{tab.label}</span>
                   {"badge" in tab && tab.badge ? (
-                    <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 font-telugu text-[8px] font-bold tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
-                      {"\u0c38\u0c30\u0c4d\u0c35\u0c47"} (New)
+                    <span className="shrink-0 rounded border border-[#B45309]/35 bg-[#B45309]/10 px-0.5 font-telugu text-[7px] font-bold tracking-wide text-[#B45309]">
+                      {tab.badge}
                     </span>
                   ) : null}
                   {isGo23 ? (
-                    <span className="rounded border border-amber-500/45 bg-amber-500/15 px-1 font-telugu text-[8px] font-bold tracking-wide text-amber-800">
-                      {"\u0c26\u0c30\u0c16\u0c3e\u0c38\u0c4d\u0c24\u0c41"}
+                    <span className="shrink-0 rounded border border-amber-500/45 bg-amber-500/15 px-0.5 font-telugu text-[7px] font-bold tracking-wide text-amber-800">
+                      హాట్
                     </span>
                   ) : null}
                 </span>
