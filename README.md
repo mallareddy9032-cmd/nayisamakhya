@@ -12,7 +12,11 @@ Authoritative civic portal for Telangana & Andhra Pradesh — Next.js App Router
 
 ## UX / Mobile (v2.0 overhaul)
 
-- Safe-area shell (`100dvh`) + in-app browser breakout banner (Telegram / Instagram / WhatsApp)
+- Safe-area shell (`100dvh`, `viewportFit: cover`) + `.pb-safe` / `.pb-nav-clear` under fixed `MobileBottomNav`
+- Mobile drawers use independent scroll + `.pb-drawer-safe`; bottom nav hides while sheets are open
+- Telugu display/body floor via `.font-telugu` / `.font-display-te` (`leading-telugu` ≈ 1.7–1.75)
+- Compact mobile header brand (no “Nayi S…” truncation); horizontal pill rails use `.no-scrollbar`
+- In-app browser breakout banner (Telegram / Instagram / WhatsApp)
 - 3-step representation wizard at `/representation` (`?dist=` deep-link)
 - A4 print + TWA PDF fallback (`html2canvas` + `jspdf`)
 - Dual-mode admin heat map: SVG choropleth on `md+`, ranked Civic Corridor cards on mobile
@@ -21,10 +25,10 @@ Authoritative civic portal for Telangana & Andhra Pradesh — Next.js App Router
 
 ```bash
 npm install
-npm run dev -- --port 43123
+npm run dev -- --port 43211
 ```
 
-Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
+Open [http://127.0.0.1:43211](http://127.0.0.1:43211).
 
 ## Design system
 
