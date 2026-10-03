@@ -164,9 +164,11 @@ export function FloatingNavbar() {
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    document.body.dataset.sheetOpen = "1";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      delete document.body.dataset.sheetOpen;
     };
   }, [open, pickerOpen]);
 

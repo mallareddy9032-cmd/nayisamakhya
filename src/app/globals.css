@@ -180,7 +180,12 @@ body {
 
 /* iOS / Android home-indicator safe padding for sticky mobile bars */
 .pb-safe {
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(0.875rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Hide fixed bottom nav while hamburger / picker sheets are open */
+body[data-sheet-open="1"] nav[aria-label="Mobile quick actions"] {
+  display: none !important;
 }
 
 .pt-safe {
@@ -189,7 +194,7 @@ body {
 
 /* Clearance under fixed MobileBottomNav (~56px + safe-area) */
 .pb-nav-clear {
-  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 768px) {

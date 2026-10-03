@@ -48,10 +48,10 @@ export default function HomePage() {
 
             <div>
               <h1 className="tracking-tight">
-                <span className="block font-display-te text-[1.85rem] font-normal leading-telugu text-slate-900 sm:text-4xl lg:text-5xl">
+                <span className="block font-display-te text-[1.75rem] font-normal leading-[1.75] text-slate-900 sm:text-4xl lg:text-5xl">
                   ఆత్మగౌరవం • చట్టబద్ధ రక్షణ
                 </span>
-                <span className="mt-2 block font-display-te text-[1.55rem] font-normal italic leading-telugu text-amber-600 sm:text-3xl lg:text-4xl">
+                <span className="mt-2.5 block font-display-te text-[1.45rem] font-normal italic leading-[1.75] text-amber-600 sm:text-3xl lg:text-4xl">
                   ఆధునిక వికాసం{" "}
                   <span className="font-sans text-[0.55em] font-medium not-italic tracking-wide text-amber-600/80">
                     (Self-Respect &amp; Progress)
