@@ -294,6 +294,36 @@ export function HomeMobileHeader() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-1.5 self-center">
+            <div
+              className="flex items-center rounded-lg border border-slate-200 bg-[#FBFBFA] p-0.5"
+              role="group"
+              aria-label="Language"
+            >
+              <button
+                type="button"
+                onClick={() => setLanguage("te")}
+                className={cn(
+                  "tap inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 font-telugu text-[11px] font-bold",
+                  language === "te"
+                    ? "bg-[#B45309] text-white"
+                    : "text-slate-600",
+                )}
+              >
+                తె
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={cn(
+                  "tap inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-[11px] font-bold",
+                  language === "en"
+                    ? "bg-[#B45309] text-white"
+                    : "text-slate-600",
+                )}
+              >
+                EN
+              </button>
+            </div>
             <Link
               href="/survey"
               className={`civic-focus-ring inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover ${isTe ? "font-telugu" : "font-sans"}`}

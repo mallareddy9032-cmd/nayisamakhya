@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -95,6 +96,8 @@ function PortraitRing({
 }
 
 export function HeroArtisanShowcase() {
+  const { language, t } = useLanguage();
+  const isTe = language === "te";
   const [active, setActive] = useState(1);
 
   useEffect(() => {
@@ -128,7 +131,7 @@ export function HeroArtisanShowcase() {
       <div className="absolute left-0 top-0 z-[3] sm:left-1 sm:top-1">
         <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#B45309]/35 bg-white/95 px-2.5 py-1 font-sans text-[10px] font-semibold tracking-wide text-[#92400E] shadow-md backdrop-blur-sm sm:text-[11px]">
           <Zap className="h-3 w-3 shrink-0 text-[#B45309]" aria-hidden />
-          250 Units Free Power (G.O. 23)
+          {isTe ? "250 యూనిట్ల ఉచిత విద్యుత్ (జీ.ఓ. 23)" : "250 Units Free Power (G.O. 23)"}
         </span>
       </div>
 
@@ -175,18 +178,22 @@ export function HeroArtisanShowcase() {
         <Link
           href="/coordinator-card"
           className="block rounded-xl border border-[#E2E8F0] bg-white p-3 text-xs ring-1 ring-[#B45309]/20 motion-safe:animate-shadow-bloom"
-          aria-label="Zone Coordinator digital card preview"
+          aria-label={isTe ? "జోన్ సమన్వయకర్త డిజిటల్ కార్డ్" : "Zone Coordinator digital card preview"}
         >
           <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-[#B45309]" aria-hidden />
           <div className="flex items-center justify-between gap-2 pt-0.5">
             <div className="flex min-w-0 items-center gap-2">
               <IdCard className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
               <div className="min-w-0">
-                <p className="font-telugu text-[10px] font-bold leading-telugu text-[#B45309]">
-                  నాయీ సమాఖ్య
+                <p
+                  className={`text-[10px] font-bold text-[#B45309] ${
+                    isTe ? "font-telugu leading-telugu" : "font-sans"
+                  }`}
+                >
+                  {t("brandName")}
                 </p>
                 <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wider text-slate-500">
-                  Zone Coordinator
+                  {isTe ? "జోన్ సమన్వయకర్త" : "Zone Coordinator"}
                 </p>
               </div>
             </div>
@@ -201,18 +208,18 @@ export function HeroArtisanShowcase() {
               </div>
             </div>
           </div>
-          <p className="mt-2.5 font-telugu text-xs font-bold text-[#0F172A]">
-            మండల సమన్వయకర్త
+          <p className={`mt-2.5 text-xs font-bold text-[#0F172A] ${isTe ? "font-telugu" : "font-sans"}`}>
+            {isTe ? "మండల సమన్వయకర్త" : "Mandal Coordinator"}
           </p>
-          <p className="mt-0.5 flex items-center gap-1 font-telugu text-[10px] text-slate-600">
+          <p className={`mt-0.5 flex items-center gap-1 text-[10px] text-slate-600 ${isTe ? "font-telugu" : "font-sans"}`}>
             <MapPin className="h-3 w-3 shrink-0 text-[#B45309]" aria-hidden />
-            కోదాడ · సూర్యాపేట
+            {isTe ? "కోదాడ · సూర్యాపేట" : "Kodad · Suryapet"}
           </p>
 
           <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1">
             <span className="live-pulse-dot" aria-hidden />
             <span className="whitespace-nowrap font-sans text-[9px] font-bold tracking-wide text-emerald-800">
-              589 Mandals Live
+              {isTe ? "589 మండలాలు లైవ్" : "589 Mandals Live"}
             </span>
           </div>
 
@@ -221,7 +228,7 @@ export function HeroArtisanShowcase() {
               <Phone className="h-2.5 w-2.5 shrink-0 text-[#B45309]" aria-hidden />
               <span className="truncate">+91 9032654111</span>
             </span>
-            <span className="shrink-0">SECURE</span>
+            <span className="shrink-0">{isTe ? "సురక్షితం" : "SECURE"}</span>
           </div>
         </Link>
       </div>
