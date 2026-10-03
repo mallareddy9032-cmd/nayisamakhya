@@ -2,7 +2,8 @@
 
 import { FormEvent, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 
 const ERROR_FALLBACK =
   "తప్పుడు పాస్‌వర్డ్ / Invalid Admin Security PIN";
@@ -85,8 +86,8 @@ export default function AdminLoginForm() {
 
       <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-12 sm:px-6">
         <header className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#E8DFD0] bg-white shadow-sm">
-            <ShieldCheck className="h-7 w-7 text-brand" aria-hidden />
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <BrandCrest size="xl" priority ring />
           </div>
           <p className="font-display-te text-2xl leading-telugu text-ink sm:text-3xl">
             నాయీ సమాఖ్య తెలంగాణ

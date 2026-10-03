@@ -1,7 +1,7 @@
 "use client";
 
-import { Landmark } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import {
   districtLabel,
   formatQuizDate,
@@ -52,9 +52,7 @@ export function QuizCertificate({
       />
 
       <header className="relative flex flex-col items-center gap-2 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#B45309] bg-[#B45309]/10 text-[#B45309] sm:h-16 sm:w-16">
-          <Landmark className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden />
-        </div>
+        <BrandCrest size="xl" className="sm:h-16 sm:w-16" />
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#B45309]">
           Nayi Samakhya · Telangana
         </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import { SosButton } from "@/components/layout/SosButton";
 import { t } from "@/lib/i18n/dictionary";
 import { useLanguageStore } from "@/lib/store/preferences";
@@ -15,15 +16,22 @@ export function StickyHeader() {
       style={{ minHeight: "var(--header-h)" }}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="tap min-w-0 rounded-xl px-1 py-1">
-          <p className="truncate text-sm font-bold tracking-tight text-brand">
-            Nayi Samakhya
-          </p>
-          <p
-            className={`truncate text-xs text-slate-600 ${lang === "te" ? "font-telugu" : ""}`}
-          >
-            {t("brandSub", lang)}
-          </p>
+        <Link
+          href="/"
+          className="tap flex min-w-0 items-center gap-2 rounded-xl px-1 py-1"
+          aria-label="Nayi Samakhya Telangana"
+        >
+          <BrandCrest size="sm" />
+          <span className="min-w-0">
+            <p className="truncate text-sm font-bold tracking-tight text-brand">
+              Nayi Samakhya
+            </p>
+            <p
+              className={`truncate text-xs text-slate-600 ${lang === "te" ? "font-telugu" : ""}`}
+            >
+              {t("brandSub", lang)}
+            </p>
+          </span>
         </Link>
 
         <div className="flex items-center gap-2">

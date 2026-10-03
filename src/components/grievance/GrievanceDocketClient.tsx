@@ -6,12 +6,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   FileText,
-  Landmark,
   Loader2,
   Printer,
   Scale,
   Zap,
 } from "lucide-react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import {
   GRIEVANCE_DRAFT_KEY,
   GRIEVANCE_TYPES,
@@ -671,9 +671,9 @@ export function GrievanceDocketClient() {
               </div>
               <div className="text-right">
                 <p className="font-semibold">స్టాంప్ / ముద్ర స్థలం</p>
-                <div className="mt-2 ml-auto flex h-20 w-28 items-center justify-center rounded border border-dashed border-slate-400 text-[10px] text-slate-400">
-                  <Landmark className="mr-1 h-3 w-3" aria-hidden />
-                  Stamp
+                <div className="mt-2 ml-auto flex h-20 w-28 flex-col items-center justify-center gap-1 rounded border border-dashed border-slate-400 text-[10px] text-slate-400">
+                  <BrandCrest size="lg" className="opacity-90" />
+                  <span>ముద్ర / Seal</span>
                 </div>
               </div>
             </footer>

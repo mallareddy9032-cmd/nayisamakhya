@@ -7,7 +7,7 @@ export function organizationJsonLd() {
     name: SITE_NAME,
     alternateName: "నాయి సమాఖ్య",
     url: SITE_ORIGIN,
-    logo: absoluteUrl("/api/og"),
+    logo: absoluteUrl("/brand/nayi-samakhya-crest-white.png"),
     inLanguage: ["te", "en"],
     areaServed: {
       "@type": "AdministrativeArea",

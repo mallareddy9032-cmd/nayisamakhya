@@ -1,10 +1,30 @@
 {
   "name": "Nayi Samakhya",
   "short_name": "Nayi",
-  "description": "Praja Samakhya civic portal for Telangana & Andhra Pradesh",
+  "description": "Praja Samakhya civic portal for Telangana — heritage, artistry, enterprise & justice",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FBFBF9",
-  "theme_color": "#C2410C",
-  "lang": "te"
+  "theme_color": "#0B172D",
+  "lang": "te",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/nayi-samakhya-crest-white.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }

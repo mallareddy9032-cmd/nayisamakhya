@@ -1,6 +1,7 @@
 "use client";
 
-import { Award, Landmark, MapPin, QrCode } from "lucide-react";
+import { Award, MapPin, QrCode } from "lucide-react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import { QUIZ_PASS_THRESHOLD } from "@/types/quiz";
 
 /**
@@ -19,9 +20,7 @@ export function QuizCertificatePreview() {
       />
 
       <div className="relative flex flex-col items-center text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#B45309] bg-[#B45309]/10 text-[#B45309]">
-          <Landmark className="h-7 w-7" aria-hidden />
-        </div>
+        <BrandCrest size="xl" />
         <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#B45309]">
           Nayi Samakhya · Telangana
         </p>

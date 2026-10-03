@@ -5,7 +5,6 @@ import { useEffect, useId, useRef, useState } from "react";
 import {
   ChevronDown,
   Contrast,
-  Landmark,
   MapPin,
   Menu,
   Scissors,
@@ -13,6 +12,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAccessibilityStore } from "@/lib/store/accessibility";
 import { MandalSelector } from "@/components/MandalSelector";
@@ -182,9 +182,7 @@ export function FloatingNavbar() {
             className="tap flex min-w-0 flex-1 items-center gap-2"
             aria-label="Nayi Samakhya Telangana"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 text-[#B45309]">
-              <Landmark className="h-4 w-4" aria-hidden />
-            </span>
+            <BrandCrest size="sm" priority className="h-9 w-9" />
             <span className="min-w-0">
               <span className="block whitespace-nowrap font-display-te text-[13px] font-normal leading-telugu tracking-tight text-[#0F172A] sm:text-sm">
                 నాయీ సమాఖ్య
@@ -224,9 +222,7 @@ export function FloatingNavbar() {
             className="tap flex shrink-0 items-center gap-2.5 self-center"
             aria-label="Nayi Samakhya Telangana"
           >
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-brand">
-              <Landmark className="h-5 w-5" aria-hidden />
-            </span>
+            <BrandCrest size="md" priority className="h-10 w-10" />
             <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none tracking-tight text-ink sm:text-base">
               నాయీ సమాఖ్య
             </span>

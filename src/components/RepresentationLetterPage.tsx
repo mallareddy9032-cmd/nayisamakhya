@@ -8,11 +8,11 @@ import {
   Printer,
   ArrowLeft,
   ArrowRight,
-  ShieldCheck,
   CheckCircle2,
   ExternalLink,
   Loader2,
 } from "lucide-react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import { AUTHORITIES } from "@/lib/data/representationLetterOptions";
 import { TELANGANA_DISTRICTS } from "@/lib/data/districts";
 import { listMandalsForDistrict } from "@/lib/data/mandalsDirectory";
@@ -499,7 +499,7 @@ export function RepresentationLetterPage() {
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 shrink-0 text-civic-bronze" />
+                <BrandCrest size="xs" />
                 <h1
                   className={cn(
                     "truncate text-base font-bold leading-relaxed text-civic-ink md:text-lg",

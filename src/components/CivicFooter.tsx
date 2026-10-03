@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ShieldCheck,
   FileText,
   Users,
   ExternalLink,
@@ -31,6 +30,7 @@ import {
   Scissors,
   Zap,
 } from "lucide-react";
+import { BrandCrest } from "@/components/brand/BrandCrest";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
 const WA_HELP = "https://wa.me/919032654111";
@@ -133,10 +133,8 @@ export function CivicFooter() {
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Col 1 — Brand */}
           <div className="space-y-3">
-            <div className="flex min-h-[2.75rem] items-center gap-2 border-b border-transparent pb-2">
-              <span className="rounded-lg border border-civic-bronze/20 bg-civic-bronze/10 p-1.5 text-civic-bronze">
-                <ShieldCheck className="h-4 w-4" />
-              </span>
+            <div className="flex min-h-[2.75rem] items-center gap-2.5 border-b border-transparent pb-2">
+              <BrandCrest size="lg" className="h-12 w-12 sm:h-14 sm:w-14" />
               <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none text-civic-ink">
                 నాయీ సమాఖ్య తెలంగాణ
               </span>
