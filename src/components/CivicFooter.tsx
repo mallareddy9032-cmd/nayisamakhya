@@ -134,7 +134,7 @@ export function CivicFooter() {
           {/* Col 1 — Brand */}
           <div className="space-y-3">
             <div className="flex min-h-[2.75rem] items-center gap-2.5 border-b border-transparent pb-2">
-              <BrandCrest size="lg" className="h-12 w-12 sm:h-14 sm:w-14" />
+              <BrandCrest size="lg" />
               <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none text-civic-ink">
                 నాయీ సమాఖ్య తెలంగాణ
               </span>

@@ -10,7 +10,7 @@ const SIZE_PX: Record<BrandCrestSize, number> = {
   xs: 28,
   sm: 36,
   md: 40,
-  lg: 52,
+  lg: 56,
   xl: 64,
   hero: 96,
 };
@@ -55,6 +55,7 @@ export function BrandCrest({
         className="h-full w-full object-contain"
         priority={priority}
         sizes={`${px}px`}
+        unoptimized
       />
     </span>
   );
