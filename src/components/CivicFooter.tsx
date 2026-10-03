@@ -31,6 +31,7 @@ import {
   Zap,
 } from "lucide-react";
 import { BrandCrest } from "@/components/brand/BrandCrest";
+import { useLanguage } from "@/context/LanguageContext";
 import { TELEGRAM_BOT_URL } from "@/lib/data/communityAnnounce";
 
 const WA_HELP = "https://wa.me/919032654111";
@@ -88,23 +89,22 @@ function FooterNavLink({
 
 function FooterColHeading({
   icon: Icon,
-  te,
-  en,
+  label,
+  isTe,
 }: {
   icon: typeof Home;
-  te: string;
-  en?: string;
+  label: string;
+  isTe: boolean;
 }) {
   return (
-    <h3 className="mb-3 flex min-h-[2.75rem] items-start gap-1.5 border-b border-slate-200/70 pb-2 font-telugu text-xs font-bold tracking-wider text-civic-ink">
+    <h3
+      className={`mb-3 flex min-h-[2.75rem] items-start gap-1.5 border-b border-slate-200/70 pb-2 text-xs font-bold tracking-wider text-civic-ink ${
+        isTe ? "font-telugu" : "font-sans"
+      }`}
+    >
       <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-civic-bronze" aria-hidden />
       <span className="min-w-0 leading-snug">
-        <span className="block">{te}</span>
-        {en ? (
-          <span className="mt-0.5 block font-sans text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-            {en}
-          </span>
-        ) : null}
+        <span className="block">{label}</span>
       </span>
     </h3>
   );
@@ -116,6 +116,8 @@ const contactPillClass =
 export function CivicFooter() {
   const pathname = usePathname() || "";
   const year = new Date().getFullYear();
+  const { language, t } = useLanguage();
+  const isTe = language === "te";
 
   // Full-bleed tool surfaces — no light sitemap under dark/print/TWA chrome.
   if (
@@ -133,16 +135,22 @@ export function CivicFooter() {
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Col 1 — Brand */}
           <div className="space-y-3">
-            <div className="flex min-h-[2.75rem] items-center gap-2.5 border-b border-transparent pb-2">
+                        <div className="flex min-h-[2.75rem] items-center gap-2.5 border-b border-transparent pb-2">
               <BrandCrest size="lg" />
-              <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none text-civic-ink">
-                నాయీ సమాఖ్య తెలంగాణ
+              <span
+                className={`whitespace-nowrap text-sm font-normal leading-none text-civic-ink ${
+                  isTe ? "font-display-te" : "font-sans font-semibold"
+                }`}
+              >
+                {t("brandSub")}
               </span>
             </div>
-            <p className="font-telugu text-sm leading-relaxed text-slate-600">
-              తెలంగాణ రాష్ట్రవ్యాప్తంగా నాయి బ్రాహ్మణ, మంగలి &amp; బజంత్రి కమ్యూనిటీ
-              సంక్షేమం, ప్రజా ప్రాతినిధ్యం మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు
-              రూపొందించబడిన అధికారిక వేదిక.
+            <p
+              className={`text-sm leading-relaxed text-slate-600 ${
+                isTe ? "font-telugu" : "font-sans"
+              }`}
+            >
+              {t("footerBrandBlurb")}
             </p>
             <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200/80 bg-white/60 px-2.5 py-1 font-telugu text-xs text-slate-600">
               <MapPin className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
@@ -154,10 +162,10 @@ export function CivicFooter() {
           <div>
             <FooterColHeading
               icon={FileText}
-              te={"ప్రజా సేవలు & వినతులు"}
-              en="Public services"
+              label={t("footerColServices")}
+              isTe={isTe}
             />
-            <ul className="space-y-2.5 font-telugu">
+            <ul className={`space-y-2.5 ${isTe ? "font-telugu" : "font-sans"}`}>
               <li>
                 <FooterNavLink href="/" icon={Home}>
                   Home
@@ -170,15 +178,12 @@ export function CivicFooter() {
               </li>
               <li>
                 <FooterNavLink href="/grievance" icon={Zap}>
-                  జీవో 23 ఉచిత విద్యుత్ ఫిర్యాదు డెస్క్
-                  <span className="mt-0.5 block font-sans text-[11px] font-medium text-slate-500">
-                    Grievance Docket Generator
-                  </span>
+                  {isTe ? t("navGrievance") : "G.O. 23 Grievance Docket"}
                 </FooterNavLink>
               </li>
               <li>
                 <FooterNavLink href="/feed" icon={Newspaper}>
-                  గెజిట్ (Gazette)
+                  {t("navGazette")}
                 </FooterNavLink>
               </li>
               <li>
@@ -198,7 +203,7 @@ export function CivicFooter() {
               </li>
               <li>
                 <FooterNavLink href="/salon-hub" icon={Scissors}>
-                  సెలూన్ హబ్
+                  {t("navSalonHub")}
                 </FooterNavLink>
               </li>
             </ul>
@@ -208,10 +213,10 @@ export function CivicFooter() {
           <div>
             <FooterColHeading
               icon={Users}
-              te="సమన్వయకర్తల విభాగం"
-              en="For coordinators"
+              label={t("footerColCoordinators")}
+              isTe={isTe}
             />
-            <ul className="space-y-2.5 font-telugu">
+            <ul className={`space-y-2.5 ${isTe ? "font-telugu" : "font-sans"}`}>
               <li>
                 <FooterNavLink href="/poster" icon={ImageIcon}>
                   Wall Poster
@@ -249,10 +254,10 @@ export function CivicFooter() {
           <div>
             <FooterColHeading
               icon={Send}
-              te={"సేవా డెస్క్ & అడ్మిన్"}
-              en="Desk & admin"
+              label={t("footerColDesk")}
+              isTe={isTe}
             />
-            <ul className="space-y-2.5 font-telugu">
+            <ul className={`space-y-2.5 ${isTe ? "font-telugu" : "font-sans"}`}>
               <li>
                 <FooterNavLink href={TELEGRAM_BOT_URL} icon={Bot} external>
                   Telegram Bot
@@ -338,8 +343,8 @@ export function CivicFooter() {
           </div>
 
           <div className="mt-4 flex flex-col items-start justify-between gap-2 border-t border-slate-200/50 pt-4 pb-2 sm:flex-row sm:items-center md:pb-4">
-            <p className="font-telugu leading-telugu">
-              © {year} నాయీ సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.
+            <p className={`leading-telugu ${isTe ? "font-telugu" : "font-sans"}`}>
+              {t("footerCopyright", { year })}
             </p>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/50 px-2.5 py-0.5 font-sans font-medium text-slate-600">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />

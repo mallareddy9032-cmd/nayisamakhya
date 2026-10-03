@@ -21,15 +21,15 @@ import { MandalSelector } from "@/components/MandalSelector";
 import { cn } from "@/lib/utils";
 
 const PRIMARY_LINKS = [
-  { href: "/districts", label: "జిల్లాల సమాచారం", icon: MapPin },
-  { href: "/survey", label: "సమగ్ర సర్వే" },
+  { href: "/districts", key: "navDistricts" as const, icon: MapPin },
+  { href: "/survey", key: "navSurvey" as const },
   {
     href: "/grievance",
-    label: "జీవో 23 రక్షణ లేఖ",
+    key: "navGrievance" as const,
     highlight: "go23" as const,
   },
-  { href: "/representation", label: "వినతిపత్రం", icon: FileText },
-  { href: "/feed", label: "గెజిట్ (Gazette)" },
+  { href: "/representation", key: "navRepresentation" as const, icon: FileText },
+  { href: "/feed", key: "navGazette" as const },
 ] as const;
 
 const COMPETITIONS = [
@@ -48,6 +48,7 @@ function CompetitionsMenu({
   compact?: boolean;
   onNavigate?: () => void;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -84,7 +85,7 @@ function CompetitionsMenu({
         )}
       >
         <Trophy className="h-3 w-3 shrink-0" aria-hidden />
-        <span className="truncate whitespace-nowrap">పోటీలు (Competitions)</span>
+        <span className="truncate whitespace-nowrap">{t("navCompetitions")}</span>
         <ChevronDown
           className={cn(
             "h-3 w-3 shrink-0 transition-transform",
@@ -125,7 +126,8 @@ function CompetitionsMenu({
  * Desktop keeps full link row; district picker opens as bottom sheet on mobile.
  */
 export function HomeMobileHeader() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
+  const isTe = language === "te";
   const bumpFont = useAccessibilityStore((s) => s.bumpFont);
   const setFontScale = useAccessibilityStore((s) => s.setFontScale);
   const highContrast = useAccessibilityStore((s) => s.highContrast);
@@ -159,15 +161,23 @@ export function HomeMobileHeader() {
           <Link
             href="/"
             className="tap flex min-w-0 flex-1 items-center gap-2"
-            aria-label="నాయీ సమాఖ్య తెలంగాణ — Nayi Samakhya"
+            aria-label={t("brandSub")}
           >
             <BrandCrest size="sm" priority className="h-9 w-9" />
             <span className="min-w-0">
-              <span className="block whitespace-nowrap font-display-te text-[13px] font-normal leading-telugu tracking-tight text-[#0F172A] sm:text-sm">
-                నాయీ సమాఖ్య
+              <span
+                className={`block whitespace-nowrap text-[13px] font-normal tracking-tight text-[#0F172A] sm:text-sm ${
+                  isTe ? "font-display-te leading-telugu" : "font-sans font-semibold"
+                }`}
+              >
+                {t("brandName")}
               </span>
-              <span className="block truncate font-sans text-[10px] font-semibold tracking-wide text-slate-500">
-                Nayi Samakhya · TG
+              <span
+                className={`block truncate text-[10px] font-semibold tracking-wide text-slate-500 ${
+                  isTe ? "font-telugu" : "font-sans"
+                }`}
+              >
+                {t("brandSub")}
               </span>
             </span>
           </Link>
@@ -222,11 +232,15 @@ export function HomeMobileHeader() {
           <Link
             href="/"
             className="tap flex shrink-0 items-center gap-2.5 self-center"
-            aria-label="Nayi Samakhya Telangana"
+            aria-label={t("brandSub")}
           >
             <BrandCrest size="md" priority className="h-10 w-10" />
-            <span className="whitespace-nowrap font-display-te text-base font-normal leading-none tracking-tight text-civic-ink md:text-lg">
-              నాయీ సమాఖ్య
+            <span
+              className={`whitespace-nowrap text-base font-normal leading-none tracking-tight text-civic-ink md:text-lg ${
+                isTe ? "font-display-te" : "font-sans font-semibold"
+              }`}
+            >
+              {t("brandName")}
             </span>
           </Link>
 
@@ -239,13 +253,13 @@ export function HomeMobileHeader() {
               className="civic-focus-ring hidden shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309] xl:inline-flex"
             >
               <MapPin className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              జిల్లాలు
+              {t("navDistrictsShort")}
             </Link>
             <Link
               href="/survey"
               className="civic-focus-ring hidden shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309] lg:inline-flex"
             >
-              సర్వే
+              {t("navSurveyShort")}
               <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 font-telugu text-[8px] font-bold tracking-wide text-[#B45309]">
                 New
               </span>
@@ -255,19 +269,19 @@ export function HomeMobileHeader() {
               className="civic-focus-ring inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309]"
             >
               <FileText className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              వినతిపత్రం
+              {t("navRepresentation")}
             </Link>
             <Link
               href="/grievance"
               className="civic-focus-ring inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 font-telugu text-xs font-bold text-amber-900 transition hover:bg-amber-500/25"
             >
-              ⚡ జీవో 23
+              {t("navGrievanceShort")}
             </Link>
             <Link
               href="/feed"
               className="civic-focus-ring hidden shrink-0 items-center rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309] xl:inline-flex"
             >
-              గెజిట్
+              {t("navGazette")}
             </Link>
             <CompetitionsMenu className="hidden shrink-0 2xl:block" />
             <Link
@@ -275,16 +289,16 @@ export function HomeMobileHeader() {
               className="civic-focus-ring hidden shrink-0 items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 lg:inline-flex"
             >
               <Scissors className="h-3 w-3 shrink-0" aria-hidden />
-              సెలూన్ హబ్
+              {t("navSalonHub")}
             </Link>
           </nav>
 
           <div className="flex shrink-0 items-center gap-1.5 self-center">
             <Link
               href="/survey"
-              className="civic-focus-ring inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
+              className={`civic-focus-ring inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover ${isTe ? "font-telugu" : "font-sans"}`}
             >
-              సర్వే ప్రారంభించండి ➔
+              {t("navCtaSurvey")}
             </Link>
             <a
               href="https://t.me/NayiSamakhyaDeskBot"
@@ -317,8 +331,8 @@ export function HomeMobileHeader() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-[52px] shrink-0 items-center justify-between border-b border-slate-200 px-4">
-              <span className="font-telugu text-sm font-bold text-[#0F172A]">
-                మెనూ
+              <span className={`text-sm font-bold text-[#0F172A] ${isTe ? "font-telugu" : "font-sans"}`}>
+                {t("menu")}
               </span>
               <button
                 type="button"
@@ -336,20 +350,17 @@ export function HomeMobileHeader() {
                 onClick={() => setOpen(false)}
                 className="tap mb-3 flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 font-telugu text-sm font-bold text-amber-900 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
               >
-                <span className="inline-flex min-w-0 flex-col leading-telugu">
-                  <span>జీవో 23 రక్షణ లేఖ</span>
-                  <span className="text-[10px] font-semibold text-amber-800/80">
-                    Grievance Docket
-                  </span>
+                <span className={`inline-flex min-w-0 flex-col ${isTe ? "leading-telugu" : ""}`}>
+                  <span>{t("navGrievance")}</span>
                 </span>
                 <span className="shrink-0 rounded-md border border-amber-500/45 bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
-                  ⚡ జీవో 23 దరఖాస్తు
+                  {t("navGrievanceShort")}
                 </span>
               </Link>
               <div className="mb-3 rounded-2xl border border-amber-200/80 bg-amber-50/60 p-2.5">
                 <p className="mb-2 flex items-center gap-1.5 px-1 font-telugu text-[11px] font-bold text-amber-900">
                   <Trophy className="h-3.5 w-3.5" aria-hidden />
-                  పోటీలు (Competitions)
+                  {t("navCompetitions")}
                 </p>
                 <ul className="space-y-1">
                   {COMPETITIONS.map((item) => (
@@ -374,7 +385,7 @@ export function HomeMobileHeader() {
                     className="tap flex min-h-12 items-center gap-2.5 rounded-xl border border-[#B45309]/25 bg-[#B45309]/10 px-3 font-telugu text-sm font-bold text-[#B45309]"
                   >
                     <Scissors className="h-4 w-4" aria-hidden />
-                    సెలూన్ హబ్
+                    {t("navSalonHub")}
                   </Link>
                 </li>
                 {PRIMARY_LINKS.map((link) => {
@@ -387,7 +398,8 @@ export function HomeMobileHeader() {
                         href={link.href}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "tap flex min-h-12 items-center gap-2.5 rounded-xl px-3 font-telugu text-sm font-semibold hover:bg-[#FBFBFA]",
+                          "tap flex min-h-12 items-center gap-2.5 rounded-xl px-3 text-sm font-semibold hover:bg-[#FBFBFA]",
+                          isTe ? "font-telugu" : "font-sans",
                           isGo23
                             ? "border border-amber-500/35 bg-amber-500/10 text-amber-900"
                             : "text-[#0F172A]",
@@ -399,10 +411,10 @@ export function HomeMobileHeader() {
                             aria-hidden
                           />
                         ) : null}
-                        {link.label}
+                        {t(link.key)}
                         {isGo23 ? (
                           <span className="ml-auto rounded-md border border-amber-500/45 bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
-                            ⚡ జీవో 23
+                            {t("navGrievanceShort")}
                           </span>
                         ) : null}
                       </Link>
@@ -426,9 +438,9 @@ export function HomeMobileHeader() {
               <Link
                 href="/survey"
                 onClick={() => setOpen(false)}
-                className="tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 font-telugu text-sm font-bold text-white"
+                className={`tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 text-sm font-bold text-white ${isTe ? "font-telugu" : "font-sans"}`}
               >
-                సర్వే ప్రారంభించండి ➔
+                {t("navCtaSurvey")}
               </Link>
 
               <div className="mt-4 rounded-2xl border border-slate-200 bg-[#FBFBFA] p-3">

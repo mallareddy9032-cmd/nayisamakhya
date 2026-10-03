@@ -3,8 +3,8 @@ import type { Lang } from "@/lib/types";
 export type TranslationKey = keyof typeof translations;
 
 export const translations = {
-  brandName: { te: "నాయీ సమాఖ్య తెలంగాణ", en: "Nayi Samakhya" },
-  brandSub: { te: "Nayi Samakhya", en: "Telangana Civic Portal" },
+  brandName: { te: "నాయీ సమాఖ్య", en: "Nayi Samakhya" },
+  brandSub: { te: "నాయీ సమాఖ్య తెలంగాణ", en: "Nayi Samakhya Telangana" },
   helpline: {
     te: "హెల్ప్‌లైన్: +91 9032654111 | టెలిగ్రామ్ అలర్ట్స్",
     en: "Helpline: +91 9032654111 | Telegram Alerts",
@@ -21,6 +21,10 @@ export const translations = {
     te: "జిల్లాల సమాచారం",
     en: "Districts",
   },
+  navDistrictsShort: {
+    te: "జిల్లాలు",
+    en: "Districts",
+  },
   navRepresentation: {
     te: "వినతిపత్రం",
     en: "Petition",
@@ -29,21 +33,89 @@ export const translations = {
     te: "జీవో 23 రక్షణ లేఖ",
     en: "Grievance Docket",
   },
+  navGrievanceShort: {
+    te: "⚡ జీవో 23",
+    en: "⚡ G.O. 23",
+  },
   navSurvey: {
     te: "సమగ్ర సర్వే",
     en: "Survey",
   },
+  navSurveyShort: {
+    te: "సర్వే",
+    en: "Survey",
+  },
   navGazette: {
-    te: "గెజిట్ (Gazette)",
-    en: "గెజిట్ (Gazette)",
+    te: "గెజిట్",
+    en: "Gazette",
   },
   navNewsletter: {
-    te: "గెజిట్ (Gazette)",
-    en: "గెజిట్ (Gazette)",
+    te: "వార్తాలేఖ",
+    en: "Newsletter",
+  },
+  navSalonHub: {
+    te: "సెలూన్ హబ్",
+    en: "Salon Hub",
+  },
+  navCompetitions: {
+    te: "పోటీలు",
+    en: "Competitions",
   },
   navCtaSurvey: {
     te: "సర్వే ప్రారంభించండి ➔",
     en: "Start Survey ➔",
+  },
+  navCtaPetition: {
+    te: "వినతిపత్రం తయారు చేయండి",
+    en: "Create petition",
+  },
+  navCtaWhatsapp: {
+    te: "WhatsApp సహాయవాణి",
+    en: "WhatsApp helpline",
+  },
+  heroBanner: {
+    te: "తెలంగాణ నాయీ సమాఖ్య అధికారిక డిజిటల్ నెట్‌వర్క్ — 33 జిల్లాలు & 589 మండలాల సేవా వేదిక",
+    en: "Official digital network of Nayi Samakhya Telangana — 33 districts & 589 mandals",
+  },
+  heroEyebrow: {
+    te: "చట్టబద్ధ రక్షణ • సంక్షేమ సాధికారత",
+    en: "Legal Protection • Welfare Empowerment",
+  },
+  heroH1Primary: {
+    te: "ఆత్మగౌరవం • చట్టబద్ధ రక్షణ • సాధికారత",
+    en: "Self-Respect • Empowerment • Progress",
+  },
+  heroH1Secondary: {
+    te: "ఆధునిక వికాసం",
+    en: "Modern Progress",
+  },
+  heroMissionLead: {
+    te: "నాయీ-బ్రాహ్మణ సమాజం యొక్క చారిత్రక గౌరవాన్ని పునరుద్ధరించి — గుర్తింపు పొందిన వెల్నెస్ నిపుణులుగా, పవిత్ర సంగీత సంరక్షకులుగా, ఆర్థికంగా స్వతంత్ర వ్యాపారులుగా సాధికారత కల్పించి, తెలంగాణ అభివృద్ధిలో సమాన, స్వావలంబన భాగస్వాములుగా నిలబెట్టడమే మా లక్ష్యం.",
+    en: "To reclaim the historical dignity of the Nayi-Brahmin community, empowering them as recognized wellness experts, custodians of sacred music, and economically independent entrepreneurs, standing as equal and self-reliant stakeholders in Telangana's development.",
+  },
+  heroMissionPillars: {
+    te: "నాయీ సమాఖ్య తెలంగాణ మూడు స్తంభాల మిషన్‌పై నిర్మితమైంది: సాంస్కృతిక పునరుద్ధరణ, రాజ్యాంగ సాధికారత, ఆర్థిక రూపాంతరం.",
+    en: "Nayi Samakhya Telangana is established to execute a tripartite mission: Cultural Reclamation, Constitutional Empowerment, and Economic Transformation.",
+  },
+  heroMissionSecondary: {
+    te: "ద్వితీయ దృష్టి: జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్ మరియు క్షేత్రస్థాయి సంక్షేమ హక్కుల అమలు.",
+    en: "Secondary focus: implementing 250 units of free electricity under G.O. 23 and field-level welfare rights.",
+  },
+  footerBrandBlurb: {
+    te: "తెలంగాణ రాష్ట్రవ్యాప్తంగా నాయీ బ్రాహ్మణ, మంగలి & బజంత్రి కమ్యూనిటీ సంక్షేమం, ప్రజా ప్రాతినిధ్యం మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు రూపొందించబడిన అధికారిక వేదిక.",
+    en: "The official platform for Nayi Brahmin, Mangali & Bajantri community welfare, public representation, and field-level grievance redress across Telangana.",
+  },
+  footerColServices: {
+    te: "ప్రజా సేవలు & వినతులు",
+    en: "Public services",
+  },
+  footerColCoordinators: {
+    te: "సమన్వయకర్తల విభాగం",
+    en: "For coordinators",
+  },
+  footerColDesk: {
+    te: "సేవా డెస్క్ & అడ్మిన్",
+    en: "Desk & admin",
   },
   goMandal: { te: "మండలానికి వెళ్ళండి", en: "Go to mandal" },
   go: { te: "వెళ్ళు", en: "Go" },
@@ -99,8 +171,8 @@ export const translations = {
   footerTerms: { te: "వినియోగ నిబంధనలు", en: "Terms of Use" },
   footerSitemap: { te: "సైట్‌మ్యాప్", en: "Sitemap" },
   footerCopyright: {
-    te: "© {year} నాయీ సమాఖ్య. అన్ని హక్కులు రక్షించబడ్డాయి.",
-    en: "© {year} Nayi Samakhya. All rights reserved.",
+    te: "© {year} నాయీ సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.",
+    en: "© {year} Nayi Samakhya Telangana. All rights reserved.",
   },
   footerDisclaimer: {
     te: "ఈ పోర్టల్ సమాచారం ప్రజా సేవ కోసం. అధికారిక నిర్ణయాలకు సంబంధిత శాఖలను సంప్రదించండి.",

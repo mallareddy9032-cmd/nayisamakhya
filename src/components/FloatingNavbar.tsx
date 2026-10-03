@@ -73,6 +73,7 @@ function CompetitionsMenu({
   compact?: boolean;
   onNavigate?: () => void;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -109,7 +110,7 @@ function CompetitionsMenu({
         )}
       >
         <Trophy className="h-3 w-3 shrink-0" aria-hidden />
-        <span className="whitespace-nowrap">పోటీలు (Competitions)</span>
+        <span className="whitespace-nowrap">{t("navCompetitions")}</span>
         <ChevronDown
           className={cn(
             "h-3 w-3 shrink-0 transition-transform",
@@ -147,6 +148,7 @@ function CompetitionsMenu({
 
 export function FloatingNavbar() {
   const { language, setLanguage, t } = useLanguage();
+  const isTe = language === "te";
   const bumpFont = useAccessibilityStore((s) => s.bumpFont);
   const setFontScale = useAccessibilityStore((s) => s.setFontScale);
   const highContrast = useAccessibilityStore((s) => s.highContrast);
@@ -180,15 +182,23 @@ export function FloatingNavbar() {
           <Link
             href="/"
             className="tap flex min-w-0 flex-1 items-center gap-2"
-            aria-label="Nayi Samakhya Telangana"
+            aria-label={t("brandSub")}
           >
             <BrandCrest size="sm" priority className="h-9 w-9" />
             <span className="min-w-0">
-              <span className="block whitespace-nowrap font-display-te text-[13px] font-normal leading-telugu tracking-tight text-[#0F172A] sm:text-sm">
-                నాయీ సమాఖ్య
+              <span
+                className={`block whitespace-nowrap text-[13px] font-normal tracking-tight text-[#0F172A] sm:text-sm ${
+                  isTe ? "font-display-te leading-telugu" : "font-sans font-semibold"
+                }`}
+              >
+                {t("brandName")}
               </span>
-              <span className="block truncate font-sans text-[10px] font-semibold tracking-wide text-slate-500">
-                Nayi Samakhya · TG
+              <span
+                className={`block truncate text-[10px] font-semibold tracking-wide text-slate-500 ${
+                  isTe ? "font-telugu" : "font-sans"
+                }`}
+              >
+                {t("brandSub")}
               </span>
             </span>
           </Link>
@@ -220,11 +230,15 @@ export function FloatingNavbar() {
           <Link
             href="/"
             className="tap flex shrink-0 items-center gap-2.5 self-center"
-            aria-label="Nayi Samakhya Telangana"
+            aria-label={t("brandSub")}
           >
             <BrandCrest size="md" priority className="h-10 w-10" />
-            <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none tracking-tight text-ink sm:text-base">
-              నాయీ సమాఖ్య
+            <span
+              className={`whitespace-nowrap text-sm font-normal leading-none tracking-tight text-ink sm:text-base ${
+                isTe ? "font-display-te" : "font-sans font-semibold"
+              }`}
+            >
+              {t("brandName")}
             </span>
           </Link>
 
@@ -254,10 +268,10 @@ export function FloatingNavbar() {
           <div className="flex shrink-0 items-center gap-1.5 self-center">
             <Link
               href="/salon-hub"
-              className="tap hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 xl:inline-flex"
+              className={`tap hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 xl:inline-flex ${isTe ? "font-telugu" : "font-sans"}`}
             >
               <Scissors className="h-3 w-3 shrink-0" aria-hidden />
-              సెలూన్ హబ్
+              {t("navSalonHub")}
             </Link>
             <CompetitionsMenu className="hidden shrink-0 xl:block" />
             <button
@@ -282,9 +296,9 @@ export function FloatingNavbar() {
 
             <Link
               href="/survey"
-              className="tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-3.5 py-2.5 font-telugu text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex"
+              className={`tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-3.5 py-2.5 text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex ${isTe ? "font-telugu" : "font-sans"}`}
             >
-              సర్వే ➔
+              {t("navCtaSurvey")}
             </Link>
 
             <div className="hidden md:block lg:hidden">
@@ -340,20 +354,17 @@ export function FloatingNavbar() {
                 onClick={() => setOpen(false)}
                 className="tap mb-3 flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-3 font-telugu text-sm font-bold text-amber-900 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
               >
-                <span className="inline-flex min-w-0 flex-col leading-telugu">
-                  <span>జీవో 23 రక్షణ లేఖ</span>
-                  <span className="text-[10px] font-semibold text-amber-800/80">
-                    Grievance Docket
-                  </span>
+                <span className={`inline-flex min-w-0 flex-col ${isTe ? "leading-telugu" : ""}`}>
+                  <span>{t("navGrievance")}</span>
                 </span>
                 <span className="shrink-0 rounded-md border border-amber-500/45 bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
-                  ⚡ జీవో 23 దరఖాస్తు
+                  {t("navGrievanceShort")}
                 </span>
               </Link>
               <div className="mb-3 rounded-2xl border border-amber-200/80 bg-amber-50/60 p-2.5">
                 <p className="mb-2 flex items-center gap-1.5 px-1 font-telugu text-[11px] font-bold text-amber-900">
                   <Trophy className="h-3.5 w-3.5" aria-hidden />
-                  పోటీలు (Competitions)
+                  {t("navCompetitions")}
                 </p>
                 <ul className="space-y-1">
                   {COMPETITIONS.map((item) => (
@@ -377,7 +388,7 @@ export function FloatingNavbar() {
                     className="tap flex min-h-12 items-center gap-2 rounded-xl border border-[#B45309]/25 bg-[#B45309]/10 px-3 font-telugu text-sm font-bold text-[#B45309]"
                   >
                     <Scissors className="h-4 w-4" aria-hidden />
-                    సెలూన్ హబ్
+                    {t("navSalonHub")}
                   </Link>
                 </li>
                 {primaryNav.map((link) => (
@@ -410,9 +421,9 @@ export function FloatingNavbar() {
               <Link
                 href="/survey"
                 onClick={() => setOpen(false)}
-                className="tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 font-telugu text-sm font-bold text-white"
+                className={`tap mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#B45309] px-4 text-sm font-bold text-white ${isTe ? "font-telugu" : "font-sans"}`}
               >
-                సర్వే ప్రారంభించండి ➔
+                {t("navCtaSurvey")}
               </Link>
 
               <a
@@ -423,7 +434,7 @@ export function FloatingNavbar() {
                 className="tap mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 font-telugu text-sm font-semibold text-ink"
               >
                 <Send className="h-4 w-4 text-[#B45309]" aria-hidden />
-                Telegram డెస్క్
+                Telegram Desk
               </a>
 
               <div className="mt-4 rounded-2xl border border-line bg-[#FBFBFA] p-3">

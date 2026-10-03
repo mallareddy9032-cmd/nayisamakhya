@@ -19,7 +19,7 @@ export function StickyHeader() {
         <Link
           href="/"
           className="tap flex min-w-0 items-center gap-2 rounded-xl px-1 py-1"
-          aria-label="Nayi Samakhya Telangana"
+          aria-label={t("brandSub", lang)}
         >
           <BrandCrest size="sm" />
           <span className="min-w-0">
@@ -30,8 +30,12 @@ export function StickyHeader() {
             >
               {t("brand", lang)}
             </p>
-            <p className="truncate font-sans text-xs text-slate-600">
-              {lang === "te" ? "Nayi Samakhya · TG" : "Nayi Samakhya Telangana"}
+            <p
+              className={`truncate text-xs text-slate-600 ${
+                lang === "te" ? "font-telugu" : "font-sans"
+              }`}
+            >
+              {t("brandSub", lang)}
             </p>
           </span>
         </Link>

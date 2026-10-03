@@ -17,15 +17,18 @@ import { HomeMobileHeader } from "@/components/home/HomeMobileHeader";
 import { PersonaSwitcher } from "@/components/home/PersonaSwitcher";
 import { QuickGrievanceWidget } from "@/components/home/QuickGrievanceWidget";
 import { ServiceActionCards } from "@/components/home/ServiceActionCards";
+import { useLanguage } from "@/context/LanguageContext";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
+  const { language, t } = useLanguage();
+  const isTe = language === "te";
+
   return (
     <div className="overflow-x-hidden bg-civic-paper text-civic-ink antialiased selection:bg-civic-bronze selection:text-white">
       <div className="border-b border-slate-700/50 bg-civic-navy px-4 py-1.5 text-center text-[11px] text-slate-200 sm:px-6 lg:px-8">
-        <span className="font-telugu">
-          {
-            "తెలంగాణ నాయీ సమాఖ్య అధికారిక డిజిటల్ నెట్‌వర్క్ — 33 జిల్లాలు & 589 మండలాల సేవా వేదిక"
-          }
+        <span className={cn(isTe ? "font-telugu" : "font-sans")}>
+          {t("heroBanner")}
         </span>
       </div>
 
@@ -42,77 +45,87 @@ export default function HomePage() {
         />
         <div className="relative mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
           <div className="space-y-5 text-center lg:text-left">
-            <span className="civic-eyebrow-pill mb-1 shadow-sm">
-              చట్టబద్ధ రక్షణ • సంక్షేమ సాధికారత
+            <span
+              className={cn(
+                "civic-eyebrow-pill mb-1 shadow-sm",
+                isTe ? "font-telugu" : "font-sans",
+              )}
+            >
+              {t("heroEyebrow")}
             </span>
 
             <div>
               <h1 className="tracking-tight text-center lg:text-left">
-                <span className="block font-display-te text-[1.75rem] font-normal leading-[1.75] text-slate-900 sm:text-4xl lg:text-5xl">
-                  ఆత్మగౌరవం • చట్టబద్ధ రక్షణ • సాధికారత
+                <span
+                  className={cn(
+                    "block text-[1.75rem] font-normal leading-[1.75] text-slate-900 sm:text-4xl lg:text-5xl",
+                    isTe ? "font-display-te" : "font-sans font-semibold tracking-tight",
+                  )}
+                >
+                  {t("heroH1Primary")}
                 </span>
-                <span className="mt-2.5 block font-display-te text-[1.45rem] font-normal italic leading-[1.75] text-amber-600 sm:text-3xl lg:text-4xl">
-                  ఆధునిక వికాసం
-                </span>
-                <span className="mt-1.5 block font-sans text-sm font-medium not-italic tracking-wide text-amber-600/80 sm:text-base">
-                  Self-Respect, Empowerment &amp; Progress
-                </span>
+                {isTe ? (
+                  <span className="mt-2.5 block font-display-te text-[1.45rem] font-normal italic leading-[1.75] text-amber-600 sm:text-3xl lg:text-4xl">
+                    {t("heroH1Secondary")}
+                  </span>
+                ) : (
+                  <span className="mt-2.5 block font-sans text-lg font-medium tracking-wide text-amber-700 sm:text-xl lg:text-2xl">
+                    {t("heroH1Secondary")}
+                  </span>
+                )}
               </h1>
             </div>
 
             <div className="mx-auto mt-3 max-w-2xl space-y-3 text-center lg:mx-0 lg:text-left">
-              <p className="font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg">
-                నాయీ-బ్రాహ్మణ సమాజం యొక్క చారిత్రక గౌరవాన్ని పునరుద్ధరించి — గుర్తింపు పొందిన వెల్నెస్ నిపుణులుగా, పవిత్ర సంగీత సంరక్షకులుగా, ఆర్థికంగా స్వతంత్ర వ్యాపారులుగా సాధికారత కల్పించి, తెలంగాణ అభివృద్ధిలో సమాన, స్వావలంబన భాగస్వాములుగా నిలబెట్టడమే మా లక్ష్యం.
+              <p
+                className={cn(
+                  "text-base font-normal text-slate-600 sm:text-lg",
+                  isTe ? "font-telugu leading-telugu" : "font-sans leading-relaxed",
+                )}
+              >
+                {t("heroMissionLead")}
               </p>
-              <p className="font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg">
-                <strong className="font-bold text-[#0F172A]">
-                  నాయీ సమాఖ్య తెలంగాణ
-                </strong> 
-                మూడు స్తంభాల మిషన్‌పై నిర్మితమైంది: 
-                <strong className="font-bold text-[#0F172A]">
-                  సాంస్కృతిక పునరుద్ధరణ
-                </strong>
-                , 
-                <strong className="font-bold text-[#0F172A]">
-                  రాజ్యాంగ సాధికారత
-                </strong>
-                , 
-                <strong className="font-bold text-[#0F172A]">
-                  ఆర్థిక రూపాంతరం
-                </strong>
-                .
+              <p
+                className={cn(
+                  "text-base font-normal text-slate-600 sm:text-lg",
+                  isTe ? "font-telugu leading-telugu" : "font-sans leading-relaxed",
+                )}
+              >
+                {t("heroMissionPillars")}
               </p>
-              <p className="font-sans text-sm font-normal leading-relaxed text-slate-600 sm:text-[15px]">
-                To reclaim the historical dignity of the Nayi-Brahmin community,
-                empowering them as recognized wellness experts, custodians of
-                sacred music, and economically independent entrepreneurs,
-                standing as equal and self-reliant stakeholders in Telangana&apos;s
-                development. Nayi Samakhya Telangana is established to execute a
-                tripartite mission: Cultural Reclamation, Constitutional
-                Empowerment, and Economic Transformation.
-              </p>
-              <p className="font-telugu text-sm font-normal leading-telugu text-slate-500">
-                ద్వితీయ దృష్టి: జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్ మరియు క్షేత్రస్థాయి సంక్షేమ హక్కుల అమలు.
+              <p
+                className={cn(
+                  "text-sm font-normal text-slate-500",
+                  isTe ? "font-telugu leading-telugu" : "font-sans leading-relaxed",
+                )}
+              >
+                {t("heroMissionSecondary")}
               </p>
             </div>
 
             <div className="flex flex-col items-stretch justify-center gap-2.5 pt-1 sm:flex-row sm:items-center lg:justify-start">
               <Link
                 href="/representation"
-                className="civic-focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-5 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_24px_rgb(180_83_9_/0.3)] transition-all duration-300 hover:brightness-110"
+                className={cn(
+                  "civic-focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-5 py-3 text-sm font-bold text-white shadow-[0_8px_24px_rgb(180_83_9_/0.3)] transition-all duration-300 hover:brightness-110",
+                  isTe ? "font-telugu" : "font-sans",
+                )}
               >
                 <FileText className="h-4 w-4 shrink-0" aria-hidden />
-                వినతిపత్రం తయారు చేయండి
+                {t("navCtaPetition")}
                 <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
               </Link>
               <a
                 href="https://wa.me/919032654111?text=%E0%B0%A8%E0%B0%AE%E0%B0%B8%E0%B1%8D%E0%B0%95%E0%B0%BE%E0%B0%B0%E0%B0%82%20%E0%B0%A8%E0%B0%BE%E0%B0%AF%E0%B0%BF%20%E0%B0%B8%E0%B0%AE%E0%B0%BE%E0%B0%96%E0%B1%8D%E0%B0%AF%20%E0%B0%A1%E0%B1%86%E0%B0%B8%E0%B1%8D%E0%B0%95%E0%B1%8D"
                 target="_blank"
                 rel="noreferrer"
-                className="civic-focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#128C7E]/40 bg-white px-5 py-3 font-telugu text-sm font-bold text-[#0E7A6E] shadow-xs transition hover:bg-emerald-50"
+                className={cn(
+                  "civic-focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#128C7E]/40 bg-white px-5 py-3 text-sm font-bold text-[#0E7A6E] shadow-xs transition hover:bg-emerald-50",
+                  isTe ? "font-telugu" : "font-sans",
+                )}
               >
                 <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
-                WhatsApp సహాయవాణి
+                {t("navCtaWhatsapp")}
                 <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
               </a>
             </div>
