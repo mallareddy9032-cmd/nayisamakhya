@@ -23,13 +23,15 @@ export function StickyHeader() {
         >
           <BrandCrest size="sm" />
           <span className="min-w-0">
-            <p className="truncate text-sm font-bold tracking-tight text-brand">
-              Nayi Samakhya
-            </p>
             <p
-              className={`truncate text-xs text-slate-600 ${lang === "te" ? "font-telugu" : ""}`}
+              className={`truncate text-sm font-bold tracking-tight text-brand ${
+                lang === "te" ? "font-telugu" : ""
+              }`}
             >
-              {t("brandSub", lang)}
+              {t("brand", lang)}
+            </p>
+            <p className="truncate font-sans text-xs text-slate-600">
+              {lang === "te" ? "Nayi Samakhya · TG" : "Nayi Samakhya Telangana"}
             </p>
           </span>
         </Link>

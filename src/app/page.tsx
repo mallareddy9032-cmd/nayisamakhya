@@ -49,29 +49,52 @@ export default function HomePage() {
             <div>
               <h1 className="tracking-tight text-center lg:text-left">
                 <span className="block font-display-te text-[1.75rem] font-normal leading-[1.75] text-slate-900 sm:text-4xl lg:text-5xl">
-                  ఆత్మగౌరవం • చట్టబద్ధ రక్షణ
+                  ఆత్మగౌరవం • చట్టబద్ధ రక్షణ • సాధికారత
                 </span>
                 <span className="mt-2.5 block font-display-te text-[1.45rem] font-normal italic leading-[1.75] text-amber-600 sm:text-3xl lg:text-4xl">
                   ఆధునిక వికాసం
                 </span>
                 <span className="mt-1.5 block font-sans text-sm font-medium not-italic tracking-wide text-amber-600/80 sm:text-base">
-                  Self-Respect &amp; Progress
+                  Self-Respect, Empowerment &amp; Progress
                 </span>
               </h1>
             </div>
 
-            <p className="mx-auto mt-3 max-w-2xl text-center font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg lg:mx-0 lg:text-left">
-              శతాబ్దాల కళా-వైద్య వైభవాన్ని పునరుద్ధరిస్తూ —{" "}
-              <strong className="font-bold text-[#0F172A]">
-                జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్
-              </strong>{" "}
-              మరియు{" "}
-              <strong className="font-bold text-[#0F172A]">
-                మున్సిపల్ షాపుల హక్కులు
-              </strong>
-              , విద్యా-స్కాలర్‌షిప్‌లు మరియు క్షేత్రస్థాయి సమస్యల పరిష్కారం కొరకు
-              తెలంగాణలోని నాయీ బ్రాహ్మణ, మంగలి, బజంత్రి సమాజాల ఏకైక ఆధీకృత వేదిక.
-            </p>
+            <div className="mx-auto mt-3 max-w-2xl space-y-3 text-center lg:mx-0 lg:text-left">
+              <p className="font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg">
+                నాయీ-బ్రాహ్మణ సమాజం యొక్క చారిత్రక గౌరవాన్ని పునరుద్ధరించి — గుర్తింపు పొందిన వెల్నెస్ నిపుణులుగా, పవిత్ర సంగీత సంరక్షకులుగా, ఆర్థికంగా స్వతంత్ర వ్యాపారులుగా సాధికారత కల్పించి, తెలంగాణ అభివృద్ధిలో సమాన, స్వావలంబన భాగస్వాములుగా నిలబెట్టడమే మా లక్ష్యం.
+              </p>
+              <p className="font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg">
+                <strong className="font-bold text-[#0F172A]">
+                  నాయీ సమాఖ్య తెలంగాణ
+                </strong> 
+                మూడు స్తంభాల మిషన్‌పై నిర్మితమైంది: 
+                <strong className="font-bold text-[#0F172A]">
+                  సాంస్కృతిక పునరుద్ధరణ
+                </strong>
+                , 
+                <strong className="font-bold text-[#0F172A]">
+                  రాజ్యాంగ సాధికారత
+                </strong>
+                , 
+                <strong className="font-bold text-[#0F172A]">
+                  ఆర్థిక రూపాంతరం
+                </strong>
+                .
+              </p>
+              <p className="font-sans text-sm font-normal leading-relaxed text-slate-600 sm:text-[15px]">
+                To reclaim the historical dignity of the Nayi-Brahmin community,
+                empowering them as recognized wellness experts, custodians of
+                sacred music, and economically independent entrepreneurs,
+                standing as equal and self-reliant stakeholders in Telangana&apos;s
+                development. Nayi Samakhya Telangana is established to execute a
+                tripartite mission: Cultural Reclamation, Constitutional
+                Empowerment, and Economic Transformation.
+              </p>
+              <p className="font-telugu text-sm font-normal leading-telugu text-slate-500">
+                ద్వితీయ దృష్టి: జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్ మరియు క్షేత్రస్థాయి సంక్షేమ హక్కుల అమలు.
+              </p>
+            </div>
 
             <div className="flex flex-col items-stretch justify-center gap-2.5 pt-1 sm:flex-row sm:items-center lg:justify-start">
               <Link

@@ -2,7 +2,7 @@ import type { Lang, Localized } from "@/lib/types";
 
 export const dictionary = {
   brand: { te: "నాయీ సమాఖ్య", en: "Nayi Samakhya" },
-  brandSub: { te: "ప్రజా సమాఖ్య", en: "Praja Samakhya" },
+  brandSub: { te: "నాయీ సమాఖ్య తెలంగాణ", en: "Nayi Samakhya Telangana" },
   home: { te: "హోమ్", en: "Home" },
   mandal: { te: "మండలం", en: "Mandal" },
   survey: { te: "సర్వే", en: "Survey" },
@@ -76,16 +76,16 @@ export const dictionary = {
   pensionActive: { te: "62% పెన్షన్ క్రియాశీలం", en: "62% Pension Active" },
   officersMeta: { te: "412 మండల అధికారులు నియమితులు", en: "412 Mandal Officers appointed" },
   heroEyebrow: {
-    te: "✦ తెలంగాణ • ఆంధ్రప్రదేశ్ | ప్రజా సమాఖ్య",
-    en: "✦ Telangana • Andhra Pradesh | Praja Samakhya",
+    te: "✦ తెలంగాణ • ఆంధ్రప్రదేశ్ | నాయీ సమాఖ్య",
+    en: "✦ Telangana • Andhra Pradesh | Nayi Samakhya",
   },
   heroTitle: {
-    te: "డిజిటల్ హోమ్ • సేవా కేంద్రం • సామూహిక స్వరం",
-    en: "Digital Home • Service Hub • Collective Voice",
+    te: "ఆత్మగౌరవం • చట్టబద్ధ రక్షణ • సాధికారత",
+    en: "Self-Respect • Legal Protection • Empowerment",
   },
   heroBody: {
-    te: "ప్రజల కోసం, ప్రజలతో — సేవ, సమాచారం, సంఘటన ఒకే చోట.",
-    en: "For the people, with the people — services, information, and action in one place.",
+    te: "నాయీ సమాఖ్య తెలంగాణ — సాంస్కృతిక పునరుద్ధరణ, రాజ్యాంగ సాధికారత, ఆర్థిక రూపాంతరం.",
+    en: "Nayi Samakhya Telangana — Cultural Reclamation, Constitutional Empowerment, and Economic Transformation.",
   },
   sosTitle: { te: "అత్యవసర రక్షణ", en: "Emergency Protection" },
   sosBody: {

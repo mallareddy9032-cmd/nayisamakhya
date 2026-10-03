@@ -1,7 +1,7 @@
 {
-  "name": "Nayi Samakhya",
-  "short_name": "Nayi",
-  "description": "Praja Samakhya civic portal for Telangana — heritage, artistry, enterprise & justice",
+  "name": "Nayi Samakhya Telangana",
+  "short_name": "Nayi Samakhya",
+  "description": "నాయీ సమాఖ్య తెలంగాణ — heritage, artistry, enterprise & justice",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FBFBF9",

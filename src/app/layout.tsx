@@ -58,8 +58,10 @@ export const metadata: Metadata = {
   description,
   keywords: [
     "నాయీ సమాఖ్య",
+    "నాయీ సమాఖ్య తెలంగాణ",
     "Nayi Samakhya",
-    "Telangana Barbers",
+    "Nayi Samakhya Telangana",
+    "Nayi Brahmin",
     "G.O. 23",
     "Salon Hub",
     "BC Welfare",

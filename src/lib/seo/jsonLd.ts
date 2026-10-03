@@ -5,7 +5,7 @@ export function organizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
-    alternateName: "నాయి సమాఖ్య",
+    alternateName: ["నాయీ సమాఖ్య", "నాయీ సమాఖ్య తెలంగాణ", "Nayi Samakhya Telangana"],
     url: SITE_ORIGIN,
     logo: absoluteUrl("/brand/nayi-samakhya-crest-white.png"),
     inLanguage: ["te", "en"],
@@ -22,7 +22,7 @@ export function websiteJsonLd() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
-    alternateName: "నాయి సమాఖ్య",
+    alternateName: ["నాయీ సమాఖ్య", "నాయీ సమాఖ్య తెలంగాణ", "Nayi Samakhya Telangana"],
     url: SITE_ORIGIN,
     inLanguage: ["te", "en"],
     publisher: {
