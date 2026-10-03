@@ -16,7 +16,7 @@ const GRIEVANCES = [
 const HELPLINE_WA =
   "https://wa.me/919032654111?text=" +
   encodeURIComponent(
-    "నమస్కారం నాయి సమాఖ్య డెస్క్, నాకు వినతిపత్రం / సేవా సహాయం కావాలి.",
+    "నమస్కారం నాయీ సమాఖ్య డెస్క్, నాకు వినతిపత్రం / సేవా సహాయం కావాలి.",
   );
 
 export function QuickGrievanceWidget() {

@@ -30,7 +30,7 @@ type InputNode = {
 
 const WA_DESK =
   "https://wa.me/919032654111?text=" +
-  encodeURIComponent("నమస్కారం నాయి సమాఖ్య డెస్క్ — సివిక్ ఇంజిన్ నుండి సహాయం కావాలి.");
+  encodeURIComponent("నమస్కారం నాయీ సమాఖ్య డెస్క్ — సివిక్ ఇంజిన్ నుండి సహాయం కావాలి.");
 
 const INPUTS: InputNode[] = [
   {

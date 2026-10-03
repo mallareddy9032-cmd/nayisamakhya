@@ -49,7 +49,7 @@ export const translations = {
   go: { te: "వెళ్ళు", en: "Go" },
   menu: { te: "మెనూ", en: "Menu" },
   marquee: {
-    te: "🔴 బ్రేకింగ్: నాయి సమాఖ్య డిజిటల్ సేవా డెస్క్ ప్రారంభం — Telegram @NayiSamakhyaDeskBot కి Hi అని మెసేజ్ చేయండి • వినతిపత్రాలు, ఫీల్డ్ ఫోటో నమోదు, మండల సమన్వయకర్త వివరాలు మొబైల్ నుంచే • 250 యూనిట్ల ఉచిత విద్యుత్ • షేర్: /announce • ",
+    te: "🔴 బ్రేకింగ్: నాయీ సమాఖ్య డిజిటల్ సేవా డెస్క్ ప్రారంభం — Telegram @NayiSamakhyaDeskBot కి Hi అని మెసేజ్ చేయండి • వినతిపత్రాలు, ఫీల్డ్ ఫోటో నమోదు, మండల సమన్వయకర్త వివరాలు మొబైల్ నుంచే • 250 యూనిట్ల ఉచిత విద్యుత్ • షేర్: /announce • ",
     en: "🔴 Breaking: Nayi Samakhya Digital Service Desk is live — message Hi to @NayiSamakhyaDeskBot • Representation letters, field photos, mandal coordinator lookup on mobile • 250-unit free power • Share blast: /announce • ",
   },
   actionPower: { te: "250 యూనిట్ల స్థితి", en: "Check 250 Units Status" },

@@ -111,7 +111,7 @@ function SpotlightPanel({ persona }: { persona: PersonaContent }) {
               <div>
                 <p className="flex items-center gap-1 font-telugu text-[11px] font-bold text-[#B45309]">
                   <IdCard className="h-3.5 w-3.5" aria-hidden />
-                  నాయి సమాఖ్య
+                  నాయీ సమాఖ్య
                 </p>
                 <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">
                   Digital Coordinator ID

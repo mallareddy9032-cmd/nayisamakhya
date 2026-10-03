@@ -183,7 +183,7 @@ export function HeroArtisanShowcase() {
               <IdCard className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
               <div className="min-w-0">
                 <p className="font-telugu text-[10px] font-bold leading-telugu text-[#B45309]">
-                  నాయి సమాఖ్య
+                  నాయీ సమాఖ్య
                 </p>
                 <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wider text-slate-500">
                   Zone Coordinator
