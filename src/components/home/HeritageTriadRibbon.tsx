@@ -69,11 +69,11 @@ export function HeritageTriadRibbon() {
             return (
               <article
                 key={pillar.id}
-                className="flex h-full flex-col gap-2.5 rounded-xl border border-[#EAD7B5] bg-gradient-to-b from-white/90 to-[#FFFDF9]/80 px-4 py-4 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8),0_4px_14px_rgb(180_83_9_/0.06)]"
+                className="flex h-full min-h-[11.5rem] flex-col gap-2.5 rounded-xl border border-[#EAD7B5] bg-gradient-to-b from-white/90 to-[#FFFDF9]/80 px-4 py-4 pb-5 shadow-[inset_0_1px_0_rgb(255_255_255_/0.8),0_4px_14px_rgb(180_83_9_/0.06)]"
               >
                 <div className="flex items-center gap-2.5">
                   <span
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#B45309]"
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#B45309]"
                     style={{
                       boxShadow:
                         "0 0 0 1.5px #FBFBFA, 0 0 0 3px #B45309, 0 0 0 4.5px rgb(180 83 9 / 0.25)",
@@ -81,8 +81,8 @@ export function HeritageTriadRibbon() {
                   >
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
-                  <div>
-                    <h3 className="font-telugu text-sm font-bold text-[#1E293B]">
+                  <div className="min-w-0">
+                    <h3 className="font-telugu text-sm font-bold leading-telugu text-[#1E293B]">
                       {pillar.title}
                     </h3>
                     <p className="font-sans text-[10px] font-semibold tracking-wide text-[#B45309]">
@@ -93,7 +93,7 @@ export function HeritageTriadRibbon() {
                 <p className="font-telugu text-xs font-semibold leading-relaxed text-[#0F172A]">
                   {pillar.bodyTe}
                 </p>
-                <p className="font-sans text-[11px] leading-relaxed text-slate-600">
+                <p className="mt-auto font-sans text-[11px] leading-relaxed text-slate-600">
                   {pillar.bodyEn}
                 </p>
               </article>

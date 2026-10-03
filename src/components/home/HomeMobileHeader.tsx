@@ -219,67 +219,74 @@ export function HomeMobileHeader() {
           </div>
         </div>
 
-        {/* Desktop / tablet ≥768px */}
-        <div className="mx-auto hidden h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 md:flex lg:px-8">
+        {/* Desktop / tablet ≥768px — brand | scroll rail | pinned CTAs (never clip) */}
+        <div className="mx-auto hidden h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 md:flex lg:px-8">
           <Link
             href="/"
-            className="tap flex flex-shrink-0 items-center gap-2.5 whitespace-nowrap"
+            className="tap flex shrink-0 items-center gap-2.5 self-center"
+            aria-label="Nayi Samakhya Telangana"
           >
-            <span className="rounded-xl border border-civic-bronze/20 bg-civic-bronze/10 p-2 text-civic-bronze">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-civic-bronze/20 bg-civic-bronze/10 text-civic-bronze">
               <Landmark className="h-5 w-5" aria-hidden />
             </span>
-            <span className="whitespace-nowrap font-display-te text-base font-normal tracking-tight text-civic-ink md:text-lg">
-              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
+            <span className="whitespace-nowrap font-display-te text-base font-normal leading-none tracking-tight text-civic-ink md:text-lg">
+              నాయీ సమాఖ్య
             </span>
           </Link>
 
-          <div className="flex shrink-0 items-center gap-1 pr-1 sm:gap-2">
+          <nav
+            aria-label="Primary"
+            className="no-scrollbar flex min-w-0 flex-1 items-center justify-end gap-1.5 overflow-x-auto overscroll-x-contain touch-pan-x"
+          >
             <Link
               href="/districts"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
+              className="civic-focus-ring hidden shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309] xl:inline-flex"
             >
               <MapPin className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              జిల్లాల సమాచారం
+              జిల్లాలు
             </Link>
             <Link
               href="/survey"
-              className="civic-focus-ring hidden min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline lg:inline-flex"
+              className="civic-focus-ring hidden shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309] lg:inline-flex"
             >
-              సమగ్ర సర్వే
-              <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 font-telugu text-[8px] font-bold tracking-wide text-[#B45309] shadow-[0_0_8px_rgba(180,83,9,0.35)]">
-                సర్వే (New)
+              సర్వే
+              <span className="rounded border border-[#B45309]/35 bg-[#B45309]/10 px-1 font-telugu text-[8px] font-bold tracking-wide text-[#B45309]">
+                New
               </span>
             </Link>
             <Link
               href="/representation"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-1 px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline"
+              className="civic-focus-ring inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309]"
             >
               <FileText className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
               వినతిపత్రం
             </Link>
             <Link
               href="/grievance"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 font-telugu text-xs font-bold text-amber-900 shadow-[0_0_10px_rgba(245,158,11,0.22)] transition hover:bg-amber-500/25"
+              className="civic-focus-ring inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 font-telugu text-xs font-bold text-amber-900 transition hover:bg-amber-500/25"
             >
-              ⚡ జీవో 23 దరఖాస్తు
+              ⚡ జీవో 23
             </Link>
             <Link
               href="/feed"
-              className="civic-focus-ring hidden min-h-11 items-center px-2.5 font-telugu text-xs font-semibold text-slate-600 underline-offset-4 transition hover:text-[#B45309] hover:underline xl:inline-flex"
+              className="civic-focus-ring hidden shrink-0 items-center rounded-lg px-2.5 py-2 font-telugu text-xs font-semibold text-slate-600 transition hover:bg-[#F4F2EB] hover:text-[#B45309] xl:inline-flex"
             >
-              గెజిట్ (Gazette)
+              గెజిట్
             </Link>
-            <CompetitionsMenu className="hidden xl:block" />
+            <CompetitionsMenu className="hidden shrink-0 2xl:block" />
             <Link
               href="/salon-hub"
-              className="civic-focus-ring hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 lg:inline-flex"
+              className="civic-focus-ring hidden shrink-0 items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 lg:inline-flex"
             >
               <Scissors className="h-3 w-3 shrink-0" aria-hidden />
               సెలూన్ హబ్
             </Link>
+          </nav>
+
+          <div className="flex shrink-0 items-center gap-1.5 self-center">
             <Link
               href="/survey"
-              className="civic-focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-civic-bronze px-4 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
+              className="civic-focus-ring inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-civic-bronze px-3.5 py-2 font-telugu text-xs font-bold text-white shadow-xs transition-all hover:bg-civic-bronze-hover"
             >
               సర్వే ప్రారంభించండి ➔
             </Link>
@@ -287,7 +294,7 @@ export function HomeMobileHeader() {
               href="https://t.me/NayiSamakhyaDeskBot"
               target="_blank"
               rel="noreferrer"
-              className="civic-focus-ring inline-flex min-h-11 w-11 items-center justify-center rounded-xl border border-civic-border bg-white text-civic-ink transition hover:bg-civic-subtle"
+              className="civic-focus-ring inline-flex h-10 w-10 items-center justify-center rounded-xl border border-civic-border bg-white text-civic-ink transition hover:bg-civic-subtle"
               aria-label="Telegram desk bot"
               title="@NayiSamakhyaDeskBot"
             >

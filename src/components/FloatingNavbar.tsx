@@ -42,11 +42,11 @@ function NewBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "ml-1.5 inline-flex items-center rounded-md border border-[#B45309]/35 bg-[#B45309]/10 px-1.5 py-0.5 font-telugu text-[9px] font-bold tracking-wide text-[#B45309] shadow-[0_0_10px_rgba(180,83,9,0.35)]",
+        "ml-1 inline-flex items-center rounded-md border border-[#B45309]/35 bg-[#B45309]/10 px-1.5 py-0.5 font-telugu text-[9px] font-bold tracking-wide text-[#B45309]",
         className,
       )}
     >
-      సర్వే (New)
+      New
     </span>
   );
 }
@@ -55,11 +55,11 @@ function Go23Badge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "ml-1.5 inline-flex items-center rounded-md border border-amber-500/45 bg-amber-500/15 px-1.5 py-0.5 font-telugu text-[9px] font-bold tracking-wide text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.28)]",
+        "ml-1 inline-flex items-center rounded-md border border-amber-500/45 bg-amber-500/15 px-1.5 py-0.5 font-telugu text-[9px] font-bold tracking-wide text-amber-800",
         className,
       )}
     >
-      ⚡ జీవో 23
+      ⚡
     </span>
   );
 }
@@ -217,22 +217,23 @@ export function FloatingNavbar() {
           </div>
         </div>
 
-        {/* ≥768px bar */}
-        <div className="mx-auto hidden max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 md:flex lg:px-8">
+        {/* ≥768px bar — brand | equal-gap nav rail | pinned actions */}
+        <div className="mx-auto hidden max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 md:flex lg:px-8">
           <Link
             href="/"
-            className="tap flex flex-shrink-0 items-center gap-2.5 whitespace-nowrap"
+            className="tap flex shrink-0 items-center gap-2.5 self-center"
+            aria-label="Nayi Samakhya Telangana"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-brand">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-warm text-brand">
               <Landmark className="h-5 w-5" aria-hidden />
             </span>
-            <span className="whitespace-nowrap font-display-te text-sm font-normal tracking-tight text-ink sm:text-base">
-              నాయీ సమాఖ్య తెలంగాణ • Nayi Samakhya
+            <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none tracking-tight text-ink sm:text-base">
+              నాయీ సమాఖ్య
             </span>
           </Link>
 
           <nav
-            className="hidden items-center gap-0.5 lg:flex"
+            className="no-scrollbar hidden min-w-0 flex-1 items-center justify-end gap-1.5 overflow-x-auto overscroll-x-contain touch-pan-x lg:flex"
             aria-label="Primary"
           >
             {primaryNav.map((link) => (
@@ -240,7 +241,7 @@ export function FloatingNavbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "inline-flex items-center rounded-lg px-2.5 py-2 text-[12px] font-medium transition-colors hover:bg-[#F4F2EB]",
+                  "inline-flex shrink-0 items-center rounded-lg px-2.5 py-2 text-[12px] font-medium transition-colors hover:bg-[#F4F2EB]",
                   language === "te" ? "font-telugu" : "",
                   link.style === "go23"
                     ? "border border-amber-500/35 bg-amber-500/10 text-amber-900 hover:bg-amber-500/20"
@@ -254,29 +255,29 @@ export function FloatingNavbar() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 pr-1">
+          <div className="flex shrink-0 items-center gap-1.5 self-center">
             <Link
               href="/salon-hub"
-              className="tap hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 md:inline-flex"
+              className="tap hidden items-center gap-1.5 rounded-full border border-[#B45309]/35 bg-[#B45309]/10 px-2.5 py-1.5 font-telugu text-[11px] font-bold text-[#B45309] transition hover:bg-[#B45309]/15 xl:inline-flex"
             >
               <Scissors className="h-3 w-3 shrink-0" aria-hidden />
               సెలూన్ హబ్
             </Link>
-            <CompetitionsMenu className="hidden md:block" />
+            <CompetitionsMenu className="hidden shrink-0 xl:block" />
             <button
               type="button"
               onClick={() => setLanguage(language === "te" ? "en" : "te")}
               className="tap hidden h-9 items-center rounded-full border border-[#B45309]/25 bg-[#B45309]/10 px-3 font-telugu text-[11px] font-bold text-[#B45309] md:inline-flex"
               aria-label="Language"
             >
-              {language === "te" ? "తెలుగు" : "English"}
+              {language === "te" ? "తె" : "EN"}
             </button>
 
             <a
               href={TELEGRAM_BOT_URL}
               target="_blank"
               rel="noreferrer"
-              className="tap hidden h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-[#0F172A] hover:bg-warm lg:inline-flex"
+              className="tap hidden h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-[#0F172A] hover:bg-warm xl:inline-flex"
               aria-label="Telegram desk bot"
               title="@NayiSamakhyaDeskBot"
             >
@@ -285,9 +286,9 @@ export function FloatingNavbar() {
 
             <Link
               href="/survey"
-              className="tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-4 py-2.5 font-telugu text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex"
+              className="tap hidden items-center gap-1 rounded-xl bg-[#B45309] px-3.5 py-2.5 font-telugu text-[12px] font-bold text-white shadow-[0_0_14px_rgba(180,83,9,0.28)] transition hover:bg-[#92400E] lg:inline-flex"
             >
-              సర్వే ప్రారంభించండి ➔
+              సర్వే ➔
             </Link>
 
             <div className="hidden md:block lg:hidden">

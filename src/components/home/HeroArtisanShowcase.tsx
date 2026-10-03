@@ -178,15 +178,17 @@ export function HeroArtisanShowcase() {
           aria-label="Zone Coordinator digital card preview"
         >
           <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-[#B45309]" aria-hidden />
-          <div className="flex items-start justify-between gap-2 pt-0.5">
-            <div className="min-w-0">
-              <p className="flex items-center gap-1 font-telugu text-[10px] font-bold text-[#B45309]">
-                <IdCard className="h-3 w-3 shrink-0" aria-hidden />
-                నాయి సమాఖ్య
-              </p>
-              <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wider text-slate-500">
-                Zone Coordinator
-              </p>
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <IdCard className="h-3.5 w-3.5 shrink-0 text-[#B45309]" aria-hidden />
+              <div className="min-w-0">
+                <p className="font-telugu text-[10px] font-bold leading-telugu text-[#B45309]">
+                  నాయి సమాఖ్య
+                </p>
+                <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wider text-slate-500">
+                  Zone Coordinator
+                </p>
+              </div>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[#E2E8F0] bg-[#FBFBFA]">
               <div className="grid h-7 w-7 grid-cols-3 gap-px" aria-hidden>

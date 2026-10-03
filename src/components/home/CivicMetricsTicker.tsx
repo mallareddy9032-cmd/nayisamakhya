@@ -140,14 +140,14 @@ export function CivicMetricsTicker() {
           {METRICS.map((metric) => (
             <div
               key={metric.id}
-              className="flex flex-col items-center justify-center gap-1 px-3 py-4 text-center sm:px-4 sm:py-5"
+              className="flex min-h-[5.5rem] flex-col items-center justify-center gap-1.5 px-3 py-4 text-center sm:min-h-[6rem] sm:px-4 sm:py-5"
             >
               <AnimatedFigure
                 metric={metric}
                 active={active}
                 reduced={reduced}
               />
-              <p className="whitespace-nowrap font-sans text-[11px] font-semibold leading-snug text-slate-600 md:text-xs">
+              <p className="max-w-[9rem] text-balance font-sans text-[11px] font-semibold leading-snug text-slate-600 md:text-xs">
                 {metric.label}
               </p>
             </div>

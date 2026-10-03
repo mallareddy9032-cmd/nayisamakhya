@@ -49,22 +49,22 @@ function FooterNavLink({
   external?: boolean;
 }) {
   const className =
-    "civic-focus-ring group inline-flex items-center gap-1.5 text-sm leading-relaxed text-slate-700 transition-colors hover:text-amber-700";
+    "civic-focus-ring group inline-flex items-start gap-1.5 text-sm leading-relaxed text-slate-700 transition-colors hover:text-amber-700";
 
   const content = (
     <>
       <Icon
-        className="h-3.5 w-3.5 shrink-0 text-slate-400 transition-colors group-hover:text-amber-700"
+        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400 transition-colors group-hover:text-amber-700"
         aria-hidden
       />
-      <span className="transition-transform duration-200 group-hover:translate-x-1">
+      <span className="min-w-0 text-pretty transition-transform duration-200 group-hover:translate-x-0.5">
         {children}
       </span>
       {external ? (
-        <ExternalLink className="h-3 w-3 text-slate-400" aria-hidden />
+        <ExternalLink className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" aria-hidden />
       ) : (
         <ChevronRight
-          className="h-3 w-3 text-slate-300 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
+          className="mt-0.5 h-3 w-3 shrink-0 text-slate-300 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
           aria-hidden
         />
       )}
@@ -83,6 +83,30 @@ function FooterNavLink({
     <Link href={href} className={className}>
       {content}
     </Link>
+  );
+}
+
+function FooterColHeading({
+  icon: Icon,
+  te,
+  en,
+}: {
+  icon: typeof Home;
+  te: string;
+  en?: string;
+}) {
+  return (
+    <h3 className="mb-3 flex min-h-[2.75rem] items-start gap-1.5 border-b border-slate-200/70 pb-2 font-telugu text-xs font-bold tracking-wider text-civic-ink">
+      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-civic-bronze" aria-hidden />
+      <span className="min-w-0 leading-snug">
+        <span className="block">{te}</span>
+        {en ? (
+          <span className="mt-0.5 block font-sans text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+            {en}
+          </span>
+        ) : null}
+      </span>
+    </h3>
   );
 }
 
@@ -106,14 +130,14 @@ export function CivicFooter() {
   return (
     <footer className="no-print mt-auto border-t border-slate-200 bg-[#F8F7F4] font-sans text-slate-700 print:hidden pb-nav-clear md:pb-0">
       <div className="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Col 1 — Brand */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex min-h-[2.75rem] items-center gap-2 border-b border-transparent pb-2">
               <span className="rounded-lg border border-civic-bronze/20 bg-civic-bronze/10 p-1.5 text-civic-bronze">
                 <ShieldCheck className="h-4 w-4" />
               </span>
-              <span className="whitespace-nowrap font-display-te text-sm font-normal text-civic-ink">
+              <span className="whitespace-nowrap font-display-te text-sm font-normal leading-none text-civic-ink">
                 నాయీ సమాఖ్య తెలంగాణ
               </span>
             </div>
@@ -130,11 +154,12 @@ export function CivicFooter() {
 
           {/* Col 2 — Public services */}
           <div>
-            <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5 font-telugu text-xs font-bold tracking-wider text-civic-ink">
-              <FileText className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              ప్రజా సేవలు &amp; వినతులు
-            </h3>
-            <ul className="space-y-2 font-telugu">
+            <FooterColHeading
+              icon={FileText}
+              te={"ప్రజా సేవలు & వినతులు"}
+              en="Public services"
+            />
+            <ul className="space-y-2.5 font-telugu">
               <li>
                 <FooterNavLink href="/" icon={Home}>
                   Home
@@ -147,7 +172,10 @@ export function CivicFooter() {
               </li>
               <li>
                 <FooterNavLink href="/grievance" icon={Zap}>
-                  జీవో 23 ఉచిత విద్యుత్ ఫిర్యాదు డెస్క్ (Grievance Docket Generator)
+                  జీవో 23 ఉచిత విద్యుత్ ఫిర్యాదు డెస్క్
+                  <span className="mt-0.5 block font-sans text-[11px] font-medium text-slate-500">
+                    Grievance Docket Generator
+                  </span>
                 </FooterNavLink>
               </li>
               <li>
@@ -180,13 +208,12 @@ export function CivicFooter() {
 
           {/* Col 3 — Coordinators */}
           <div>
-            <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5 font-telugu text-xs font-bold tracking-wider text-civic-ink">
-              <Users className="h-3.5 w-3.5 shrink-0 text-civic-bronze" aria-hidden />
-              <span className="leading-snug">
-                సమన్వయకర్తల విభాగం • FOR COORDINATORS
-              </span>
-            </h3>
-            <ul className="space-y-2 font-telugu">
+            <FooterColHeading
+              icon={Users}
+              te="సమన్వయకర్తల విభాగం"
+              en="For coordinators"
+            />
+            <ul className="space-y-2.5 font-telugu">
               <li>
                 <FooterNavLink href="/poster" icon={ImageIcon}>
                   Wall Poster
@@ -222,11 +249,12 @@ export function CivicFooter() {
 
           {/* Col 4 — Desk & admin */}
           <div>
-            <h3 className="mb-3 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5 font-telugu text-xs font-bold tracking-wider text-civic-ink">
-              <Send className="h-3.5 w-3.5 text-civic-bronze" aria-hidden />
-              సేవా డెస్క్ &amp; అడ్మిన్
-            </h3>
-            <ul className="space-y-2 font-telugu">
+            <FooterColHeading
+              icon={Send}
+              te={"సేవా డెస్క్ & అడ్మిన్"}
+              en="Desk & admin"
+            />
+            <ul className="space-y-2.5 font-telugu">
               <li>
                 <FooterNavLink href={TELEGRAM_BOT_URL} icon={Bot} external>
                   Telegram Bot
@@ -248,7 +276,7 @@ export function CivicFooter() {
 
         {/* Bottom bar — contact pills + legal */}
         <div className="mt-8 border-t border-slate-200/70 pt-6 text-xs text-slate-500">
-          <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
             <div className="flex flex-wrap items-center gap-2">
               <a
                 href={WA_HELP}
@@ -271,7 +299,7 @@ export function CivicFooter() {
             </div>
 
             <nav
-              className="flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap lg:justify-end"
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 lg:justify-end"
               aria-label="Legal and admin"
             >
               <Link
@@ -311,7 +339,7 @@ export function CivicFooter() {
             </nav>
           </div>
 
-          <div className="mt-3 flex flex-col items-start justify-between gap-2 pb-2 sm:flex-row sm:items-center md:pb-4">
+          <div className="mt-4 flex flex-col items-start justify-between gap-2 border-t border-slate-200/50 pt-4 pb-2 sm:flex-row sm:items-center md:pb-4">
             <p className="font-telugu leading-telugu">
               © {year} నాయీ సమాఖ్య తెలంగాణ. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.
             </p>

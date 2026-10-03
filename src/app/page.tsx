@@ -47,20 +47,20 @@ export default function HomePage() {
             </span>
 
             <div>
-              <h1 className="tracking-tight">
+              <h1 className="tracking-tight text-center lg:text-left">
                 <span className="block font-display-te text-[1.75rem] font-normal leading-[1.75] text-slate-900 sm:text-4xl lg:text-5xl">
                   ఆత్మగౌరవం • చట్టబద్ధ రక్షణ
                 </span>
                 <span className="mt-2.5 block font-display-te text-[1.45rem] font-normal italic leading-[1.75] text-amber-600 sm:text-3xl lg:text-4xl">
-                  ఆధునిక వికాసం{" "}
-                  <span className="font-sans text-[0.55em] font-medium not-italic tracking-wide text-amber-600/80">
-                    (Self-Respect &amp; Progress)
-                  </span>
+                  ఆధునిక వికాసం
+                </span>
+                <span className="mt-1.5 block font-sans text-sm font-medium not-italic tracking-wide text-amber-600/80 sm:text-base">
+                  Self-Respect &amp; Progress
                 </span>
               </h1>
             </div>
 
-            <p className="mx-auto mt-3 max-w-2xl font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg lg:mx-0">
+            <p className="mx-auto mt-3 max-w-2xl text-center font-telugu text-base font-normal leading-telugu text-slate-600 sm:text-lg lg:mx-0 lg:text-left">
               శతాబ్దాల కళా-వైద్య వైభవాన్ని పునరుద్ధరిస్తూ —{" "}
               <strong className="font-bold text-[#0F172A]">
                 జీ.ఓ. 23 ప్రకారం 250 యూనిట్ల ఉచిత విద్యుత్
@@ -78,9 +78,9 @@ export default function HomePage() {
                 href="/representation"
                 className="civic-focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B45309] via-[#C2410C] to-[#D97706] px-5 py-3 font-telugu text-sm font-bold text-white shadow-[0_8px_24px_rgb(180_83_9_/0.3)] transition-all duration-300 hover:brightness-110"
               >
-                <FileText className="h-4 w-4" aria-hidden />
+                <FileText className="h-4 w-4 shrink-0" aria-hidden />
                 వినతిపత్రం తయారు చేయండి
-                <ArrowRight className="h-4 w-4" aria-hidden />
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
               </Link>
               <a
                 href="https://wa.me/919032654111?text=%E0%B0%A8%E0%B0%AE%E0%B0%B8%E0%B1%8D%E0%B0%95%E0%B0%BE%E0%B0%B0%E0%B0%82%20%E0%B0%A8%E0%B0%BE%E0%B0%AF%E0%B0%BF%20%E0%B0%B8%E0%B0%AE%E0%B0%BE%E0%B0%96%E0%B1%8D%E0%B0%AF%20%E0%B0%A1%E0%B1%86%E0%B0%B8%E0%B1%8D%E0%B0%95%E0%B1%8D"
@@ -88,8 +88,9 @@ export default function HomePage() {
                 rel="noreferrer"
                 className="civic-focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#128C7E]/40 bg-white px-5 py-3 font-telugu text-sm font-bold text-[#0E7A6E] shadow-xs transition hover:bg-emerald-50"
               >
-                <MessageCircle className="h-4 w-4" aria-hidden />
+                <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
                 WhatsApp సహాయవాణి
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
               </a>
             </div>
           </div>
